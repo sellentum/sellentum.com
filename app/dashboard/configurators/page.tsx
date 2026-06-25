@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Check, ChevronDown, ExternalLink, GripVertical, LoaderCircle, PackagePlus, Plus, Save, Settings2, Sparkles, Trash2, X } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Check, ChevronDown, ExternalLink, GripVertical, LoaderCircle, PackagePlus, Plus, Save, Settings2, Sparkles, Trash2, X } from "lucide-react";
 import { LoadingState } from "@/components/loading-state";
 import { useStore } from "@/lib/store";
+import { analyzeConfiguratorReadiness } from "@/lib/configurator-readiness";
 import type { Configurator, ConfiguratorOption, ConfiguratorStep } from "@/lib/types";
 import { describeConfiguratorSelection, flattenConfiguratorOptions, formatCurrency, getConfiguratorTotal, slugify, uid } from "@/lib/utils";
 
@@ -22,6 +23,7 @@ function ConfiguratorEditor({ selected, onBack }: { selected: Configurator; onBa
   const [activeStepId, setActiveStepId] = useState<string | null>(selected.steps[0]?.id || null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [publishError, setPublishError] = useState("");
 
   useEffect(() => {
     setDraft(selected);
@@ -33,6 +35,7 @@ function ConfiguratorEditor({ selected, onBack }: { selected: Configurator; onBa
   const previewSelectedIds = useMemo(() => draft.steps.flatMap((step) => step.options[0]?.id ? [step.options[0].id] : []), [draft.steps]);
   const previewSummary = describeConfiguratorSelection(draft, previewSelectedIds);
   const previewTotal = getConfiguratorTotal(draft, previewSelectedIds);
+  const readiness = useMemo(() => analyzeConfiguratorReadiness(draft, products), [draft, products]);
 
   function updateStep(stepId: string, update: Partial<ConfiguratorStep>) {
     setDraft((current) => ({ ...current, steps: current.steps.map((step) => step.id === stepId ? { ...step, ...update } : step) }));
@@ -112,6 +115,11 @@ function ConfiguratorEditor({ selected, onBack }: { selected: Configurator; onBa
   }
 
   async function persist(publish?: boolean) {
+    setPublishError("");
+    if (publish === true && !readiness.canPublish) {
+      setPublishError(`Fix ${readiness.blockers.length} launch blocker${readiness.blockers.length === 1 ? "" : "s"} before publishing.`);
+      return;
+    }
     setSaving(true);
     setSaved(false);
     try {
@@ -136,9 +144,10 @@ function ConfiguratorEditor({ selected, onBack }: { selected: Configurator; onBa
         <div className="ml-auto flex items-center gap-2">
           {draft.published && <Link target="_blank" href={`/configurator/${draft.id}`} className="btn-secondary !px-3 !py-2 text-xs"><ExternalLink size={13} /> Preview</Link>}
           <button onClick={() => persist()} disabled={saving} className="btn-secondary !px-3 !py-2 text-xs">{saving ? <LoaderCircle className="animate-spin" size={14} /> : saved ? <Check size={14} /> : <Save size={14} />}{saved ? "Saved" : "Save"}</button>
-          <button onClick={() => persist(!draft.published)} disabled={saving || draft.steps.length === 0} className="btn-primary !px-4 !py-2 text-xs">{draft.published ? "Unpublish" : "Publish"}</button>
+          <button onClick={() => persist(!draft.published)} disabled={saving || (!draft.published && !readiness.canPublish)} title={!draft.published && !readiness.canPublish ? readiness.blockers[0]?.detail : undefined} className="btn-primary !px-4 !py-2 text-xs disabled:opacity-50">{draft.published ? "Unpublish" : "Publish"}</button>
         </div>
       </div>
+      {publishError && <div className="border-b border-red-100 bg-red-50 px-6 py-2 text-xs font-bold text-red-700">{publishError}</div>}
 
       <div className="grid flex-1 lg:grid-cols-[270px_1fr_330px]">
         <aside className="border-b border-black/[0.07] bg-[#eef0eb] p-4 lg:border-b-0 lg:border-r">
@@ -224,6 +233,24 @@ function ConfiguratorEditor({ selected, onBack }: { selected: Configurator; onBa
               <h3 className="display mt-6 text-3xl leading-none">{draft.title}</h3>
               <p className="mt-2 text-[9px] leading-4 text-white/45">{draft.subtitle}</p>
               <div className="mt-5 rounded-xl bg-white/[.08] p-3"><p className="text-[9px] font-extrabold text-lime">Preview bundle</p><p className="mt-1 text-xl font-extrabold">{formatCurrency(previewTotal)}</p><div className="mt-3 flex flex-wrap gap-1">{previewSummary.tags.slice(0, 5).map((tag) => <span key={tag} className="rounded-full bg-white/10 px-2 py-1 text-[7px] font-bold text-lime">{tag}</span>)}</div></div>
+            </div>
+          </div>
+          <div className="mt-5 rounded-xl border border-black/[0.07] p-3">
+            <div className="flex items-center justify-between gap-3">
+              <p className="flex items-center gap-2 text-[10px] font-extrabold"><AlertTriangle size={13} className={readiness.canPublish ? "text-moss" : "text-amber-600"} /> Publish readiness</p>
+              <span className={`rounded-full px-2 py-1 text-[8px] font-extrabold ${readiness.canPublish ? "bg-lime/35 text-moss" : "bg-amber-50 text-amber-700"}`}>{readiness.score}% ready</span>
+            </div>
+            <p className="mt-1.5 text-[9px] leading-4 text-black/40">{readiness.canPublish ? readiness.warnings.length ? "This configurator can publish, but review warnings before embedding." : "This configurator is structurally ready to publish." : "Fix blockers before shoppers can receive a valid bundle."}</p>
+            <div className="mt-3 space-y-1.5">
+              {readiness.checks.map((item) => <div key={item.id} className={`rounded-lg px-2.5 py-2 ${item.severity === "blocker" ? "bg-red-50" : item.severity === "warning" ? "bg-amber-50" : "bg-canvas"}`}>
+                <div className="flex items-start gap-2">
+                  <span className={`mt-1 h-1.5 w-1.5 shrink-0 rounded-full ${item.severity === "blocker" ? "bg-red-500" : item.severity === "warning" ? "bg-amber-500" : "bg-moss"}`} />
+                  <span>
+                    <span className="block text-[9px] font-extrabold">{item.label}</span>
+                    <span className="mt-0.5 block text-[8px] font-bold leading-3 text-black/35">{item.detail}</span>
+                  </span>
+                </div>
+              </div>)}
             </div>
           </div>
           <div className="mt-5 rounded-xl border border-black/[0.07] p-3"><p className="flex items-center gap-2 text-[10px] font-extrabold"><Settings2 size={13} className="text-moss" /> Builder tip</p><p className="mt-1.5 text-[9px] leading-4 text-black/40">Use linked products for the main purchasable items. Use unlinked options for preferences, materials, service plans or add-ons.</p></div>

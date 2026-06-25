@@ -123,6 +123,16 @@ function assertQuizReadinessWorkflow() {
   assert(readiness.includes("catalog-mapping"), "Quiz readiness helper should validate answer rules against catalog signals");
 }
 
+function assertConfiguratorReadinessWorkflow() {
+  const page = readFileSync("app/dashboard/configurators/page.tsx", "utf8");
+  const readiness = readFileSync("lib/configurator-readiness.ts", "utf8");
+  assert(page.includes("analyzeConfiguratorReadiness"), "Configurator builder should run publish-readiness diagnostics");
+  assert(page.includes("Publish readiness"), "Configurator builder should surface publish-readiness feedback");
+  assert(page.includes("!readiness.canPublish"), "Configurator builder should block publishing when readiness has blockers");
+  assert(readiness.includes("available-linked-products"), "Configurator readiness helper should validate linked product availability");
+  assert(readiness.includes("compatibility"), "Configurator readiness helper should validate compatibility references");
+}
+
 async function assertDeterministicLogic() {
   if (existsSync(compileDir)) rmSync(compileDir, { recursive: true, force: true });
   execFileSync("./node_modules/.bin/tsc", ["-p", "tsconfig.json", "--outDir", compileDir, "--noEmit", "false", "--declaration", "false", "--emitDeclarationOnly", "false"], { stdio: "ignore" });
@@ -132,6 +142,7 @@ async function assertDeterministicLogic() {
   const analytics = await import(pathToFileURL(`${compileDir}/lib/analytics.js`));
   const catalogImport = await import(pathToFileURL(`${compileDir}/lib/catalog-import.js`));
   const quizReadiness = await import(pathToFileURL(`${compileDir}/lib/quiz-readiness.js`));
+  const configuratorReadiness = await import(pathToFileURL(`${compileDir}/lib/configurator-readiness.js`));
 
   const answers = [
     { questionId: "q_use", question: "Where?", optionId: "o_trail", answer: "Trails & outdoors", matchType: "tag", matchValue: "trail", weight: 5 },
@@ -212,6 +223,12 @@ async function assertDeterministicLogic() {
   const brokenReadiness = quizReadiness.analyzeQuizReadiness(brokenQuiz, demo.demoProducts);
   assert(!brokenReadiness.canPublish && brokenReadiness.blockers.some((item) => item.id === "answer-options" || item.id === "rule-values"), "Expected incomplete finder rules to block publishing");
 
+  const readyConfigurator = configuratorReadiness.analyzeConfiguratorReadiness(demo.demoConfigurator, demo.demoProducts);
+  assert(readyConfigurator.canPublish && readyConfigurator.score >= 80, "Expected seeded demo configurator to pass publish-readiness checks");
+  const brokenConfigurator = { ...demo.demoConfigurator, steps: [{ ...demo.demoConfigurator.steps[0], options: [{ ...demo.demoConfigurator.steps[0].options[0], product_id: "missing_product" }] }] };
+  const brokenConfiguratorReadiness = configuratorReadiness.analyzeConfiguratorReadiness(brokenConfigurator, demo.demoProducts);
+  assert(!brokenConfiguratorReadiness.canPublish && brokenConfiguratorReadiness.blockers.some((item) => item.id === "available-linked-products"), "Expected missing linked products to block configurator publishing");
+
 }
 
 async function main() {
@@ -232,6 +249,7 @@ async function main() {
   assertLaunchStudioWorkflow();
   assertCatalogImportWorkflow();
   assertQuizReadinessWorkflow();
+  assertConfiguratorReadinessWorkflow();
   await assertDeterministicLogic();
   console.log("Findly smoke test passed");
 }
