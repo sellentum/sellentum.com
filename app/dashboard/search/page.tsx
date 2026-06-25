@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { ArrowRight, Boxes, BrainCircuit, ExternalLink, Gauge, Search, ShieldCheck, Sparkles, WandSparkles } from "lucide-react";
 import { LoadingState } from "@/components/loading-state";
 import { runSemanticProductSearch } from "@/lib/search-engine";
+import { buildSearchTuningReport } from "@/lib/search-tuning";
 import { useStore } from "@/lib/store";
 import { formatCurrency } from "@/lib/utils";
 
@@ -19,6 +20,7 @@ export default function SearchLabPage() {
   const { ready, products } = useStore();
   const [query, setQuery] = useState(starterQueries[0]);
   const report = useMemo(() => runSemanticProductSearch({ query, products, limit: 6 }), [query, products]);
+  const tuning = useMemo(() => buildSearchTuningReport(report), [report]);
   const winner = report.results[0];
 
   if (!ready) return <LoadingState label="Loading semantic search lab…" />;
@@ -139,6 +141,33 @@ export default function SearchLabPage() {
       </main>
 
       <aside className="space-y-5">
+        <section className="rounded-[26px] border border-black/[0.07] bg-ink p-5 text-white">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="flex items-center gap-2 text-xs font-extrabold"><WandSparkles size={14} className="text-lime" /> Search tuning plan</p>
+              <p className="mt-2 text-[10px] leading-5 text-white/45">{tuning.summary}</p>
+            </div>
+            <span className="display text-4xl text-lime">{tuning.score}</span>
+          </div>
+          <div className="mt-4 grid grid-cols-3 gap-2 text-center">
+            <div className="rounded-xl bg-white/[0.06] p-2.5"><p className="text-sm font-extrabold">{tuning.counts.covered}</p><p className="mt-0.5 text-[8px] font-bold text-white/30">Covered</p></div>
+            <div className="rounded-xl bg-white/[0.06] p-2.5"><p className="text-sm font-extrabold">{tuning.counts.thin}</p><p className="mt-0.5 text-[8px] font-bold text-white/30">Thin</p></div>
+            <div className="rounded-xl bg-white/[0.06] p-2.5"><p className="text-sm font-extrabold">{tuning.counts.missing}</p><p className="mt-0.5 text-[8px] font-bold text-white/30">Missing</p></div>
+          </div>
+          <div className="mt-4 space-y-2">
+            {tuning.opportunities.map((item) => (
+              <div key={item.title} className={`rounded-2xl border p-3 ${item.severity === "good" ? "border-lime/30 bg-lime/10" : item.severity === "critical" ? "border-red-300/25 bg-red-300/10" : "border-amber-200/25 bg-amber-200/10"}`}>
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-[10px] font-extrabold leading-4">{item.title}</p>
+                  <span className={`rounded-full px-2 py-0.5 text-[8px] font-extrabold uppercase ${item.severity === "good" ? "bg-lime text-moss" : item.severity === "critical" ? "bg-red-300 text-red-950" : "bg-amber-200 text-amber-950"}`}>{item.severity}</span>
+                </div>
+                <p className="mt-1.5 text-[9px] leading-4 text-white/45">{item.detail}</p>
+                <p className="mt-1.5 text-[9px] leading-4 font-bold text-lime">{item.recommendation}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
         <section className="rounded-[26px] border border-black/[0.07] bg-white p-5">
           <p className="flex items-center gap-2 text-xs font-extrabold"><BrainCircuit size={14} className="text-moss" /> Catalog term coverage</p>
           <p className="mt-2 text-[10px] leading-5 text-black/40">See whether each parsed shopper term exists in active product fields. Missing terms are catalog-enrichment opportunities.</p>

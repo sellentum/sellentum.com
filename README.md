@@ -17,7 +17,7 @@ Findly is a compact guided-selling SaaS product for ecommerce brands. A merchant
 - One-click product finder generation from the current catalog
 - Deterministic top-three recommendation engine with budget eligibility filtering, buyer-profile intent scoring and merchant overrides
 - Branch-aware recommendation lab for testing shopper answer paths and inspecting score breakdowns before publishing
-- Semantic Search Lab and authenticated search API for testing natural-language product discovery plus parsed-term catalog coverage over the active catalog
+- Semantic Search Lab and authenticated search API for testing natural-language product discovery, parsed-term catalog coverage and deterministic tuning guidance over the active catalog
 - OpenAI match explanations with a safe fact-based fallback when no API key is present
 - Conversational product advisor combining semantic similarity, deterministic field signals, hard budget constraints and clarification turns for vague requests
 - Published advisor runtime that loads the merchant catalog server-side instead of trusting browser-supplied products
@@ -124,6 +124,7 @@ Import the repository into Vercel, add the variables from `.env.example`, and de
 - `lib/finder-flow.ts` — deterministic conditional question routing and server-side answer-path validation
 - `lib/catalog-import.ts` — flexible CSV header mapping, row validation and import previews
 - `lib/search-engine.ts` — deterministic semantic search ranking, intent parsing, parsed-term catalog coverage and budget eligibility checks
+- `lib/search-tuning.ts` — merchant-facing search tuning guidance from term coverage, weak confidence and budget blockers
 - `lib/search-explanations.ts` — grounded OpenAI/fallback copy for already-ranked semantic search results
 - `lib/rule-coverage.ts` — deterministic answer-rule coverage helper used by the finder builder and readiness checks
 - `lib/quiz-readiness.ts` — publish-readiness diagnostics for finder structure, catalog mapping and rule quality

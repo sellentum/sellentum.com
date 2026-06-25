@@ -145,6 +145,7 @@ function assertSemanticSearchWorkflow() {
   const shell = readFileSync("components/dashboard-shell.tsx", "utf8");
   const overview = readFileSync("app/dashboard/page.tsx", "utf8");
   const engine = readFileSync("lib/search-engine.ts", "utf8");
+  const tuning = readFileSync("lib/search-tuning.ts", "utf8");
   assert(route.includes("getWorkspaceIdentity"), "Search service should require an authenticated workspace");
   assert(route.includes("runSemanticProductSearch"), "Search service should use the shared semantic search engine");
   assert(publicRoute.includes("eq(\"published\", true)"), "Published search route should validate published finder context");
@@ -154,6 +155,8 @@ function assertSemanticSearchWorkflow() {
   assert(explanations.includes("already selected deterministically"), "Search explanation prompt should keep AI out of product selection");
   assert(page.includes("runSemanticProductSearch"), "Search Lab should run the shared semantic search engine");
   assert(page.includes("Catalog term coverage"), "Search Lab should expose deterministic catalog coverage for parsed terms");
+  assert(page.includes("buildSearchTuningReport"), "Search Lab should turn term coverage into deterministic tuning guidance");
+  assert(page.includes("Search tuning plan"), "Search Lab should show a merchant-facing search tuning plan");
   assert(page.includes("POST /api/search"), "Search Lab should document the search service endpoint");
   assert(publicPage.includes("/api/public/search/"), "Public search page should call the published search runtime outside demo mode");
   assert(publicPage.includes("experience_type: \"search\""), "Public search analytics should identify search experiences");
@@ -169,6 +172,8 @@ function assertSemanticSearchWorkflow() {
   assert(engine.includes("extractSearchBudget"), "Search engine should parse budget constraints");
   assert(engine.includes("buildTermCoverage"), "Search engine should diagnose active-catalog coverage for each parsed term");
   assert(engine.includes("SearchTermCoverage"), "Search engine should expose term coverage in the shared search report type");
+  assert(tuning.includes("buildSearchTuningReport"), "Search tuning helper should expose deterministic merchant recommendations");
+  assert(tuning.includes("missingTerms"), "Search tuning helper should prioritize missing catalog language");
 }
 
 function assertCatalogImportWorkflow() {
@@ -249,6 +254,7 @@ async function assertDeterministicLogic() {
   const quizReadiness = await import(pathToFileURL(`${compileDir}/lib/quiz-readiness.js`));
   const ruleCoverage = await import(pathToFileURL(`${compileDir}/lib/rule-coverage.js`));
   const searchEngine = await import(pathToFileURL(`${compileDir}/lib/search-engine.js`));
+  const searchTuning = await import(pathToFileURL(`${compileDir}/lib/search-tuning.js`));
   const configuratorReadiness = await import(pathToFileURL(`${compileDir}/lib/configurator-readiness.js`));
 
   const answers = [
@@ -379,6 +385,10 @@ async function assertDeterministicLogic() {
   assert(budgetSearch.blockedProducts >= 2 && budgetSearch.results.every((result) => result.product.price <= 100), "Expected semantic search budget constraints to block over-budget products");
   const uncoveredSearch = searchEngine.runSemanticProductSearch({ query: "orthopedic office shoe", products: demo.demoProducts, limit: 3 });
   assert(uncoveredSearch.intent.coverage.some((item) => item.status === "missing"), "Expected semantic search coverage to flag missing catalog terms");
+  const tuningReport = searchTuning.buildSearchTuningReport(uncoveredSearch);
+  assert(tuningReport.score < 80 && tuningReport.opportunities.some((item) => item.severity === "critical"), "Expected search tuning to produce critical guidance for missing terms");
+  const healthyTuningReport = searchTuning.buildSearchTuningReport(trailSearch);
+  assert(healthyTuningReport.counts.covered > 0 && healthyTuningReport.opportunities.length, "Expected search tuning to summarize healthy catalog-backed terms");
 
   const readyQuiz = quizReadiness.analyzeQuizReadiness(demo.demoQuiz, demo.demoProducts);
   assert(readyQuiz.canPublish && readyQuiz.score >= 80, "Expected seeded demo finder to pass publish-readiness checks");
