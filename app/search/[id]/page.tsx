@@ -147,7 +147,7 @@ export default function PublicSearchPage({ params }: { params: Promise<{ id: str
           {searchError && <p className="mt-5 rounded-xl bg-red-50 p-3 text-xs font-bold text-red-700">{searchError}</p>}
 
           <div className="mt-5 flex flex-wrap gap-1.5">
-            {report.intent.terms.slice(0, 10).map((term) => <span key={term} className="rounded-full bg-canvas px-2.5 py-1 text-[9px] font-extrabold text-black/35">{term}</span>)}
+            {report.intent.coverage.slice(0, 10).map((item) => <span key={item.term} className={`rounded-full px-2.5 py-1 text-[9px] font-extrabold ${item.status === "covered" ? "bg-lime/35 text-moss" : item.status === "thin" ? "bg-amber-50 text-amber-700" : "bg-canvas text-black/35"}`}>{item.term}</span>)}
           </div>
 
           <div className="mt-6 space-y-3">

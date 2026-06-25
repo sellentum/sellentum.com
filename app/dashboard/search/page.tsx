@@ -140,6 +140,22 @@ export default function SearchLabPage() {
 
       <aside className="space-y-5">
         <section className="rounded-[26px] border border-black/[0.07] bg-white p-5">
+          <p className="flex items-center gap-2 text-xs font-extrabold"><BrainCircuit size={14} className="text-moss" /> Catalog term coverage</p>
+          <p className="mt-2 text-[10px] leading-5 text-black/40">See whether each parsed shopper term exists in active product fields. Missing terms are catalog-enrichment opportunities.</p>
+          <div className="mt-4 space-y-2">
+            {report.intent.coverage.length ? report.intent.coverage.slice(0, 10).map((item) => (
+              <div key={item.term} className={`rounded-xl border px-3 py-2 ${item.status === "covered" ? "border-lime/50 bg-lime/15" : item.status === "thin" ? "border-amber-200 bg-amber-50" : "border-red-100 bg-red-50"}`}>
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-[10px] font-extrabold">{item.term}</p>
+                  <span className={`rounded-full px-2 py-0.5 text-[8px] font-extrabold uppercase ${item.status === "covered" ? "bg-lime text-moss" : item.status === "thin" ? "bg-amber-200 text-amber-800" : "bg-red-100 text-red-600"}`}>{item.status}</span>
+                </div>
+                <p className="mt-1 text-[8px] font-bold text-black/35">{item.productCount} active product{item.productCount === 1 ? "" : "s"} · {item.sources.length ? item.sources.join(", ") : "no matching field"}</p>
+              </div>
+            )) : <p className="rounded-xl bg-canvas px-3 py-5 text-center text-[10px] leading-4 text-black/35">Enter a more specific shopper query to inspect catalog coverage.</p>}
+          </div>
+        </section>
+
+        <section className="rounded-[26px] border border-black/[0.07] bg-white p-5">
           <p className="flex items-center gap-2 text-xs font-extrabold"><WandSparkles size={14} className="text-moss" /> Search suggestions</p>
           <p className="mt-2 text-[10px] leading-5 text-black/40">Generated from active product tags, buyer needs, features and categories.</p>
           <div className="mt-4 space-y-2">

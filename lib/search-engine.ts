@@ -7,6 +7,13 @@ export type ProductSearchSignal = {
   detail: string;
 };
 
+export type SearchTermCoverage = {
+  term: string;
+  productCount: number;
+  sources: Array<ProductSearchSignal["source"]>;
+  status: "covered" | "thin" | "missing";
+};
+
 export type ProductSearchResult = {
   product: Product;
   score: number;
@@ -23,6 +30,7 @@ export type ProductSearchReport = {
   intent: {
     terms: string[];
     maxBudget: number | null;
+    coverage: SearchTermCoverage[];
   };
   totalProducts: number;
   activeProducts: number;
@@ -216,6 +224,24 @@ function buildSuggestions(products: Product[]) {
   ]).slice(0, 4);
 }
 
+function buildTermCoverage(products: Product[], terms: string[]): SearchTermCoverage[] {
+  const active = products.filter((product) => product.active);
+  return terms.map((term) => {
+    const matches = active.flatMap((product) => {
+      const sources = productFields(product).flatMap((field) => normalize(field.text).includes(term) ? [field.source] : []);
+      return sources.length ? [{ productId: product.id, sources }] : [];
+    });
+    const sources = unique(matches.flatMap((match) => match.sources)) as Array<ProductSearchSignal["source"]>;
+    const productCount = new Set(matches.map((match) => match.productId)).size;
+    return {
+      term,
+      productCount,
+      sources,
+      status: productCount >= 2 ? "covered" : productCount === 1 ? "thin" : "missing",
+    };
+  });
+}
+
 export function runSemanticProductSearch({ query, products, limit = 6 }: { query: string; products: Product[]; limit?: number }): ProductSearchReport {
   const trimmedQuery = query.trim();
   const terms = extractSearchIntentTokens(trimmedQuery);
@@ -223,6 +249,7 @@ export function runSemanticProductSearch({ query, products, limit = 6 }: { query
   const active = products.filter((product) => product.active);
   const corpus = active.map(productCorpus);
   const documentFrequency = Object.fromEntries(terms.map((term) => [term, corpus.filter((text) => text.includes(term)).length]));
+  const coverage = buildTermCoverage(products, terms);
   const scored = products
     .map((product) => scoreProduct(product, terms, maxBudget, documentFrequency, Math.max(1, active.length)))
     .sort((a, b) => Number(b.eligible) - Number(a.eligible) || b.score - a.score || a.product.price - b.product.price || a.product.name.localeCompare(b.product.name));
@@ -232,7 +259,7 @@ export function runSemanticProductSearch({ query, products, limit = 6 }: { query
 
   return {
     query: trimmedQuery,
-    intent: { terms, maxBudget },
+    intent: { terms, maxBudget, coverage },
     totalProducts: products.length,
     activeProducts: active.length,
     eligibleProducts: eligible.length,

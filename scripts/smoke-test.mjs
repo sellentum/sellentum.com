@@ -153,10 +153,12 @@ function assertSemanticSearchWorkflow() {
   assert(publicRoute.includes("explanation_source"), "Published search route should expose explanation source metadata");
   assert(explanations.includes("already selected deterministically"), "Search explanation prompt should keep AI out of product selection");
   assert(page.includes("runSemanticProductSearch"), "Search Lab should run the shared semantic search engine");
+  assert(page.includes("Catalog term coverage"), "Search Lab should expose deterministic catalog coverage for parsed terms");
   assert(page.includes("POST /api/search"), "Search Lab should document the search service endpoint");
   assert(publicPage.includes("/api/public/search/"), "Public search page should call the published search runtime outside demo mode");
   assert(publicPage.includes("experience_type: \"search\""), "Public search analytics should identify search experiences");
   assert(publicPage.includes("explanation_source"), "Public search analytics should record explanation source");
+  assert(publicPage.includes("report.intent.coverage"), "Public search should render term coverage chips from the shared search report");
   assert(settings.includes("<option value=\"search\">Semantic search</option>"), "Settings should expose semantic search as an embeddable experience");
   assert(settings.includes("data-experience=\"${embedType}\""), "Settings snippet should support search through the generic experience field");
   assert(eventsRoute.includes("requestedType === \"search\""), "Analytics route should preserve search experience metadata");
@@ -165,6 +167,8 @@ function assertSemanticSearchWorkflow() {
   assert(overview.includes("/dashboard/search"), "Dashboard overview should expose Search Lab");
   assert(engine.includes("extractSearchIntentTokens"), "Search engine should parse natural-language intent tokens");
   assert(engine.includes("extractSearchBudget"), "Search engine should parse budget constraints");
+  assert(engine.includes("buildTermCoverage"), "Search engine should diagnose active-catalog coverage for each parsed term");
+  assert(engine.includes("SearchTermCoverage"), "Search engine should expose term coverage in the shared search report type");
 }
 
 function assertCatalogImportWorkflow() {
@@ -366,12 +370,15 @@ async function assertDeterministicLogic() {
 
   const trailSearch = searchEngine.runSemanticProductSearch({ query: "waterproof hiking shoes under £140", products: demo.demoProducts, limit: 3 });
   assert(trailSearch.intent.maxBudget === 140 && trailSearch.intent.terms.includes("trail"), "Expected semantic search to parse budget and expanded hiking/trail intent");
+  assert(trailSearch.intent.coverage.some((item) => item.term === "trail" && item.status !== "missing"), "Expected semantic search coverage to identify catalog-backed terms");
   assert(trailSearch.results[0]?.product.id === "prod_trail", `Expected semantic search to rank Terra Trail Runner first, got ${trailSearch.results[0]?.product.name || "nothing"}`);
   assert(trailSearch.results[0]?.matchedSignals.some((signal) => signal.source === "budget"), "Expected semantic search to include budget eligibility signals");
   const citySearch = searchEngine.runSemanticProductSearch({ query: "lightweight city travel shoe", products: demo.demoProducts, limit: 3 });
   assert(citySearch.results[0]?.product.id === "prod_city", `Expected semantic search to rank Aero City Knit first, got ${citySearch.results[0]?.product.name || "nothing"}`);
   const budgetSearch = searchEngine.runSemanticProductSearch({ query: "running shoes under £100", products: demo.demoProducts, limit: 4 });
   assert(budgetSearch.blockedProducts >= 2 && budgetSearch.results.every((result) => result.product.price <= 100), "Expected semantic search budget constraints to block over-budget products");
+  const uncoveredSearch = searchEngine.runSemanticProductSearch({ query: "orthopedic office shoe", products: demo.demoProducts, limit: 3 });
+  assert(uncoveredSearch.intent.coverage.some((item) => item.status === "missing"), "Expected semantic search coverage to flag missing catalog terms");
 
   const readyQuiz = quizReadiness.analyzeQuizReadiness(demo.demoQuiz, demo.demoProducts);
   assert(readyQuiz.canPublish && readyQuiz.score >= 80, "Expected seeded demo finder to pass publish-readiness checks");
