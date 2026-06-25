@@ -21,6 +21,7 @@ Findly is a compact guided-selling SaaS product for ecommerce brands. A merchant
 - Conversational product advisor combining semantic similarity, deterministic field signals, hard budget constraints and clarification turns for vague requests
 - Published advisor runtime that loads the merchant catalog server-side instead of trusting browser-supplied products
 - Customer-facing semantic search experience for natural-language product discovery over a published catalog context
+- Grounded AI/fallback explanations for semantic search results after deterministic ranking
 - Pgvector-backed advisor candidate retrieval for enriched Supabase catalogs, with deterministic ranking as the final selector
 - Visual configurator builder with steps, options, product-linked price deltas, compatibility rules and publish-readiness diagnostics
 - Customer finder with welcome, progress, AI explanations, side-by-side result comparison, restart and buy-click tracking
@@ -116,6 +117,7 @@ Import the repository into Vercel, add the variables from `.env.example`, and de
 - `lib/catalog-ontology.ts` — category, buyer-need, tag and feature clustering for ontology mapping and question ideas
 - `lib/catalog-import.ts` — flexible CSV header mapping, row validation and import previews
 - `lib/search-engine.ts` — deterministic semantic search ranking, intent parsing and budget eligibility checks
+- `lib/search-explanations.ts` — grounded OpenAI/fallback copy for already-ranked semantic search results
 - `lib/rule-coverage.ts` — deterministic answer-rule coverage helper used by the finder builder and readiness checks
 - `lib/quiz-readiness.ts` — publish-readiness diagnostics for finder structure, catalog mapping and rule quality
 - `lib/configurator-readiness.ts` — publish-readiness diagnostics for configurator structure, linked products, pricing and compatibility rules

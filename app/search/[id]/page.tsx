@@ -85,8 +85,8 @@ export default function PublicSearchPage({ params }: { params: Promise<{ id: str
           return payload as ProductSearchReport;
         });
       setReport(nextReport);
-      await track("quiz_start", undefined, { search_action: "search_submit", query: nextReport.query, terms: nextReport.intent.terms, max_budget: nextReport.intent.maxBudget, result_count: nextReport.results.length });
-      await Promise.all(nextReport.results.slice(0, 3).map((result, index) => track("product_recommended", result.product.id, { query: nextReport.query, rank: index + 1, score: result.score, confidence: result.confidence, matched_signals: result.matchedSignals.map((signal) => signal.term), product_name: result.product.name })));
+      await track("quiz_start", undefined, { search_action: "search_submit", query: nextReport.query, terms: nextReport.intent.terms, max_budget: nextReport.intent.maxBudget, result_count: nextReport.results.length, explanation_source: nextReport.explanationSource || "deterministic" });
+      await Promise.all(nextReport.results.slice(0, 3).map((result, index) => track("product_recommended", result.product.id, { query: nextReport.query, rank: index + 1, score: result.score, confidence: result.confidence, matched_signals: result.matchedSignals.map((signal) => signal.term), explanation_source: nextReport.explanationSource || "deterministic", product_name: result.product.name })));
     } catch (err) {
       setSearchError(err instanceof Error ? err.message : "Search failed.");
     } finally {

@@ -110,6 +110,7 @@ function assertSemanticSearchWorkflow() {
   const publicRoute = readFileSync("app/api/public/search/[id]/route.ts", "utf8");
   const page = readFileSync("app/dashboard/search/page.tsx", "utf8");
   const publicPage = readFileSync("app/search/[id]/page.tsx", "utf8");
+  const explanations = readFileSync("lib/search-explanations.ts", "utf8");
   const settings = readFileSync("app/dashboard/settings/page.tsx", "utf8");
   const eventsRoute = readFileSync("app/api/events/route.ts", "utf8");
   const utils = readFileSync("lib/utils.ts", "utf8");
@@ -120,10 +121,14 @@ function assertSemanticSearchWorkflow() {
   assert(route.includes("runSemanticProductSearch"), "Search service should use the shared semantic search engine");
   assert(publicRoute.includes("eq(\"published\", true)"), "Published search route should validate published finder context");
   assert(publicRoute.includes("runSemanticProductSearch"), "Published search route should use the shared semantic search engine");
+  assert(publicRoute.includes("explainSearchReport"), "Published search route should generate grounded explanations after ranking");
+  assert(publicRoute.includes("explanation_source"), "Published search route should expose explanation source metadata");
+  assert(explanations.includes("already selected deterministically"), "Search explanation prompt should keep AI out of product selection");
   assert(page.includes("runSemanticProductSearch"), "Search Lab should run the shared semantic search engine");
   assert(page.includes("POST /api/search"), "Search Lab should document the search service endpoint");
   assert(publicPage.includes("/api/public/search/"), "Public search page should call the published search runtime outside demo mode");
   assert(publicPage.includes("experience_type: \"search\""), "Public search analytics should identify search experiences");
+  assert(publicPage.includes("explanation_source"), "Public search analytics should record explanation source");
   assert(settings.includes("<option value=\"search\">Semantic search</option>"), "Settings should expose semantic search as an embeddable experience");
   assert(settings.includes("data-experience=\"${embedType}\""), "Settings snippet should support search through the generic experience field");
   assert(eventsRoute.includes("requestedType === \"search\""), "Analytics route should preserve search experience metadata");

@@ -19,6 +19,7 @@ export type ProductSearchResult = {
 
 export type ProductSearchReport = {
   query: string;
+  explanationSource?: "deterministic" | "fallback" | "openai";
   intent: {
     terms: string[];
     maxBudget: number | null;

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { explainSearchReport } from "@/lib/search-explanations";
 import { runSemanticProductSearch } from "@/lib/search-engine";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Product, Quiz } from "@/lib/types";
@@ -64,16 +65,16 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
 
     if (productsError) return NextResponse.json({ error: "Could not load search catalog." }, { status: 500 });
 
-    const report = runSemanticProductSearch({
+    const report = await explainSearchReport(runSemanticProductSearch({
       query: parsed.data.query,
       products: (products || []) as Product[],
       limit: parsed.data.limit || 6,
-    });
+    }));
 
     return NextResponse.json({
       ...report,
       experience: { id: quiz.id, name: quiz.name, slug: quiz.slug },
-      retrieval: { source: "catalog_scan", candidate_count: products?.length || 0 },
+      retrieval: { source: "catalog_scan", candidate_count: products?.length || 0, explanation_source: report.explanationSource || "fallback" },
     });
   } catch (error) {
     console.error("Published semantic search failed", error);
