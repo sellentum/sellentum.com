@@ -48,7 +48,7 @@ export default function LaunchStudioPage() {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [createdQuizId, setCreatedQuizId] = useState("");
-  const [source, setSource] = useState<"rules" | "openai" | "">("");
+  const [source, setSource] = useState<"rules" | "ontology" | "openai" | "">("");
   const [copied, setCopied] = useState(false);
 
   useEffect(() => setOrigin(window.location.origin), []);
@@ -135,7 +135,7 @@ export default function LaunchStudioPage() {
       await saveQuiz(quiz);
       setCreatedQuizId(quiz.id);
       setSource(payload.source);
-      setNotice(`${quiz.name} was generated and published using ${payload.source === "openai" ? "OpenAI" : "the deterministic fallback engine"}.`);
+      setNotice(`${quiz.name} was generated and published using ${payload.source === "openai" ? "OpenAI with catalog ontology context" : payload.source === "ontology" ? "the catalog ontology engine" : "the deterministic fallback engine"}.`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Finder generation failed.");
     } finally {

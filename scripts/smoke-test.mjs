@@ -90,11 +90,17 @@ function assertSessionAnalytics() {
 
 function assertLaunchStudioWorkflow() {
   const page = readFileSync("app/dashboard/launch/page.tsx", "utf8");
+  const generator = readFileSync("app/api/quizzes/generate/route.ts", "utf8");
+  const quizGeneration = readFileSync("lib/quiz-generation.ts", "utf8");
   const settings = readFileSync("app/dashboard/settings/page.tsx", "utf8");
   const shell = readFileSync("components/dashboard-shell.tsx", "utf8");
   const overview = readFileSync("app/dashboard/page.tsx", "utf8");
   assert(page.includes("/api/catalog/enrich"), "Launch Studio should call catalog enrichment");
   assert(page.includes("/api/quizzes/generate"), "Launch Studio should call AI quiz generation");
+  assert(page.includes("catalog ontology engine"), "Launch Studio should report ontology-guided generation source");
+  assert(generator.includes("buildQuizGenerationOntologySummary"), "Quiz generation route should pass ontology context to OpenAI");
+  assert(generator.includes("buildOntologyQuizSuggestion"), "Quiz generation route should use ontology-guided deterministic fallback");
+  assert(quizGeneration.includes("buildCatalogOntology"), "Quiz generation helper should derive questions from the catalog ontology");
   assert(page.includes("quiz.published = true"), "Launch Studio should publish the generated finder");
   assert(page.includes("data-experience=\"finder\""), "Launch Studio should produce a finder widget snippet");
   assert(page.includes("data-mode=\"modal\""), "Launch Studio should produce a lazy modal widget snippet");
@@ -202,6 +208,8 @@ async function assertDeterministicLogic() {
   execFileSync("./node_modules/.bin/tsc", ["-p", "tsconfig.json", "--outDir", compileDir, "--noEmit", "false", "--declaration", "false", "--emitDeclarationOnly", "false"], { stdio: "ignore" });
   const compiledQuizReadiness = `${compileDir}/lib/quiz-readiness.js`;
   writeFileSync(compiledQuizReadiness, readFileSync(compiledQuizReadiness, "utf8").replace('from "./rule-coverage";', 'from "./rule-coverage.js";'));
+  const compiledQuizGeneration = `${compileDir}/lib/quiz-generation.js`;
+  writeFileSync(compiledQuizGeneration, readFileSync(compiledQuizGeneration, "utf8").replace('from "./catalog-ontology";', 'from "./catalog-ontology.js";'));
 
   const demo = await import(pathToFileURL(`${compileDir}/lib/demo-data.js`));
   const utils = await import(pathToFileURL(`${compileDir}/lib/utils.js`));
@@ -209,6 +217,7 @@ async function assertDeterministicLogic() {
   const catalogIntelligence = await import(pathToFileURL(`${compileDir}/lib/catalog-intelligence.js`));
   const catalogOntology = await import(pathToFileURL(`${compileDir}/lib/catalog-ontology.js`));
   const catalogImport = await import(pathToFileURL(`${compileDir}/lib/catalog-import.js`));
+  const quizGeneration = await import(pathToFileURL(`${compileDir}/lib/quiz-generation.js`));
   const quizReadiness = await import(pathToFileURL(`${compileDir}/lib/quiz-readiness.js`));
   const ruleCoverage = await import(pathToFileURL(`${compileDir}/lib/rule-coverage.js`));
   const searchEngine = await import(pathToFileURL(`${compileDir}/lib/search-engine.js`));
@@ -297,6 +306,12 @@ async function assertDeterministicLogic() {
   assert(ontologyReport.categoryClusters.length >= 2, "Expected ontology map to cluster demo products by category");
   assert(ontologyReport.topSignals.some((signal) => signal.key === "trail"), "Expected ontology map to expose repeated trail signal");
   assert(ontologyReport.suggestedQuestions.some((question) => question.options.length >= 2), "Expected ontology map to generate suggested finder questions");
+  const generatedSuggestion = quizGeneration.buildOntologyQuizSuggestion(demo.demoProducts, "Help shoppers choose the right footwear");
+  assert(generatedSuggestion.questions.length >= 2, "Expected ontology-guided quiz generation to produce multiple questions");
+  assert(generatedSuggestion.questions.some((question) => question.options.some((option) => option.match_type === "category" || option.match_type === "tag" || option.match_type === "feature")), "Expected generated quiz to use ontology-backed catalog rules");
+  assert(generatedSuggestion.questions.some((question) => question.options.some((option) => option.match_type === "budget_max")), "Expected generated quiz to include a budget question");
+  const generationSummary = quizGeneration.buildQuizGenerationOntologySummary(demo.demoProducts);
+  assert(generationSummary.categoryClusters.length >= 2 && generationSummary.suggestedQuestions.length, "Expected quiz generation summary to expose ontology context");
 
   const trailSearch = searchEngine.runSemanticProductSearch({ query: "waterproof hiking shoes under £140", products: demo.demoProducts, limit: 3 });
   assert(trailSearch.intent.maxBudget === 140 && trailSearch.intent.terms.includes("trail"), "Expected semantic search to parse budget and expanded hiking/trail intent");
