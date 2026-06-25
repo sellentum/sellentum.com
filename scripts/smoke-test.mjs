@@ -25,7 +25,7 @@ async function assertPage(pathname, expectedText, status = 200) {
 async function assertWidgetScript() {
   const { response, text } = await get("/api/widget.js");
   assert(response.status === 200, `/api/widget.js returned ${response.status}`);
-  for (const token of ["data-experience", "data-mode", "data-id", "assistant", "configurator", "finder", "inline", "ensureFrame"]) {
+  for (const token of ["data-experience", "data-mode", "data-id", "assistant", "configurator", "finder", "search", "inline", "ensureFrame"]) {
     assert(text.includes(token), `/api/widget.js missing ${token}`);
   }
   assert(text.indexOf("function open(){ensureFrame()") > text.indexOf("function ensureFrame()"), "Modal widget should lazy-load the iframe only when opened");
@@ -78,7 +78,7 @@ function assertSessionAnalytics() {
   const session = readFileSync("lib/session.ts", "utf8");
   const analytics = readFileSync("app/dashboard/analytics/page.tsx", "utf8");
   const analyticsHelpers = readFileSync("lib/analytics.ts", "utf8");
-  for (const file of ["app/finder/[id]/page.tsx", "app/assistant/[id]/page.tsx", "app/configurator/[id]/page.tsx"]) {
+  for (const file of ["app/finder/[id]/page.tsx", "app/assistant/[id]/page.tsx", "app/configurator/[id]/page.tsx", "app/search/[id]/page.tsx"]) {
     assert(readFileSync(file, "utf8").includes("getSessionMetadata"), `${file} should attach anonymous session metadata to analytics events`);
   }
   assert(session.includes("findly_anonymous_session"), "Session helper should persist anonymous shopper sessions");
@@ -107,14 +107,27 @@ function assertLaunchStudioWorkflow() {
 
 function assertSemanticSearchWorkflow() {
   const route = readFileSync("app/api/search/route.ts", "utf8");
+  const publicRoute = readFileSync("app/api/public/search/[id]/route.ts", "utf8");
   const page = readFileSync("app/dashboard/search/page.tsx", "utf8");
+  const publicPage = readFileSync("app/search/[id]/page.tsx", "utf8");
+  const settings = readFileSync("app/dashboard/settings/page.tsx", "utf8");
+  const eventsRoute = readFileSync("app/api/events/route.ts", "utf8");
+  const utils = readFileSync("lib/utils.ts", "utf8");
   const shell = readFileSync("components/dashboard-shell.tsx", "utf8");
   const overview = readFileSync("app/dashboard/page.tsx", "utf8");
   const engine = readFileSync("lib/search-engine.ts", "utf8");
   assert(route.includes("getWorkspaceIdentity"), "Search service should require an authenticated workspace");
   assert(route.includes("runSemanticProductSearch"), "Search service should use the shared semantic search engine");
+  assert(publicRoute.includes("eq(\"published\", true)"), "Published search route should validate published finder context");
+  assert(publicRoute.includes("runSemanticProductSearch"), "Published search route should use the shared semantic search engine");
   assert(page.includes("runSemanticProductSearch"), "Search Lab should run the shared semantic search engine");
   assert(page.includes("POST /api/search"), "Search Lab should document the search service endpoint");
+  assert(publicPage.includes("/api/public/search/"), "Public search page should call the published search runtime outside demo mode");
+  assert(publicPage.includes("experience_type: \"search\""), "Public search analytics should identify search experiences");
+  assert(settings.includes("<option value=\"search\">Semantic search</option>"), "Settings should expose semantic search as an embeddable experience");
+  assert(settings.includes("data-experience=\"${embedType}\""), "Settings snippet should support search through the generic experience field");
+  assert(eventsRoute.includes("requestedType === \"search\""), "Analytics route should preserve search experience metadata");
+  assert(utils.includes("value === \"search\""), "Experience type inference should recognise search events");
   assert(shell.includes("/dashboard/search"), "Dashboard navigation should expose Search Lab");
   assert(overview.includes("/dashboard/search"), "Dashboard overview should expose Search Lab");
   assert(engine.includes("extractSearchIntentTokens"), "Search engine should parse natural-language intent tokens");
@@ -223,7 +236,8 @@ async function assertDeterministicLogic() {
     { quiz_id: "config_trail_kit", metadata: {} },
     { quiz_id: "quiz_footwear", metadata: {} },
   ].map((event) => utils.getEventExperienceType(event));
-  assert(eventTypes.join(",") === "assistant,configurator,finder", `Unexpected event type inference: ${eventTypes.join(",")}`);
+  const searchType = utils.getEventExperienceType({ quiz_id: "quiz_footwear", metadata: { experience_type: "search" } });
+  assert(eventTypes.join(",") === "assistant,configurator,finder" && searchType === "search", `Unexpected event type inference: ${eventTypes.join(",")}, ${searchType}`);
   assert(demo.demoEvents.some((event) => Array.isArray(event.metadata?.answers) && event.metadata.answers.length), "Expected seeded finder analytics to include answer metadata");
   assert(demo.demoEvents.some((event) => event.metadata?.experience_type === "assistant" && typeof event.metadata.query === "string"), "Expected seeded advisor analytics to include shopper query metadata");
   assert(demo.demoEvents.some((event) => Array.isArray(event.metadata?.selected_option_names) && event.metadata.selected_option_names.length), "Expected seeded configurator analytics to include selected option names");
@@ -291,6 +305,7 @@ async function main() {
   await assertPage("/resources", "Demo the product discovery loop");
   await assertPage("/finder/quiz_footwear", "Preparing your product guide");
   await assertPage("/assistant/quiz_footwear", "Preparing your product advisor");
+  await assertPage("/search/quiz_footwear", "Preparing product search");
   await assertPage("/configurator/config_trail_kit", "Loading configurator");
   await assertPage("/api/preflight", "Authentication required", 401);
   await assertWidgetScript();

@@ -109,7 +109,7 @@ export type AnalyticsEventType =
   | "product_recommended"
   | "buy_click";
 
-export type ExperienceType = "finder" | "assistant" | "configurator";
+export type ExperienceType = "finder" | "assistant" | "configurator" | "search";
 
 export type AnalyticsEvent = {
   id: string;

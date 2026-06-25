@@ -24,7 +24,7 @@ export async function POST(request: Request) {
     const useConfigurator = requestedType === "configurator" && Boolean(configurator);
     const experience = useConfigurator ? configurator : quiz || configurator;
     if (!experience) return NextResponse.json({ error: "Published experience not found." }, { status: 404 });
-    const experienceType: ExperienceType = useConfigurator || (!quiz && configurator) ? "configurator" : requestedType === "assistant" ? "assistant" : "finder";
+    const experienceType: ExperienceType = useConfigurator || (!quiz && configurator) ? "configurator" : requestedType === "assistant" ? "assistant" : requestedType === "search" ? "search" : "finder";
     if (parsed.data.productId) {
       const { data: product } = await supabase.from("products").select("id").eq("id", parsed.data.productId).eq("user_id", experience.user_id).maybeSingle();
       if (!product) return NextResponse.json({ error: "Product does not belong to this experience." }, { status: 400 });

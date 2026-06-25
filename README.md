@@ -18,13 +18,14 @@ Findly is a compact guided-selling SaaS product for ecommerce brands. A merchant
 - OpenAI match explanations with a safe fact-based fallback when no API key is present
 - Conversational product advisor combining semantic similarity, deterministic field signals, hard budget constraints and clarification turns for vague requests
 - Published advisor runtime that loads the merchant catalog server-side instead of trusting browser-supplied products
+- Customer-facing semantic search experience for natural-language product discovery over a published catalog context
 - Pgvector-backed advisor candidate retrieval for enriched Supabase catalogs, with deterministic ranking as the final selector
 - Visual configurator builder with steps, options, product-linked price deltas, compatibility rules and publish-readiness diagnostics
 - Customer finder with welcome, progress, AI explanations, side-by-side result comparison, restart and buy-click tracking
 - Published finder runtime that validates selected answer IDs, builds a semantic buyer profile and ranks products server-side
 - Customer-facing configurator with live bundle price, compatibility filtering, review and buy-click tracking
 - Published configurator runtime that revalidates final bundles server-side before review/buy
-- Copyable JavaScript widget that opens a finder, advisor or configurator in a lazy-loaded modal iframe or direct inline iframe
+- Copyable JavaScript widget that opens a finder, advisor, semantic search or configurator in a lazy-loaded modal iframe or direct inline iframe
 - Analytics for sessions, real period-over-period trends, funnel diagnosis, views, starts, completions, recommendations, buy clicks, selected answers, advisor queries and matched intent signals
 - Brand, colour, widget copy and launcher-position settings
 - Launch preflight checks for catalog readiness, builder readiness diagnostics, AI/env keys, published experiences, widget setup and analytics coverage
@@ -97,7 +98,7 @@ Publish a finder or configurator, then copy the generated snippet from **Brand &
 ></script>
 ```
 
-Set `data-experience` to `finder`, `assistant`, or `configurator`. Set `data-mode` to `modal` for a floating launcher that lazy-loads the iframe only when opened, or `inline` to embed the iframe directly where the script is placed. The widget has no framework dependency and can be used on any HTML storefront.
+Set `data-experience` to `finder`, `assistant`, `search`, or `configurator`. Search uses a published finder ID as the catalog context. Set `data-mode` to `modal` for a floating launcher that lazy-loads the iframe only when opened, or `inline` to embed the iframe directly where the script is placed. The widget has no framework dependency and can be used on any HTML storefront.
 
 ## Deploy to Vercel
 
@@ -126,6 +127,7 @@ Import the repository into Vercel, add the variables from `.env.example`, and de
 - `app/api/public/assistant/[id]` — published advisor runtime that validates the experience and loads active products server-side
 - `lib/semantic-candidates.ts` — pgvector candidate retrieval through the Supabase `match_products` RPC
 - `app/api/public/finder/[id]` — published finder runtime for server-side deterministic recommendations
+- `app/search/[id]` and `app/api/public/search/[id]` — customer-facing semantic search page and published search runtime
 - `app/api/public/configurator/[id]` — published configurator runtime for server-side compatibility and bundle validation
 - `app/assistant/[id]` — customer-facing natural-language product advisor
 - `app/configurator/[id]` — customer-facing visual configurator

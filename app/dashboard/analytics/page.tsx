@@ -14,6 +14,7 @@ const experienceLabels: Record<ExperienceFilter, string> = {
   all: "All experiences",
   finder: "Product finders",
   assistant: "AI advisor",
+  search: "Semantic search",
   configurator: "Configurators",
 };
 
@@ -21,6 +22,7 @@ const experienceOptions: Array<{ value: ExperienceFilter; icon: typeof Sparkles 
   { value: "all", icon: Sparkles },
   { value: "finder", icon: Sparkles },
   { value: "assistant", icon: MessageCircle },
+  { value: "search", icon: Search },
   { value: "configurator", icon: PackagePlus },
 ];
 
@@ -73,7 +75,7 @@ export default function AnalyticsPage() {
   const clicks = sessionStats.buy_click;
   const recommended = sessionStats.product_recommended;
 
-  const experienceStats = useMemo(() => (["finder", "assistant", "configurator"] as ExperienceType[]).map((type) => {
+  const experienceStats = useMemo(() => (["finder", "assistant", "search", "configurator"] as ExperienceType[]).map((type) => {
     const scoped = eventsInRange.filter((event) => getEventExperienceType(event) === type);
     return {
       type,

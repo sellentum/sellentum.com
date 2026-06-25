@@ -6,7 +6,7 @@ export async function GET(request: Request) {
   var experience=(script.getAttribute('data-experience')||'finder').toLowerCase();
   var id=script.getAttribute('data-id')||script.getAttribute('data-quiz')||script.getAttribute('data-configurator');
   if(!id){console.error('[Findly] Missing data-id, data-quiz, or data-configurator attribute');return;}
-  var path=experience==='assistant'?'assistant':experience==='configurator'?'configurator':'finder';
+  var path=experience==='assistant'?'assistant':experience==='configurator'?'configurator':experience==='search'?'search':'finder';
   var mode=(script.getAttribute('data-mode')||'modal').toLowerCase();
   var color=script.getAttribute('data-color')||'#22352a';
   var label=script.getAttribute('data-label')||'Find my match';

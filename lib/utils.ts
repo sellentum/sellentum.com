@@ -29,7 +29,7 @@ export function uniqueValues(values: string[]) {
 
 export function getEventExperienceType(event: Pick<AnalyticsEvent, "metadata" | "quiz_id">): ExperienceType {
   const value = event.metadata?.experience_type;
-  if (value === "assistant" || value === "configurator" || value === "finder") return value;
+  if (value === "assistant" || value === "configurator" || value === "finder" || value === "search") return value;
   if (event.quiz_id.startsWith("config_")) return "configurator";
   return "finder";
 }
