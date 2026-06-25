@@ -36,6 +36,10 @@ type PreflightPayload = {
     active_products: number;
     ready_finders: number;
     ready_configurators: number;
+    finder_readiness_blockers: number;
+    finder_readiness_warnings: number;
+    configurator_readiness_blockers: number;
+    configurator_readiness_warnings: number;
     analytics_events: number;
     sessions: number;
     session_events: number;
@@ -138,11 +142,13 @@ export default function PreflightPage() {
         </div>
       </div>
 
-      <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-7">
+      <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-9">
         {[
           [payload.summary.active_products, "Active products"],
           [payload.summary.ready_finders, "Ready finders"],
           [payload.summary.ready_configurators, "Ready configurators"],
+          [payload.summary.finder_readiness_blockers + payload.summary.configurator_readiness_blockers, "Readiness blockers"],
+          [payload.summary.finder_readiness_warnings + payload.summary.configurator_readiness_warnings, "Readiness warnings"],
           [payload.summary.analytics_events, "Analytics events"],
           [payload.summary.sessions, "Sessions"],
           [payload.summary.intent_events, "Intent events"],

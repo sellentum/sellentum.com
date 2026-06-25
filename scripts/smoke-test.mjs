@@ -133,6 +133,16 @@ function assertConfiguratorReadinessWorkflow() {
   assert(readiness.includes("compatibility"), "Configurator readiness helper should validate compatibility references");
 }
 
+function assertPreflightReadinessWorkflow() {
+  const route = readFileSync("app/api/preflight/route.ts", "utf8");
+  const page = readFileSync("app/dashboard/preflight/page.tsx", "utf8");
+  assert(route.includes("analyzeQuizReadiness"), "Preflight should reuse finder publish-readiness diagnostics");
+  assert(route.includes("analyzeConfiguratorReadiness"), "Preflight should reuse configurator publish-readiness diagnostics");
+  assert(route.includes("finder_readiness_blockers"), "Preflight summary should expose finder readiness blockers");
+  assert(route.includes("configurator_readiness_blockers"), "Preflight summary should expose configurator readiness blockers");
+  assert(page.includes("Readiness blockers"), "Preflight page should show readiness blocker counts");
+}
+
 async function assertDeterministicLogic() {
   if (existsSync(compileDir)) rmSync(compileDir, { recursive: true, force: true });
   execFileSync("./node_modules/.bin/tsc", ["-p", "tsconfig.json", "--outDir", compileDir, "--noEmit", "false", "--declaration", "false", "--emitDeclarationOnly", "false"], { stdio: "ignore" });
@@ -250,6 +260,7 @@ async function main() {
   assertCatalogImportWorkflow();
   assertQuizReadinessWorkflow();
   assertConfiguratorReadinessWorkflow();
+  assertPreflightReadinessWorkflow();
   await assertDeterministicLogic();
   console.log("Findly smoke test passed");
 }

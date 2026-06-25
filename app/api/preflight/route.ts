@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { demoConfigurator, demoEvents, demoProducts, demoQuiz, demoSettings } from "@/lib/demo-data";
 import { getWorkspaceIdentity } from "@/lib/api-auth";
+import { analyzeConfiguratorReadiness } from "@/lib/configurator-readiness";
+import { analyzeQuizReadiness } from "@/lib/quiz-readiness";
 import type { AnalyticsEvent, Configurator, Product, Quiz, WidgetSettings } from "@/lib/types";
 
 type CheckStatus = "pass" | "warn" | "fail";
@@ -47,14 +49,6 @@ function hasSessionMetadata(event: AnalyticsEvent) {
   return typeof event.metadata?.session_id === "string" && event.metadata.session_id.length > 0;
 }
 
-function publishedFinderReady(quiz: Quiz) {
-  return quiz.published && quiz.questions.length > 0 && quiz.questions.every((question) => question.options.length >= 2);
-}
-
-function publishedConfiguratorReady(configurator: Configurator) {
-  return configurator.published && configurator.steps.length > 0 && configurator.steps.every((step) => step.options.length > 0);
-}
-
 function buildPreflight({ products, quizzes, configurators, events, settings, mode, origin }: {
   products: Product[];
   quizzes: Quiz[];
@@ -69,10 +63,16 @@ function buildPreflight({ products, quizzes, configurators, events, settings, mo
   const enrichedProducts = activeProducts.filter((product) => product.enrichment_status === "enriched" || product.search_text || product.buyer_needs?.length);
   const productsWithUrls = activeProducts.filter((product) => product.product_url);
   const productsWithImages = activeProducts.filter((product) => product.image_url);
-  const readyFinders = quizzes.filter(publishedFinderReady);
-  const readyConfigurators = configurators.filter(publishedConfiguratorReady);
+  const finderReadiness = quizzes.map((quiz) => ({ quiz, report: analyzeQuizReadiness(quiz, products) }));
+  const configuratorReadiness = configurators.map((configurator) => ({ configurator, report: analyzeConfiguratorReadiness(configurator, products) }));
+  const readyFinders = finderReadiness.filter(({ quiz, report }) => quiz.published && report.canPublish);
+  const readyConfigurators = configuratorReadiness.filter(({ configurator, report }) => configurator.published && report.canPublish);
   const publishedFinders = quizzes.filter((quiz) => quiz.published);
   const publishedConfigurators = configurators.filter((configurator) => configurator.published);
+  const blockedPublishedFinders = finderReadiness.filter(({ quiz, report }) => quiz.published && !report.canPublish);
+  const blockedPublishedConfigurators = configuratorReadiness.filter(({ configurator, report }) => configurator.published && !report.canPublish);
+  const finderWarnings = finderReadiness.filter(({ quiz, report }) => quiz.published && report.warnings.length);
+  const configuratorWarnings = configuratorReadiness.filter(({ configurator, report }) => configurator.published && report.warnings.length);
   const widgetViews = events.filter((event) => event.event_type === "widget_view").length;
   const completions = events.filter((event) => event.event_type === "quiz_complete").length;
   const recommendations = events.filter((event) => event.event_type === "product_recommended").length;
@@ -111,8 +111,10 @@ function buildPreflight({ products, quizzes, configurators, events, settings, mo
       description: "At least one published experience should be ready to embed.",
       checks: [
         check("published-finder", "Published finder", "Guided selling needs a published quiz with questions and answer rules.", readyFinders.length ? "pass" : publishedFinders.length ? "warn" : "fail", readyFinders.length ? `${readyFinders.length} finder${readyFinders.length === 1 ? "" : "s"} ready.` : `${publishedFinders.length} published finder${publishedFinders.length === 1 ? "" : "s"}, but structure needs review.`, "/dashboard/quizzes", "Open finder builder"),
-        check("advisor", "Conversational advisor", "The advisor reuses a published finder and active catalog as its public entrypoint.", readyFinders.length && activeProducts.length >= 2 ? "pass" : "warn", readyFinders.length && activeProducts.length >= 2 ? "Advisor can run against the active catalog." : "Publish a finder and keep at least two active products for advisor mode.", "/dashboard/settings", "Copy advisor embed"),
+        check("finder-readiness", "Finder readiness diagnostics", "Published finders should pass the same launch checks shown in the builder.", blockedPublishedFinders.length ? "fail" : finderWarnings.length ? "warn" : readyFinders.length ? "pass" : "fail", blockedPublishedFinders.length ? `${blockedPublishedFinders.length} published finder${blockedPublishedFinders.length === 1 ? "" : "s"} have blockers.` : finderWarnings.length ? `${finderWarnings.length} published finder${finderWarnings.length === 1 ? "" : "s"} have warnings.` : readyFinders.length ? "Published finder checks pass." : "No launch-ready finder is published.", "/dashboard/quizzes", "Review readiness"),
+        check("advisor", "Conversational advisor", "The advisor reuses a launch-ready published finder and active catalog as its public entrypoint.", readyFinders.length && activeProducts.length >= 2 ? "pass" : "warn", readyFinders.length && activeProducts.length >= 2 ? "Advisor can run against the active catalog." : "Publish a readiness-checked finder and keep at least two active products for advisor mode.", "/dashboard/settings", "Copy advisor embed"),
         check("configurator", "Visual configurator", "Compatibility workflows need a published configurator with steps and options.", readyConfigurators.length ? "pass" : publishedConfigurators.length ? "warn" : "warn", readyConfigurators.length ? `${readyConfigurators.length} configurator${readyConfigurators.length === 1 ? "" : "s"} ready.` : "No ready configurator yet; optional for the MVP but useful for complex products.", "/dashboard/configurators", "Build configurator"),
+        check("configurator-readiness", "Configurator readiness diagnostics", "Published configurators should pass linked-product, pricing and compatibility checks.", blockedPublishedConfigurators.length ? "fail" : configuratorWarnings.length ? "warn" : readyConfigurators.length ? "pass" : "warn", blockedPublishedConfigurators.length ? `${blockedPublishedConfigurators.length} published configurator${blockedPublishedConfigurators.length === 1 ? "" : "s"} have blockers.` : configuratorWarnings.length ? `${configuratorWarnings.length} published configurator${configuratorWarnings.length === 1 ? "" : "s"} have warnings.` : readyConfigurators.length ? "Published configurator checks pass." : "No launch-ready configurator is published yet.", "/dashboard/configurators", "Review readiness"),
       ],
     },
     {
@@ -145,6 +147,10 @@ function buildPreflight({ products, quizzes, configurators, events, settings, mo
       ready_finders: readyFinders.length,
       published_configurators: publishedConfigurators.length,
       ready_configurators: readyConfigurators.length,
+      finder_readiness_blockers: blockedPublishedFinders.length,
+      finder_readiness_warnings: finderWarnings.length,
+      configurator_readiness_blockers: blockedPublishedConfigurators.length,
+      configurator_readiness_warnings: configuratorWarnings.length,
       analytics_events: events.length,
       sessions,
       session_events: sessionEvents,

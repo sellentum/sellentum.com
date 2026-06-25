@@ -26,7 +26,7 @@ Findly is a compact guided-selling SaaS product for ecommerce brands. A merchant
 - Copyable JavaScript widget that opens a finder, advisor or configurator in a lazy-loaded modal iframe or direct inline iframe
 - Analytics for sessions, real period-over-period trends, funnel diagnosis, views, starts, completions, recommendations, buy clicks, selected answers, advisor queries and matched intent signals
 - Brand, colour, widget copy and launcher-position settings
-- Launch preflight checks for catalog readiness, AI/env keys, published experiences, widget setup and analytics coverage
+- Launch preflight checks for catalog readiness, builder readiness diagnostics, AI/env keys, published experiences, widget setup and analytics coverage
 - Supabase schema, indexes, triggers and row-level security
 - Fully interactive local demo mode when credentials are absent
 
@@ -114,7 +114,7 @@ Import the repository into Vercel, add the variables from `.env.example`, and de
 - `lib/utils.ts` — deterministic matching, recommendation comparison, configurator compatibility and shared formatting
 - `app/dashboard/launch` — self-serve launch workflow for enrichment, quiz generation, publishing and widget copy
 - `app/dashboard/lab` — merchant-side recommendation testing and explainability lab
-- `app/dashboard/preflight` and `app/api/preflight` — production readiness checks before embedding
+- `app/dashboard/preflight` and `app/api/preflight` — production readiness checks before embedding, including finder/configurator readiness diagnostics
 - `supabase/schema.sql` — PostgreSQL schema and RLS policies
 - `app/api/catalog/enrich` — authenticated catalog enrichment and embedding generation
 - `app/api/quizzes/generate` — authenticated guided-selling flow generation
