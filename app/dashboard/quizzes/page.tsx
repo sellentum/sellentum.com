@@ -6,12 +6,30 @@ import { AlertTriangle, ArrowLeft, Ban, Check, ChevronDown, ChevronRight, Extern
 import { LoadingState } from "@/components/loading-state";
 import { useStore } from "@/lib/store";
 import { analyzeQuizReadiness } from "@/lib/quiz-readiness";
+import { getAnswerOptionCoverage, type AnswerOptionRuleCoverage } from "@/lib/rule-coverage";
 import type { AnswerOption, GeneratedQuizSuggestion, MatchType, Question, Quiz, RecommendationOverride } from "@/lib/types";
 import { slugify, uid } from "@/lib/utils";
 
 const typeLabels: Record<MatchType, string> = { tag: "Product tag", category: "Category", feature: "Feature contains", budget_max: "Maximum price", none: "No filter / preference only" };
 const overrideLabels: Record<RecommendationOverride["action"], string> = { boost: "Boost", pin: "Pin to top", exclude: "Exclude" };
 const overrideIcons: Record<RecommendationOverride["action"], LucideIcon> = { boost: TrendingUp, pin: Pin, exclude: Ban };
+
+function RuleCoverageRow({ label, coverage }: { label: string; coverage?: AnswerOptionRuleCoverage }) {
+  if (!coverage) return null;
+  const tone = coverage.status === "matched" ? "bg-lime/25 text-moss" : coverage.status === "preference" ? "bg-blue-50 text-blue-700" : "bg-amber-50 text-amber-700";
+  const dot = coverage.status === "matched" ? "bg-moss" : coverage.status === "preference" ? "bg-blue-500" : "bg-amber-500";
+  const summary = coverage.status === "matched" ? `${coverage.count} product match${coverage.count === 1 ? "" : "es"}` : coverage.status === "preference" ? "Preference-only" : "No product match";
+
+  return <div className={`rounded-xl px-3 py-2 ${tone}`}>
+    <div className="flex items-start gap-2">
+      <span className={`mt-1 h-1.5 w-1.5 shrink-0 rounded-full ${dot}`} />
+      <div className="min-w-0">
+        <p className="truncate text-[9px] font-extrabold">{label || "Untitled answer"} · {summary}</p>
+        <p className="mt-0.5 text-[8px] font-bold leading-3 opacity-70">{coverage.detail}</p>
+      </div>
+    </div>
+  </div>;
+}
 
 function QuizEditor({ selected, onBack }: { selected: Quiz; onBack: () => void }) {
   const { saveQuiz, deleteQuiz, products } = useStore();
@@ -29,6 +47,7 @@ function QuizEditor({ selected, onBack }: { selected: Quiz; onBack: () => void }
   const active = draft.questions.find((q) => q.id === activeQuestion);
   const overrides = draft.recommendation_overrides || [];
   const readiness = useMemo(() => analyzeQuizReadiness(draft, products), [draft, products]);
+  const coverageByOptionId = useMemo(() => Object.fromEntries(draft.questions.flatMap((question) => question.options.map((option) => [option.id, getAnswerOptionCoverage(option, products)] as const))) as Record<string, AnswerOptionRuleCoverage>, [draft.questions, products]);
   const updateQuestion = (questionId: string, update: Partial<Question>) => setDraft((current) => ({ ...current, questions: current.questions.map((q) => q.id === questionId ? { ...q, ...update } : q) }));
   const updateOption = (questionId: string, optionId: string, update: Partial<AnswerOption>) => setDraft((current) => ({ ...current, questions: current.questions.map((q) => q.id === questionId ? { ...q, options: q.options.map((o) => o.id === optionId ? { ...o, ...update } : o) } : q) }));
   function addQuestion() { const id = uid("q"); const question: Question = { id, quiz_id: draft.id, title: "New question", helper_text: "", position: draft.questions.length, options: [] }; setDraft((current) => ({ ...current, questions: [...current.questions, question] })); setActiveQuestion(id); }
@@ -109,6 +128,17 @@ function QuizEditor({ selected, onBack }: { selected: Quiz; onBack: () => void }
           </div>
         </div>
         <div className="mt-5 rounded-xl border border-black/[0.07] p-3"><p className="flex items-center gap-2 text-[10px] font-extrabold"><HelpCircle size={13} className="text-moss" /> Matching tip</p><p className="mt-1.5 text-[9px] leading-4 text-black/40">Use high weights for answers that should strongly shape the result. Budget always acts as an eligibility signal.</p></div>
+        {active && <div className="mt-5 rounded-xl border border-black/[0.07] p-3">
+          <div className="flex items-center justify-between gap-3">
+            <p className="flex items-center gap-2 text-[10px] font-extrabold"><Check size={13} className="text-moss" /> Rule coverage</p>
+            <span className="rounded-full bg-black/5 px-2 py-1 text-[8px] font-extrabold text-black/35">{active.options.length} answers</span>
+          </div>
+          <p className="mt-1.5 text-[9px] leading-4 text-black/40">Check whether each answer actually reaches active products before publishing.</p>
+          <div className="mt-3 space-y-2">
+            {active.options.map((option) => <RuleCoverageRow key={option.id} label={option.label} coverage={coverageByOptionId[option.id]} />)}
+            {!active.options.length && <p className="rounded-xl bg-canvas p-3 text-[9px] font-bold leading-4 text-black/35">Add answer options to see rule coverage.</p>}
+          </div>
+        </div>}
         <div className="mt-5 rounded-xl border border-black/[0.07] p-3">
           <p className="flex items-center gap-2 text-[10px] font-extrabold"><SlidersHorizontal size={13} className="text-moss" /> Merchandising</p>
           <p className="mt-1.5 text-[9px] leading-4 text-black/40">Pin, boost or exclude specific products for this finder while keeping answer matching deterministic.</p>

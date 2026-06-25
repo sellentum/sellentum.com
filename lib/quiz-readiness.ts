@@ -1,4 +1,5 @@
-import type { MatchType, Product, Quiz } from "@/lib/types";
+import type { Product, Quiz } from "@/lib/types";
+import { getAnswerOptionCoverage } from "./rule-coverage";
 
 export type QuizReadinessSeverity = "pass" | "warning" | "blocker";
 
@@ -21,32 +22,8 @@ function check(id: string, label: string, detail: string, severity: QuizReadines
   return { id, label, detail, severity };
 }
 
-function normalize(value: string) {
-  return value.toLowerCase().trim();
-}
-
 function activeProducts(products: Product[]) {
   return products.filter((product) => product.active);
-}
-
-function catalogValues(products: Product[], matchType: MatchType) {
-  const active = activeProducts(products);
-  if (matchType === "category") return new Set(active.map((product) => normalize(product.category)).filter(Boolean));
-  if (matchType === "tag") return new Set(active.flatMap((product) => [...product.tags, ...(product.buyer_needs || [])]).map(normalize).filter(Boolean));
-  if (matchType === "feature") return new Set(active.flatMap((product) => product.features).map(normalize).filter(Boolean));
-  return new Set<string>();
-}
-
-function optionMatchesCatalog(products: Product[], matchType: MatchType, matchValue: string) {
-  const value = normalize(matchValue);
-  if (!value || matchType === "none") return true;
-  if (matchType === "budget_max") {
-    const budget = Number(value);
-    return Number.isFinite(budget) && budget > 0 && activeProducts(products).some((product) => product.price <= budget);
-  }
-  const values = catalogValues(products, matchType);
-  if (matchType === "feature") return [...values].some((feature) => feature.includes(value) || value.includes(feature));
-  return values.has(value);
 }
 
 export function analyzeQuizReadiness(quiz: Quiz, products: Product[]): QuizReadinessReport {
@@ -56,7 +33,7 @@ export function analyzeQuizReadiness(quiz: Quiz, products: Product[]): QuizReadi
   const options = questions.flatMap((question) => question.options);
   const ruleOptions = options.filter((option) => option.match_type !== "none");
   const blankValueOptions = ruleOptions.filter((option) => option.match_type !== "none" && !option.match_value.trim());
-  const catalogMisses = products.length ? ruleOptions.filter((option) => option.match_value.trim() && !optionMatchesCatalog(products, option.match_type, option.match_value)) : [];
+  const catalogMisses = products.length ? ruleOptions.filter((option) => option.match_value.trim() && getAnswerOptionCoverage(option, products).status === "empty") : [];
   const malformedBudgets = options.filter((option) => option.match_type === "budget_max" && (!Number.isFinite(Number(option.match_value)) || Number(option.match_value) <= 0));
 
   checks.push(check(

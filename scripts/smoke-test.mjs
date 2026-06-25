@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { existsSync, readFileSync, rmSync } from "node:fs";
+import { existsSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
 
 const baseUrl = process.env.SMOKE_BASE_URL || "http://localhost:3000";
@@ -117,10 +117,15 @@ function assertCatalogImportWorkflow() {
 function assertQuizReadinessWorkflow() {
   const page = readFileSync("app/dashboard/quizzes/page.tsx", "utf8");
   const readiness = readFileSync("lib/quiz-readiness.ts", "utf8");
+  const coverage = readFileSync("lib/rule-coverage.ts", "utf8");
   assert(page.includes("analyzeQuizReadiness"), "Quiz builder should run publish-readiness diagnostics");
   assert(page.includes("Publish readiness"), "Quiz builder should surface publish-readiness feedback");
   assert(page.includes("!readiness.canPublish"), "Quiz builder should block publishing when readiness has blockers");
+  assert(page.includes("Rule coverage"), "Quiz builder should surface per-answer catalog coverage");
+  assert(page.includes("getAnswerOptionCoverage"), "Quiz builder should calculate answer-rule catalog coverage");
+  assert(readiness.includes("getAnswerOptionCoverage"), "Quiz readiness helper should reuse shared rule coverage diagnostics");
   assert(readiness.includes("catalog-mapping"), "Quiz readiness helper should validate answer rules against catalog signals");
+  assert(coverage.includes("ruleMatchesProduct"), "Rule coverage helper should expose deterministic product matching");
 }
 
 function assertConfiguratorReadinessWorkflow() {
@@ -146,12 +151,15 @@ function assertPreflightReadinessWorkflow() {
 async function assertDeterministicLogic() {
   if (existsSync(compileDir)) rmSync(compileDir, { recursive: true, force: true });
   execFileSync("./node_modules/.bin/tsc", ["-p", "tsconfig.json", "--outDir", compileDir, "--noEmit", "false", "--declaration", "false", "--emitDeclarationOnly", "false"], { stdio: "ignore" });
+  const compiledQuizReadiness = `${compileDir}/lib/quiz-readiness.js`;
+  writeFileSync(compiledQuizReadiness, readFileSync(compiledQuizReadiness, "utf8").replace('from "./rule-coverage";', 'from "./rule-coverage.js";'));
 
   const demo = await import(pathToFileURL(`${compileDir}/lib/demo-data.js`));
   const utils = await import(pathToFileURL(`${compileDir}/lib/utils.js`));
   const analytics = await import(pathToFileURL(`${compileDir}/lib/analytics.js`));
   const catalogImport = await import(pathToFileURL(`${compileDir}/lib/catalog-import.js`));
   const quizReadiness = await import(pathToFileURL(`${compileDir}/lib/quiz-readiness.js`));
+  const ruleCoverage = await import(pathToFileURL(`${compileDir}/lib/rule-coverage.js`));
   const configuratorReadiness = await import(pathToFileURL(`${compileDir}/lib/configurator-readiness.js`));
 
   const answers = [
@@ -229,6 +237,14 @@ async function assertDeterministicLogic() {
 
   const readyQuiz = quizReadiness.analyzeQuizReadiness(demo.demoQuiz, demo.demoProducts);
   assert(readyQuiz.canPublish && readyQuiz.score >= 80, "Expected seeded demo finder to pass publish-readiness checks");
+  const trailCoverage = ruleCoverage.getAnswerOptionCoverage(demo.demoQuiz.questions[0].options[0], demo.demoProducts);
+  assert(trailCoverage.status === "matched" && trailCoverage.productNames.includes("Terra Trail Runner"), "Expected tag rule coverage to identify matching active products");
+  const budgetCoverage = ruleCoverage.getAnswerOptionCoverage(demo.demoQuiz.questions[2].options[0], demo.demoProducts);
+  assert(budgetCoverage.status === "matched" && budgetCoverage.count === 2, "Expected budget rule coverage to count eligible active products");
+  const preferenceCoverage = ruleCoverage.getAnswerOptionCoverage(demo.demoQuiz.questions[2].options[2], demo.demoProducts);
+  assert(preferenceCoverage.status === "preference" && preferenceCoverage.count === demo.demoProducts.length, "Expected preference-only answers to keep active products eligible");
+  const emptyCoverage = ruleCoverage.getAnswerOptionCoverage({ match_type: "tag", match_value: "nonexistent-signal" }, demo.demoProducts);
+  assert(emptyCoverage.status === "empty" && emptyCoverage.count === 0, "Expected unmatched answer rules to report empty catalog coverage");
   const brokenQuiz = { ...demo.demoQuiz, questions: [{ ...demo.demoQuiz.questions[0], options: [{ ...demo.demoQuiz.questions[0].options[0], match_value: "" }] }] };
   const brokenReadiness = quizReadiness.analyzeQuizReadiness(brokenQuiz, demo.demoProducts);
   assert(!brokenReadiness.canPublish && brokenReadiness.blockers.some((item) => item.id === "answer-options" || item.id === "rule-values"), "Expected incomplete finder rules to block publishing");
