@@ -34,6 +34,9 @@ type PreflightPayload = {
   summary: {
     products: number;
     active_products: number;
+    catalog_intelligence_score: number;
+    catalog_intelligence_blockers: number;
+    catalog_intelligence_warnings: number;
     ready_finders: number;
     ready_configurators: number;
     finder_readiness_blockers: number;
@@ -142,9 +145,12 @@ export default function PreflightPage() {
         </div>
       </div>
 
-      <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-9">
+      <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-12">
         {[
           [payload.summary.active_products, "Active products"],
+          [`${payload.summary.catalog_intelligence_score}%`, "Catalog score"],
+          [payload.summary.catalog_intelligence_blockers, "Catalog blockers"],
+          [payload.summary.catalog_intelligence_warnings, "Catalog warnings"],
           [payload.summary.ready_finders, "Ready finders"],
           [payload.summary.ready_configurators, "Ready configurators"],
           [payload.summary.finder_readiness_blockers + payload.summary.configurator_readiness_blockers, "Readiness blockers"],

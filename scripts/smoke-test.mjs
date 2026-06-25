@@ -137,10 +137,18 @@ function assertSemanticSearchWorkflow() {
 function assertCatalogImportWorkflow() {
   const page = readFileSync("app/dashboard/products/page.tsx", "utf8");
   const importer = readFileSync("lib/catalog-import.ts", "utf8");
+  const intelligence = readFileSync("lib/catalog-intelligence.ts", "utf8");
+  const preflight = readFileSync("app/api/preflight/route.ts", "utf8");
+  const preflightPage = readFileSync("app/dashboard/preflight/page.tsx", "utf8");
   assert(page.includes("normalizeCatalogImportRows"), "Product CSV import should use the shared catalog import normalizer");
   assert(page.includes("Fix required"), "Product CSV import should expose invalid row feedback before import");
   assert(importer.includes("headerAliases"), "Catalog import normalizer should support flexible CSV header aliases");
   assert(importer.includes("Possible duplicate name/category"), "Catalog import normalizer should warn about duplicate rows");
+  assert(page.includes("analyzeCatalogIntelligence"), "Products dashboard should show shared catalog intelligence diagnostics");
+  assert(page.includes("Catalog intelligence score"), "Products dashboard should surface the catalog intelligence score");
+  assert(intelligence.includes("analyzeCatalogIntelligence"), "Catalog intelligence helper should expose a deterministic analyzer");
+  assert(preflight.includes("analyzeCatalogIntelligence"), "Preflight should reuse shared catalog intelligence diagnostics");
+  assert(preflightPage.includes("catalog_intelligence_score"), "Preflight page should show catalog intelligence summary fields");
 }
 
 function assertQuizReadinessWorkflow() {
@@ -186,6 +194,7 @@ async function assertDeterministicLogic() {
   const demo = await import(pathToFileURL(`${compileDir}/lib/demo-data.js`));
   const utils = await import(pathToFileURL(`${compileDir}/lib/utils.js`));
   const analytics = await import(pathToFileURL(`${compileDir}/lib/analytics.js`));
+  const catalogIntelligence = await import(pathToFileURL(`${compileDir}/lib/catalog-intelligence.js`));
   const catalogImport = await import(pathToFileURL(`${compileDir}/lib/catalog-import.js`));
   const quizReadiness = await import(pathToFileURL(`${compileDir}/lib/quiz-readiness.js`));
   const ruleCoverage = await import(pathToFileURL(`${compileDir}/lib/rule-coverage.js`));
@@ -265,6 +274,12 @@ async function assertDeterministicLogic() {
   assert(importPreview.summary.valid === 2 && importPreview.summary.invalid === 1, "Expected CSV import normalizer to separate valid and invalid rows");
   assert(importPreview.products[0].price === 1299.5 && importPreview.products[0].product_url === "https://store.example/trail", "Expected CSV import normalizer to clean aliased price and URL fields");
   assert(importPreview.rows.some((row) => row.warnings.some((warning) => warning.includes("duplicate"))), "Expected CSV import normalizer to warn about duplicate product rows");
+
+  const catalogReport = catalogIntelligence.analyzeCatalogIntelligence(demo.demoProducts);
+  assert(catalogReport.score >= 80 && catalogReport.activeProducts === demo.demoProducts.length, "Expected seeded demo catalog to have a strong intelligence score");
+  assert(catalogReport.warnings.some((item) => item.id === "enrichment"), "Expected non-enriched demo catalog to warn about enrichment coverage");
+  const thinCatalogReport = catalogIntelligence.analyzeCatalogIntelligence([{ ...demo.demoProducts[0], id: "thin_product", description: "", features: [], tags: [], image_url: "", product_url: "", search_text: "", buyer_needs: [] }]);
+  assert(!thinCatalogReport.score || thinCatalogReport.blockers.some((item) => item.id === "catalog-size" || item.id === "matching-signals"), "Expected thin catalog to expose launch blockers");
 
   const trailSearch = searchEngine.runSemanticProductSearch({ query: "waterproof hiking shoes under £140", products: demo.demoProducts, limit: 3 });
   assert(trailSearch.intent.maxBudget === 140 && trailSearch.intent.terms.includes("trail"), "Expected semantic search to parse budget and expanded hiking/trail intent");

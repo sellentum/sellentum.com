@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { demoConfigurator, demoEvents, demoProducts, demoQuiz, demoSettings } from "@/lib/demo-data";
 import { getWorkspaceIdentity } from "@/lib/api-auth";
+import { analyzeCatalogIntelligence, type CatalogIntelligenceSeverity } from "@/lib/catalog-intelligence";
 import { analyzeConfiguratorReadiness } from "@/lib/configurator-readiness";
 import { analyzeQuizReadiness } from "@/lib/quiz-readiness";
 import type { AnalyticsEvent, Configurator, Product, Quiz, WidgetSettings } from "@/lib/types";
@@ -36,8 +37,25 @@ function check(id: string, label: string, description: string, status: CheckStat
   return { id, label, description, status, detail, actionHref, actionLabel };
 }
 
-function percent(value: number, total: number) {
-  return total ? Math.round(value / total * 100) : 0;
+function catalogStatus(severity: CatalogIntelligenceSeverity): CheckStatus {
+  return severity === "blocker" ? "fail" : severity === "warning" ? "warn" : "pass";
+}
+
+function catalogDescription(id: string) {
+  if (id === "catalog-size") return "A meaningful discovery experience needs enough active products to compare.";
+  if (id === "core-copy") return "Descriptions help AI explanations, semantic search and shopper confidence.";
+  if (id === "matching-signals") return "Tags, features and buyer needs are the structured signals behind deterministic ranking.";
+  if (id === "enrichment") return "Enriched buyer needs and search text improve semantic and conversational discovery.";
+  if (id === "semantic-text") return "Searchable language lets shopper intent map back to product facts.";
+  if (id === "commerce-assets") return "Result cards need product images and links for conversion.";
+  if (id === "taxonomy") return "Clear categories help comparison, filtering and generated questions.";
+  return "Catalog intelligence diagnostic.";
+}
+
+function catalogActionLabel(id: string) {
+  if (id === "enrichment" || id === "semantic-text") return "Run AI enrich";
+  if (id === "commerce-assets") return "Fill product media";
+  return "Review catalog";
 }
 
 function hasIntentMetadata(event: AnalyticsEvent) {
@@ -59,10 +77,7 @@ function buildPreflight({ products, quizzes, configurators, events, settings, mo
   origin: string;
 }) {
   const activeProducts = products.filter((product) => product.active);
-  const structuredProducts = activeProducts.filter((product) => product.category && product.description && (product.features.length || product.tags.length));
-  const enrichedProducts = activeProducts.filter((product) => product.enrichment_status === "enriched" || product.search_text || product.buyer_needs?.length);
-  const productsWithUrls = activeProducts.filter((product) => product.product_url);
-  const productsWithImages = activeProducts.filter((product) => product.image_url);
+  const catalogIntelligence = analyzeCatalogIntelligence(products);
   const finderReadiness = quizzes.map((quiz) => ({ quiz, report: analyzeQuizReadiness(quiz, products) }));
   const configuratorReadiness = configurators.map((configurator) => ({ configurator, report: analyzeConfiguratorReadiness(configurator, products) }));
   const readyFinders = finderReadiness.filter(({ quiz, report }) => quiz.published && report.canPublish);
@@ -98,11 +113,8 @@ function buildPreflight({ products, quizzes, configurators, events, settings, mo
       label: "Catalog intelligence",
       description: "Products must carry enough clean data to power reliable recommendations.",
       checks: [
-        check("active-products", "Active products", "A finder needs at least two active products to make a meaningful recommendation.", activeProducts.length >= 2 ? "pass" : "fail", `${activeProducts.length} active product${activeProducts.length === 1 ? "" : "s"} available.`, "/dashboard/products", "Add products"),
-        check("structured-products", "Structured recommendation signals", "Products should have categories, descriptions, tags or features.", percent(structuredProducts.length, activeProducts.length) >= 80 ? "pass" : structuredProducts.length ? "warn" : "fail", `${percent(structuredProducts.length, activeProducts.length)}% of active products have useful matching fields.`, "/dashboard/products", "Review catalog"),
-        check("enrichment", "AI/discovery enrichment", "Search text, buyer needs and normalized tags improve advisor quality.", enrichedProducts.length ? "pass" : "warn", enrichedProducts.length ? `${enrichedProducts.length} active product${enrichedProducts.length === 1 ? "" : "s"} enriched or discovery-ready.` : "No enriched products yet; deterministic matching still works.", "/dashboard/products", "Run AI enrich"),
-        check("semantic-runtime", "Semantic candidate retrieval", "Published advisors can use enriched catalog text and stored embeddings to retrieve better candidates before deterministic ranking.", process.env.OPENAI_API_KEY && enrichedProducts.length ? "pass" : enrichedProducts.length ? "warn" : "warn", process.env.OPENAI_API_KEY && enrichedProducts.length ? "OpenAI and enriched products are available for pgvector-backed advisor retrieval." : enrichedProducts.length ? "Products are enriched, but OPENAI_API_KEY is missing so advisor retrieval uses rules/fallbacks." : "Run catalog enrichment with an OpenAI key to activate semantic candidate retrieval.", "/dashboard/products", "Prepare semantic catalog"),
-        check("commerce-links", "Product links and images", "Recommendation cards should send shoppers to a product page with visual context.", percent(productsWithUrls.length, activeProducts.length) >= 80 && percent(productsWithImages.length, activeProducts.length) >= 80 ? "pass" : "warn", `${productsWithUrls.length}/${activeProducts.length} have URLs · ${productsWithImages.length}/${activeProducts.length} have images.`, "/dashboard/products", "Fill product media"),
+        ...catalogIntelligence.checks.map((item) => check(`catalog-${item.id}`, item.label, catalogDescription(item.id), catalogStatus(item.severity), item.detail, "/dashboard/products", catalogActionLabel(item.id))),
+        check("semantic-runtime", "Semantic candidate retrieval", "Published advisors can use enriched catalog text and stored embeddings to retrieve better candidates before deterministic ranking.", process.env.OPENAI_API_KEY && catalogIntelligence.enrichedProducts ? "pass" : catalogIntelligence.enrichedProducts ? "warn" : "warn", process.env.OPENAI_API_KEY && catalogIntelligence.enrichedProducts ? "OpenAI and enriched products are available for pgvector-backed advisor retrieval." : catalogIntelligence.enrichedProducts ? "Products are enriched, but OPENAI_API_KEY is missing so advisor retrieval uses rules/fallbacks." : "Run catalog enrichment with an OpenAI key to activate semantic candidate retrieval.", "/dashboard/products", "Prepare semantic catalog"),
       ],
     },
     {
@@ -143,6 +155,9 @@ function buildPreflight({ products, quizzes, configurators, events, settings, mo
     summary: {
       products: products.length,
       active_products: activeProducts.length,
+      catalog_intelligence_score: catalogIntelligence.score,
+      catalog_intelligence_blockers: catalogIntelligence.blockers.length,
+      catalog_intelligence_warnings: catalogIntelligence.warnings.length,
       published_finders: publishedFinders.length,
       ready_finders: readyFinders.length,
       published_configurators: publishedConfigurators.length,

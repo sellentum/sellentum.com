@@ -8,6 +8,7 @@ Findly is a compact guided-selling SaaS product for ecommerce brands. A merchant
 - Supabase email/password authentication, protected dashboard routes and logout
 - Product catalog CRUD plus CSV upload with flexible header aliases, row-level validation and import preview (`name`, `price`, and `category` are required)
 - AI catalog enrichment with normalized attributes, buyer needs, semantic search text and optional OpenAI embeddings
+- Catalog intelligence scoring for enrichment coverage, semantic-search readiness, matching signals, product media and commerce links
 - Launch Studio workflow that enriches a catalog, generates a finder, publishes it, and prepares the embed snippet from one screen
 - Visual finder builder with questions, answer options, weights, tag/category/feature/budget rules, per-answer catalog coverage and publish-readiness diagnostics
 - Finder merchandising controls to pin, boost or exclude specific products without handing selection to AI
@@ -110,6 +111,7 @@ Import the repository into Vercel, add the variables from `.env.example`, and de
 - `components/` — reusable navigation, shell, modal and state components
 - `lib/store.tsx` — demo/Supabase data adapter
 - `lib/analytics.ts` — session-aware analytics snapshots, period trends and funnel diagnostics
+- `lib/catalog-intelligence.ts` — catalog health scoring for enrichment coverage, matching signals, semantic text, media and commerce links
 - `lib/catalog-import.ts` — flexible CSV header mapping, row validation and import previews
 - `lib/search-engine.ts` — deterministic semantic search ranking, intent parsing and budget eligibility checks
 - `lib/rule-coverage.ts` — deterministic answer-rule coverage helper used by the finder builder and readiness checks
