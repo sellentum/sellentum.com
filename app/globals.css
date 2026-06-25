@@ -1,0 +1,60 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --ink: #17211b;
+  --muted: #667069;
+  --canvas: #f6f7f3;
+  --line: #dde1da;
+  --lime: #d9ff61;
+  --forest: #22352a;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  color: var(--ink);
+  background: var(--canvas);
+  font-family: var(--font-body), Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+button, input, textarea, select { font: inherit; }
+button, a { -webkit-tap-highlight-color: transparent; }
+::selection { background: var(--lime); color: var(--ink); }
+
+.display { font-family: var(--font-display), Georgia, serif; letter-spacing: -0.04em; }
+.eyebrow { font-size: 0.7rem; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; }
+.focus-ring { @apply focus:outline-none focus:ring-4 focus:ring-lime/50; }
+
+.dot-grid {
+  background-image: radial-gradient(rgba(23, 33, 27, 0.12) 1px, transparent 1px);
+  background-size: 18px 18px;
+}
+
+.noise::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.8'/%3E%3C/svg%3E");
+}
+
+.soft-card { @apply rounded-[28px] border border-black/10 bg-white shadow-soft; }
+.field { @apply focus-ring w-full rounded-xl border border-black/10 bg-white px-3.5 py-3 text-sm text-ink placeholder:text-black/35; }
+.label { @apply mb-1.5 block text-xs font-bold text-ink; }
+.btn-primary { @apply focus-ring inline-flex items-center justify-center gap-2 rounded-full bg-ink px-5 py-3 text-sm font-bold text-white transition hover:-translate-y-0.5 hover:bg-moss disabled:pointer-events-none disabled:opacity-50; }
+.btn-secondary { @apply focus-ring inline-flex items-center justify-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-sm font-bold text-ink transition hover:-translate-y-0.5 hover:border-black/20; }
+.btn-lime { @apply focus-ring inline-flex items-center justify-center gap-2 rounded-full bg-lime px-5 py-3 text-sm font-extrabold text-ink transition hover:-translate-y-0.5 hover:bg-[#caff26]; }
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-rise { animation: rise 0.55s cubic-bezier(.2,.7,.2,1) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}

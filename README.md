@@ -1,0 +1,140 @@
+# Findly MVP
+
+Findly is a compact guided-selling SaaS product for ecommerce brands. A merchant can import products, build question flows, create configurable bundles, connect choices to deterministic matching signals, publish the experience, and embed it on any website. OpenAI turns the selected product facts into concise match explanations; it never chooses the products.
+
+## What is included
+
+- Premium marketing site with product, workflow, use-case, pricing, resource and platform pages
+- Supabase email/password authentication, protected dashboard routes and logout
+- Product catalog CRUD plus CSV upload with flexible header aliases, row-level validation and import preview (`name`, `price`, and `category` are required)
+- AI catalog enrichment with normalized attributes, buyer needs, semantic search text and optional OpenAI embeddings
+- Launch Studio workflow that enriches a catalog, generates a finder, publishes it, and prepares the embed snippet from one screen
+- Visual finder builder with questions, answer options, weights and tag/category/feature/budget rules
+- Finder merchandising controls to pin, boost or exclude specific products without handing selection to AI
+- One-click product finder generation from the current catalog
+- Deterministic top-three recommendation engine with budget eligibility filtering, buyer-profile intent scoring and merchant overrides
+- Recommendation lab for testing shopper answer paths and inspecting score breakdowns before publishing
+- OpenAI match explanations with a safe fact-based fallback when no API key is present
+- Conversational product advisor combining semantic similarity, deterministic field signals, hard budget constraints and clarification turns for vague requests
+- Published advisor runtime that loads the merchant catalog server-side instead of trusting browser-supplied products
+- Pgvector-backed advisor candidate retrieval for enriched Supabase catalogs, with deterministic ranking as the final selector
+- Visual configurator builder with steps, options, product-linked price deltas and compatibility rules
+- Customer finder with welcome, progress, AI explanations, side-by-side result comparison, restart and buy-click tracking
+- Published finder runtime that validates selected answer IDs, builds a semantic buyer profile and ranks products server-side
+- Customer-facing configurator with live bundle price, compatibility filtering, review and buy-click tracking
+- Published configurator runtime that revalidates final bundles server-side before review/buy
+- Copyable JavaScript widget that opens a finder, advisor or configurator in a lazy-loaded modal iframe or direct inline iframe
+- Analytics for sessions, real period-over-period trends, funnel diagnosis, views, starts, completions, recommendations, buy clicks, selected answers, advisor queries and matched intent signals
+- Brand, colour, widget copy and launcher-position settings
+- Launch preflight checks for catalog readiness, AI/env keys, published experiences, widget setup and analytics coverage
+- Supabase schema, indexes, triggers and row-level security
+- Fully interactive local demo mode when credentials are absent
+
+## Run locally
+
+Requirements: Node.js 20 or newer and npm.
+
+```bash
+npm install
+cp .env.example .env.local
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000). With blank Supabase values, any email/password on the login page opens the seeded demo workspace. Demo edits persist in browser local storage. Use **Brand & embed → Reset demo workspace** to restore the sample catalog.
+
+## Connect Supabase
+
+1. Create a Supabase project.
+2. Open its SQL editor and run [`supabase/schema.sql`](./supabase/schema.sql).
+3. Add the project URL, anon key, and service-role key to `.env.local`.
+4. In Supabase Authentication, add your local and production URLs to the allowed redirect URLs.
+5. Restart the development server.
+
+The service-role key is used only in server routes that load published finder data and validate analytics events. It must never use a `NEXT_PUBLIC_` prefix. Dashboard data uses the signed-in user’s anon-key client and is protected with RLS.
+
+For a project created with an earlier schema, run migrations in order:
+
+```sql
+-- Adds pgvector, enrichment fields and semantic matching.
+supabase/migrations/002_ai_discovery.sql
+
+-- Adds visual configurator tables and makes analytics experience-agnostic.
+supabase/migrations/003_configurators.sql
+
+-- Adds per-finder merchandising controls for pins, boosts and exclusions.
+supabase/migrations/004_merchandising_overrides.sql
+```
+
+## Enable OpenAI explanations
+
+Set `OPENAI_API_KEY` on the server. `OPENAI_MODEL` defaults to `gpt-4o-mini` and can be changed without code. OpenAI enables richer catalog enrichment, automatic question design, vector embeddings, semantic conversational matching and grounded product explanations. Every workflow has a deterministic local fallback when no key is configured.
+
+## CSV format
+
+```csv
+name,price,image_url,category,description,features,tags,product_url,active
+Terra Trail Runner,128,https://example.com/terra.jpg,Running shoes,Cushioned trail runner,High cushioning|Trail grip,trail|outdoors,https://store.example/terra,true
+```
+
+Use pipes, commas or semicolons inside `features` and `tags`. The dashboard includes a downloadable template, accepts common aliases such as `title`, `sale price`, `collection`, `image`, `link`, and shows invalid rows or weak recommendation-data warnings before import.
+
+## Embed a guided experience
+
+Publish a finder or configurator, then copy the generated snippet from **Brand & embed**. The generated script has this shape:
+
+```html
+<script
+  src="https://your-app.vercel.app/api/widget.js"
+  data-experience="finder"
+  data-mode="modal"
+  data-id="YOUR_FINDER_ID"
+  data-color="#22352a"
+  data-label="Find my match"
+  data-position="right"
+  data-height="780px"
+  async
+></script>
+```
+
+Set `data-experience` to `finder`, `assistant`, or `configurator`. Set `data-mode` to `modal` for a floating launcher that lazy-loads the iframe only when opened, or `inline` to embed the iframe directly where the script is placed. The widget has no framework dependency and can be used on any HTML storefront.
+
+## Deploy to Vercel
+
+Import the repository into Vercel, add the variables from `.env.example`, and deploy. Set `NEXT_PUBLIC_APP_URL` to the production origin. No persistent filesystem is required.
+
+## Architecture notes
+
+- `app/` — App Router pages and server routes
+- `components/` — reusable navigation, shell, modal and state components
+- `lib/store.tsx` — demo/Supabase data adapter
+- `lib/analytics.ts` — session-aware analytics snapshots, period trends and funnel diagnostics
+- `lib/utils.ts` — deterministic matching, recommendation comparison, configurator compatibility and shared formatting
+- `app/dashboard/launch` — self-serve launch workflow for enrichment, quiz generation, publishing and widget copy
+- `app/dashboard/lab` — merchant-side recommendation testing and explainability lab
+- `app/dashboard/preflight` and `app/api/preflight` — production readiness checks before embedding
+- `supabase/schema.sql` — PostgreSQL schema and RLS policies
+- `app/api/catalog/enrich` — authenticated catalog enrichment and embedding generation
+- `app/api/quizzes/generate` — authenticated guided-selling flow generation
+- `app/api/assistant` — rate-limited hybrid conversational discovery with deterministic clarification when shopper intent is vague
+- `app/api/public/assistant/[id]` — published advisor runtime that validates the experience and loads active products server-side
+- `lib/semantic-candidates.ts` — pgvector candidate retrieval through the Supabase `match_products` RPC
+- `app/api/public/finder/[id]` — published finder runtime for server-side deterministic recommendations
+- `app/api/public/configurator/[id]` — published configurator runtime for server-side compatibility and bundle validation
+- `app/assistant/[id]` — customer-facing natural-language product advisor
+- `app/configurator/[id]` — customer-facing visual configurator
+- `app/dashboard/configurators` — merchant configurator builder
+
+Product selection is intentionally hybrid but not AI-dependent: exact rule signals are scored, a chosen budget is a hard ceiling, inactive products are excluded, enriched buyer-profile language can add semantic/lexical intent points, per-finder pins/boosts/exclusions apply deterministically, and stable price/name tie-breakers make results repeatable. AI runs only after those products have been selected.
+
+## Checks
+
+```bash
+npm run typecheck
+npm run lint
+npm run build
+npm run smoke # requires the app to be running, defaults to http://localhost:3000
+```
+
+## MVP boundaries
+
+Stripe is represented only by the pricing placeholder. Shopify, Magento, WooCommerce, Salesforce, SAP, advanced personalisation, multi-user permissions and enterprise integrations are deliberately out of scope.

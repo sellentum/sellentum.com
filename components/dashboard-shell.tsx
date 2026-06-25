@@ -1,0 +1,76 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { BarChart3, BookOpenCheck, Boxes, ChevronDown, ClipboardCheck, ExternalLink, FlaskConical, HelpCircle, LayoutDashboard, LogOut, Menu, PackagePlus, Rocket, Settings, Sparkles, X } from "lucide-react";
+import { useState } from "react";
+import { Logo } from "@/components/logo";
+import { createClient } from "@/lib/supabase/client";
+import { cn } from "@/lib/utils";
+import { useStore } from "@/lib/store";
+
+const nav = [
+  { href: "/dashboard", label: "Overview", icon: LayoutDashboard, exact: true },
+  { href: "/dashboard/launch", label: "Launch Studio", icon: Rocket },
+  { href: "/dashboard/products", label: "Products", icon: Boxes },
+  { href: "/dashboard/quizzes", label: "Product finders", icon: BookOpenCheck },
+  { href: "/dashboard/configurators", label: "Configurators", icon: PackagePlus },
+  { href: "/dashboard/lab", label: "Recommendation lab", icon: FlaskConical },
+  { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
+  { href: "/dashboard/settings", label: "Brand & embed", icon: Settings },
+  { href: "/dashboard/preflight", label: "Launch preflight", icon: ClipboardCheck },
+];
+
+export function DashboardShell({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const router = useRouter();
+  const { mode, settings, quizzes, configurators } = useStore();
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const previewQuiz = quizzes.find((quiz) => quiz.published) || quizzes[0];
+  const previewConfigurator = configurators.find((configurator) => configurator.published) || configurators[0];
+
+  async function logout() {
+    if (mode === "supabase") await createClient()?.auth.signOut();
+    document.cookie = "findly_demo_session=; path=/; max-age=0";
+    router.push("/login"); router.refresh();
+  }
+
+  const sidebar = (
+    <div className="flex h-full flex-col">
+      <div className="flex h-[76px] items-center justify-between px-5"><Logo href="/dashboard" /><button onClick={() => setMobileOpen(false)} className="md:hidden"><X size={19} /></button></div>
+      <div className="mx-3 mb-5 rounded-2xl border border-black/[0.07] bg-white p-2.5">
+        <button className="flex w-full items-center gap-3 rounded-xl px-2 py-1.5 text-left">
+          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-[10px] bg-ink text-xs font-extrabold text-lime">{settings.brand_name.slice(0, 1)}</span>
+          <span className="min-w-0 flex-1"><span className="block truncate text-xs font-extrabold">{settings.brand_name}</span><span className="block text-[10px] text-black/35">Starter workspace</span></span><ChevronDown size={14} className="text-black/30" />
+        </button>
+      </div>
+      <nav className="space-y-1 px-3">
+        <p className="mb-2 px-3 text-[9px] font-extrabold uppercase tracking-[.18em] text-black/30">Workspace</p>
+        {nav.map(({ href, label, icon: Icon, exact }) => {
+          const active = exact ? pathname === href : pathname.startsWith(href);
+          return <Link onClick={() => setMobileOpen(false)} key={href} href={href} className={cn("flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition", active ? "bg-ink text-white shadow-sm" : "text-black/55 hover:bg-white hover:text-ink")}><Icon size={17} className={active ? "text-lime" : "text-black/35"} />{label}</Link>;
+        })}
+      </nav>
+      <div className="mt-auto p-3">
+        <div className="mb-3 rounded-2xl bg-ink p-4 text-white">
+          <div className="grid h-8 w-8 place-items-center rounded-xl bg-lime text-ink"><Sparkles size={15} /></div><p className="mt-3 text-xs font-extrabold">Need a hand?</p><p className="mt-1 text-[10px] leading-4 text-white/45">Set up your first finder with our quick-start guide.</p><a href="mailto:hello@findly.app" className="mt-3 inline-flex items-center gap-1 text-[10px] font-extrabold text-lime">Contact support <ExternalLink size={10} /></a>
+        </div>
+        <button onClick={logout} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold text-black/45 hover:bg-white hover:text-ink"><LogOut size={16} /> Log out</button>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-[#f3f4ef] md:grid md:grid-cols-[245px_1fr]">
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-[245px] border-r border-black/[0.06] bg-[#eceee8] md:block">{sidebar}</aside>
+      {mobileOpen && <div className="fixed inset-0 z-50 md:hidden"><button className="absolute inset-0 bg-black/30" onClick={() => setMobileOpen(false)} aria-label="Close menu" /><aside className="relative h-full w-[280px] bg-[#eceee8] shadow-2xl">{sidebar}</aside></div>}
+      <div className="md:col-start-2">
+        <header className="sticky top-0 z-30 flex h-[68px] items-center justify-between border-b border-black/[0.06] bg-[#f3f4ef]/90 px-4 backdrop-blur-xl sm:px-7">
+          <div className="flex items-center gap-3"><button aria-label="Open navigation" onClick={() => setMobileOpen(true)} className="grid h-9 w-9 place-items-center rounded-xl border border-black/10 md:hidden"><Menu size={17} /></button><p className="text-xs font-bold text-black/35">{mode === "demo" ? "Interactive demo workspace" : "Your workspace"}</p></div>
+          <div className="flex items-center gap-3">{previewQuiz && <Link href={`/finder/${previewQuiz.slug || previewQuiz.id}`} target="_blank" className="hidden items-center gap-1.5 text-xs font-extrabold text-black/50 sm:flex">Preview finder <ExternalLink size={13} /></Link>}{previewConfigurator && <Link href={`/configurator/${previewConfigurator.slug || previewConfigurator.id}`} target="_blank" className="hidden items-center gap-1.5 text-xs font-extrabold text-black/50 xl:flex">Preview configurator <ExternalLink size={13} /></Link>}<button className="grid h-9 w-9 place-items-center rounded-full border border-black/10 bg-white text-black/40" aria-label="Help"><HelpCircle size={16} /></button><div className="grid h-9 w-9 place-items-center rounded-full bg-peach text-xs font-extrabold">AM</div></div>
+        </header>
+        <main className="mx-auto max-w-[1500px] p-4 sm:p-7 lg:p-9">{children}</main>
+      </div>
+    </div>
+  );
+}
