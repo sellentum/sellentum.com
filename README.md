@@ -12,7 +12,7 @@ Findly is a compact guided-selling SaaS product for ecommerce brands. A merchant
 - Ontology map for inspecting category clusters, buyer needs, tags, features, thin signals and AI-ready quiz question ideas
 - Launch Studio workflow that enriches a catalog, generates a finder, publishes it, and prepares the embed snippet from one screen
 - Ontology-guided finder generation that uses category clusters, repeated buyer needs and product features before falling back to OpenAI copy
-- Visual finder builder with questions, answer options, weights, tag/category/feature/budget rules, per-answer catalog coverage and publish-readiness diagnostics
+- Visual finder builder with questions, answer options, optional conditional branching, weights, tag/category/feature/budget rules, per-answer catalog coverage and publish-readiness diagnostics
 - Finder merchandising controls to pin, boost or exclude specific products without handing selection to AI
 - One-click product finder generation from the current catalog
 - Deterministic top-three recommendation engine with budget eligibility filtering, buyer-profile intent scoring and merchant overrides
@@ -26,7 +26,7 @@ Findly is a compact guided-selling SaaS product for ecommerce brands. A merchant
 - Pgvector-backed advisor candidate retrieval for enriched Supabase catalogs, with deterministic ranking as the final selector
 - Visual configurator builder with steps, options, product-linked price deltas, compatibility rules and publish-readiness diagnostics
 - Customer finder with welcome, progress, AI explanations, side-by-side result comparison, restart and buy-click tracking
-- Published finder runtime that validates selected answer IDs, builds a semantic buyer profile and ranks products server-side
+- Published finder runtime that validates the selected branched answer path, builds a semantic buyer profile and ranks products server-side
 - Customer-facing configurator with live bundle price, compatibility filtering, review and buy-click tracking
 - Published configurator runtime that revalidates final bundles server-side before review/buy
 - Copyable JavaScript widget that opens a finder, advisor, semantic search or configurator in a lazy-loaded modal iframe or direct inline iframe
@@ -69,6 +69,9 @@ supabase/migrations/003_configurators.sql
 
 -- Adds per-finder merchandising controls for pins, boosts and exclusions.
 supabase/migrations/004_merchandising_overrides.sql
+
+-- Adds optional answer-level branching for conditional finder flows.
+supabase/migrations/005_finder_branching.sql
 ```
 
 ## Enable OpenAI explanations
@@ -118,6 +121,7 @@ Import the repository into Vercel, add the variables from `.env.example`, and de
 - `lib/catalog-intelligence.ts` — catalog health scoring for enrichment coverage, matching signals, semantic text, media and commerce links
 - `lib/catalog-ontology.ts` — category, buyer-need, tag and feature clustering for ontology mapping and question ideas
 - `lib/quiz-generation.ts` — ontology-guided quiz generation fallback and OpenAI grounding summary
+- `lib/finder-flow.ts` — deterministic conditional question routing and server-side answer-path validation
 - `lib/catalog-import.ts` — flexible CSV header mapping, row validation and import previews
 - `lib/search-engine.ts` — deterministic semantic search ranking, intent parsing and budget eligibility checks
 - `lib/search-explanations.ts` — grounded OpenAI/fallback copy for already-ranked semantic search results

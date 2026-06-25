@@ -35,6 +35,10 @@ export function analyzeQuizReadiness(quiz: Quiz, products: Product[]): QuizReadi
   const blankValueOptions = ruleOptions.filter((option) => option.match_type !== "none" && !option.match_value.trim());
   const catalogMisses = products.length ? ruleOptions.filter((option) => option.match_value.trim() && getAnswerOptionCoverage(option, products).status === "empty") : [];
   const malformedBudgets = options.filter((option) => option.match_type === "budget_max" && (!Number.isFinite(Number(option.match_value)) || Number(option.match_value) <= 0));
+  const questionById = new Map(questions.map((question) => [question.id, question]));
+  const branchOptions = questions.flatMap((question) => question.options.flatMap((option) => option.next_question_id ? [{ question, option, target: questionById.get(option.next_question_id) }] : []));
+  const missingBranches = branchOptions.filter((item) => !item.target);
+  const loopingBranches = branchOptions.filter((item) => item.target && item.target.position <= item.question.position);
 
   checks.push(check(
     "catalog",
@@ -77,6 +81,19 @@ export function analyzeQuizReadiness(quiz: Quiz, products: Product[]): QuizReadi
     checks.push(check("budget-rules", "Budget rules", `${malformedBudgets.length} budget answer${malformedBudgets.length === 1 ? "" : "s"} have invalid maximum prices.`, "blocker"));
   } else if (options.some((option) => option.match_type === "budget_max")) {
     checks.push(check("budget-rules", "Budget rules", "Budget answers use valid maximum prices.", "pass"));
+  }
+
+  if (branchOptions.length) {
+    checks.push(check(
+      "branching",
+      "Conditional routing",
+      missingBranches.length
+        ? `${missingBranches.length} answer route${missingBranches.length === 1 ? "" : "s"} point to missing questions.`
+        : loopingBranches.length
+          ? `${loopingBranches.length} answer route${loopingBranches.length === 1 ? "" : "s"} point backward or to the same question.`
+          : `${branchOptions.length} answer route${branchOptions.length === 1 ? "" : "s"} safely jump to later questions.`,
+      missingBranches.length || loopingBranches.length ? "blocker" : "pass",
+    ));
   }
 
   checks.push(check(

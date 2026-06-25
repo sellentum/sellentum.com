@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, ArrowRight, Check, ExternalLink, LoaderCircle, RefreshCcw, ShieldCheck, Sparkles, Star } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { getSessionMetadata } from "@/lib/session";
+import { getNextFinderQuestionIndex } from "@/lib/finder-flow";
 import type { FinderAnswer, Product, Quiz, Recommendation, WidgetSettings } from "@/lib/types";
 import { compareFinderRecommendations, formatCurrency, recommendProducts } from "@/lib/utils";
 import { demoSettings } from "@/lib/demo-data";
@@ -32,6 +33,7 @@ export default function FinderPage({ params }: { params: Promise<{ id: string }>
   const [error, setError] = useState("");
   const [recommendationError, setRecommendationError] = useState("");
   const [step, setStep] = useState(-1);
+  const [visitedStepIndexes, setVisitedStepIndexes] = useState<number[]>([]);
   const [answers, setAnswers] = useState<FinderAnswer[]>([]);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [recommending, setRecommending] = useState(false);
@@ -57,16 +59,30 @@ export default function FinderPage({ params }: { params: Promise<{ id: string }>
     if (!data) return;
     setRecommendationError("");
     setStep(0);
-    track("quiz_start", undefined, { question_count: data.quiz.questions.length });
+    setVisitedStepIndexes([0]);
+    track("quiz_start", undefined, { question_count: data.quiz.questions.length, flow_type: "conditional" });
   }
   async function choose(optionIndex: number) {
     if (!data) return;
     const question = data.quiz.questions[step];
     const option = question.options[optionIndex];
-    const nextAnswers = [...answers.filter((a) => a.questionId !== question.id), { questionId: question.id, question: question.title, optionId: option.id, answer: option.label, matchType: option.match_type, matchValue: option.match_value, weight: option.weight }];
+    const currentPathIndex = visitedStepIndexes.lastIndexOf(step);
+    const currentPath = currentPathIndex >= 0 ? visitedStepIndexes.slice(0, currentPathIndex + 1) : [...visitedStepIndexes, step];
+    const activeQuestionIds = new Set(currentPath.map((index) => data.quiz.questions[index]?.id).filter(Boolean));
+    const selectedAnswer: FinderAnswer = { questionId: question.id, question: question.title, optionId: option.id, answer: option.label, matchType: option.match_type, matchValue: option.match_value, weight: option.weight };
+    const nextAnswers = [...answers.filter((a) => activeQuestionIds.has(a.questionId) && a.questionId !== question.id), selectedAnswer];
+    const nextStep = getNextFinderQuestionIndex(data.quiz, step, option, currentPath);
+    const questionPath = currentPath.map((index) => data.quiz.questions[index]?.id).filter(Boolean);
     setRecommendationError("");
     setAnswers(nextAnswers);
-    if (step < data.quiz.questions.length - 1) { setTimeout(() => setStep(step + 1), 150); return; }
+    setVisitedStepIndexes(currentPath);
+    if (nextStep >= 0) {
+      setTimeout(() => {
+        setVisitedStepIndexes([...currentPath, nextStep]);
+        setStep(nextStep);
+      }, 150);
+      return;
+    }
     setStep(data.quiz.questions.length);
     setRecommendations([]);
     setRecommending(true);
@@ -74,8 +90,8 @@ export default function FinderPage({ params }: { params: Promise<{ id: string }>
     if (store.mode === "demo") {
       const matches = recommendProducts(data.products, nextAnswers, 3, { overrides: data.quiz.recommendation_overrides || [] });
       const answerMetadata = serializeAnswers(nextAnswers);
-      setRecommendations(matches); track("quiz_complete", undefined, { answers: answerMetadata, answer_summary: nextAnswers.map((answer) => answer.answer), result_count: matches.length });
-      matches.forEach((match, index) => track("product_recommended", match.product.id, { answers: answerMetadata, rank: index + 1, score: match.score, matched_reasons: match.matchedReasons, product_name: match.product.name }));
+      setRecommendations(matches); track("quiz_complete", undefined, { answers: answerMetadata, answer_summary: nextAnswers.map((answer) => answer.answer), question_path: questionPath, result_count: matches.length });
+      matches.forEach((match, index) => track("product_recommended", match.product.id, { answers: answerMetadata, question_path: questionPath, rank: index + 1, score: match.score, matched_reasons: match.matchedReasons, product_name: match.product.name }));
       const explained = await Promise.all(matches.map(async (match) => { try { const response = await fetch("/api/explain", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ product: { name: match.product.name, description: match.product.description, category: match.product.category, features: match.product.features, tags: match.product.tags }, answers: nextAnswers.map(({ question: q, answer }) => ({ question: q, answer })), matchedReasons: match.matchedReasons }) }); const json = await response.json(); return { ...match, explanation: json.explanation }; } catch { return match; } }));
       setRecommendations(explained);
       setRecommending(false);
@@ -94,18 +110,18 @@ export default function FinderPage({ params }: { params: Promise<{ id: string }>
       const matches = (payload.recommendations || []) as Recommendation[];
       const answerMetadata = serializeAnswers(serverAnswers);
       setRecommendations(matches);
-      track("quiz_complete", undefined, { answers: answerMetadata, answer_summary: serverAnswers.map((answer) => answer.answer), result_count: matches.length });
-      matches.forEach((match, index) => track("product_recommended", match.product.id, { answers: answerMetadata, rank: index + 1, score: match.score, matched_reasons: match.matchedReasons, product_name: match.product.name }));
+      track("quiz_complete", undefined, { answers: answerMetadata, answer_summary: serverAnswers.map((answer) => answer.answer), question_path: payload.retrieval?.question_path || questionPath, result_count: matches.length });
+      matches.forEach((match, index) => track("product_recommended", match.product.id, { answers: answerMetadata, question_path: payload.retrieval?.question_path || questionPath, rank: index + 1, score: match.score, matched_reasons: match.matchedReasons, product_name: match.product.name }));
     } catch (err) {
       setRecommendationError(err instanceof Error ? err.message : "The finder could not generate recommendations.");
-      track("quiz_complete", undefined, { answers: serializeAnswers(nextAnswers), answer_summary: nextAnswers.map((answer) => answer.answer), result_count: 0, error: "recommendation_failed" });
+      track("quiz_complete", undefined, { answers: serializeAnswers(nextAnswers), answer_summary: nextAnswers.map((answer) => answer.answer), question_path: questionPath, result_count: 0, error: "recommendation_failed" });
     } finally {
       setRecommending(false);
     }
   }
-  function restart() { setStep(-1); setAnswers([]); setRecommendations([]); setRecommendationError(""); setRecommending(false); viewed.current = true; }
+  function restart() { setStep(-1); setVisitedStepIndexes([]); setAnswers([]); setRecommendations([]); setRecommendationError(""); setRecommending(false); viewed.current = true; }
   const accent = data?.settings.primary_color || "#22352a";
-  const progress = data && step >= 0 ? Math.min(100, ((step + 1) / data.quiz.questions.length) * 100) : 0;
+  const progress = data && step >= 0 ? Math.min(100, ((step === data.quiz.questions.length ? visitedStepIndexes.length : Math.max(1, visitedStepIndexes.lastIndexOf(step) + 1)) / data.quiz.questions.length) * 100) : 0;
   const comparisonRows = useMemo(() => compareFinderRecommendations(recommendations), [recommendations]);
 
   if (loading) return <main className="grid min-h-screen place-items-center bg-[#e8eadf]"><div className="text-center"><LoaderCircle className="mx-auto animate-spin text-moss" /><p className="mt-3 text-xs font-bold text-black/40">Preparing your product guide…</p></div></main>;
@@ -120,7 +136,23 @@ export default function FinderPage({ params }: { params: Promise<{ id: string }>
 
       {step === -1 && <div className="grid flex-1 lg:grid-cols-[1.05fr_.95fr]"><div className="flex flex-col justify-center px-7 py-14 sm:px-14 lg:px-20"><p className="eyebrow text-moss">Your personal product guide</p><h1 className="display mt-4 max-w-2xl text-5xl leading-[.95] sm:text-7xl">{quiz.welcome_title}</h1><p className="mt-6 max-w-lg text-base leading-7 text-black/50">{quiz.welcome_message}</p><button onClick={start} className="mt-8 inline-flex w-fit items-center gap-2 rounded-full px-6 py-3.5 text-sm font-extrabold text-white transition hover:-translate-y-0.5" style={{ background: accent }}>{data.settings.button_text || "Find my match"}<ArrowRight size={16} /></button><p className="mt-4 text-[10px] font-bold text-black/30">{quiz.questions.length} quick questions · About 60 seconds</p></div><div className="relative hidden overflow-hidden bg-[#d9ff61] lg:block"><div className="dot-grid absolute inset-0 opacity-30" /><div className="absolute left-1/2 top-1/2 w-[78%] -translate-x-1/2 -translate-y-1/2 rotate-3 rounded-[28px] bg-white p-7 shadow-2xl"><div className="flex items-center justify-between"><span className="rounded-full bg-lime/40 px-3 py-1.5 text-[9px] font-extrabold uppercase tracking-wider">Made for you</span><div className="flex text-[#f0a746]">{Array.from({ length: 5 }).map((_, i) => <Star key={i} size={11} fill="currentColor" />)}</div></div><p className="display mt-8 text-4xl leading-none">A short path to<br /><span className="italic">the right choice.</span></p><div className="mt-7 space-y-2">{["Tell us what matters", "We compare the details", "Meet your best matches"].map((item, i) => <div className="flex items-center gap-3 rounded-xl bg-canvas px-3 py-3 text-xs font-extrabold" key={item}><span className="grid h-6 w-6 place-items-center rounded-full bg-ink text-[9px] text-lime">{i + 1}</span>{item}</div>)}</div></div></div></div>}
 
-      {step >= 0 && step < quiz.questions.length && (() => { const question = quiz.questions[step]; const prior = answers.find((a) => a.questionId === question.id); return <div className="flex flex-1 flex-col justify-center px-5 py-10 sm:px-12 lg:px-24"><div className="mx-auto w-full max-w-3xl"><div className="flex items-center justify-between"><p className="eyebrow text-moss">Question {step + 1} of {quiz.questions.length}</p><span className="text-[10px] font-bold text-black/25">{Math.round(progress)}% complete</span></div><h1 className="display mt-4 text-4xl leading-none sm:text-6xl">{question.title}</h1>{question.helper_text && <p className="mt-4 text-sm text-black/45">{question.helper_text}</p>}<div className="mt-8 grid gap-3 sm:grid-cols-2">{question.options.map((option, index) => { const chosen = prior?.optionId === option.id; return <button key={option.id} onClick={() => choose(index)} className={`group flex min-h-[72px] items-center justify-between rounded-2xl border p-4 text-left text-sm font-extrabold transition hover:-translate-y-0.5 hover:border-black/30 hover:shadow-md ${chosen ? "border-ink bg-ink text-white" : "border-black/10 bg-white"}`}><span className="flex items-center gap-3"><span className={`grid h-8 w-8 shrink-0 place-items-center rounded-full border text-[10px] ${chosen ? "border-lime bg-lime text-ink" : "border-black/10 bg-canvas group-hover:bg-lime/40"}`}>{chosen ? <Check size={14} /> : String.fromCharCode(65 + index)}</span>{option.label}</span><ChevronRightIcon chosen={chosen} /></button>; })}</div><div className="mt-8 flex items-center justify-between">{step > 0 ? <button onClick={() => setStep(step - 1)} className="flex items-center gap-2 text-xs font-extrabold text-black/40 hover:text-ink"><ArrowLeft size={14} /> Back</button> : <button onClick={() => setStep(-1)} className="flex items-center gap-2 text-xs font-extrabold text-black/40"><ArrowLeft size={14} /> Welcome</button>}<p className="text-[10px] text-black/25">Choose one answer to continue</p></div></div></div>; })()}
+      {step >= 0 && step < quiz.questions.length && (() => {
+        const question = quiz.questions[step];
+        const prior = answers.find((a) => a.questionId === question.id);
+        const pathIndex = visitedStepIndexes.lastIndexOf(step);
+        const pathPosition = pathIndex >= 0 ? pathIndex + 1 : Math.min(step + 1, quiz.questions.length);
+        const goBack = () => {
+          if (pathIndex > 0) {
+            const previousPath = visitedStepIndexes.slice(0, pathIndex);
+            setVisitedStepIndexes(previousPath);
+            setStep(previousPath[previousPath.length - 1]);
+            return;
+          }
+          setStep(-1);
+          setVisitedStepIndexes([]);
+        };
+        return <div className="flex flex-1 flex-col justify-center px-5 py-10 sm:px-12 lg:px-24"><div className="mx-auto w-full max-w-3xl"><div className="flex items-center justify-between"><p className="eyebrow text-moss">Question {pathPosition} of up to {quiz.questions.length}</p><span className="text-[10px] font-bold text-black/25">{Math.round(progress)}% complete</span></div><h1 className="display mt-4 text-4xl leading-none sm:text-6xl">{question.title}</h1>{question.helper_text && <p className="mt-4 text-sm text-black/45">{question.helper_text}</p>}<div className="mt-8 grid gap-3 sm:grid-cols-2">{question.options.map((option, index) => { const chosen = prior?.optionId === option.id; return <button key={option.id} onClick={() => choose(index)} className={`group flex min-h-[72px] items-center justify-between rounded-2xl border p-4 text-left text-sm font-extrabold transition hover:-translate-y-0.5 hover:border-black/30 hover:shadow-md ${chosen ? "border-ink bg-ink text-white" : "border-black/10 bg-white"}`}><span className="flex items-center gap-3"><span className={`grid h-8 w-8 shrink-0 place-items-center rounded-full border text-[10px] ${chosen ? "border-lime bg-lime text-ink" : "border-black/10 bg-canvas group-hover:bg-lime/40"}`}>{chosen ? <Check size={14} /> : String.fromCharCode(65 + index)}</span>{option.label}</span><ChevronRightIcon chosen={chosen} /></button>; })}</div><div className="mt-8 flex items-center justify-between"><button onClick={goBack} className="flex items-center gap-2 text-xs font-extrabold text-black/40 hover:text-ink"><ArrowLeft size={14} /> {pathIndex > 0 ? "Back" : "Welcome"}</button><p className="text-[10px] text-black/25">Choose one answer to continue</p></div></div></div>;
+      })()}
 
       {step === quiz.questions.length && (
         <div className="flex-1 overflow-y-auto px-5 py-9 sm:px-9 lg:px-12">

@@ -90,7 +90,7 @@ export const demoQuiz: Quiz = {
       options: [
         { id: "o_trail", question_id: "q_use", label: "Trails & outdoors", match_type: "tag", match_value: "trail", weight: 5, position: 0 },
         { id: "o_road", question_id: "q_use", label: "Road running", match_type: "category", match_value: "Running shoes", weight: 3, position: 1 },
-        { id: "o_city", question_id: "q_use", label: "City & everyday", match_type: "tag", match_value: "everyday", weight: 5, position: 2 },
+        { id: "o_city", question_id: "q_use", label: "City & everyday", match_type: "tag", match_value: "everyday", weight: 5, next_question_id: "q_budget", position: 2 },
       ],
     },
     {

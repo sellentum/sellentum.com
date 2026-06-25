@@ -65,6 +65,7 @@ create table if not exists public.answer_options (
   match_type text not null default 'none' check (match_type in ('tag','category','feature','budget_max','none')),
   match_value text not null default '',
   weight integer not null default 3 check (weight between 1 and 10),
+  next_question_id text references public.questions(id) on delete set null,
   position integer not null default 0,
   created_at timestamptz not null default now()
 );

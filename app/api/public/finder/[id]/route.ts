@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { resolveFinderAnswerPath } from "@/lib/finder-flow";
 import { runFinderRecommendations } from "@/lib/finder-engine";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getSemanticProductCandidates } from "@/lib/semantic-candidates";
 import { createAdminClient } from "@/lib/supabase/admin";
-import type { AnswerOption, FinderAnswer, Product, Question, Quiz } from "@/lib/types";
+import type { AnswerOption, Product, Question, Quiz } from "@/lib/types";
 import { buildFinderBuyerProfile, getSelectedBudgetCeiling } from "@/lib/utils";
 
 type QuestionRow = Omit<Question, "options"> & { answer_options?: AnswerOption[]; options?: AnswerOption[] };
@@ -29,30 +30,6 @@ function normalizeQuiz(quiz: QuizRow): Quiz {
         answer_options: undefined,
       })),
   };
-}
-
-function selectedAnswersFromQuiz(quiz: Quiz, selections: Array<{ questionId: string; optionId: string }>): FinderAnswer[] | null {
-  const answers: FinderAnswer[] = [];
-  const seen = new Set<string>();
-
-  for (const selection of selections) {
-    if (seen.has(selection.questionId)) continue;
-    seen.add(selection.questionId);
-    const question = quiz.questions.find((item) => item.id === selection.questionId);
-    const option = question?.options.find((item) => item.id === selection.optionId);
-    if (!question || !option) return null;
-    answers.push({
-      questionId: question.id,
-      question: question.title,
-      optionId: option.id,
-      answer: option.label,
-      matchType: option.match_type,
-      matchValue: option.match_value,
-      weight: option.weight,
-    });
-  }
-
-  return answers.sort((a, b) => quiz.questions.findIndex((question) => question.id === a.questionId) - quiz.questions.findIndex((question) => question.id === b.questionId));
 }
 
 async function loadPublishedFinder(id: string) {
@@ -97,8 +74,10 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
     if (error) return NextResponse.json({ error: "Could not load finder." }, { status: 500 });
     if (!quiz) return NextResponse.json({ error: "Published finder not found." }, { status: 404 });
 
-    const answers = selectedAnswersFromQuiz(quiz, parsed.data.answers);
-    if (!answers?.length) return NextResponse.json({ error: "Selected answers do not belong to this finder." }, { status: 400 });
+    const answerPath = resolveFinderAnswerPath(quiz, parsed.data.answers);
+    if (!answerPath.valid) return NextResponse.json({ error: answerPath.error || "Selected answers do not belong to this finder." }, { status: 400 });
+    if (!answerPath.completed) return NextResponse.json({ error: "The selected answer path is incomplete." }, { status: 400 });
+    const answers = answerPath.answers;
 
     const { data: products, error: productsError } = await supabase
       .from("products")
@@ -143,7 +122,7 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
       ...result,
       answers,
       experience: { id: quiz.id, name: quiz.name, slug: quiz.slug },
-      retrieval: { source: semanticSource || "catalog_scan", buyer_profile: buyerProfile },
+      retrieval: { source: semanticSource || "catalog_scan", buyer_profile: buyerProfile, question_path: answerPath.visitedQuestionIds },
     });
   } catch (error) {
     console.error("Published finder recommendation failed", error);

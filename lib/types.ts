@@ -66,6 +66,7 @@ export type AnswerOption = {
   match_type: MatchType;
   match_value: string;
   weight: number;
+  next_question_id?: string | null;
   position: number;
 };
 

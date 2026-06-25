@@ -52,17 +52,29 @@ function assertPublishedAdvisorRuntime() {
 function assertPublishedFinderRuntime() {
   const route = readFileSync("app/api/public/finder/[id]/route.ts", "utf8");
   const page = readFileSync("app/finder/[id]/page.tsx", "utf8");
+  const builder = readFileSync("app/dashboard/quizzes/page.tsx", "utf8");
+  const readiness = readFileSync("lib/quiz-readiness.ts", "utf8");
+  const flow = readFileSync("lib/finder-flow.ts", "utf8");
+  const schema = readFileSync("supabase/schema.sql", "utf8");
   assert(route.includes("runFinderRecommendations"), "Published finder route should use the server-side finder engine");
-  assert(route.includes("selectedAnswersFromQuiz"), "Published finder route should reconstruct answers from stored option rules");
+  assert(route.includes("resolveFinderAnswerPath"), "Published finder route should reconstruct the valid branched answer path from stored option rules");
   assert(route.includes("products: []"), "Published finder GET should avoid exposing the full product catalog");
   assert(route.includes("recommendation_overrides: []"), "Published finder GET should strip merchant override details from the shopper payload");
   assert(route.includes("overrides: quiz.recommendation_overrides"), "Published finder POST should apply stored merchandising overrides server-side");
   assert(route.includes("getSemanticProductCandidates"), "Published finder POST should try pgvector buyer-profile retrieval when available");
   assert(route.includes("buildFinderBuyerProfile"), "Published finder POST should build a semantic buyer profile from selected answers");
   assert(route.includes("semanticScoresByProductId"), "Published finder recommendations should receive semantic scores as deterministic ranking signals");
+  assert(route.includes("question_path"), "Published finder recommendations should report the validated branched question path");
   assert(page.includes("/api/public/finder/"), "Finder page should call the published finder runtime outside demo mode");
+  assert(page.includes("getNextFinderQuestionIndex"), "Finder page should follow conditional answer routing in the customer experience");
+  assert(page.includes("visitedStepIndexes"), "Finder page should keep back navigation aligned to the shopper's actual branch path");
   assert(page.includes("compareFinderRecommendations"), "Finder page should generate deterministic comparison rows for recommended products");
   assert(page.includes("Compare your matches"), "Finder page should show a side-by-side recommendation comparison");
+  assert(builder.includes("Then show"), "Finder builder should expose answer-level branching controls");
+  assert(builder.includes("Branching tip"), "Finder builder should explain conditional routing");
+  assert(readiness.includes("Conditional routing"), "Quiz readiness should validate conditional finder routes");
+  assert(flow.includes("resolveFinderAnswerPath"), "Finder flow helper should expose deterministic answer-path resolution");
+  assert(schema.includes("next_question_id"), "Database schema should persist answer-level branch targets");
 }
 
 function assertPublishedConfiguratorRuntime() {
@@ -220,6 +232,7 @@ async function assertDeterministicLogic() {
   const demo = await import(pathToFileURL(`${compileDir}/lib/demo-data.js`));
   const utils = await import(pathToFileURL(`${compileDir}/lib/utils.js`));
   const analytics = await import(pathToFileURL(`${compileDir}/lib/analytics.js`));
+  const finderFlow = await import(pathToFileURL(`${compileDir}/lib/finder-flow.js`));
   const insights = await import(pathToFileURL(`${compileDir}/lib/insights.js`));
   const catalogIntelligence = await import(pathToFileURL(`${compileDir}/lib/catalog-intelligence.js`));
   const catalogOntology = await import(pathToFileURL(`${compileDir}/lib/catalog-ontology.js`));
@@ -241,6 +254,16 @@ async function assertDeterministicLogic() {
   assert(comparison.length === recommendations.length, "Expected comparison rows for each recommendation");
   assert(comparison[0]?.productId === recommendations[0]?.product.id, "Expected comparison rows to preserve recommendation order");
   assert(comparison.every((row) => row.bestFor && row.standout && row.tradeoff && row.proofPoints.length), "Expected comparison rows to expose shopper-facing decision support");
+  const cityOption = demo.demoQuiz.questions[0].options.find((option) => option.id === "o_city");
+  assert(cityOption?.next_question_id === "q_budget", "Expected seeded demo finder to include answer-level branching");
+  const nextBranchIndex = finderFlow.getNextFinderQuestionIndex(demo.demoQuiz, 0, cityOption, [0]);
+  assert(demo.demoQuiz.questions[nextBranchIndex]?.id === "q_budget", "Expected branch helper to jump from city usage to budget");
+  const branchedPath = finderFlow.resolveFinderAnswerPath(demo.demoQuiz, [
+    { questionId: "q_use", optionId: "o_city" },
+    { questionId: "q_feel", optionId: "o_soft" },
+    { questionId: "q_budget", optionId: "o_100" },
+  ]);
+  assert(branchedPath.completed && branchedPath.answers.length === 2 && branchedPath.visitedQuestionIds.join(",") === "q_use,q_budget", "Expected answer-path resolver to ignore skipped question answers");
   const audits = utils.auditProductMatches(demo.demoProducts, answers);
   assert(audits[0]?.product.id === "prod_trail" && audits[0].eligible, "Expected recommendation audit to rank Terra Trail Runner first and eligible");
   assert(audits.some((audit) => audit.product.id === "prod_speed" && !audit.eligible), "Expected audit to show over-budget products as blocked");

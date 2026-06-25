@@ -36,7 +36,14 @@ type DemoState = { products: Product[]; quizzes: Quiz[]; configurators: Configur
 const initialState: DemoState = { products: demoProducts, quizzes: [demoQuiz], configurators: [demoConfigurator], events: demoEvents, settings: demoSettings };
 
 function normalizeQuizState(quiz: Quiz): Quiz {
-  return { ...quiz, recommendation_overrides: quiz.recommendation_overrides || [] };
+  return {
+    ...quiz,
+    recommendation_overrides: quiz.recommendation_overrides || [],
+    questions: (quiz.questions || []).map((question) => ({
+      ...question,
+      options: (question.options || []).map((option) => ({ ...option, next_question_id: option.next_question_id || null })),
+    })),
+  };
 }
 
 function normalizeDemoState(state: DemoState): DemoState {
@@ -89,7 +96,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           recommendation_overrides: quiz.recommendation_overrides || [],
           questions: [...(quiz.questions || [])]
             .sort((a, b) => a.position - b.position)
-            .map((q) => ({ ...q, options: [...(q.options || (q as unknown as { answer_options: typeof q.options }).answer_options || [])].sort((a, b) => a.position - b.position) })),
+            .map((q) => ({ ...q, options: [...(q.options || (q as unknown as { answer_options: typeof q.options }).answer_options || [])].sort((a, b) => a.position - b.position).map((option) => ({ ...option, next_question_id: option.next_question_id || null })) })),
         })),
         configurators: ((configuratorsResult.data || []) as unknown as Configurator[]).map((configurator) => ({
           ...configurator,
@@ -167,13 +174,14 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       if (quizError) { setError(quizError.message); throw quizError; }
       await supabase.from("questions").delete().eq("quiz_id", quiz.id);
       for (const question of questions) {
-        const { options, ...questionRow } = question;
+        const questionRow = { id: question.id, quiz_id: question.quiz_id, title: question.title, helper_text: question.helper_text, position: question.position };
         const { error: questionError } = await supabase.from("questions").insert({ ...questionRow, user_id: userId });
         if (questionError) { setError(questionError.message); throw questionError; }
-        if (options.length) {
-          const { error: optionError } = await supabase.from("answer_options").insert(options.map((option) => ({ ...option, user_id: userId })));
-          if (optionError) { setError(optionError.message); throw optionError; }
-        }
+      }
+      const optionRows = questions.flatMap((question) => question.options.map((option) => ({ ...option, next_question_id: option.next_question_id || null, user_id: userId })));
+      if (optionRows.length) {
+        const { error: optionError } = await supabase.from("answer_options").insert(optionRows);
+        if (optionError) { setError(optionError.message); throw optionError; }
       }
     }
     setState((current) => ({ ...current, quizzes: current.quizzes.some((q) => q.id === next.id) ? current.quizzes.map((q) => q.id === next.id ? next : q) : [next, ...current.quizzes] }));
