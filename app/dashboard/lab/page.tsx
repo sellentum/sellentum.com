@@ -5,12 +5,12 @@ import { useEffect, useMemo, useState } from "react";
 import { Beaker, CheckCircle2, ExternalLink, FlaskConical, HelpCircle, Plus, ShieldCheck, SlidersHorizontal, Sparkles, XCircle } from "lucide-react";
 import { LoadingState } from "@/components/loading-state";
 import { useStore } from "@/lib/store";
+import { answerToFinderAnswer, buildFinderQuestionPath, defaultFinderSelections } from "@/lib/finder-flow";
 import type { FinderAnswer, Quiz } from "@/lib/types";
 import { auditProductMatches, buildFinderBuyerProfile, extractIntentTokens, formatCurrency } from "@/lib/utils";
 
 function defaultSelections(quiz?: Quiz) {
-  if (!quiz) return {};
-  return Object.fromEntries(quiz.questions.map((question) => [question.id, question.options[0]?.id]).filter((entry): entry is [string, string] => Boolean(entry[1])));
+  return quiz ? defaultFinderSelections(quiz) : {};
 }
 
 export default function LabPage() {
@@ -27,22 +27,10 @@ export default function LabPage() {
     setSelections(defaultSelections(selectedQuiz));
   }, [selectedQuiz]);
 
-  const answers = useMemo<FinderAnswer[]>(() => {
-    if (!selectedQuiz) return [];
-    return selectedQuiz.questions.flatMap((question) => {
-      const option = question.options.find((item) => item.id === selections[question.id]);
-      if (!option) return [];
-      return [{
-        questionId: question.id,
-        question: question.title,
-        optionId: option.id,
-        answer: option.label,
-        matchType: option.match_type,
-        matchValue: option.match_value,
-        weight: option.weight,
-      }];
-    });
-  }, [selectedQuiz, selections]);
+  const questionPath = useMemo(() => selectedQuiz ? buildFinderQuestionPath(selectedQuiz, selections, true) : [], [selectedQuiz, selections]);
+  const routedQuestionIds = useMemo(() => new Set(questionPath.map((step) => step.question.id)), [questionPath]);
+  const skippedQuestions = useMemo(() => selectedQuiz ? selectedQuiz.questions.filter((question) => !routedQuestionIds.has(question.id)) : [], [selectedQuiz, routedQuestionIds]);
+  const answers = useMemo<FinderAnswer[]>(() => questionPath.flatMap((step) => step.selectedOption ? [answerToFinderAnswer(step.question, step.selectedOption)] : []), [questionPath]);
 
   const overrides = useMemo(() => selectedQuiz?.recommendation_overrides || [], [selectedQuiz]);
   const buyerProfile = useMemo(() => buildFinderBuyerProfile(answers), [answers]);
@@ -87,7 +75,7 @@ export default function LabPage() {
             <span className="grid h-10 w-10 place-items-center rounded-2xl bg-ink text-lime"><Beaker size={17} /></span>
             <div>
               <p className="text-sm font-extrabold">Shopper scenario</p>
-              <p className="mt-0.5 text-[10px] text-black/35">{answers.length} of {selectedQuiz?.questions.length || 0} questions answered</p>
+              <p className="mt-0.5 text-[10px] text-black/35">{answers.length} active path answer{answers.length === 1 ? "" : "s"} · {skippedQuestions.length} skipped</p>
             </div>
           </div>
 
@@ -97,7 +85,7 @@ export default function LabPage() {
           </select>
 
           <div className="mt-6 space-y-5">
-            {selectedQuiz?.questions.map((question, index) => (
+            {questionPath.map(({ question, selectedOption }, index) => (
               <section key={question.id} className="rounded-2xl border border-black/[0.07] p-4">
                 <div className="flex items-start gap-3">
                   <span className="grid h-7 w-7 shrink-0 place-items-center rounded-xl bg-lime/45 text-[10px] font-extrabold text-moss">{index + 1}</span>
@@ -108,7 +96,8 @@ export default function LabPage() {
                 </div>
                 <div className="mt-3 grid gap-2">
                   {question.options.map((option) => {
-                    const selected = selections[question.id] === option.id;
+                    const selected = (selections[question.id] || selectedOption?.id) === option.id;
+                    const targetQuestion = selectedQuiz?.questions.find((item) => item.id === option.next_question_id);
                     return (
                       <button key={option.id} onClick={() => setSelections((current) => ({ ...current, [question.id]: option.id }))} className={`rounded-xl border px-3 py-2.5 text-left text-[10px] font-extrabold transition ${selected ? "border-ink bg-ink text-white" : "border-black/10 bg-canvas text-black/50 hover:border-moss/30 hover:bg-white"}`}>
                         <span className="flex items-center justify-between gap-2">
@@ -116,6 +105,7 @@ export default function LabPage() {
                           <span className={`rounded-full px-2 py-0.5 text-[8px] ${selected ? "bg-lime text-ink" : "bg-white text-black/30"}`}>{option.match_type}</span>
                         </span>
                         {option.match_value && <span className={`mt-1 block text-[8px] ${selected ? "text-white/45" : "text-black/30"}`}>Value: {option.match_value} · weight {option.weight}</span>}
+                        {targetQuestion && <span className={`mt-1 block text-[8px] ${selected ? "text-lime" : "text-moss"}`}>Branches to question {targetQuestion.position + 1}</span>}
                       </button>
                     );
                   })}
@@ -123,6 +113,13 @@ export default function LabPage() {
               </section>
             ))}
           </div>
+
+          {skippedQuestions.length > 0 && <div className="mt-5 rounded-2xl border border-dashed border-black/10 bg-canvas p-4">
+            <p className="text-[9px] font-extrabold uppercase tracking-wider text-black/35">Skipped by this branch</p>
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {skippedQuestions.map((question) => <span key={question.id} className="rounded-full bg-white px-2.5 py-1 text-[8px] font-extrabold text-black/35">{question.position + 1}. {question.title}</span>)}
+            </div>
+          </div>}
 
           <div className="mt-5 rounded-2xl bg-canvas p-4">
             <p className="text-[9px] font-extrabold uppercase tracking-wider text-black/35">Buyer profile</p>
@@ -183,7 +180,7 @@ export default function LabPage() {
                 <p className="text-sm font-extrabold">Score breakdown</p>
                 <p className="mt-0.5 text-[10px] text-black/35">Same scorer used by the customer-facing finder.</p>
               </div>
-              <span className="rounded-full bg-black/5 px-3 py-1 text-[9px] font-bold text-black/35">Top 3 become recommendations</span>
+                  <span className="rounded-full bg-black/5 px-3 py-1 text-[9px] font-bold text-black/35">Top 3 · branch-aware path</span>
             </div>
 
             <div className="divide-y divide-black/[0.06]">

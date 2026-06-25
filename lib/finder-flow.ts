@@ -14,6 +14,12 @@ export type FinderAnswerPathResult = {
   error?: string;
 };
 
+export type FinderQuestionPathStep = {
+  index: number;
+  question: Question;
+  selectedOption?: AnswerOption;
+};
+
 export function orderedFinderQuestions(quiz: Pick<Quiz, "questions">): Question[] {
   return [...(quiz.questions || [])].sort((a, b) => a.position - b.position);
 }
@@ -48,6 +54,36 @@ export function getNextFinderQuestionIndex(
   const nextIndex = currentIndex + 1;
   if (nextIndex < questions.length && !visited.has(nextIndex)) return nextIndex;
   return -1;
+}
+
+export function buildFinderQuestionPath(
+  quiz: Pick<Quiz, "questions">,
+  selectionsByQuestionId: Record<string, string> = {},
+  fillMissingWithFirstOption = false,
+): FinderQuestionPathStep[] {
+  const questions = orderedFinderQuestions(quiz);
+  const path: FinderQuestionPathStep[] = [];
+  const visitedIndexes: number[] = [];
+  let currentIndex = 0;
+
+  while (currentIndex >= 0 && currentIndex < questions.length) {
+    if (visitedIndexes.includes(currentIndex)) break;
+    const question = questions[currentIndex];
+    const selectedOption = question.options.find((option) => option.id === selectionsByQuestionId[question.id]) || (fillMissingWithFirstOption ? question.options[0] : undefined);
+    path.push({ index: currentIndex, question, selectedOption });
+    visitedIndexes.push(currentIndex);
+    if (!selectedOption) break;
+    currentIndex = getNextFinderQuestionIndex(quiz, currentIndex, selectedOption, visitedIndexes);
+  }
+
+  return path;
+}
+
+export function defaultFinderSelections(quiz: Pick<Quiz, "questions">) {
+  return Object.fromEntries(
+    buildFinderQuestionPath(quiz, {}, true)
+      .flatMap((step) => step.selectedOption ? [[step.question.id, step.selectedOption.id] as const] : []),
+  );
 }
 
 export function resolveFinderAnswerPath(quiz: Pick<Quiz, "questions">, selections: FinderAnswerSelection[]): FinderAnswerPathResult {

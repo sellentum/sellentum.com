@@ -53,6 +53,7 @@ function assertPublishedFinderRuntime() {
   const route = readFileSync("app/api/public/finder/[id]/route.ts", "utf8");
   const page = readFileSync("app/finder/[id]/page.tsx", "utf8");
   const builder = readFileSync("app/dashboard/quizzes/page.tsx", "utf8");
+  const lab = readFileSync("app/dashboard/lab/page.tsx", "utf8");
   const readiness = readFileSync("lib/quiz-readiness.ts", "utf8");
   const flow = readFileSync("lib/finder-flow.ts", "utf8");
   const schema = readFileSync("supabase/schema.sql", "utf8");
@@ -72,8 +73,11 @@ function assertPublishedFinderRuntime() {
   assert(page.includes("Compare your matches"), "Finder page should show a side-by-side recommendation comparison");
   assert(builder.includes("Then show"), "Finder builder should expose answer-level branching controls");
   assert(builder.includes("Branching tip"), "Finder builder should explain conditional routing");
+  assert(lab.includes("buildFinderQuestionPath"), "Recommendation lab should simulate the same conditional finder path as shoppers");
+  assert(lab.includes("Skipped by this branch"), "Recommendation lab should expose questions skipped by the current branch");
   assert(readiness.includes("Conditional routing"), "Quiz readiness should validate conditional finder routes");
   assert(flow.includes("resolveFinderAnswerPath"), "Finder flow helper should expose deterministic answer-path resolution");
+  assert(flow.includes("defaultFinderSelections"), "Finder flow helper should expose branch-aware default selections for merchant testing");
   assert(schema.includes("next_question_id"), "Database schema should persist answer-level branch targets");
 }
 
@@ -258,6 +262,10 @@ async function assertDeterministicLogic() {
   assert(cityOption?.next_question_id === "q_budget", "Expected seeded demo finder to include answer-level branching");
   const nextBranchIndex = finderFlow.getNextFinderQuestionIndex(demo.demoQuiz, 0, cityOption, [0]);
   assert(demo.demoQuiz.questions[nextBranchIndex]?.id === "q_budget", "Expected branch helper to jump from city usage to budget");
+  const defaultBranchSelections = finderFlow.defaultFinderSelections(demo.demoQuiz);
+  assert(defaultBranchSelections.q_use === "o_trail" && defaultBranchSelections.q_feel === "o_soft" && defaultBranchSelections.q_budget === "o_100", "Expected default finder selections to follow the first-option branch path");
+  const cityBranchPath = finderFlow.buildFinderQuestionPath(demo.demoQuiz, { q_use: "o_city", q_budget: "o_100" }, true);
+  assert(cityBranchPath.map((step) => step.question.id).join(",") === "q_use,q_budget", "Expected branch-aware lab path to skip irrelevant questions");
   const branchedPath = finderFlow.resolveFinderAnswerPath(demo.demoQuiz, [
     { questionId: "q_use", optionId: "o_city" },
     { questionId: "q_feel", optionId: "o_soft" },

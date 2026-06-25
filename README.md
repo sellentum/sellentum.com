@@ -16,7 +16,7 @@ Findly is a compact guided-selling SaaS product for ecommerce brands. A merchant
 - Finder merchandising controls to pin, boost or exclude specific products without handing selection to AI
 - One-click product finder generation from the current catalog
 - Deterministic top-three recommendation engine with budget eligibility filtering, buyer-profile intent scoring and merchant overrides
-- Recommendation lab for testing shopper answer paths and inspecting score breakdowns before publishing
+- Branch-aware recommendation lab for testing shopper answer paths and inspecting score breakdowns before publishing
 - Semantic Search Lab and authenticated search API for testing natural-language product discovery over the active catalog
 - OpenAI match explanations with a safe fact-based fallback when no API key is present
 - Conversational product advisor combining semantic similarity, deterministic field signals, hard budget constraints and clarification turns for vague requests
@@ -131,7 +131,7 @@ Import the repository into Vercel, add the variables from `.env.example`, and de
 - `lib/utils.ts` — deterministic matching, recommendation comparison, configurator compatibility and shared formatting
 - `app/dashboard/launch` — self-serve launch workflow for enrichment, quiz generation, publishing and widget copy
 - `app/dashboard/ontology` — merchant-side catalog ontology map for product attribute clusters and suggested quiz questions
-- `app/dashboard/lab` — merchant-side recommendation testing and explainability lab
+- `app/dashboard/lab` — branch-aware merchant-side recommendation testing and explainability lab
 - `app/dashboard/search` and `app/api/search` — semantic catalog search lab and authenticated product search service
 - `app/dashboard/preflight` and `app/api/preflight` — production readiness checks before embedding, including finder/configurator readiness diagnostics
 - `supabase/schema.sql` — PostgreSQL schema and RLS policies
