@@ -136,8 +136,11 @@ function assertSemanticSearchWorkflow() {
 
 function assertCatalogImportWorkflow() {
   const page = readFileSync("app/dashboard/products/page.tsx", "utf8");
+  const ontologyPage = readFileSync("app/dashboard/ontology/page.tsx", "utf8");
+  const shell = readFileSync("components/dashboard-shell.tsx", "utf8");
   const importer = readFileSync("lib/catalog-import.ts", "utf8");
   const intelligence = readFileSync("lib/catalog-intelligence.ts", "utf8");
+  const ontology = readFileSync("lib/catalog-ontology.ts", "utf8");
   const preflight = readFileSync("app/api/preflight/route.ts", "utf8");
   const preflightPage = readFileSync("app/dashboard/preflight/page.tsx", "utf8");
   assert(page.includes("normalizeCatalogImportRows"), "Product CSV import should use the shared catalog import normalizer");
@@ -147,6 +150,10 @@ function assertCatalogImportWorkflow() {
   assert(page.includes("analyzeCatalogIntelligence"), "Products dashboard should show shared catalog intelligence diagnostics");
   assert(page.includes("Catalog intelligence score"), "Products dashboard should surface the catalog intelligence score");
   assert(intelligence.includes("analyzeCatalogIntelligence"), "Catalog intelligence helper should expose a deterministic analyzer");
+  assert(ontology.includes("buildCatalogOntology"), "Catalog ontology helper should expose a deterministic attribute mapper");
+  assert(ontologyPage.includes("buildCatalogOntology"), "Ontology dashboard should use the shared catalog ontology mapper");
+  assert(ontologyPage.includes("Suggested finder questions"), "Ontology dashboard should surface AI-ready finder question ideas");
+  assert(shell.includes("/dashboard/ontology"), "Dashboard navigation should expose the ontology map");
   assert(preflight.includes("analyzeCatalogIntelligence"), "Preflight should reuse shared catalog intelligence diagnostics");
   assert(preflightPage.includes("catalog_intelligence_score"), "Preflight page should show catalog intelligence summary fields");
 }
@@ -195,6 +202,7 @@ async function assertDeterministicLogic() {
   const utils = await import(pathToFileURL(`${compileDir}/lib/utils.js`));
   const analytics = await import(pathToFileURL(`${compileDir}/lib/analytics.js`));
   const catalogIntelligence = await import(pathToFileURL(`${compileDir}/lib/catalog-intelligence.js`));
+  const catalogOntology = await import(pathToFileURL(`${compileDir}/lib/catalog-ontology.js`));
   const catalogImport = await import(pathToFileURL(`${compileDir}/lib/catalog-import.js`));
   const quizReadiness = await import(pathToFileURL(`${compileDir}/lib/quiz-readiness.js`));
   const ruleCoverage = await import(pathToFileURL(`${compileDir}/lib/rule-coverage.js`));
@@ -280,6 +288,10 @@ async function assertDeterministicLogic() {
   assert(catalogReport.warnings.some((item) => item.id === "enrichment"), "Expected non-enriched demo catalog to warn about enrichment coverage");
   const thinCatalogReport = catalogIntelligence.analyzeCatalogIntelligence([{ ...demo.demoProducts[0], id: "thin_product", description: "", features: [], tags: [], image_url: "", product_url: "", search_text: "", buyer_needs: [] }]);
   assert(!thinCatalogReport.score || thinCatalogReport.blockers.some((item) => item.id === "catalog-size" || item.id === "matching-signals"), "Expected thin catalog to expose launch blockers");
+  const ontologyReport = catalogOntology.buildCatalogOntology(demo.demoProducts);
+  assert(ontologyReport.categoryClusters.length >= 2, "Expected ontology map to cluster demo products by category");
+  assert(ontologyReport.topSignals.some((signal) => signal.key === "trail"), "Expected ontology map to expose repeated trail signal");
+  assert(ontologyReport.suggestedQuestions.some((question) => question.options.length >= 2), "Expected ontology map to generate suggested finder questions");
 
   const trailSearch = searchEngine.runSemanticProductSearch({ query: "waterproof hiking shoes under £140", products: demo.demoProducts, limit: 3 });
   assert(trailSearch.intent.maxBudget === 140 && trailSearch.intent.terms.includes("trail"), "Expected semantic search to parse budget and expanded hiking/trail intent");

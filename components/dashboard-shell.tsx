@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { BarChart3, BookOpenCheck, Boxes, ChevronDown, ClipboardCheck, ExternalLink, FlaskConical, HelpCircle, LayoutDashboard, LogOut, Menu, PackagePlus, Rocket, Search, Settings, Sparkles, X } from "lucide-react";
+import { BarChart3, BookOpenCheck, Boxes, ChevronDown, ClipboardCheck, ExternalLink, FlaskConical, HelpCircle, LayoutDashboard, LogOut, Menu, Network, PackagePlus, Rocket, Search, Settings, Sparkles, X } from "lucide-react";
 import { useState } from "react";
 import { Logo } from "@/components/logo";
 import { createClient } from "@/lib/supabase/client";
@@ -13,6 +13,7 @@ const nav = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard, exact: true },
   { href: "/dashboard/launch", label: "Launch Studio", icon: Rocket },
   { href: "/dashboard/products", label: "Products", icon: Boxes },
+  { href: "/dashboard/ontology", label: "Ontology map", icon: Network },
   { href: "/dashboard/quizzes", label: "Product finders", icon: BookOpenCheck },
   { href: "/dashboard/configurators", label: "Configurators", icon: PackagePlus },
   { href: "/dashboard/lab", label: "Recommendation lab", icon: FlaskConical },

@@ -9,6 +9,7 @@ Findly is a compact guided-selling SaaS product for ecommerce brands. A merchant
 - Product catalog CRUD plus CSV upload with flexible header aliases, row-level validation and import preview (`name`, `price`, and `category` are required)
 - AI catalog enrichment with normalized attributes, buyer needs, semantic search text and optional OpenAI embeddings
 - Catalog intelligence scoring for enrichment coverage, semantic-search readiness, matching signals, product media and commerce links
+- Ontology map for inspecting category clusters, buyer needs, tags, features, thin signals and AI-ready quiz question ideas
 - Launch Studio workflow that enriches a catalog, generates a finder, publishes it, and prepares the embed snippet from one screen
 - Visual finder builder with questions, answer options, weights, tag/category/feature/budget rules, per-answer catalog coverage and publish-readiness diagnostics
 - Finder merchandising controls to pin, boost or exclude specific products without handing selection to AI
@@ -112,6 +113,7 @@ Import the repository into Vercel, add the variables from `.env.example`, and de
 - `lib/store.tsx` — demo/Supabase data adapter
 - `lib/analytics.ts` — session-aware analytics snapshots, period trends and funnel diagnostics
 - `lib/catalog-intelligence.ts` — catalog health scoring for enrichment coverage, matching signals, semantic text, media and commerce links
+- `lib/catalog-ontology.ts` — category, buyer-need, tag and feature clustering for ontology mapping and question ideas
 - `lib/catalog-import.ts` — flexible CSV header mapping, row validation and import previews
 - `lib/search-engine.ts` — deterministic semantic search ranking, intent parsing and budget eligibility checks
 - `lib/rule-coverage.ts` — deterministic answer-rule coverage helper used by the finder builder and readiness checks
@@ -119,6 +121,7 @@ Import the repository into Vercel, add the variables from `.env.example`, and de
 - `lib/configurator-readiness.ts` — publish-readiness diagnostics for configurator structure, linked products, pricing and compatibility rules
 - `lib/utils.ts` — deterministic matching, recommendation comparison, configurator compatibility and shared formatting
 - `app/dashboard/launch` — self-serve launch workflow for enrichment, quiz generation, publishing and widget copy
+- `app/dashboard/ontology` — merchant-side catalog ontology map for product attribute clusters and suggested quiz questions
 - `app/dashboard/lab` — merchant-side recommendation testing and explainability lab
 - `app/dashboard/search` and `app/api/search` — semantic catalog search lab and authenticated product search service
 - `app/dashboard/preflight` and `app/api/preflight` — production readiness checks before embedding, including finder/configurator readiness diagnostics
