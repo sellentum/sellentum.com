@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Ban, Check, ChevronDown, ChevronRight, ExternalLink, GripVertical, HelpCircle, LayoutTemplate, LoaderCircle, MoreHorizontal, Pin, Plus, Save, SlidersHorizontal, Sparkles, Trash2, TrendingUp, X, type LucideIcon } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Ban, Check, ChevronDown, ChevronRight, ExternalLink, GripVertical, HelpCircle, LayoutTemplate, LoaderCircle, MoreHorizontal, Pin, Plus, Save, SlidersHorizontal, Sparkles, Trash2, TrendingUp, X, type LucideIcon } from "lucide-react";
 import { LoadingState } from "@/components/loading-state";
 import { useStore } from "@/lib/store";
+import { analyzeQuizReadiness } from "@/lib/quiz-readiness";
 import type { AnswerOption, GeneratedQuizSuggestion, MatchType, Question, Quiz, RecommendationOverride } from "@/lib/types";
 import { slugify, uid } from "@/lib/utils";
 
@@ -22,10 +23,12 @@ function QuizEditor({ selected, onBack }: { selected: Quiz; onBack: () => void }
   const [overrideAction, setOverrideAction] = useState<RecommendationOverride["action"]>("boost");
   const [overrideWeight, setOverrideWeight] = useState(3);
   const [overrideNote, setOverrideNote] = useState("");
+  const [publishError, setPublishError] = useState("");
   useEffect(() => { setDraft({ ...selected, recommendation_overrides: selected.recommendation_overrides || [] }); setActiveQuestion(selected.questions[0]?.id || null); }, [selected]);
   useEffect(() => { if (!overrideProductId && products[0]) setOverrideProductId(products[0].id); }, [overrideProductId, products]);
   const active = draft.questions.find((q) => q.id === activeQuestion);
   const overrides = draft.recommendation_overrides || [];
+  const readiness = useMemo(() => analyzeQuizReadiness(draft, products), [draft, products]);
   const updateQuestion = (questionId: string, update: Partial<Question>) => setDraft((current) => ({ ...current, questions: current.questions.map((q) => q.id === questionId ? { ...q, ...update } : q) }));
   const updateOption = (questionId: string, optionId: string, update: Partial<AnswerOption>) => setDraft((current) => ({ ...current, questions: current.questions.map((q) => q.id === questionId ? { ...q, options: q.options.map((o) => o.id === optionId ? { ...o, ...update } : o) } : q) }));
   function addQuestion() { const id = uid("q"); const question: Question = { id, quiz_id: draft.id, title: "New question", helper_text: "", position: draft.questions.length, options: [] }; setDraft((current) => ({ ...current, questions: [...current.questions, question] })); setActiveQuestion(id); }
@@ -39,15 +42,32 @@ function QuizEditor({ selected, onBack }: { selected: Quiz; onBack: () => void }
     setOverrideNote("");
   }
   function removeOverride(id: string) { setDraft((current) => ({ ...current, recommendation_overrides: (current.recommendation_overrides || []).filter((item) => item.id !== id) })); }
-  async function persist(publish?: boolean) { setSaving(true); setSaved(false); try { const next = { ...draft, recommendation_overrides: draft.recommendation_overrides || [], published: publish ?? draft.published, slug: slugify(draft.slug || draft.name) }; await saveQuiz(next); setDraft(next); setSaved(true); setTimeout(() => setSaved(false), 1800); } finally { setSaving(false); } }
+  async function persist(publish?: boolean) {
+    setPublishError("");
+    if (publish === true && !readiness.canPublish) {
+      setPublishError(`Fix ${readiness.blockers.length} launch blocker${readiness.blockers.length === 1 ? "" : "s"} before publishing.`);
+      return;
+    }
+    setSaving(true); setSaved(false);
+    try {
+      const next = { ...draft, recommendation_overrides: draft.recommendation_overrides || [], published: publish ?? draft.published, slug: slugify(draft.slug || draft.name) };
+      await saveQuiz(next);
+      setDraft(next);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 1800);
+    } finally {
+      setSaving(false);
+    }
+  }
   const suggestions = useMemo(() => ({ tag: [...new Set(products.flatMap((p) => p.tags))], category: [...new Set(products.map((p) => p.category))], feature: [...new Set(products.flatMap((p) => p.features))] }), [products]);
 
   return <div className="-m-4 flex min-h-[calc(100vh-68px)] flex-col sm:-m-7 lg:-m-9">
     <div className="flex flex-wrap items-center gap-3 border-b border-black/[0.07] bg-white px-4 py-3 sm:px-6">
       <button onClick={onBack} className="grid h-9 w-9 place-items-center rounded-xl border border-black/10"><ArrowLeft size={16} /></button>
       <div className="min-w-0 flex-1"><input aria-label="Finder name" className="w-full max-w-lg truncate bg-transparent text-sm font-extrabold outline-none" value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} /><p className="mt-0.5 text-[10px] text-black/35">{draft.questions.length} questions · {draft.published ? "Published" : "Draft"}</p></div>
-      <div className="ml-auto flex items-center gap-2">{draft.published && <Link target="_blank" href={`/finder/${draft.id}`} className="btn-secondary !px-3 !py-2 text-xs"><ExternalLink size={13} /> <span className="hidden sm:inline">Preview</span></Link>}<button onClick={() => persist()} disabled={saving} className="btn-secondary !px-3 !py-2 text-xs">{saving ? <LoaderCircle className="animate-spin" size={14} /> : saved ? <Check size={14} /> : <Save size={14} />}<span className="hidden sm:inline">{saved ? "Saved" : "Save"}</span></button><button onClick={() => persist(!draft.published)} disabled={saving || draft.questions.length === 0} className="btn-primary !px-4 !py-2 text-xs">{draft.published ? "Unpublish" : "Publish finder"}</button></div>
+      <div className="ml-auto flex items-center gap-2">{draft.published && <Link target="_blank" href={`/finder/${draft.id}`} className="btn-secondary !px-3 !py-2 text-xs"><ExternalLink size={13} /> <span className="hidden sm:inline">Preview</span></Link>}<button onClick={() => persist()} disabled={saving} className="btn-secondary !px-3 !py-2 text-xs">{saving ? <LoaderCircle className="animate-spin" size={14} /> : saved ? <Check size={14} /> : <Save size={14} />}<span className="hidden sm:inline">{saved ? "Saved" : "Save"}</span></button><button onClick={() => persist(!draft.published)} disabled={saving || (!draft.published && !readiness.canPublish)} title={!draft.published && !readiness.canPublish ? readiness.blockers[0]?.detail : undefined} className="btn-primary !px-4 !py-2 text-xs disabled:opacity-50">{draft.published ? "Unpublish" : "Publish finder"}</button></div>
     </div>
+    {publishError && <div className="border-b border-red-100 bg-red-50 px-6 py-2 text-xs font-bold text-red-700">{publishError}</div>}
     <div className="grid flex-1 lg:grid-cols-[260px_1fr_315px]">
       <aside className="border-b border-black/[0.07] bg-[#eef0eb] p-4 lg:border-b-0 lg:border-r">
         <p className="px-2 text-[9px] font-extrabold uppercase tracking-wider text-black/30">Conversation flow</p>
@@ -70,6 +90,24 @@ function QuizEditor({ selected, onBack }: { selected: Quiz; onBack: () => void }
       <aside className="hidden border-l border-black/[0.07] bg-white p-5 lg:block">
         <div className="flex items-center justify-between"><p className="text-xs font-extrabold">Live preview</p><span className="rounded-full bg-black/5 px-2 py-1 text-[9px] font-bold text-black/35">Desktop</span></div>
         <div className="mt-5 overflow-hidden rounded-[22px] border border-black/10 bg-[#e8eadf] p-3 shadow-sm"><div className="rounded-[17px] bg-white p-4"><div className="flex items-center gap-2 text-[10px] font-extrabold"><span className="grid h-6 w-6 place-items-center rounded-lg bg-ink text-lime"><Sparkles size={11} /></span> Your brand</div><div className="mt-5 h-1 overflow-hidden rounded-full bg-black/5"><div className="h-full w-1/3 bg-lime" /></div><p className="mt-6 text-[8px] font-extrabold uppercase tracking-wider text-moss">Question {(active?.position || 0) + 1}</p><h3 className="display mt-2 text-2xl leading-none">{active?.title || draft.welcome_title}</h3><p className="mt-2 text-[9px] leading-4 text-black/35">{active?.helper_text || draft.welcome_message}</p><div className="mt-5 space-y-2">{active ? active.options.slice(0, 4).map((option, index) => <div key={option.id} className={`flex items-center gap-2 rounded-xl border p-2.5 text-[9px] font-bold ${index === 0 ? "border-ink bg-ink text-white" : "border-black/10"}`}><span className={`grid h-4 w-4 place-items-center rounded-full border ${index === 0 ? "border-lime bg-lime text-ink" : "border-black/15"}`}>{index === 0 && <Check size={8} />}</span>{option.label}</div>) : <button className="mt-2 w-full rounded-full bg-ink py-2.5 text-[9px] font-extrabold text-white">Get started →</button>}</div></div></div>
+        <div className="mt-5 rounded-xl border border-black/[0.07] p-3">
+          <div className="flex items-center justify-between gap-3">
+            <p className="flex items-center gap-2 text-[10px] font-extrabold"><AlertTriangle size={13} className={readiness.canPublish ? "text-moss" : "text-amber-600"} /> Publish readiness</p>
+            <span className={`rounded-full px-2 py-1 text-[8px] font-extrabold ${readiness.canPublish ? "bg-lime/35 text-moss" : "bg-amber-50 text-amber-700"}`}>{readiness.score}% ready</span>
+          </div>
+          <p className="mt-1.5 text-[9px] leading-4 text-black/40">{readiness.canPublish ? readiness.warnings.length ? "This finder can publish, but review warnings before embedding." : "This finder is structurally ready to publish." : "Fix blockers before shoppers can receive reliable recommendations."}</p>
+          <div className="mt-3 space-y-1.5">
+            {readiness.checks.map((item) => <div key={item.id} className={`rounded-lg px-2.5 py-2 ${item.severity === "blocker" ? "bg-red-50" : item.severity === "warning" ? "bg-amber-50" : "bg-canvas"}`}>
+              <div className="flex items-start gap-2">
+                <span className={`mt-1 h-1.5 w-1.5 shrink-0 rounded-full ${item.severity === "blocker" ? "bg-red-500" : item.severity === "warning" ? "bg-amber-500" : "bg-moss"}`} />
+                <span>
+                  <span className="block text-[9px] font-extrabold">{item.label}</span>
+                  <span className="mt-0.5 block text-[8px] font-bold leading-3 text-black/35">{item.detail}</span>
+                </span>
+              </div>
+            </div>)}
+          </div>
+        </div>
         <div className="mt-5 rounded-xl border border-black/[0.07] p-3"><p className="flex items-center gap-2 text-[10px] font-extrabold"><HelpCircle size={13} className="text-moss" /> Matching tip</p><p className="mt-1.5 text-[9px] leading-4 text-black/40">Use high weights for answers that should strongly shape the result. Budget always acts as an eligibility signal.</p></div>
         <div className="mt-5 rounded-xl border border-black/[0.07] p-3">
           <p className="flex items-center gap-2 text-[10px] font-extrabold"><SlidersHorizontal size={13} className="text-moss" /> Merchandising</p>

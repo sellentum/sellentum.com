@@ -114,6 +114,15 @@ function assertCatalogImportWorkflow() {
   assert(importer.includes("Possible duplicate name/category"), "Catalog import normalizer should warn about duplicate rows");
 }
 
+function assertQuizReadinessWorkflow() {
+  const page = readFileSync("app/dashboard/quizzes/page.tsx", "utf8");
+  const readiness = readFileSync("lib/quiz-readiness.ts", "utf8");
+  assert(page.includes("analyzeQuizReadiness"), "Quiz builder should run publish-readiness diagnostics");
+  assert(page.includes("Publish readiness"), "Quiz builder should surface publish-readiness feedback");
+  assert(page.includes("!readiness.canPublish"), "Quiz builder should block publishing when readiness has blockers");
+  assert(readiness.includes("catalog-mapping"), "Quiz readiness helper should validate answer rules against catalog signals");
+}
+
 async function assertDeterministicLogic() {
   if (existsSync(compileDir)) rmSync(compileDir, { recursive: true, force: true });
   execFileSync("./node_modules/.bin/tsc", ["-p", "tsconfig.json", "--outDir", compileDir, "--noEmit", "false", "--declaration", "false", "--emitDeclarationOnly", "false"], { stdio: "ignore" });
@@ -122,6 +131,7 @@ async function assertDeterministicLogic() {
   const utils = await import(pathToFileURL(`${compileDir}/lib/utils.js`));
   const analytics = await import(pathToFileURL(`${compileDir}/lib/analytics.js`));
   const catalogImport = await import(pathToFileURL(`${compileDir}/lib/catalog-import.js`));
+  const quizReadiness = await import(pathToFileURL(`${compileDir}/lib/quiz-readiness.js`));
 
   const answers = [
     { questionId: "q_use", question: "Where?", optionId: "o_trail", answer: "Trails & outdoors", matchType: "tag", matchValue: "trail", weight: 5 },
@@ -196,6 +206,12 @@ async function assertDeterministicLogic() {
   assert(importPreview.products[0].price === 1299.5 && importPreview.products[0].product_url === "https://store.example/trail", "Expected CSV import normalizer to clean aliased price and URL fields");
   assert(importPreview.rows.some((row) => row.warnings.some((warning) => warning.includes("duplicate"))), "Expected CSV import normalizer to warn about duplicate product rows");
 
+  const readyQuiz = quizReadiness.analyzeQuizReadiness(demo.demoQuiz, demo.demoProducts);
+  assert(readyQuiz.canPublish && readyQuiz.score >= 80, "Expected seeded demo finder to pass publish-readiness checks");
+  const brokenQuiz = { ...demo.demoQuiz, questions: [{ ...demo.demoQuiz.questions[0], options: [{ ...demo.demoQuiz.questions[0].options[0], match_value: "" }] }] };
+  const brokenReadiness = quizReadiness.analyzeQuizReadiness(brokenQuiz, demo.demoProducts);
+  assert(!brokenReadiness.canPublish && brokenReadiness.blockers.some((item) => item.id === "answer-options" || item.id === "rule-values"), "Expected incomplete finder rules to block publishing");
+
 }
 
 async function main() {
@@ -215,6 +231,7 @@ async function main() {
   assertSessionAnalytics();
   assertLaunchStudioWorkflow();
   assertCatalogImportWorkflow();
+  assertQuizReadinessWorkflow();
   await assertDeterministicLogic();
   console.log("Findly smoke test passed");
 }
