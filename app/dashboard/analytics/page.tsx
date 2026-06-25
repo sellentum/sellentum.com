@@ -6,6 +6,7 @@ import { LoadingState } from "@/components/loading-state";
 import { useStore } from "@/lib/store";
 import type { ExperienceType } from "@/lib/types";
 import { buildAnalyticsSnapshot, buildAnalyticsTrends, buildFunnelDiagnosis, countAnalyticsEvents, getAnalyticsPeriods, stageRate } from "@/lib/analytics";
+import { buildZeroPartyInsights } from "@/lib/insights";
 import { filterEventsByExperience, formatCurrency, getEventExperienceType } from "@/lib/utils";
 
 type ExperienceFilter = ExperienceType | "all";
@@ -25,35 +26,6 @@ const experienceOptions: Array<{ value: ExperienceFilter; icon: typeof Sparkles 
   { value: "search", icon: Search },
   { value: "configurator", icon: PackagePlus },
 ];
-
-function textValue(value: unknown) {
-  return typeof value === "string" && value.trim() ? value.trim() : "";
-}
-
-function stringArray(value: unknown) {
-  return Array.isArray(value) ? value.map(textValue).filter(Boolean) : [];
-}
-
-function answerItems(metadata?: Record<string, unknown>) {
-  const answers = metadata?.answers;
-  if (!Array.isArray(answers)) return [];
-  return answers.flatMap((item) => {
-    if (!item || typeof item !== "object") return [];
-    const entry = item as Record<string, unknown>;
-    const answer = textValue(entry.answer);
-    if (!answer) return [];
-    return [{ answer, question: textValue(entry.question) || "Question" }];
-  });
-}
-
-function topCounts(items: Array<{ label: string; detail?: string }>, limit = 5) {
-  const counts = new Map<string, { label: string; detail?: string; count: number }>();
-  for (const item of items) {
-    const existing = counts.get(item.label);
-    counts.set(item.label, { label: item.label, detail: item.detail || existing?.detail, count: (existing?.count || 0) + 1 });
-  }
-  return [...counts.values()].sort((a, b) => b.count - a.count || a.label.localeCompare(b.label)).slice(0, limit);
-}
 
 export default function AnalyticsPage() {
   const { ready, events, products, quizzes, configurators } = useStore();
@@ -93,53 +65,7 @@ export default function AnalyticsPage() {
     return { product, recommended: productRecommended, clicks: productClicks };
   }).sort((a, b) => b.recommended - a.recommended || b.clicks - a.clicks || a.product.name.localeCompare(b.product.name)), [products, filteredEvents]);
 
-  const intentInsights = useMemo(() => {
-    const answerSignals: Array<{ label: string; detail?: string }> = [];
-    const querySignals: Array<{ label: string; detail?: string }> = [];
-    const matchSignals: Array<{ label: string; detail?: string }> = [];
-
-    for (const event of filteredEvents) {
-      const metadata = event.metadata || {};
-      answerItems(metadata).forEach((answer) => answerSignals.push({ label: answer.answer, detail: answer.question }));
-      stringArray(metadata.selected_option_names).forEach((label) => answerSignals.push({ label, detail: "Configurator option" }));
-
-      const query = textValue(metadata.query);
-      if (query) querySignals.push({ label: query, detail: getEventExperienceType(event) === "assistant" ? "AI advisor query" : "Shopper query" });
-
-      [...stringArray(metadata.matched_reasons), ...stringArray(metadata.matched_signals), ...stringArray(metadata.selected_tags), ...stringArray(metadata.terms)]
-        .forEach((signal) => matchSignals.push({ label: signal, detail: "Matched signal" }));
-    }
-
-    const recent = filteredEvents
-      .filter((event) => ["quiz_complete", "product_recommended", "buy_click"].includes(event.event_type))
-      .slice()
-      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-      .slice(0, 6)
-      .map((event) => {
-        const metadata = event.metadata || {};
-        const query = textValue(metadata.query);
-        const product = event.product_id ? products.find((item) => item.id === event.product_id) : undefined;
-        const productName = textValue(metadata.product_name) || product?.name || "";
-        const answers = answerItems(metadata).map((item) => item.answer);
-        const selectedOptions = stringArray(metadata.selected_option_names);
-        const summary = query || answers.slice(0, 2).join(", ") || selectedOptions.slice(0, 2).join(", ") || productName || "Shopper intent captured";
-        return {
-          id: event.id,
-          type: getEventExperienceType(event),
-          eventType: event.event_type,
-          productName,
-          summary,
-          date: new Date(event.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short" }),
-        };
-      });
-
-    return {
-      answers: topCounts(answerSignals),
-      queries: topCounts(querySignals),
-      signals: topCounts(matchSignals),
-      recent,
-    };
-  }, [filteredEvents, products]);
+  const zeroPartyInsights = useMemo(() => buildZeroPartyInsights(filteredEvents, products), [filteredEvents, products]);
 
   const byDay = useMemo(() => Array.from({ length: rangeDays }, (_, reverseIndex) => {
     const offset = rangeDays - 1 - reverseIndex;
@@ -287,17 +213,17 @@ export default function AnalyticsPage() {
         </div>
       </section>
 
-      <section className="mt-5 grid gap-5 xl:grid-cols-[1fr_.85fr]">
+      <section className="mt-5 grid gap-5 xl:grid-cols-[1fr_.9fr]">
         <div className="rounded-2xl border border-black/[0.07] bg-white p-5 sm:p-7">
           <div className="flex items-center justify-between">
-            <div><h2 className="text-sm font-extrabold">Zero-party intent</h2><p className="mt-1 text-[10px] text-black/35">What shoppers explicitly told your guided experiences</p></div>
-            <span className="rounded-full bg-lime/35 px-3 py-1.5 text-[9px] font-extrabold text-moss">{filteredEvents.length} scoped events</span>
+            <div><h2 className="text-sm font-extrabold">Zero-party intent hub</h2><p className="mt-1 text-[10px] text-black/35">Answers, queries and catalog signals shoppers explicitly gave you</p></div>
+            <span className="rounded-full bg-lime/35 px-3 py-1.5 text-[9px] font-extrabold text-moss">{zeroPartyInsights.summary.explicitSignals} signals</span>
           </div>
           <div className="mt-6 grid gap-3 lg:grid-cols-3">
             {[
-              { label: "Top answers", icon: ListChecks, items: intentInsights.answers, empty: "Completed finder answers and configurator choices will appear here." },
-              { label: "Advisor queries", icon: Search, items: intentInsights.queries, empty: "Natural-language shopper requests will appear here." },
-              { label: "Match signals", icon: Tags, items: intentInsights.signals, empty: "Matched tags, reasons and semantic terms will appear here." },
+              { label: "Top answers", icon: ListChecks, items: zeroPartyInsights.answers, empty: "Completed finder answers and configurator choices will appear here." },
+              { label: "Search/advisor themes", icon: Search, items: zeroPartyInsights.queryThemes, empty: "Natural-language shopper themes will appear here." },
+              { label: "Matched catalog signals", icon: Tags, items: zeroPartyInsights.catalogSignals, empty: "Matched tags, reasons and semantic terms will appear here." },
             ].map((card) => {
               const Icon = card.icon;
               return (
@@ -308,6 +234,7 @@ export default function AnalyticsPage() {
                       <div key={item.label} className="rounded-xl bg-white px-3 py-2">
                         <div className="flex items-start justify-between gap-2"><p className="text-[10px] font-extrabold leading-4">{item.label}</p><span className="rounded-full bg-black/5 px-2 py-0.5 text-[8px] font-extrabold text-black/35">{item.count}</span></div>
                         {item.detail && <p className="mt-0.5 line-clamp-1 text-[8px] font-bold text-black/30">{item.detail}</p>}
+                        <p className="mt-1 text-[8px] font-bold uppercase tracking-wide text-black/25">{item.sources.join(" · ")}{item.products.length ? ` · ${item.products.slice(0, 2).join(", ")}` : ""}</p>
                       </div>
                     )) : <p className="rounded-xl bg-white px-3 py-5 text-center text-[10px] leading-4 text-black/35">{card.empty}</p>}
                   </div>
@@ -315,15 +242,70 @@ export default function AnalyticsPage() {
               );
             })}
           </div>
+          <div className="mt-4 grid gap-3 lg:grid-cols-3">
+            <div className="rounded-2xl bg-ink p-4 text-white">
+              <p className="text-[9px] font-extrabold uppercase tracking-wider text-lime">Unique signals</p>
+              <p className="display mt-3 text-4xl">{zeroPartyInsights.summary.uniqueSignals}</p>
+              <p className="mt-2 text-[10px] leading-4 text-white/45">Distinct shopper terms, answers and mapped catalog reasons in this filter.</p>
+            </div>
+            <div className="rounded-2xl bg-[#f7f8f4] p-4">
+              <p className="text-[9px] font-extrabold uppercase tracking-wider text-black/35">Product demand</p>
+              <p className="display mt-3 text-4xl">{zeroPartyInsights.summary.productsWithDemand}</p>
+              <p className="mt-2 text-[10px] leading-4 text-black/40">Products with recommendation or buy-click evidence.</p>
+            </div>
+            <div className="rounded-2xl bg-lime/35 p-4">
+              <p className="text-[9px] font-extrabold uppercase tracking-wider text-moss">Scoped events</p>
+              <p className="display mt-3 text-4xl">{filteredEvents.length}</p>
+              <p className="mt-2 text-[10px] leading-4 text-moss/70">Filtered by {activeExperienceLabel.toLowerCase()} over {range.toLowerCase()}.</p>
+            </div>
+          </div>
         </div>
 
         <div className="rounded-2xl border border-black/[0.07] bg-white p-5 sm:p-7">
           <div className="flex items-center justify-between">
-            <div><h2 className="text-sm font-extrabold">Recent high-intent moments</h2><p className="mt-1 text-[10px] text-black/35">Completions, recommendations and clicks with context</p></div>
-            <span className="grid h-9 w-9 place-items-center rounded-xl bg-[#f0f2ec] text-moss"><Clock3 size={16} /></span>
+            <div><h2 className="text-sm font-extrabold">Intent opportunities</h2><p className="mt-1 text-[10px] text-black/35">Deterministic next steps from your captured shopper signals</p></div>
+            <span className="grid h-9 w-9 place-items-center rounded-xl bg-[#f0f2ec] text-moss"><Sparkles size={16} /></span>
           </div>
           <div className="mt-6 space-y-3">
-            {intentInsights.recent.length ? intentInsights.recent.map((item) => (
+            {zeroPartyInsights.opportunities.map((opportunity) => (
+              <div key={opportunity.title} className={`rounded-2xl border p-4 ${opportunity.severity === "win" ? "border-lime/60 bg-lime/20" : opportunity.severity === "watch" ? "border-amber-200 bg-amber-50" : "border-black/[0.06] bg-[#f7f8f4]"}`}>
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-xs font-extrabold">{opportunity.title}</p>
+                  <span className={`rounded-full px-2 py-1 text-[8px] font-extrabold uppercase ${opportunity.severity === "win" ? "bg-lime text-moss" : opportunity.severity === "watch" ? "bg-amber-200 text-amber-800" : "bg-white text-black/35"}`}>{opportunity.severity}</span>
+                </div>
+                <p className="mt-2 text-[10px] leading-4 text-black/45">{opportunity.detail}</p>
+                <p className="mt-2 text-[10px] leading-4 font-bold text-moss">{opportunity.recommendation}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-6 rounded-2xl border border-black/[0.06] p-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-extrabold">Product demand pulse</h3>
+              <Trophy size={15} className="text-moss" />
+            </div>
+            <div className="mt-3 space-y-2">
+              {zeroPartyInsights.productDemand.length ? zeroPartyInsights.productDemand.map((item) => (
+                <div key={item.productId || item.productName} className="rounded-xl bg-[#f7f8f4] px-3 py-2">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="truncate text-[10px] font-extrabold">{item.productName}</p>
+                    <span className="rounded-full bg-white px-2 py-0.5 text-[8px] font-extrabold text-moss">{Math.round(item.clickRate)}%</span>
+                  </div>
+                  <p className="mt-1 text-[8px] font-bold text-black/35">{item.recommended} surfaced · {item.clicks} buy clicks · {item.sources.join(" · ")}</p>
+                </div>
+              )) : <p className="rounded-xl bg-[#f7f8f4] px-3 py-5 text-center text-[10px] leading-4 text-black/35">Recommendation and buy-click product demand will appear here.</p>}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="mt-5 rounded-2xl border border-black/[0.07] bg-white p-5 sm:p-7">
+        <div className="flex items-center justify-between">
+          <div><h2 className="text-sm font-extrabold">Recent high-intent moments</h2><p className="mt-1 text-[10px] text-black/35">Completions, recommendations and clicks with zero-party context</p></div>
+          <span className="grid h-9 w-9 place-items-center rounded-xl bg-[#f0f2ec] text-moss"><Clock3 size={16} /></span>
+        </div>
+        <div className="mt-6 grid gap-3 xl:grid-cols-3">
+          {zeroPartyInsights.recent.length ? zeroPartyInsights.recent.map((item) => (
               <div key={item.id} className="rounded-2xl border border-black/[0.06] p-4">
                 <div className="flex items-center justify-between gap-3">
                   <span className="rounded-full bg-lime/35 px-2.5 py-1 text-[8px] font-extrabold uppercase text-moss">{item.type}</span>
@@ -335,8 +317,7 @@ export default function AnalyticsPage() {
                   {item.productName && <span className="truncate text-moss">{item.productName}</span>}
                 </div>
               </div>
-            )) : <div className="rounded-2xl border border-dashed border-black/10 p-8 text-center"><p className="text-xs font-extrabold">No high-intent events yet</p><p className="mt-1 text-[10px] text-black/35">Run a finder, advisor or configurator to populate this stream.</p></div>}
-          </div>
+            )) : <div className="rounded-2xl border border-dashed border-black/10 p-8 text-center xl:col-span-3"><p className="text-xs font-extrabold">No high-intent events yet</p><p className="mt-1 text-[10px] text-black/35">Run a finder, advisor, search or configurator to populate this stream.</p></div>}
         </div>
       </section>
 

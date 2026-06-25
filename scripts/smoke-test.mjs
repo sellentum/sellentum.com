@@ -78,6 +78,7 @@ function assertSessionAnalytics() {
   const session = readFileSync("lib/session.ts", "utf8");
   const analytics = readFileSync("app/dashboard/analytics/page.tsx", "utf8");
   const analyticsHelpers = readFileSync("lib/analytics.ts", "utf8");
+  const insights = readFileSync("lib/insights.ts", "utf8");
   for (const file of ["app/finder/[id]/page.tsx", "app/assistant/[id]/page.tsx", "app/configurator/[id]/page.tsx", "app/search/[id]/page.tsx"]) {
     assert(readFileSync(file, "utf8").includes("getSessionMetadata"), `${file} should attach anonymous session metadata to analytics events`);
   }
@@ -85,6 +86,11 @@ function assertSessionAnalytics() {
   assert(analytics.includes("buildAnalyticsSnapshot"), "Analytics dashboard should group events into session-aware snapshots");
   assert(analyticsHelpers.includes("buildAnalyticsTrends"), "Analytics helpers should calculate real period-over-period trends");
   assert(analytics.includes("funnelDiagnosis"), "Analytics dashboard should surface a deterministic funnel diagnosis");
+  assert(analytics.includes("buildZeroPartyInsights"), "Analytics dashboard should use shared zero-party insight intelligence");
+  assert(analytics.includes("Zero-party intent hub"), "Analytics dashboard should expose a zero-party intent hub");
+  assert(analytics.includes("Intent opportunities"), "Analytics dashboard should surface deterministic intent opportunities");
+  assert(insights.includes("buildZeroPartyInsights"), "Insight helper should expose a reusable zero-party report builder");
+  assert(insights.includes("ProductDemandInsight"), "Insight helper should calculate product demand from recommendations and clicks");
   assert(!analytics.includes("percentChangePlaceholder"), "Analytics dashboard should not display placeholder trend percentages");
 }
 
@@ -214,6 +220,7 @@ async function assertDeterministicLogic() {
   const demo = await import(pathToFileURL(`${compileDir}/lib/demo-data.js`));
   const utils = await import(pathToFileURL(`${compileDir}/lib/utils.js`));
   const analytics = await import(pathToFileURL(`${compileDir}/lib/analytics.js`));
+  const insights = await import(pathToFileURL(`${compileDir}/lib/insights.js`));
   const catalogIntelligence = await import(pathToFileURL(`${compileDir}/lib/catalog-intelligence.js`));
   const catalogOntology = await import(pathToFileURL(`${compileDir}/lib/catalog-ontology.js`));
   const catalogImport = await import(pathToFileURL(`${compileDir}/lib/catalog-import.js`));
@@ -271,6 +278,7 @@ async function assertDeterministicLogic() {
   assert(eventTypes.join(",") === "assistant,configurator,finder" && searchType === "search", `Unexpected event type inference: ${eventTypes.join(",")}, ${searchType}`);
   assert(demo.demoEvents.some((event) => Array.isArray(event.metadata?.answers) && event.metadata.answers.length), "Expected seeded finder analytics to include answer metadata");
   assert(demo.demoEvents.some((event) => event.metadata?.experience_type === "assistant" && typeof event.metadata.query === "string"), "Expected seeded advisor analytics to include shopper query metadata");
+  assert(demo.demoEvents.some((event) => event.metadata?.experience_type === "search" && typeof event.metadata.query === "string"), "Expected seeded search analytics to include shopper query metadata");
   assert(demo.demoEvents.some((event) => Array.isArray(event.metadata?.selected_option_names) && event.metadata.selected_option_names.length), "Expected seeded configurator analytics to include selected option names");
   assert(demo.demoEvents.some((event) => typeof event.metadata?.session_id === "string"), "Expected seeded analytics to include anonymous session metadata");
 
@@ -287,6 +295,18 @@ async function assertDeterministicLogic() {
   assert(trends.widget_view.current === 1 && trends.widget_view.previous === 1 && trends.quiz_complete.label === "New", "Expected analytics trends to use real previous-period values");
   const diagnosis = analytics.buildFunnelDiagnosis(analytics.buildAnalyticsSnapshot(periods.current));
   assert(diagnosis.title && diagnosis.recommendation, "Expected funnel diagnosis to produce merchant guidance");
+  const zeroPartyEvents = [
+    { id: "z1", user_id: "demo-user", quiz_id: "quiz_footwear", event_type: "quiz_complete", metadata: { session_id: "z1", experience_type: "finder", answers: [{ question: "Where?", answer: "Trails & outdoors" }], matched_reasons: ["trail"], product_name: "Terra Trail Runner" }, created_at: "2026-06-25T10:03:00Z" },
+    { id: "z2", user_id: "demo-user", quiz_id: "quiz_footwear", product_id: "prod_trail", event_type: "product_recommended", metadata: { session_id: "z1", experience_type: "finder", product_name: "Terra Trail Runner", matched_reasons: ["trail"] }, created_at: "2026-06-25T10:04:00Z" },
+    { id: "z3", user_id: "demo-user", quiz_id: "quiz_footwear", product_id: "prod_trail", event_type: "product_recommended", metadata: { session_id: "z2", experience_type: "search", query: "waterproof trail shoes under 140", terms: ["trail", "waterproof"], product_name: "Terra Trail Runner" }, created_at: "2026-06-25T10:05:00Z" },
+    { id: "z4", user_id: "demo-user", quiz_id: "quiz_footwear", product_id: "prod_trail", event_type: "buy_click", metadata: { session_id: "z2", experience_type: "search", query: "waterproof trail shoes under 140", terms: ["trail", "waterproof"], product_name: "Terra Trail Runner" }, created_at: "2026-06-25T10:06:00Z" },
+    { id: "z5", user_id: "demo-user", quiz_id: "quiz_footwear", event_type: "quiz_start", metadata: { session_id: "z3", experience_type: "assistant", query: "trail comfort for rainy weekends", terms: ["trail", "comfort", "rainy"] }, created_at: "2026-06-25T10:07:00Z" },
+  ];
+  const zeroPartyReport = insights.buildZeroPartyInsights(zeroPartyEvents, demo.demoProducts);
+  assert(zeroPartyReport.answers.some((item) => item.label === "Trails & outdoors"), "Expected zero-party insights to count selected finder answers");
+  assert(zeroPartyReport.queryThemes.some((item) => item.label === "trail" && item.count >= 3), "Expected zero-party insights to cluster repeated query themes");
+  assert(zeroPartyReport.productDemand[0]?.productName === "Terra Trail Runner" && zeroPartyReport.productDemand[0].clicks === 1, "Expected zero-party insights to connect recommendations and buy clicks to products");
+  assert(zeroPartyReport.opportunities.length && zeroPartyReport.summary.uniqueSignals >= 3, "Expected zero-party insights to generate deterministic merchant opportunities");
 
   const importPreview = catalogImport.normalizeCatalogImportRows([
     { title: "Trail Shoe", "sale price": "£1,299.50", collection: "Footwear", attributes: "Grip|Waterproof", keywords: "trail,wet", link: "store.example/trail" },

@@ -30,7 +30,7 @@ Findly is a compact guided-selling SaaS product for ecommerce brands. A merchant
 - Customer-facing configurator with live bundle price, compatibility filtering, review and buy-click tracking
 - Published configurator runtime that revalidates final bundles server-side before review/buy
 - Copyable JavaScript widget that opens a finder, advisor, semantic search or configurator in a lazy-loaded modal iframe or direct inline iframe
-- Analytics for sessions, real period-over-period trends, funnel diagnosis, views, starts, completions, recommendations, buy clicks, selected answers, advisor queries and matched intent signals
+- Analytics for sessions, real period-over-period trends, funnel diagnosis, views, starts, completions, recommendations, buy clicks, selected answers, search/advisor themes, matched intent signals, product demand and zero-party opportunity suggestions
 - Brand, colour, widget copy and launcher-position settings
 - Launch preflight checks for catalog readiness, builder readiness diagnostics, AI/env keys, published experiences, widget setup and analytics coverage
 - Supabase schema, indexes, triggers and row-level security
@@ -114,6 +114,7 @@ Import the repository into Vercel, add the variables from `.env.example`, and de
 - `components/` — reusable navigation, shell, modal and state components
 - `lib/store.tsx` — demo/Supabase data adapter
 - `lib/analytics.ts` — session-aware analytics snapshots, period trends and funnel diagnostics
+- `lib/insights.ts` — zero-party insight extraction for shopper answers, query themes, catalog signals, product demand and deterministic merchant opportunities
 - `lib/catalog-intelligence.ts` — catalog health scoring for enrichment coverage, matching signals, semantic text, media and commerce links
 - `lib/catalog-ontology.ts` — category, buyer-need, tag and feature clustering for ontology mapping and question ideas
 - `lib/quiz-generation.ts` — ontology-guided quiz generation fallback and OpenAI grounding summary

@@ -358,6 +358,7 @@ export const demoEvents: AnalyticsEvent[] = Array.from({ length: 84 }, (_, index
   const advisor = demoAdvisorQueries[index % demoAdvisorQueries.length];
   const isConfigurator = index % 7 === 0;
   const isAssistant = !isConfigurator && index % 11 === 0;
+  const isSearch = !isConfigurator && !isAssistant && index % 13 === 0;
   const sessionMetadata = { session_id: `demo_session_${Math.floor(index / 6)}`, session_started_at: date.toISOString() };
   return {
     id: `event_${index}`,
@@ -369,7 +370,9 @@ export const demoEvents: AnalyticsEvent[] = Array.from({ length: 84 }, (_, index
       ? { ...demoConfiguratorMetadata, ...sessionMetadata, product_name: product.name }
       : isAssistant
         ? { experience_type: "assistant", experience_id: demoQuiz.id, experience_name: demoQuiz.name, ...sessionMetadata, query: advisor.query, terms: advisor.terms, max_budget: advisor.max_budget, source: "rules", matched_signals: advisor.terms, product_name: product.name }
-        : { experience_type: "finder", experience_id: demoQuiz.id, experience_name: demoQuiz.name, ...sessionMetadata, answers: demoFinderAnswers, answer_summary: demoFinderAnswers.map((answer) => answer.answer), matched_reasons: ["Trails & outdoors", "Soft cushioning"], product_name: product.name },
+        : isSearch
+          ? { experience_type: "search", experience_id: demoQuiz.id, experience_name: demoQuiz.name, ...sessionMetadata, query: advisor.query, terms: advisor.terms, search_action: "search_submit", matched_signals: advisor.terms, product_name: product.name }
+          : { experience_type: "finder", experience_id: demoQuiz.id, experience_name: demoQuiz.name, ...sessionMetadata, answers: demoFinderAnswers, answer_summary: demoFinderAnswers.map((answer) => answer.answer), matched_reasons: ["Trails & outdoors", "Soft cushioning"], product_name: product.name },
     created_at: date.toISOString(),
   };
 });
