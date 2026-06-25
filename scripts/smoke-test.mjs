@@ -105,6 +105,22 @@ function assertLaunchStudioWorkflow() {
   assert(overview.includes("/dashboard/launch"), "Dashboard overview should route quick-start work through Launch Studio");
 }
 
+function assertSemanticSearchWorkflow() {
+  const route = readFileSync("app/api/search/route.ts", "utf8");
+  const page = readFileSync("app/dashboard/search/page.tsx", "utf8");
+  const shell = readFileSync("components/dashboard-shell.tsx", "utf8");
+  const overview = readFileSync("app/dashboard/page.tsx", "utf8");
+  const engine = readFileSync("lib/search-engine.ts", "utf8");
+  assert(route.includes("getWorkspaceIdentity"), "Search service should require an authenticated workspace");
+  assert(route.includes("runSemanticProductSearch"), "Search service should use the shared semantic search engine");
+  assert(page.includes("runSemanticProductSearch"), "Search Lab should run the shared semantic search engine");
+  assert(page.includes("POST /api/search"), "Search Lab should document the search service endpoint");
+  assert(shell.includes("/dashboard/search"), "Dashboard navigation should expose Search Lab");
+  assert(overview.includes("/dashboard/search"), "Dashboard overview should expose Search Lab");
+  assert(engine.includes("extractSearchIntentTokens"), "Search engine should parse natural-language intent tokens");
+  assert(engine.includes("extractSearchBudget"), "Search engine should parse budget constraints");
+}
+
 function assertCatalogImportWorkflow() {
   const page = readFileSync("app/dashboard/products/page.tsx", "utf8");
   const importer = readFileSync("lib/catalog-import.ts", "utf8");
@@ -160,6 +176,7 @@ async function assertDeterministicLogic() {
   const catalogImport = await import(pathToFileURL(`${compileDir}/lib/catalog-import.js`));
   const quizReadiness = await import(pathToFileURL(`${compileDir}/lib/quiz-readiness.js`));
   const ruleCoverage = await import(pathToFileURL(`${compileDir}/lib/rule-coverage.js`));
+  const searchEngine = await import(pathToFileURL(`${compileDir}/lib/search-engine.js`));
   const configuratorReadiness = await import(pathToFileURL(`${compileDir}/lib/configurator-readiness.js`));
 
   const answers = [
@@ -235,6 +252,15 @@ async function assertDeterministicLogic() {
   assert(importPreview.products[0].price === 1299.5 && importPreview.products[0].product_url === "https://store.example/trail", "Expected CSV import normalizer to clean aliased price and URL fields");
   assert(importPreview.rows.some((row) => row.warnings.some((warning) => warning.includes("duplicate"))), "Expected CSV import normalizer to warn about duplicate product rows");
 
+  const trailSearch = searchEngine.runSemanticProductSearch({ query: "waterproof hiking shoes under £140", products: demo.demoProducts, limit: 3 });
+  assert(trailSearch.intent.maxBudget === 140 && trailSearch.intent.terms.includes("trail"), "Expected semantic search to parse budget and expanded hiking/trail intent");
+  assert(trailSearch.results[0]?.product.id === "prod_trail", `Expected semantic search to rank Terra Trail Runner first, got ${trailSearch.results[0]?.product.name || "nothing"}`);
+  assert(trailSearch.results[0]?.matchedSignals.some((signal) => signal.source === "budget"), "Expected semantic search to include budget eligibility signals");
+  const citySearch = searchEngine.runSemanticProductSearch({ query: "lightweight city travel shoe", products: demo.demoProducts, limit: 3 });
+  assert(citySearch.results[0]?.product.id === "prod_city", `Expected semantic search to rank Aero City Knit first, got ${citySearch.results[0]?.product.name || "nothing"}`);
+  const budgetSearch = searchEngine.runSemanticProductSearch({ query: "running shoes under £100", products: demo.demoProducts, limit: 4 });
+  assert(budgetSearch.blockedProducts >= 2 && budgetSearch.results.every((result) => result.product.price <= 100), "Expected semantic search budget constraints to block over-budget products");
+
   const readyQuiz = quizReadiness.analyzeQuizReadiness(demo.demoQuiz, demo.demoProducts);
   assert(readyQuiz.canPublish && readyQuiz.score >= 80, "Expected seeded demo finder to pass publish-readiness checks");
   const trailCoverage = ruleCoverage.getAnswerOptionCoverage(demo.demoQuiz.questions[0].options[0], demo.demoProducts);
@@ -273,6 +299,7 @@ async function main() {
   assertPublishedConfiguratorRuntime();
   assertSessionAnalytics();
   assertLaunchStudioWorkflow();
+  assertSemanticSearchWorkflow();
   assertCatalogImportWorkflow();
   assertQuizReadinessWorkflow();
   assertConfiguratorReadinessWorkflow();

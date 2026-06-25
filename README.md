@@ -14,6 +14,7 @@ Findly is a compact guided-selling SaaS product for ecommerce brands. A merchant
 - One-click product finder generation from the current catalog
 - Deterministic top-three recommendation engine with budget eligibility filtering, buyer-profile intent scoring and merchant overrides
 - Recommendation lab for testing shopper answer paths and inspecting score breakdowns before publishing
+- Semantic Search Lab and authenticated search API for testing natural-language product discovery over the active catalog
 - OpenAI match explanations with a safe fact-based fallback when no API key is present
 - Conversational product advisor combining semantic similarity, deterministic field signals, hard budget constraints and clarification turns for vague requests
 - Published advisor runtime that loads the merchant catalog server-side instead of trusting browser-supplied products
@@ -109,12 +110,14 @@ Import the repository into Vercel, add the variables from `.env.example`, and de
 - `lib/store.tsx` — demo/Supabase data adapter
 - `lib/analytics.ts` — session-aware analytics snapshots, period trends and funnel diagnostics
 - `lib/catalog-import.ts` — flexible CSV header mapping, row validation and import previews
+- `lib/search-engine.ts` — deterministic semantic search ranking, intent parsing and budget eligibility checks
 - `lib/rule-coverage.ts` — deterministic answer-rule coverage helper used by the finder builder and readiness checks
 - `lib/quiz-readiness.ts` — publish-readiness diagnostics for finder structure, catalog mapping and rule quality
 - `lib/configurator-readiness.ts` — publish-readiness diagnostics for configurator structure, linked products, pricing and compatibility rules
 - `lib/utils.ts` — deterministic matching, recommendation comparison, configurator compatibility and shared formatting
 - `app/dashboard/launch` — self-serve launch workflow for enrichment, quiz generation, publishing and widget copy
 - `app/dashboard/lab` — merchant-side recommendation testing and explainability lab
+- `app/dashboard/search` and `app/api/search` — semantic catalog search lab and authenticated product search service
 - `app/dashboard/preflight` and `app/api/preflight` — production readiness checks before embedding, including finder/configurator readiness diagnostics
 - `supabase/schema.sql` — PostgreSQL schema and RLS policies
 - `app/api/catalog/enrich` — authenticated catalog enrichment and embedding generation
@@ -128,7 +131,7 @@ Import the repository into Vercel, add the variables from `.env.example`, and de
 - `app/configurator/[id]` — customer-facing visual configurator
 - `app/dashboard/configurators` — merchant configurator builder
 
-Product selection is intentionally hybrid but not AI-dependent: exact rule signals are scored, a chosen budget is a hard ceiling, inactive products are excluded, enriched buyer-profile language can add semantic/lexical intent points, per-finder pins/boosts/exclusions apply deterministically, and stable price/name tie-breakers make results repeatable. AI runs only after those products have been selected.
+Product selection is intentionally hybrid but not AI-dependent: exact rule signals are scored, natural-language search terms are mapped to catalog fields, a chosen budget is a hard ceiling, inactive products are excluded, enriched buyer-profile language can add semantic/lexical intent points, per-finder pins/boosts/exclusions apply deterministically, and stable price/name tie-breakers make results repeatable. AI runs only after those products have been selected.
 
 ## Checks
 
