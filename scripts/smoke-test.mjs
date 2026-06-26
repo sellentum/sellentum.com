@@ -215,7 +215,11 @@ function assertCatalogImportWorkflow() {
   const preflightPage = readFileSync("app/dashboard/preflight/page.tsx", "utf8");
   assert(page.includes("normalizeCatalogImportRows"), "Product CSV import should use the shared catalog import normalizer");
   assert(page.includes("Fix required"), "Product CSV import should expose invalid row feedback before import");
+  assert(page.includes("Buyer needs"), "Product form should expose buyer-needs editing");
+  assert(page.includes("Semantic search text"), "Product form should expose semantic search text editing");
   assert(importer.includes("headerAliases"), "Catalog import normalizer should support flexible CSV header aliases");
+  assert(importer.includes("buyer_needs"), "Catalog import normalizer should support buyer-needs fields");
+  assert(importer.includes("search_text"), "Catalog import normalizer should support semantic search text fields");
   assert(importer.includes("Possible duplicate name/category"), "Catalog import normalizer should warn about duplicate rows");
   assert(page.includes("analyzeCatalogIntelligence"), "Products dashboard should show shared catalog intelligence diagnostics");
   assert(page.includes("Catalog intelligence score"), "Products dashboard should surface the catalog intelligence score");
@@ -412,12 +416,13 @@ async function assertDeterministicLogic() {
   assert(zeroPartyReport.opportunities.length && zeroPartyReport.summary.uniqueSignals >= 3, "Expected zero-party insights to generate deterministic merchant opportunities");
 
   const importPreview = catalogImport.normalizeCatalogImportRows([
-    { title: "Trail Shoe", "sale price": "£1,299.50", collection: "Footwear", attributes: "Grip|Waterproof", keywords: "trail,wet", link: "store.example/trail" },
+    { title: "Trail Shoe", "sale price": "£1,299.50", collection: "Footwear", attributes: "Grip|Waterproof", keywords: "trail,wet", benefits: "wet-weather protection|outdoor confidence", "semantic text": "Rain-ready trail grip for weekend hikes", link: "store.example/trail" },
     { name: "", price: "not-a-price", category: "" },
     { title: "Trail Shoe", "sale price": "99", collection: "Footwear" },
   ]);
   assert(importPreview.summary.valid === 2 && importPreview.summary.invalid === 1, "Expected CSV import normalizer to separate valid and invalid rows");
   assert(importPreview.products[0].price === 1299.5 && importPreview.products[0].product_url === "https://store.example/trail", "Expected CSV import normalizer to clean aliased price and URL fields");
+  assert(importPreview.products[0].buyer_needs?.includes("wet-weather protection") && importPreview.products[0].search_text?.includes("Rain-ready"), "Expected CSV import normalizer to preserve buyer-needs and semantic search text");
   assert(importPreview.rows.some((row) => row.warnings.some((warning) => warning.includes("duplicate"))), "Expected CSV import normalizer to warn about duplicate product rows");
 
   const catalogReport = catalogIntelligence.analyzeCatalogIntelligence(demo.demoProducts);

@@ -6,7 +6,7 @@ Findly is a compact guided-selling SaaS product for ecommerce brands. A merchant
 
 - Premium marketing site with product, workflow, use-case, pricing, resource and platform pages
 - Supabase email/password authentication, protected dashboard routes and logout
-- Product catalog CRUD plus CSV upload with flexible header aliases, row-level validation and import preview (`name`, `price`, and `category` are required)
+- Product catalog CRUD plus CSV upload with flexible header aliases, row-level validation and import preview (`name`, `price`, and `category` are required; buyer needs/search text are optional discovery fields)
 - AI catalog enrichment with normalized attributes, buyer needs, semantic search text and optional OpenAI embeddings
 - Catalog intelligence scoring for enrichment coverage, semantic-search readiness, matching signals, product media and commerce links
 - Ontology map for inspecting category clusters, buyer needs, tags, features, spec-to-benefit translations, thin signals and AI-ready quiz question ideas
@@ -84,11 +84,11 @@ Set `OPENAI_API_KEY` on the server. `OPENAI_MODEL` defaults to `gpt-4o-mini` and
 ## CSV format
 
 ```csv
-name,price,image_url,category,description,features,tags,product_url,active
-Terra Trail Runner,128,https://example.com/terra.jpg,Running shoes,Cushioned trail runner,High cushioning|Trail grip,trail|outdoors,https://store.example/terra,true
+name,price,image_url,category,description,features,tags,buyer_needs,search_text,product_url,active
+Terra Trail Runner,128,https://example.com/terra.jpg,Running shoes,Cushioned trail runner,High cushioning|Trail grip,trail|outdoors,wet-weather protection|outdoor confidence,Water-resistant trail shoe for mixed surfaces and rainy weekend runs,https://store.example/terra,true
 ```
 
-Use pipes, commas or semicolons inside `features` and `tags`. The dashboard includes a downloadable template, accepts common aliases such as `title`, `sale price`, `collection`, `image`, `link`, and shows invalid rows or weak recommendation-data warnings before import.
+Use pipes, commas or semicolons inside `features`, `tags`, and `buyer_needs`. `search_text` is optional extra discovery language for semantic search/advisor matching. The dashboard includes a downloadable template, accepts common aliases such as `title`, `sale price`, `collection`, `image`, `benefits`, `semantic text`, and `link`, and shows invalid rows or weak recommendation-data warnings before import.
 
 ## Embed a guided experience
 

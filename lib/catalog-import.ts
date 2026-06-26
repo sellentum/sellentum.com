@@ -1,7 +1,7 @@
 import type { ProductInput } from "@/lib/types";
 
 type CsvRow = Record<string, string | undefined>;
-type ImportField = "name" | "price" | "image_url" | "category" | "description" | "features" | "tags" | "product_url" | "active";
+type ImportField = "name" | "price" | "image_url" | "category" | "description" | "features" | "tags" | "buyer_needs" | "search_text" | "product_url" | "active";
 
 export type CatalogImportPreviewRow = {
   rowNumber: number;
@@ -31,6 +31,8 @@ const headerAliases = {
   description: ["description", "body", "body_html", "details", "summary"],
   features: ["features", "feature", "attributes", "attribute", "specs", "specifications"],
   tags: ["tags", "tag", "keywords", "labels"],
+  buyer_needs: ["buyer_needs", "buyer needs", "needs", "use cases", "use_cases", "benefits", "customer benefits"],
+  search_text: ["search_text", "search text", "semantic text", "semantic_search_text", "discovery text"],
   product_url: ["product_url", "product url", "url", "link", "product link", "handle"],
   active: ["active", "available", "published", "status", "enabled"],
 } satisfies Record<ImportField, string[]>;
@@ -79,6 +81,8 @@ export function normalizeCatalogImportRows(data: CsvRow[]): CatalogImportResult 
     const description = getCell(row, "description");
     const features = parseList(getCell(row, "features"));
     const tags = parseList(getCell(row, "tags"));
+    const buyerNeeds = parseList(getCell(row, "buyer_needs"));
+    const searchText = getCell(row, "search_text");
     const productUrl = normalizeUrl(getCell(row, "product_url"));
     const imageUrl = normalizeUrl(getCell(row, "image_url"));
     const issues: string[] = [];
@@ -95,7 +99,7 @@ export function normalizeCatalogImportRows(data: CsvRow[]): CatalogImportResult 
       seen.add(duplicateKey);
     }
     if (!description) warnings.push("No description; AI enrichment and explanations will be weaker.");
-    if (!features.length && !tags.length) warnings.push("No tags or features; rule-based matching will be weaker.");
+    if (!features.length && !tags.length && !buyerNeeds.length) warnings.push("No tags, features or buyer needs; rule-based matching will be weaker.");
     if (!productUrl) warnings.push("No product URL; Buy Now clicks will have nowhere useful to go.");
     if (!imageUrl) warnings.push("No image URL; recommendation cards will look less polished.");
 
@@ -107,6 +111,8 @@ export function normalizeCatalogImportRows(data: CsvRow[]): CatalogImportResult 
       description,
       features,
       tags,
+      buyer_needs: buyerNeeds,
+      search_text: searchText,
       product_url: productUrl,
       active: parseActive(getCell(row, "active")),
     };
