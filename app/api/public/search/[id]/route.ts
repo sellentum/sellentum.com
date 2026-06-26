@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { normalizeWidgetSettings } from "@/lib/public-experience";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { explainSearchReport } from "@/lib/search-explanations";
 import { runSemanticProductSearch } from "@/lib/search-engine";
@@ -38,7 +39,7 @@ export async function GET(_: Request, context: { params: Promise<{ id: string }>
   return NextResponse.json({
     experience: { id: quiz.id, name: quiz.name, slug: quiz.slug },
     catalog: { active_products: count || 0 },
-    settings,
+    settings: normalizeWidgetSettings(settings),
   });
 }
 

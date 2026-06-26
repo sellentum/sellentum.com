@@ -6,6 +6,7 @@ import { ArrowLeft, ArrowRight, Check, ExternalLink, LoaderCircle, RefreshCcw, S
 import { LoadingState } from "@/components/loading-state";
 import { useStore } from "@/lib/store";
 import { getSessionMetadata } from "@/lib/session";
+import { buildPublicExperienceCopy, normalizeWidgetSettings } from "@/lib/public-experience";
 import type { Configurator, ConfiguratorOption, Product, WidgetSettings } from "@/lib/types";
 import { describeConfiguratorSelection, formatCurrency, getConfiguratorProducts, getConfiguratorProgress, getConfiguratorTotal, optionConflictsWithSelection, updateConfiguratorSelection } from "@/lib/utils";
 
@@ -46,13 +47,13 @@ export default function ConfiguratorPage() {
     if (!store.ready) return;
     const localConfigurator = store.configurators.find((configurator) => configurator.id === id || configurator.slug === id);
     if (localConfigurator) {
-      setData({ configurator: localConfigurator, products: store.products, settings: store.settings });
+      setData({ configurator: localConfigurator, products: store.products, settings: normalizeWidgetSettings(store.settings) });
       setLoading(false);
       return;
     }
     fetch(`/api/public/configurator/${id}`)
       .then((response) => response.ok ? response.json() : Promise.reject(new Error("Configurator not found.")))
-      .then((payload) => setData(payload))
+      .then((payload) => setData({ ...payload, settings: normalizeWidgetSettings(payload.settings) }))
       .catch((err) => setError(err instanceof Error ? err.message : "Configurator not found."))
       .finally(() => setLoading(false));
   }, [id, store.ready, store.configurators, store.products, store.settings]);
@@ -91,8 +92,9 @@ export default function ConfiguratorPage() {
 
   const configurator = data?.configurator;
   const products = data?.products || [];
-  const settings = data?.settings || store.settings;
-  const accent = settings.primary_color || "#22352a";
+  const settings = useMemo(() => normalizeWidgetSettings(data?.settings || store.settings), [data?.settings, store.settings]);
+  const configuratorCopy = useMemo(() => buildPublicExperienceCopy("configurator", settings, { title: configurator?.title, description: configurator?.subtitle }), [settings, configurator?.title, configurator?.subtitle]);
+  const accent = configuratorCopy.accentColor;
   const currentStep = configurator?.steps[stepIndex];
   const progress = configurator ? getConfiguratorProgress(configurator, selectedIds) : 0;
   const total = configurator ? getConfiguratorTotal(configurator, selectedIds) : 0;
@@ -192,14 +194,14 @@ export default function ConfiguratorPage() {
           {configurator.hero_image_url && <img src={configurator.hero_image_url} alt="" className="absolute inset-0 h-full w-full object-cover opacity-25" />}
           <div className="relative flex min-h-full flex-col">
             <div className="flex items-center justify-between">
-              <span className="flex items-center gap-2 text-xs font-extrabold"><span className="grid h-9 w-9 place-items-center rounded-xl bg-lime text-ink"><Sparkles size={15} /></span>{settings.brand_name}</span>
-              <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-[9px] font-extrabold text-lime">Visual configurator</span>
+              <span className="flex items-center gap-2 text-xs font-extrabold"><span className="grid h-9 w-9 place-items-center rounded-xl text-white" style={{ background: accent }}><Sparkles size={15} /></span>{configuratorCopy.brandName}</span>
+              <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-[9px] font-extrabold text-lime">{configuratorCopy.eyebrow}</span>
             </div>
 
             <div className="my-auto py-16">
-              <p className="eyebrow text-lime">Buildable bundle</p>
-              <h1 className="mt-5 max-w-xl text-6xl font-extrabold leading-[.95] tracking-[-.065em]">{configurator.title}</h1>
-              <p className="mt-6 max-w-lg text-sm leading-6 text-white/55">{configurator.subtitle}</p>
+              <p className="eyebrow text-lime">{configuratorCopy.widgetTitle}</p>
+              <h1 className="mt-5 max-w-xl text-6xl font-extrabold leading-[.95] tracking-[-.065em]">{configuratorCopy.title}</h1>
+              <p className="mt-6 max-w-lg text-sm leading-6 text-white/55">{configuratorCopy.description}</p>
 
               <div className="mt-10 max-w-xl overflow-hidden rounded-[28px] border border-white/10 bg-white/[.08] p-4 backdrop-blur">
                 <div className="grid grid-cols-[180px_1fr] gap-4">
@@ -212,7 +214,7 @@ export default function ConfiguratorPage() {
                     <p className="mt-3 text-xs leading-5 text-white/50">{explanation}</p>
                     <div className="mt-auto flex items-end justify-between">
                       <div><p className="text-[9px] text-white/35">Estimated total</p><p className="text-3xl font-extrabold tracking-[-.06em]">{formatCurrency(displayTotal)}</p></div>
-                      <span className="rounded-full bg-lime px-3 py-1.5 text-[9px] font-extrabold text-ink">{displayProgress}% ready</span>
+                      <span className="rounded-full px-3 py-1.5 text-[9px] font-extrabold text-white" style={{ background: accent }}>{displayProgress}% ready</span>
                     </div>
                   </div>
                 </div>
@@ -231,7 +233,7 @@ export default function ConfiguratorPage() {
             <div className="text-right"><p className="text-[9px] font-bold text-black/30">Total</p><p className="text-lg font-extrabold">{formatCurrency(displayTotal)}</p></div>
           </header>
 
-          <div className="h-1.5 bg-black/[0.04]"><div className="h-full rounded-r-full bg-lime transition-all duration-500" style={{ width: `${complete ? 100 : progress}%` }} /></div>
+          <div className="h-1.5 bg-black/[0.04]"><div className="h-full rounded-r-full transition-all duration-500" style={{ width: `${complete ? 100 : progress}%`, background: accent }} /></div>
 
           {!complete && currentStep && (
             <div className="flex-1 overflow-y-auto p-8 lg:p-12">

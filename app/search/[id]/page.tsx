@@ -3,7 +3,8 @@
 import { use, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, ExternalLink, LoaderCircle, Search, ShieldCheck, Sparkles } from "lucide-react";
-import { demoQuiz, demoSettings } from "@/lib/demo-data";
+import { demoQuiz } from "@/lib/demo-data";
+import { buildPublicExperienceCopy, normalizeWidgetSettings } from "@/lib/public-experience";
 import { getSessionMetadata } from "@/lib/session";
 import type { ProductSearchReport } from "@/lib/search-engine";
 import { runSemanticProductSearch } from "@/lib/search-engine";
@@ -21,9 +22,9 @@ type SearchData = {
 type SearchEventType = "widget_view" | "quiz_start" | "product_recommended" | "buy_click";
 
 const starterQueries = [
-  "waterproof hiking shoes under £140",
-  "lightweight pair for city travel",
-  "soft everyday comfort",
+  "durable everyday option under £100",
+  "lightweight travel-friendly product",
+  "premium gift-ready choice",
 ];
 
 function emptyReport(query: string, products: Product[] = []): ProductSearchReport {
@@ -47,7 +48,7 @@ export default function PublicSearchPage({ params }: { params: Promise<{ id: str
     const localQuiz = store.quizzes.find((quiz) => quiz.id === id || quiz.slug === id) || demoQuiz;
     const localData = { experience: { id: localQuiz.id, name: localQuiz.name, slug: localQuiz.slug }, products: store.products, settings: store.settings, catalog: { active_products: store.products.filter((product) => product.active).length } };
     if (store.mode === "demo" || localQuiz.id === id || localQuiz.slug === id) {
-      setData(localData);
+      setData({ ...localData, settings: normalizeWidgetSettings(localData.settings) });
       setReport(runSemanticProductSearch({ query: starterQueries[0], products: store.products, limit: 6 }));
       setLoading(false);
       return;
@@ -55,7 +56,7 @@ export default function PublicSearchPage({ params }: { params: Promise<{ id: str
     fetch(`/api/public/search/${encodeURIComponent(id)}`).then(async (response) => {
       if (!response.ok) throw new Error((await response.json()).error || "Search experience not found.");
       return response.json();
-    }).then((result) => setData({ ...result, settings: result.settings || demoSettings })).catch((err) => setError(err.message)).finally(() => setLoading(false));
+    }).then((result) => setData({ ...result, settings: normalizeWidgetSettings(result.settings) })).catch((err) => setError(err.message)).finally(() => setLoading(false));
   }, [id, store.ready, store.mode, store.quizzes, store.products, store.settings]);
 
   const track = useCallback(async (eventType: SearchEventType, productId?: string, extraMetadata: Record<string, unknown> = {}) => {
@@ -94,7 +95,9 @@ export default function PublicSearchPage({ params }: { params: Promise<{ id: str
     }
   }
 
-  const accent = data?.settings.primary_color || "#22352a";
+  const settings = useMemo(() => normalizeWidgetSettings(data?.settings), [data?.settings]);
+  const searchCopy = useMemo(() => buildPublicExperienceCopy("search", settings, { title: settings.widget_title, description: settings.welcome_message }), [settings]);
+  const accent = searchCopy.accentColor;
   const topResult = report.results[0];
   const maxScore = Math.max(1, ...report.results.map((result) => result.score));
   const suggestions = useMemo(() => report.suggestions.length ? report.suggestions : starterQueries, [report.suggestions]);
@@ -106,20 +109,20 @@ export default function PublicSearchPage({ params }: { params: Promise<{ id: str
     <section className="relative mx-auto min-h-[calc(100vh-24px)] max-w-6xl overflow-hidden rounded-[28px] border border-white/80 bg-white shadow-soft sm:min-h-[calc(100vh-48px)] lg:min-h-[700px]">
       <div className="dot-grid absolute inset-0 opacity-30" />
       <header className="relative flex items-center justify-between border-b border-black/[0.06] bg-white/80 px-5 py-4 backdrop-blur sm:px-8">
-        <div className="flex items-center gap-2.5 text-sm font-extrabold"><span className="grid h-8 w-8 place-items-center rounded-xl text-white" style={{ background: accent }}><Search size={14} /></span>{data.settings.brand_name}</div>
-        <span className="hidden items-center gap-1.5 text-[10px] font-bold text-black/35 sm:flex"><ShieldCheck size={13} /> Deterministic catalog search</span>
+        <div className="flex items-center gap-2.5 text-sm font-extrabold"><span className="grid h-8 w-8 place-items-center rounded-xl text-white" style={{ background: accent }}><Search size={14} /></span>{searchCopy.brandName}</div>
+        <span className="hidden items-center gap-1.5 text-[10px] font-bold text-black/35 sm:flex"><ShieldCheck size={13} /> {searchCopy.trustLabel}</span>
       </header>
 
       <div className="relative grid gap-0 lg:grid-cols-[.9fr_1.1fr]">
         <aside className="flex flex-col justify-center bg-ink px-7 py-10 text-white sm:px-10 lg:min-h-[620px]">
-          <p className="eyebrow text-lime">Product search</p>
-          <h1 className="display mt-4 text-5xl leading-[.95] sm:text-6xl">Tell us what you need.</h1>
-          <p className="mt-5 max-w-md text-sm leading-6 text-white/45">Search by use case, feature, category or budget. Findly only ranks active catalog products and shows the signals behind each result.</p>
+          <p className="eyebrow text-lime">{searchCopy.eyebrow}</p>
+          <h1 className="display mt-4 text-5xl leading-[.95] sm:text-6xl">{searchCopy.title}</h1>
+          <p className="mt-5 max-w-md text-sm leading-6 text-white/45">{searchCopy.description}</p>
 
           <form onSubmit={(event) => { event.preventDefault(); submitSearch(); }} className="mt-7 rounded-2xl bg-white p-1.5 text-ink">
             <div className="flex">
-              <input value={query} onChange={(event) => setQuery(event.target.value)} className="min-w-0 flex-1 bg-transparent px-4 py-3 text-sm font-bold outline-none" placeholder="e.g. waterproof hiking shoes under £140" />
-              <button disabled={searching || !query.trim()} className="rounded-full px-5 py-3 text-xs font-extrabold text-white disabled:opacity-50" style={{ background: accent }}>{searching ? <LoaderCircle size={14} className="animate-spin" /> : <ArrowRight size={14} />}</button>
+              <input value={query} onChange={(event) => setQuery(event.target.value)} className="min-w-0 flex-1 bg-transparent px-4 py-3 text-sm font-bold outline-none" placeholder={searchCopy.inputPlaceholder} />
+              <button disabled={searching || !query.trim()} className="rounded-full px-5 py-3 text-xs font-extrabold text-white disabled:opacity-50" style={{ background: accent }} aria-label={searchCopy.ctaLabel}>{searching ? <LoaderCircle size={14} className="animate-spin" /> : <ArrowRight size={14} />}</button>
             </div>
           </form>
 

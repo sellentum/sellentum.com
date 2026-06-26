@@ -90,6 +90,28 @@ function assertPublishedConfiguratorRuntime() {
   assert(page.includes("server_validated"), "Configurator analytics should mark server-validated bundles");
 }
 
+function assertPublicBrandingRuntime() {
+  const helper = readFileSync("lib/public-experience.ts", "utf8");
+  const finder = readFileSync("app/finder/[id]/page.tsx", "utf8");
+  const assistant = readFileSync("app/assistant/[id]/page.tsx", "utf8");
+  const search = readFileSync("app/search/[id]/page.tsx", "utf8");
+  const configurator = readFileSync("app/configurator/[id]/page.tsx", "utf8");
+  const finderRoute = readFileSync("app/api/public/finder/[id]/route.ts", "utf8");
+  const searchRoute = readFileSync("app/api/public/search/[id]/route.ts", "utf8");
+  const configuratorRoute = readFileSync("app/api/public/configurator/[id]/route.ts", "utf8");
+  assert(helper.includes("buildPublicExperienceCopy"), "Public experience helper should expose shared copy generation");
+  assert(helper.includes("normalizeWidgetSettings"), "Public experience helper should normalize widget settings");
+  assert(finder.includes("buildPublicExperienceCopy(\"finder\""), "Finder page should use shared public branding copy");
+  assert(assistant.includes("buildPublicExperienceCopy(\"assistant\""), "Assistant page should use shared public branding copy");
+  assert(search.includes("buildPublicExperienceCopy(\"search\""), "Search page should use shared public branding copy");
+  assert(configurator.includes("buildPublicExperienceCopy(\"configurator\""), "Configurator page should use shared public branding copy");
+  assert(finderRoute.includes("normalizeWidgetSettings(settings)"), "Finder public API should return normalized settings");
+  assert(searchRoute.includes("normalizeWidgetSettings(settings)"), "Search public API should return normalized settings");
+  assert(configuratorRoute.includes("normalizeWidgetSettings(settingsResult.data)"), "Configurator public API should return normalized settings");
+  assert(!assistant.includes("wet weekend trails"), "Assistant starter prompts should not be tied to the demo shoe catalog");
+  assert(!search.includes("waterproof hiking shoes"), "Search starter prompts should not be tied to the demo shoe catalog");
+}
+
 function assertSessionAnalytics() {
   const session = readFileSync("lib/session.ts", "utf8");
   const analytics = readFileSync("app/dashboard/analytics/page.tsx", "utf8");
@@ -315,6 +337,7 @@ async function assertDeterministicLogic() {
   const ruleCoverage = await import(pathToFileURL(`${compileDir}/lib/rule-coverage.js`));
   const searchEngine = await import(pathToFileURL(`${compileDir}/lib/search-engine.js`));
   const searchTuning = await import(pathToFileURL(`${compileDir}/lib/search-tuning.js`));
+  const publicExperience = await import(pathToFileURL(`${compileDir}/lib/public-experience.js`));
   const widgetSnippet = await import(pathToFileURL(`${compileDir}/lib/widget-snippet.js`));
   const launchPacket = await import(pathToFileURL(`${compileDir}/lib/launch-packet.js`));
   const configuratorReadiness = await import(pathToFileURL(`${compileDir}/lib/configurator-readiness.js`));
@@ -470,6 +493,11 @@ async function assertDeterministicLogic() {
   const healthyTuningReport = searchTuning.buildSearchTuningReport(trailSearch);
   assert(healthyTuningReport.counts.covered > 0 && healthyTuningReport.opportunities.length, "Expected search tuning to summarize healthy catalog-backed terms");
 
+  const normalizedSettings = publicExperience.normalizeWidgetSettings({ brand_name: "Acme Labs", primary_color: "not-a-colour", widget_title: "Find the right setup", welcome_message: "Tell us what matters most.", button_text: "Start matching", launcher_position: "bottom-left" });
+  assert(normalizedSettings.primary_color === "#22352a" && normalizedSettings.launcher_position === "bottom-left", "Expected public settings normalization to sanitize invalid colors while preserving valid launcher placement");
+  const publicCopy = publicExperience.buildPublicExperienceCopy("assistant", normalizedSettings);
+  assert(publicCopy.brandName === "Acme Labs" && publicCopy.title === "Find the right setup" && publicCopy.assistantGreeting === "Tell us what matters most.", "Expected public experience copy to reuse merchant widget settings");
+
   const generatedWidgetSnippet = widgetSnippet.buildWidgetSnippet({ origin: "https://findly.example", experience: "search", mode: "inline", id: "quiz_footwear", color: "#22352a", label: "Search products", position: "right" });
   assert(generatedWidgetSnippet.includes('data-experience="search"') && generatedWidgetSnippet.includes('data-mode="inline"') && generatedWidgetSnippet.includes('data-id="quiz_footwear"'), "Expected widget helper to generate a complete search embed snippet");
   const blockedInstallReport = widgetSnippet.buildWidgetInstallReport({ origin: "http://store.example", experience: "finder", mode: "modal", color: "#22352a", label: "Find my match", position: "right" });
@@ -533,6 +561,7 @@ async function main() {
   assertPublishedAdvisorRuntime();
   assertPublishedFinderRuntime();
   assertPublishedConfiguratorRuntime();
+  assertPublicBrandingRuntime();
   assertSessionAnalytics();
   assertLaunchStudioWorkflow();
   assertSemanticSearchWorkflow();

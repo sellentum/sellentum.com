@@ -1,12 +1,12 @@
 "use client";
 
-import { use, useEffect, useRef, useState } from "react";
+import { use, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, ExternalLink, LoaderCircle, MessageCircle, Send, ShieldCheck, Sparkles } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { getSessionMetadata } from "@/lib/session";
+import { buildPublicExperienceCopy, normalizeWidgetSettings } from "@/lib/public-experience";
 import type { ConversationalMatch, Product, Quiz, WidgetSettings } from "@/lib/types";
-import { demoSettings } from "@/lib/demo-data";
 import { formatCurrency } from "@/lib/utils";
 
 type AdvisorData = { quiz: Quiz; products: Product[]; settings: WidgetSettings };
@@ -15,7 +15,7 @@ type AssistantEventType = "widget_view" | "quiz_start" | "quiz_complete" | "prod
 type AdvisorStatus = "clarifying" | "recommendations";
 type LastIntent = { query: string; source?: string; terms?: string[]; maxBudget?: number | null; resultCount?: number; status?: AdvisorStatus };
 
-const suggestions = ["Comfortable shoes for wet weekend trails under £140", "A lightweight pair for city travel", "Something responsive for faster road running"];
+const suggestions = ["Something durable for everyday use", "A premium option under £150", "Help me compare the best value choices"];
 
 export default function AssistantPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -35,9 +35,20 @@ export default function AssistantPage({ params }: { params: Promise<{ id: string
   useEffect(() => {
     if (!store.ready) return;
     const localQuiz = store.quizzes.find((quiz) => quiz.id === id || quiz.slug === id);
-    if (localQuiz) { setData({ quiz: localQuiz, products: store.products, settings: store.settings }); setLoading(false); return; }
-    fetch(`/api/public/finder/${encodeURIComponent(id)}`).then(async (response) => { if (!response.ok) throw new Error((await response.json()).error || "Advisor not found."); return response.json(); }).then((result) => setData({ ...result, settings: result.settings || demoSettings })).catch((err) => setError(err.message)).finally(() => setLoading(false));
+    if (localQuiz) { setData({ quiz: localQuiz, products: store.products, settings: normalizeWidgetSettings(store.settings) }); setLoading(false); return; }
+    fetch(`/api/public/finder/${encodeURIComponent(id)}`).then(async (response) => { if (!response.ok) throw new Error((await response.json()).error || "Advisor not found."); return response.json(); }).then((result) => setData({ ...result, settings: normalizeWidgetSettings(result.settings) })).catch((err) => setError(err.message)).finally(() => setLoading(false));
   }, [id, store.ready, store.quizzes, store.products, store.settings]);
+
+  const settings = useMemo(() => normalizeWidgetSettings(data?.settings), [data?.settings]);
+  const advisorCopy = useMemo(() => buildPublicExperienceCopy("assistant", settings, { title: data?.settings.widget_title, description: data?.settings.welcome_message }), [settings, data?.settings.widget_title, data?.settings.welcome_message]);
+
+  useEffect(() => {
+    if (!data || started.current) return;
+    setMessages((current) => {
+      if (current.length !== 1 || current[0]?.role !== "assistant") return current;
+      return [{ role: "assistant", content: advisorCopy.assistantGreeting }];
+    });
+  }, [data, advisorCopy.assistantGreeting]);
 
   useEffect(() => {
     if (!data || viewed.current) return;
@@ -86,14 +97,14 @@ export default function AssistantPage({ params }: { params: Promise<{ id: string
 
   if (loading) return <main className="grid min-h-screen place-items-center bg-[#eef1e9]"><div className="text-center"><LoaderCircle className="mx-auto animate-spin text-moss" /><p className="mt-3 text-xs font-bold text-black/40">Preparing your product advisor…</p></div></main>;
   if (!data) return <main className="grid min-h-screen place-items-center bg-canvas p-6 text-center"><div><h1 className="text-3xl font-extrabold">Advisor unavailable</h1><p className="mt-2 text-sm text-black/45">{error}</p><Link href="/" className="btn-primary mt-5">Back to Findly</Link></div></main>;
-  const accent = data.settings.primary_color || "#22352a";
+  const accent = advisorCopy.accentColor;
 
   return <main className="min-h-screen bg-[radial-gradient(circle_at_80%_10%,rgba(217,255,97,.38),transparent_30%),linear-gradient(135deg,#f0f3eb,#fff5ec)] p-4 lg:p-8">
     <div className="mx-auto grid min-h-[calc(100vh-64px)] max-w-[1400px] overflow-hidden rounded-[30px] border border-white/80 bg-white shadow-[0_35px_100px_rgba(25,40,30,.16)] lg:grid-cols-[.82fr_1.18fr]">
       <section className="flex min-h-[700px] flex-col border-b border-black/[0.07] lg:border-b-0 lg:border-r">
-        <header className="flex items-center justify-between border-b border-black/[0.07] px-6 py-5"><div className="flex items-center gap-3"><span className="grid h-10 w-10 place-items-center rounded-2xl text-white" style={{ background: accent }}><MessageCircle size={18} /></span><span><span className="block text-sm font-extrabold">{data.settings.brand_name} advisor</span><span className="mt-0.5 flex items-center gap-1 text-[9px] font-bold text-black/35"><i className="h-1.5 w-1.5 rounded-full bg-green-500" /> Ready to help</span></span></div><span className="hidden items-center gap-1.5 text-[9px] font-bold text-black/30 sm:flex"><ShieldCheck size={12} /> Catalog-grounded</span></header>
-        <div className="flex-1 overflow-y-auto p-6"><div className="mb-7"><p className="eyebrow text-moss">Conversational discovery</p><h1 className="mt-3 text-3xl font-extrabold leading-tight tracking-[-.05em]">What can I help you find?</h1></div><div className="space-y-4">{messages.map((message, index) => <div key={index} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}><div className={`max-w-[88%] rounded-2xl px-4 py-3 text-xs leading-5 ${message.role === "user" ? "rounded-br-sm text-white" : "rounded-bl-sm bg-[#f0f2ec] text-black/60"}`} style={message.role === "user" ? { background: accent } : undefined}>{message.role === "assistant" && <Sparkles size={12} className="mb-2 text-moss" />}{message.content}</div></div>)}{searching && <div className="flex justify-start"><div className="flex items-center gap-2 rounded-2xl rounded-bl-sm bg-[#f0f2ec] px-4 py-3 text-[10px] font-bold text-black/40"><LoaderCircle size={13} className="animate-spin" /> Comparing catalog facts…</div></div>}</div>{clarifyingOptions.length > 0 && !searching && <div className="mt-5"><p className="text-[9px] font-extrabold uppercase tracking-wider text-black/30">Quick replies</p><div className="mt-2 flex flex-wrap gap-2">{clarifyingOptions.map((option) => <button key={option} onClick={() => ask(option)} className="rounded-full border border-moss/20 bg-lime/20 px-3 py-2 text-left text-[9px] font-extrabold text-moss hover:bg-lime/40">{option}</button>)}</div></div>}{messages.length === 1 && <div className="mt-7"><p className="text-[9px] font-extrabold uppercase tracking-wider text-black/30">Try asking</p><div className="mt-2 flex flex-wrap gap-2">{suggestions.map((suggestion) => <button key={suggestion} onClick={() => ask(suggestion)} className="rounded-full border border-black/10 bg-white px-3 py-2 text-left text-[9px] font-bold text-black/50 hover:border-moss/40 hover:text-moss">{suggestion}</button>)}</div></div>}{error && <p className="mt-4 rounded-xl bg-red-50 p-3 text-[10px] font-bold text-red-700">{error}</p>}</div>
-        <form onSubmit={(event) => { event.preventDefault(); ask(); }} className="border-t border-black/[0.07] p-4"><div className="flex items-center gap-2 rounded-2xl border border-black/10 bg-white p-2 shadow-sm focus-within:border-moss/40"><input value={query} onChange={(event) => setQuery(event.target.value)} className="min-w-0 flex-1 bg-transparent px-3 py-2.5 text-xs outline-none placeholder:text-black/30" placeholder="Describe the product you need…" maxLength={500} /><button disabled={!query.trim() || searching} className="grid h-10 w-10 place-items-center rounded-xl text-white disabled:opacity-40" style={{ background: accent }} aria-label="Ask product advisor"><Send size={15} /></button></div><p className="mt-2 text-center text-[8px] text-black/25">Product selection is constrained to the active catalog and your stated budget.</p></form>
+        <header className="flex items-center justify-between border-b border-black/[0.07] px-6 py-5"><div className="flex items-center gap-3"><span className="grid h-10 w-10 place-items-center rounded-2xl text-white" style={{ background: accent }}><MessageCircle size={18} /></span><span><span className="block text-sm font-extrabold">{advisorCopy.brandName} advisor</span><span className="mt-0.5 flex items-center gap-1 text-[9px] font-bold text-black/35"><i className="h-1.5 w-1.5 rounded-full bg-green-500" /> Ready to help</span></span></div><span className="hidden items-center gap-1.5 text-[9px] font-bold text-black/30 sm:flex"><ShieldCheck size={12} /> {advisorCopy.trustLabel}</span></header>
+        <div className="flex-1 overflow-y-auto p-6"><div className="mb-7"><p className="eyebrow text-moss">{advisorCopy.eyebrow}</p><h1 className="mt-3 text-3xl font-extrabold leading-tight tracking-[-.05em]">{advisorCopy.title}</h1><p className="mt-2 text-xs leading-5 text-black/40">{advisorCopy.description}</p></div><div className="space-y-4">{messages.map((message, index) => <div key={index} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}><div className={`max-w-[88%] rounded-2xl px-4 py-3 text-xs leading-5 ${message.role === "user" ? "rounded-br-sm text-white" : "rounded-bl-sm bg-[#f0f2ec] text-black/60"}`} style={message.role === "user" ? { background: accent } : undefined}>{message.role === "assistant" && <Sparkles size={12} className="mb-2 text-moss" />}{message.content}</div></div>)}{searching && <div className="flex justify-start"><div className="flex items-center gap-2 rounded-2xl rounded-bl-sm bg-[#f0f2ec] px-4 py-3 text-[10px] font-bold text-black/40"><LoaderCircle size={13} className="animate-spin" /> Comparing catalog facts…</div></div>}</div>{clarifyingOptions.length > 0 && !searching && <div className="mt-5"><p className="text-[9px] font-extrabold uppercase tracking-wider text-black/30">Quick replies</p><div className="mt-2 flex flex-wrap gap-2">{clarifyingOptions.map((option) => <button key={option} onClick={() => ask(option)} className="rounded-full border border-moss/20 bg-lime/20 px-3 py-2 text-left text-[9px] font-extrabold text-moss hover:bg-lime/40">{option}</button>)}</div></div>}{messages.length === 1 && <div className="mt-7"><p className="text-[9px] font-extrabold uppercase tracking-wider text-black/30">Try asking</p><div className="mt-2 flex flex-wrap gap-2">{suggestions.map((suggestion) => <button key={suggestion} onClick={() => ask(suggestion)} className="rounded-full border border-black/10 bg-white px-3 py-2 text-left text-[9px] font-bold text-black/50 hover:border-moss/40 hover:text-moss">{suggestion}</button>)}</div></div>}{error && <p className="mt-4 rounded-xl bg-red-50 p-3 text-[10px] font-bold text-red-700">{error}</p>}</div>
+        <form onSubmit={(event) => { event.preventDefault(); ask(); }} className="border-t border-black/[0.07] p-4"><div className="flex items-center gap-2 rounded-2xl border border-black/10 bg-white p-2 shadow-sm focus-within:border-moss/40"><input value={query} onChange={(event) => setQuery(event.target.value)} className="min-w-0 flex-1 bg-transparent px-3 py-2.5 text-xs outline-none placeholder:text-black/30" placeholder={advisorCopy.inputPlaceholder} maxLength={500} /><button disabled={!query.trim() || searching} className="grid h-10 w-10 place-items-center rounded-xl text-white disabled:opacity-40" style={{ background: accent }} aria-label="Ask product advisor"><Send size={15} /></button></div><p className="mt-2 text-center text-[8px] text-black/25">Product selection is constrained to the active catalog and your stated budget.</p></form>
       </section>
 
       <section className="bg-[#f7f8f4] p-6 lg:p-9"><div className="flex items-end justify-between"><div><p className="eyebrow text-moss">Recommended for you</p><h2 className="mt-2 text-3xl font-extrabold tracking-[-.05em]">{matches.length ? `${matches.length} strongest matches` : "Your matches will appear here"}</h2></div>{matches.length > 0 && <span className="rounded-full bg-lime px-3 py-1.5 text-[9px] font-extrabold">Ranked live</span>}</div>

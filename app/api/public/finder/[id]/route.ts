@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { resolveFinderAnswerPath } from "@/lib/finder-flow";
 import { runFinderRecommendations } from "@/lib/finder-engine";
+import { normalizeWidgetSettings } from "@/lib/public-experience";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getSemanticProductCandidates } from "@/lib/semantic-candidates";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -57,7 +58,7 @@ export async function GET(_: Request, context: { params: Promise<{ id: string }>
     supabase.from("widget_settings").select("*").eq("user_id", quiz.user_id).maybeSingle(),
   ]);
 
-  return NextResponse.json({ quiz: publicQuiz, products: [], catalog: { active_products: count || 0 }, settings });
+  return NextResponse.json({ quiz: publicQuiz, products: [], catalog: { active_products: count || 0 }, settings: normalizeWidgetSettings(settings) });
 }
 
 export async function POST(request: Request, context: { params: Promise<{ id: string }> }) {

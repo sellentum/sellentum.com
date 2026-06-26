@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { validateConfiguratorSelection } from "@/lib/configurator-engine";
+import { normalizeWidgetSettings } from "@/lib/public-experience";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Configurator, ConfiguratorStep, Product } from "@/lib/types";
@@ -57,7 +58,7 @@ export async function GET(_: Request, { params }: { params: Promise<{ id: string
   return NextResponse.json({
     configurator,
     products: productsResult.data || [],
-    settings: settingsResult.data,
+    settings: normalizeWidgetSettings(settingsResult.data),
   });
 }
 
