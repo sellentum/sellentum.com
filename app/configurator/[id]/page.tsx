@@ -6,6 +6,7 @@ import { ArrowLeft, ArrowRight, Check, ExternalLink, LoaderCircle, RefreshCcw, S
 import { LoadingState } from "@/components/loading-state";
 import { useStore } from "@/lib/store";
 import { getSessionMetadata } from "@/lib/session";
+import { buildConfiguratorOptionGuidance, buildConfiguratorSelectionGuidance } from "@/lib/configurator-guidance";
 import { buildPublicExperienceCopy, normalizeWidgetSettings } from "@/lib/public-experience";
 import type { Configurator, ConfiguratorOption, Product, WidgetSettings } from "@/lib/types";
 import { describeConfiguratorSelection, formatCurrency, getConfiguratorProducts, getConfiguratorProgress, getConfiguratorTotal, optionConflictsWithSelection, updateConfiguratorSelection } from "@/lib/utils";
@@ -107,6 +108,7 @@ export default function ConfiguratorPage() {
   const displaySelectedOptions = complete && validatedBundle ? validatedBundle.selectedOptions : selectionSummary.selected;
   const displaySelectedProducts = complete && validatedBundle ? validatedBundle.selectedProducts : selectedProducts;
   const displayPrimaryProduct = complete && validatedBundle ? validatedBundle.primaryProduct : primaryProduct;
+  const compatibilityGuidance = useMemo(() => configurator ? buildConfiguratorSelectionGuidance(configurator, selectedIds) : null, [configurator, selectedIds]);
 
   const explanation = useMemo(() => {
     if (complete && validatedBundle) return validatedBundle.explanation;
@@ -243,6 +245,10 @@ export default function ConfiguratorPage() {
                   {currentStep.options.map((option, index) => {
                     const selected = selectedIds.includes(option.id);
                     const disabled = !selected && optionConflictsWithSelection(option, selectedIds, configurator);
+                    const guidance = buildConfiguratorOptionGuidance(configurator, option.id, selectedIds);
+                    const alternativeLabels = guidance?.safeAlternativeIds
+                      .map((alternativeId) => currentStep.options.find((item) => item.id === alternativeId)?.label)
+                      .filter(Boolean) || [];
                     return (
                       <button key={option.id} onClick={() => choose(option.id)} disabled={disabled} className={`group grid grid-cols-[88px_1fr_auto] items-center gap-4 rounded-3xl border p-3 text-left transition ${selected ? "border-ink bg-ink text-white shadow-lg" : disabled ? "border-black/5 bg-black/[0.03] text-black/25" : "border-black/10 bg-white hover:-translate-y-0.5 hover:border-black/25 hover:shadow-md"}`}>
                         <div className="h-20 overflow-hidden rounded-2xl bg-[#eceee8]">
@@ -252,6 +258,10 @@ export default function ConfiguratorPage() {
                           <span className="flex items-center gap-2"><span className={`grid h-7 w-7 place-items-center rounded-full border text-[10px] font-extrabold ${selected ? "border-lime bg-lime text-ink" : "border-black/10 bg-canvas text-black/40"}`}>{selected ? <Check size={12} /> : String.fromCharCode(65 + index)}</span><span className="font-extrabold">{option.label}</span></span>
                           <span className={`mt-2 block text-xs leading-5 ${selected ? "text-white/55" : "text-black/45"}`}>{option.description}</span>
                           <span className="mt-3 flex flex-wrap gap-1.5">{option.tags.slice(0, 4).map((tag) => <span key={tag} className={`rounded-full px-2 py-1 text-[8px] font-bold ${selected ? "bg-white/10 text-lime" : "bg-lime/30 text-moss"}`}>{tag}</span>)}</span>
+                          {disabled && guidance && <span className="mt-3 block rounded-xl bg-red-50 px-3 py-2 text-[9px] font-bold leading-4 text-red-600">
+                            {guidance.explanation}
+                            {alternativeLabels.length ? ` Try ${alternativeLabels.slice(0, 2).join(" or ")} instead.` : " Go back and change the conflicting choice to unlock it."}
+                          </span>}
                         </span>
                         <span className="text-right">
                           <span className="block text-sm font-extrabold">{option.price_delta ? formatCurrency(option.price_delta) : "Included"}</span>
@@ -279,6 +289,21 @@ export default function ConfiguratorPage() {
                       return <div key={option.id} className="flex gap-3 rounded-2xl bg-[#f1f3ed] p-3"><div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-white">{(linkedProduct?.image_url || option.image_url) && <img src={linkedProduct?.image_url || option.image_url} alt="" className="h-full w-full object-cover" />}</div><div><p className="text-xs font-extrabold">{option.label}</p><p className="mt-1 text-[10px] leading-4 text-black/45">{option.description}</p><p className="mt-1 text-[10px] font-extrabold text-moss">{option.price_delta ? formatCurrency(option.price_delta) : "Included"}</p></div></div>;
                     })}
                   </div>
+                  {compatibilityGuidance && <div className="mt-6 rounded-2xl border border-black/[0.06] bg-[#f7f8f4] p-4">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <p className="text-xs font-extrabold">Compatibility guidance</p>
+                        <p className="mt-1 text-[10px] leading-4 text-black/40">{compatibilityGuidance.summary}</p>
+                      </div>
+                      <span className="rounded-full bg-lime/35 px-3 py-1 text-[9px] font-extrabold text-moss">{compatibilityGuidance.availableOptions.length} safe options</span>
+                    </div>
+                    {compatibilityGuidance.blockedOptions.length ? <div className="mt-3 grid gap-2 lg:grid-cols-2">
+                      {compatibilityGuidance.blockedOptions.slice(0, 4).map((item) => <div key={item.optionId} className="rounded-xl bg-white p-3">
+                        <p className="text-[10px] font-extrabold">{item.explanation}</p>
+                        <p className="mt-1 text-[9px] leading-4 text-black/40">{item.suggestion}</p>
+                      </div>)}
+                    </div> : null}
+                  </div>}
                   <div className="mt-8 flex flex-wrap gap-3">
                     {displayPrimaryProduct ? <a href={displayPrimaryProduct.product_url || "#"} target="_blank" rel="noreferrer" onClick={() => track("buy_click", displayPrimaryProduct.id, { product_name: displayPrimaryProduct.name, primary_product_id: displayPrimaryProduct.id, primary_product_name: displayPrimaryProduct.name, server_validated: Boolean(validatedBundle) }, validatedBundle?.selectedIds || selectedIds)} className="inline-flex items-center gap-2 rounded-full px-6 py-3.5 text-sm font-extrabold text-white" style={{ background: accent }}>Buy configured kit <ExternalLink size={14} /></a> : <button className="btn-primary">Request quote</button>}
                     <button onClick={restart} className="btn-secondary"><RefreshCcw size={14} /> Start again</button>

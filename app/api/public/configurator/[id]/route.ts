@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { validateConfiguratorSelection } from "@/lib/configurator-engine";
+import { buildConfiguratorSelectionGuidance } from "@/lib/configurator-guidance";
 import { normalizeWidgetSettings } from "@/lib/public-experience";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -88,6 +89,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     const result = validateConfiguratorSelection(configurator, (products || []) as Product[], parsed.data.selectedIds);
     return NextResponse.json({
       ...result,
+      compatibility_guidance: buildConfiguratorSelectionGuidance(configurator, parsed.data.selectedIds),
       experience: { id: configurator.id, name: configurator.name, slug: configurator.slug },
     }, { status: result.valid ? 200 : 400 });
   } catch (error) {

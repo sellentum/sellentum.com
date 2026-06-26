@@ -101,10 +101,16 @@ function assertPublishedFinderRuntime() {
 function assertPublishedConfiguratorRuntime() {
   const route = readFileSync("app/api/public/configurator/[id]/route.ts", "utf8");
   const page = readFileSync("app/configurator/[id]/page.tsx", "utf8");
+  const guidance = readFileSync("lib/configurator-guidance.ts", "utf8");
   assert(route.includes("validateConfiguratorSelection"), "Published configurator route should validate bundles server-side");
+  assert(route.includes("buildConfiguratorSelectionGuidance"), "Published configurator route should return compatibility guidance");
   assert(route.includes("selectedIds"), "Published configurator route should accept selected option IDs");
   assert(page.includes("/api/public/configurator/"), "Configurator page should call the published configurator runtime outside demo mode");
   assert(page.includes("server_validated"), "Configurator analytics should mark server-validated bundles");
+  assert(page.includes("Compatibility guidance"), "Configurator page should explain blocked compatibility choices");
+  assert(page.includes("buildConfiguratorOptionGuidance"), "Configurator page should use deterministic option guidance");
+  assert(guidance.includes("buildConfiguratorSelectionGuidance"), "Configurator guidance helper should expose selection guidance");
+  assert(guidance.includes("safeAlternativeIds"), "Configurator guidance should include safe alternatives for blocked options");
 }
 
 function assertPublicBrandingRuntime() {
@@ -396,6 +402,10 @@ async function assertDeterministicLogic() {
   writeFileSync(compiledRecommendationRecovery, readFileSync(compiledRecommendationRecovery, "utf8")
     .replace('from "./utils";', 'from "./utils.js";')
     .replace('from "@/lib/utils";', 'from "./utils.js";'));
+  const compiledConfiguratorGuidance = `${compileDir}/lib/configurator-guidance.js`;
+  writeFileSync(compiledConfiguratorGuidance, readFileSync(compiledConfiguratorGuidance, "utf8")
+    .replace('from "./utils";', 'from "./utils.js";')
+    .replace('from "@/lib/utils";', 'from "./utils.js";'));
   const compiledSearchEngine = `${compileDir}/lib/search-engine.js`;
   writeFileSync(compiledSearchEngine, readFileSync(compiledSearchEngine, "utf8").replace('from "./catalog-benefits";', 'from "./catalog-benefits.js";'));
   const compiledExperienceLaunch = `${compileDir}/lib/experience-launch.js`;
@@ -430,6 +440,7 @@ async function assertDeterministicLogic() {
   const quizReadiness = await import(pathToFileURL(`${compileDir}/lib/quiz-readiness.js`));
   const recommendationQa = await import(pathToFileURL(`${compileDir}/lib/recommendation-qa.js`));
   const recommendationRecovery = await import(pathToFileURL(`${compileDir}/lib/recommendation-recovery.js`));
+  const configuratorGuidance = await import(pathToFileURL(`${compileDir}/lib/configurator-guidance.js`));
   const recommendationTrace = await import(pathToFileURL(`${compileDir}/lib/recommendation-trace.js`));
   const ruleCoverage = await import(pathToFileURL(`${compileDir}/lib/rule-coverage.js`));
   const searchEngine = await import(pathToFileURL(`${compileDir}/lib/search-engine.js`));
@@ -500,6 +511,10 @@ async function assertDeterministicLogic() {
   assert(utils.getConfiguratorTotal(demo.demoConfigurator, selected) === 166, "Expected configured trail kit total to be £166");
   assert(utils.getConfiguratorProgress(demo.demoConfigurator, selected) === 100, "Expected configured trail kit progress to be 100%");
   assert(utils.optionConflictsWithSelection(cloud, selected, demo.demoConfigurator), "Expected Cloud Rest to conflict with wet/mud trail selection");
+  const cloudGuidance = configuratorGuidance.buildConfiguratorOptionGuidance(demo.demoConfigurator, "config_opt_cloud", selected);
+  assert(cloudGuidance?.blocked && cloudGuidance.explanation.includes("Wet trails & mud"), "Expected configurator guidance to explain the selected compatibility conflict");
+  const selectionGuidance = configuratorGuidance.buildConfiguratorSelectionGuidance(demo.demoConfigurator, selected);
+  assert(selectionGuidance.blockedOptions.length > 0 && selectionGuidance.summary.includes("blocked"), "Expected configurator selection guidance to summarize blocked options");
 
   const eventTypes = [
     { quiz_id: "quiz_footwear", metadata: { experience_type: "assistant" } },
