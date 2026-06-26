@@ -65,6 +65,7 @@ export type LaunchReadinessReport = {
 const sectionWeights: Record<string, number> = {
   environment: 1.1,
   catalog: 1.15,
+  "shopper-language": 1.15,
   experiences: 1.25,
   "recommendation-qa": 1.3,
   "explanation-grounding": 1.2,
@@ -88,6 +89,7 @@ function statusScore(status: LaunchCheckStatus) {
 function sectionOwner(section: LaunchReportSection) {
   if (section.id === "environment") return "Engineering";
   if (section.id === "catalog") return "Catalog";
+  if (section.id === "shopper-language") return "Catalog";
   if (section.id === "experiences") return "Experience";
   if (section.id === "recommendation-qa") return "Recommendation QA";
   if (section.id === "explanation-grounding") return "Content QA";
@@ -99,6 +101,7 @@ function sectionOwner(section: LaunchReportSection) {
 function sectionImpact(section: LaunchReportSection, check: LaunchReportCheck) {
   if (section.id === "environment") return check.id === "openai" ? "AI quality" : "Production runtime";
   if (section.id === "catalog") return check.id.includes("semantic") || check.id.includes("enrichment") ? "Search relevance" : "Recommendation quality";
+  if (section.id === "shopper-language") return check.id.includes("observed") ? "Shopper relevance" : "Discovery relevance";
   if (section.id === "experiences") return "Launch coverage";
   if (section.id === "recommendation-qa") return "Recommendation reliability";
   if (section.id === "explanation-grounding") return "AI trust";
@@ -109,6 +112,7 @@ function sectionImpact(section: LaunchReportSection, check: LaunchReportCheck) {
 
 function checkEffort(check: LaunchReportCheck) {
   if (["app-url", "openai", "settings", "event-volume", "session-events", "intent-events", "analytics-quality-score", "analytics-contract-coverage"].includes(check.id)) return "Small";
+  if (check.id.includes("language") || check.id.includes("synonym")) return check.id === "semantic-synonyms" ? "Small" : "Medium";
   if (check.id.includes("explanation-")) return check.id === "explanation-fact-coverage" ? "Medium" : "Small";
   if (check.id.includes("analytics-")) return "Small";
   if (check.id.includes("readiness") || check.id.includes("qa") || check.id.includes("catalog-")) return "Medium";
@@ -123,6 +127,7 @@ function checkPriority(section: LaunchReportSection, check: LaunchReportCheck): 
   }
 
   if (section.id === "recommendation-qa") return "high";
+  if (section.id === "shopper-language" && check.status === "warn") return check.id === "semantic-synonyms" ? "low" : "medium";
   if (section.id === "explanation-grounding" && check.status === "warn") return check.id === "explanation-source" ? "low" : "medium";
   if (section.id === "environment" && check.id.includes("supabase")) return "high";
   if (section.id === "experiences" && (check.id.includes("readiness") || check.id === "advisor")) return "high";
@@ -145,6 +150,10 @@ function actionTitle(check: LaunchReportCheck) {
     "catalog-commerce-assets": "Complete product images and commerce links",
     "catalog-taxonomy": "Normalize product categories",
     "semantic-runtime": "Prepare semantic candidate retrieval",
+    "language-coverage-score": "Improve shopper language coverage",
+    "observed-shopper-language": "Add observed shopper terms to product facts",
+    "product-language-backlog": "Fill the product language backlog",
+    "semantic-synonyms": "Approve semantic synonyms",
     "published-finder": "Publish one launch-ready finder",
     "finder-readiness": "Fix published finder readiness issues",
     advisor: "Make the conversational advisor launchable",
@@ -237,6 +246,10 @@ function strengthCopy(check: LaunchReportCheck) {
     "analytics-contract-coverage": "All five analytics contract events have been captured.",
     "catalog-matching-signals": "The catalog has structured signals for deterministic matching.",
     "catalog-commerce-assets": "Result cards have enough media and links to convert.",
+    "language-coverage-score": "Shopper language maps back to catalog evidence.",
+    "observed-shopper-language": "Observed search and advisor language is covered by product facts.",
+    "product-language-backlog": "Active products carry enough buyer needs and semantic copy.",
+    "semantic-synonyms": "Synonym opportunities are available for merchant review.",
   };
 
   return strengths[check.id] || `${check.label} is ready.`;

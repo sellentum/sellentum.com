@@ -378,6 +378,7 @@ function assertCatalogImportWorkflow() {
   const intelligence = readFileSync("lib/catalog-intelligence.ts", "utf8");
   const ontology = readFileSync("lib/catalog-ontology.ts", "utf8");
   const benefits = readFileSync("lib/catalog-benefits.ts", "utf8");
+  const languagePlanner = readFileSync("lib/shopper-language-planner.ts", "utf8");
   const preflight = readFileSync("app/api/preflight/route.ts", "utf8");
   const preflightPage = readFileSync("app/dashboard/preflight/page.tsx", "utf8");
   assert(page.includes("normalizeCatalogImportRows"), "Product CSV import should use the shared catalog import normalizer");
@@ -396,6 +397,13 @@ function assertCatalogImportWorkflow() {
   assert(benefits.includes("buildCatalogBenefitReport"), "Catalog benefit helper should expose deterministic spec-to-benefit translation");
   assert(ontologyPage.includes("buildCatalogBenefitReport"), "Ontology dashboard should use the shared catalog benefit translator");
   assert(ontologyPage.includes("Spec-to-benefit translator"), "Ontology dashboard should surface spec-to-benefit translation");
+  assert(languagePlanner.includes("buildShopperLanguagePlan"), "Shopper language planner should expose a reusable report builder");
+  assert(languagePlanner.includes("missingObservedTerms") && languagePlanner.includes("synonymSuggestions"), "Shopper language planner should detect missing observed terms and synonym opportunities");
+  assert(ontologyPage.includes("buildShopperLanguagePlan"), "Ontology dashboard should use the shared shopper language planner");
+  assert(ontologyPage.includes("Shopper language planner"), "Ontology dashboard should surface shopper-language planning");
+  assert(preflight.includes("buildShopperLanguagePlan"), "Preflight should reuse shopper-language launch checks");
+  assert(preflight.includes("Shopper language coverage"), "Preflight should expose a shopper-language coverage section");
+  assert(preflightPage.includes("shopper_language_score"), "Preflight page should show shopper-language summary fields");
   assert(ontologyPage.includes("Suggested finder questions"), "Ontology dashboard should surface AI-ready finder question ideas");
   assert(shell.includes("/dashboard/ontology"), "Dashboard navigation should expose the ontology map");
   assert(preflight.includes("analyzeCatalogIntelligence"), "Preflight should reuse shared catalog intelligence diagnostics");
@@ -507,6 +515,11 @@ async function assertDeterministicLogic() {
     .replace('from "@/lib/utils";', 'from "./utils.js";'));
   const compiledSearchEngine = `${compileDir}/lib/search-engine.js`;
   writeFileSync(compiledSearchEngine, readFileSync(compiledSearchEngine, "utf8").replace('from "./catalog-benefits";', 'from "./catalog-benefits.js";'));
+  const compiledShopperLanguagePlanner = `${compileDir}/lib/shopper-language-planner.js`;
+  writeFileSync(compiledShopperLanguagePlanner, readFileSync(compiledShopperLanguagePlanner, "utf8")
+    .replace('from "./catalog-benefits";', 'from "./catalog-benefits.js";')
+    .replace('from "./catalog-ontology";', 'from "./catalog-ontology.js";')
+    .replace('from "./search-engine";', 'from "./search-engine.js";'));
   const compiledExperienceLaunch = `${compileDir}/lib/experience-launch.js`;
   writeFileSync(compiledExperienceLaunch, readFileSync(compiledExperienceLaunch, "utf8")
     .replace('from "./widget-snippet";', 'from "./widget-snippet.js";')
@@ -561,6 +574,7 @@ async function assertDeterministicLogic() {
   const recommendationTrace = await import(pathToFileURL(`${compileDir}/lib/recommendation-trace.js`));
   const ruleCoverage = await import(pathToFileURL(`${compileDir}/lib/rule-coverage.js`));
   const searchEngine = await import(pathToFileURL(`${compileDir}/lib/search-engine.js`));
+  const shopperLanguagePlanner = await import(pathToFileURL(`${compileDir}/lib/shopper-language-planner.js`));
   const searchRecovery = await import(pathToFileURL(`${compileDir}/lib/search-recovery.js`));
   const searchTuning = await import(pathToFileURL(`${compileDir}/lib/search-tuning.js`));
   const publicExperience = await import(pathToFileURL(`${compileDir}/lib/public-experience.js`));
@@ -762,6 +776,11 @@ async function assertDeterministicLogic() {
   assert(benefitReport.suggestedQuestion.options.length, "Expected benefit report to produce benefit-led question options");
   const benefitIntentTerms = catalogBenefits.expandBenefitIntentTokens("I need wet-weather protection");
   assert(benefitIntentTerms.includes("water") && benefitIntentTerms.includes("rain"), "Expected benefit intent expansion to map shopper benefit language to concrete catalog terms");
+  const shopperLanguagePlan = shopperLanguagePlanner.buildShopperLanguagePlan({ products: demo.demoProducts, quizzes: [demo.demoQuiz], events: demo.demoEvents });
+  assert(shopperLanguagePlan.score > 0 && shopperLanguagePlan.summary.coveredTerms > 0, "Expected shopper language planner to score catalog-backed vocabulary coverage");
+  assert(shopperLanguagePlan.missingTerms.some((term) => term.term === "orthopedic" || term.term === "office"), "Expected shopper language planner to detect missing observed shopper vocabulary");
+  assert(shopperLanguagePlan.actions.some((action) => action.id === "add-missing-shopper-language"), "Expected shopper language planner to create enrichment actions from missing query terms");
+  assert(shopperLanguagePlan.productAudits.some((audit) => audit.suggestedSearchText.includes(audit.productName)), "Expected shopper language planner to create product-level search text suggestions");
   const generatedSuggestion = quizGeneration.buildOntologyQuizSuggestion(demo.demoProducts, "Help shoppers choose the right footwear");
   assert(generatedSuggestion.questions.length >= 2, "Expected ontology-guided quiz generation to produce multiple questions");
   assert(generatedSuggestion.questions.some((question) => question.options.some((option) => option.match_type === "category" || option.match_type === "tag" || option.match_type === "feature")), "Expected generated quiz to use ontology-backed catalog rules");

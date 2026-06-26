@@ -10,6 +10,7 @@ Findly is a compact guided-selling SaaS product for ecommerce brands. A merchant
 - AI catalog enrichment with normalized attributes, buyer needs, semantic search text and optional OpenAI embeddings
 - Catalog intelligence scoring for enrichment coverage, semantic-search readiness, matching signals, product media and commerce links
 - Ontology map for inspecting category clusters, buyer needs, tags, features, spec-to-benefit translations, thin signals and AI-ready quiz question ideas
+- Shopper language planner that compares catalog facts, generated quiz terms and real search/advisor queries to find covered, thin and missing shopper vocabulary before launch
 - AI quiz blueprint review in Launch Studio so merchants can inspect planned questions, catalog coverage and generation risks before publishing
 - Launch Studio workflow that enriches a catalog, generates a finder, publishes it, prepares finder/advisor/search/configurator embed snippets and copies a developer launch packet from one screen
 - Copyable launch contract with runtime endpoints, widget data attributes, analytics payload requirements, QA checks and troubleshooting guidance for storefront handoff
@@ -50,7 +51,7 @@ Findly is a compact guided-selling SaaS product for ecommerce brands. A merchant
 - Conversion playbook that turns analytics quality, funnel rates, discovery gaps, catalog health and product demand into prioritized merchant actions
 - Commercial impact reporting that estimates assisted product value, unclicked recommendation value, demand coverage and ROI opportunities from recommendation and buy-click events
 - Brand, colour, widget copy and launcher-position settings
-- Launch preflight checks for catalog readiness, builder readiness diagnostics, synthetic recommendation QA, AI/env keys, published experiences, widget setup, analytics coverage and telemetry quality
+- Launch preflight checks for catalog readiness, shopper-language coverage, builder readiness diagnostics, synthetic recommendation QA, AI/env keys, published experiences, widget setup, analytics coverage and telemetry quality
 - Prioritized launch-readiness report that turns preflight checks into a scored production plan with owners, evidence, effort and next actions
 - Supabase schema, indexes, triggers and row-level security
 - Fully interactive local demo mode when credentials are absent
@@ -148,6 +149,7 @@ Import the repository into Vercel, add the variables from `.env.example`, and de
 - `lib/catalog-benefits.ts` — deterministic spec-to-benefit translation for shopper-friendly ontology insights and question ideas
 - `lib/catalog-intelligence.ts` — catalog health scoring for enrichment coverage, matching signals, semantic text, media and commerce links
 - `lib/catalog-ontology.ts` — category, buyer-need, tag and feature clustering for ontology mapping and question ideas
+- `lib/shopper-language-planner.ts` — deterministic shopper-vocabulary coverage planner for catalog enrichment, synonym review, quiz guidance and preflight launch checks
 - `lib/quiz-generation.ts` — ontology-guided quiz generation fallback and OpenAI grounding summary
 - `lib/quiz-blueprint.ts` — launch-ready preview of generated finder questions, option coverage and catalog risks
 - `lib/finder-flow.ts` — deterministic conditional question routing and server-side answer-path validation

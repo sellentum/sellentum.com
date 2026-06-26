@@ -8,6 +8,7 @@ import { buildExplanationGroundingReport } from "@/lib/explanation-grounding";
 import { buildLaunchReadinessReport } from "@/lib/launch-readiness-report";
 import { analyzeQuizReadiness } from "@/lib/quiz-readiness";
 import { buildRecommendationQaReport } from "@/lib/recommendation-qa";
+import { buildShopperLanguagePlan } from "@/lib/shopper-language-planner";
 import type { AnalyticsEvent, Configurator, Product, Quiz, WidgetSettings } from "@/lib/types";
 
 type CheckStatus = "pass" | "warn" | "fail";
@@ -82,6 +83,7 @@ function buildPreflight({ products, quizzes, configurators, events, settings, mo
 }) {
   const activeProducts = products.filter((product) => product.active);
   const catalogIntelligence = analyzeCatalogIntelligence(products);
+  const shopperLanguage = buildShopperLanguagePlan({ products, quizzes, events });
   const finderReadiness = quizzes.map((quiz) => ({ quiz, report: analyzeQuizReadiness(quiz, products) }));
   const configuratorReadiness = configurators.map((configurator) => ({ configurator, report: analyzeConfiguratorReadiness(configurator, products) }));
   const recommendationQa = buildRecommendationQaReport(quizzes, products);
@@ -122,6 +124,49 @@ function buildPreflight({ products, quizzes, configurators, events, settings, mo
       checks: [
         ...catalogIntelligence.checks.map((item) => check(`catalog-${item.id}`, item.label, catalogDescription(item.id), catalogStatus(item.severity), item.detail, "/dashboard/products", catalogActionLabel(item.id))),
         check("semantic-runtime", "Semantic candidate retrieval", "Published advisors can use enriched catalog text and stored embeddings to retrieve better candidates before deterministic ranking.", process.env.OPENAI_API_KEY && catalogIntelligence.enrichedProducts ? "pass" : catalogIntelligence.enrichedProducts ? "warn" : "warn", process.env.OPENAI_API_KEY && catalogIntelligence.enrichedProducts ? "OpenAI and enriched products are available for pgvector-backed advisor retrieval." : catalogIntelligence.enrichedProducts ? "Products are enriched, but OPENAI_API_KEY is missing so advisor retrieval uses rules/fallbacks." : "Run catalog enrichment with an OpenAI key to activate semantic candidate retrieval.", "/dashboard/products", "Prepare semantic catalog"),
+      ],
+    },
+    {
+      id: "shopper-language",
+      label: "Shopper language coverage",
+      description: "Shopper vocabulary from catalog facts, quiz options and analytics should map back to real product evidence.",
+      checks: [
+        check(
+          "language-coverage-score",
+          "Language coverage score",
+          "Combines covered terms, thin terms, missing terms, product-level search text and quiz term coverage.",
+          shopperLanguage.score >= 82 ? "pass" : shopperLanguage.score >= 55 ? "warn" : "fail",
+          `${shopperLanguage.score}% score · ${shopperLanguage.summary.coveredTerms} covered · ${shopperLanguage.summary.thinTerms} thin · ${shopperLanguage.summary.missingTerms} missing terms.`,
+          "/dashboard/ontology",
+          "Review planner",
+        ),
+        check(
+          "observed-shopper-language",
+          "Observed shopper terms",
+          "Search and advisor queries should not contain repeated language missing from product facts.",
+          shopperLanguage.summary.observedTerms ? shopperLanguage.summary.missingObservedTerms ? "warn" : "pass" : "warn",
+          shopperLanguage.summary.observedTerms ? shopperLanguage.summary.missingObservedTerms ? `${shopperLanguage.summary.missingObservedTerms}/${shopperLanguage.summary.observedTerms} observed term${shopperLanguage.summary.observedTerms === 1 ? "" : "s"} are missing direct catalog coverage.` : `${shopperLanguage.summary.observedTerms} observed shopper term${shopperLanguage.summary.observedTerms === 1 ? "" : "s"} map back to catalog evidence.` : "No search/advisor query terms captured yet; run a storefront QA session.",
+          "/dashboard/analytics",
+          "Review intent",
+        ),
+        check(
+          "product-language-backlog",
+          "Product language backlog",
+          "Every active product should carry buyer needs and semantic search text for search, advisor and AI explanations.",
+          shopperLanguage.summary.productsNeedingLanguage ? "warn" : activeProducts.length ? "pass" : "fail",
+          shopperLanguage.summary.productsNeedingLanguage ? `${shopperLanguage.summary.productsNeedingLanguage} active product${shopperLanguage.summary.productsNeedingLanguage === 1 ? "" : "s"} need buyer needs, search text or richer copy.` : activeProducts.length ? "Active products have enough discovery language for launch testing." : "No active products are available to audit.",
+          "/dashboard/products",
+          "Edit products",
+        ),
+        check(
+          "semantic-synonyms",
+          "Semantic synonym guidance",
+          "Adjacent shopper phrases should be approved only when they are factually true for the product.",
+          shopperLanguage.summary.synonymSuggestions ? "pass" : "warn",
+          shopperLanguage.summary.synonymSuggestions ? `${shopperLanguage.summary.synonymSuggestions} synonym suggestion${shopperLanguage.summary.synonymSuggestions === 1 ? "" : "s"} available for merchant review.` : "No synonym opportunities detected yet; add richer product tags and buyer needs.",
+          "/dashboard/ontology",
+          "Review synonyms",
+        ),
       ],
     },
     {
@@ -304,6 +349,12 @@ function buildPreflight({ products, quizzes, configurators, events, settings, mo
       catalog_intelligence_score: catalogIntelligence.score,
       catalog_intelligence_blockers: catalogIntelligence.blockers.length,
       catalog_intelligence_warnings: catalogIntelligence.warnings.length,
+      shopper_language_score: shopperLanguage.score,
+      shopper_language_covered_terms: shopperLanguage.summary.coveredTerms,
+      shopper_language_thin_terms: shopperLanguage.summary.thinTerms,
+      shopper_language_missing_terms: shopperLanguage.summary.missingTerms,
+      shopper_language_missing_observed_terms: shopperLanguage.summary.missingObservedTerms,
+      shopper_language_products_needing_copy: shopperLanguage.summary.productsNeedingLanguage,
       published_finders: publishedFinders.length,
       ready_finders: readyFinders.length,
       published_configurators: publishedConfigurators.length,

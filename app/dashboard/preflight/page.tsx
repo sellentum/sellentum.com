@@ -77,6 +77,12 @@ type PreflightPayload = {
     catalog_intelligence_score: number;
     catalog_intelligence_blockers: number;
     catalog_intelligence_warnings: number;
+    shopper_language_score: number;
+    shopper_language_covered_terms: number;
+    shopper_language_thin_terms: number;
+    shopper_language_missing_terms: number;
+    shopper_language_missing_observed_terms: number;
+    shopper_language_products_needing_copy: number;
     ready_finders: number;
     ready_configurators: number;
     finder_readiness_blockers: number;
@@ -284,6 +290,12 @@ export default function PreflightPage() {
           [`${payload.summary.catalog_intelligence_score}%`, "Catalog score"],
           [payload.summary.catalog_intelligence_blockers, "Catalog blockers"],
           [payload.summary.catalog_intelligence_warnings, "Catalog warnings"],
+          [`${payload.summary.shopper_language_score}%`, "Language QA"],
+          [payload.summary.shopper_language_covered_terms, "Covered terms"],
+          [payload.summary.shopper_language_thin_terms, "Thin terms"],
+          [payload.summary.shopper_language_missing_terms, "Missing terms"],
+          [payload.summary.shopper_language_missing_observed_terms, "Missing observed"],
+          [payload.summary.shopper_language_products_needing_copy, "Copy backlog"],
           [payload.summary.ready_finders, "Ready finders"],
           [payload.summary.ready_configurators, "Ready configurators"],
           [`${payload.summary.recommendation_qa_score}%`, "QA score"],
