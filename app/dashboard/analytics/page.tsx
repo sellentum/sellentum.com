@@ -5,6 +5,7 @@ import { AlertTriangle, ArrowDownRight, ArrowUpRight, Check, ChevronDown, Clock3
 import { LoadingState } from "@/components/loading-state";
 import { useStore } from "@/lib/store";
 import type { ExperienceType } from "@/lib/types";
+import { buildAnalyticsQualityReport, type AnalyticsQualityCheckStatus, type AnalyticsQualityStatus } from "@/lib/analytics-quality";
 import { buildAnalyticsSnapshot, buildAnalyticsTrends, buildFunnelDiagnosis, countAnalyticsEvents, getAnalyticsPeriods, stageRate } from "@/lib/analytics";
 import { buildDiscoveryGapReport, type DiscoveryGapSeverity } from "@/lib/discovery-gaps";
 import { buildZeroPartyInsights } from "@/lib/insights";
@@ -34,6 +35,18 @@ const discoverySeverityTone: Record<DiscoveryGapSeverity, string> = {
   watch: "border-amber-200 bg-amber-50 text-amber-800",
   info: "border-black/[0.06] bg-[#f7f8f4] text-black/60",
   win: "border-lime/60 bg-lime/20 text-moss",
+};
+
+const analyticsQualityTone: Record<AnalyticsQualityStatus, string> = {
+  healthy: "bg-lime text-moss",
+  watch: "bg-amber-100 text-amber-800",
+  "needs-attention": "bg-red-100 text-red-700",
+};
+
+const analyticsCheckTone: Record<AnalyticsQualityCheckStatus, string> = {
+  pass: "bg-lime/25 text-moss",
+  warn: "bg-amber-50 text-amber-700",
+  fail: "bg-red-50 text-red-700",
 };
 
 function formatDuration(seconds: number) {
@@ -82,6 +95,7 @@ export default function AnalyticsPage() {
   const discoveryGapReport = useMemo(() => buildDiscoveryGapReport(filteredEvents, products), [filteredEvents, products]);
   const zeroPartyInsights = useMemo(() => buildZeroPartyInsights(filteredEvents, products), [filteredEvents, products]);
   const journeyReport = useMemo(() => buildShopperJourneyReport(filteredEvents, products), [filteredEvents, products]);
+  const analyticsQuality = useMemo(() => buildAnalyticsQualityReport(filteredEvents), [filteredEvents]);
 
   const byDay = useMemo(() => Array.from({ length: rangeDays }, (_, reverseIndex) => {
     const offset = rangeDays - 1 - reverseIndex;
@@ -164,6 +178,58 @@ export default function AnalyticsPage() {
           );
         })}
       </div>
+
+      <section className="mt-5 grid gap-5 xl:grid-cols-[.68fr_1.32fr]">
+        <div className="rounded-2xl border border-black/[0.07] bg-ink p-6 text-white">
+          <div className="flex items-center justify-between gap-4">
+            <span className={`grid h-11 w-11 place-items-center rounded-xl ${analyticsQuality.status === "healthy" ? "bg-lime text-ink" : analyticsQuality.status === "watch" ? "bg-amber-300 text-ink" : "bg-red-400 text-white"}`}>{analyticsQuality.status === "needs-attention" ? <ShieldAlert size={19} /> : <Radar size={19} />}</span>
+            <span className={`rounded-full px-3 py-1.5 text-[9px] font-extrabold uppercase ${analyticsQualityTone[analyticsQuality.status]}`}>{analyticsQuality.status.replace("-", " ")}</span>
+          </div>
+          <h2 className="display mt-6 text-3xl">Analytics QA</h2>
+          <p className="mt-2 text-xs leading-5 text-white/45">Checks whether event metadata, session linkage and event order are reliable enough for launch decisions.</p>
+          <div className="mt-6 grid grid-cols-[120px_1fr] gap-4">
+            <div className="rounded-2xl bg-white/[.07] p-4 text-center">
+              <p className="display text-5xl">{analyticsQuality.score}</p>
+              <p className="mt-1 text-[8px] font-extrabold uppercase tracking-wider text-white/35">QA score</p>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                ["Events", analyticsQuality.summary.events],
+                ["Sessions", analyticsQuality.summary.sessions],
+                ["Event types", `${analyticsQuality.summary.completeEventTypes}/5`],
+                ["Issues", analyticsQuality.summary.missingRequiredMetadata + analyticsQuality.summary.sequenceIssues + analyticsQuality.summary.productEventsWithoutProduct],
+              ].map(([label, value]) => <div key={String(label)} className="rounded-2xl bg-white/[.07] p-3">
+                <p className="text-xl font-extrabold">{String(value)}</p>
+                <p className="mt-1 text-[8px] font-bold text-white/35">{String(label)}</p>
+              </div>)}
+            </div>
+          </div>
+          <p className="mt-5 rounded-2xl bg-white/[.06] p-3 text-[10px] leading-4 text-white/45">Use this before launch with the storefront QA runbook: the goal is not just traffic volume, but trustworthy event quality.</p>
+        </div>
+
+        <div className="rounded-2xl border border-black/[0.07] bg-white p-5 sm:p-7">
+          <div className="flex items-center justify-between">
+            <div><h2 className="text-sm font-extrabold">Event-contract health</h2><p className="mt-1 text-[10px] text-black/35">Required metadata, session stitching, event sequence and product attribution for {activeExperienceLabel.toLowerCase()}</p></div>
+            <span className="grid h-9 w-9 place-items-center rounded-xl bg-[#f0f2ec] text-moss"><Radar size={16} /></span>
+          </div>
+          <div className="mt-5 grid gap-3 xl:grid-cols-2">
+            {analyticsQuality.checks.map((check) => (
+              <article key={check.id} className={`rounded-2xl border border-black/[0.06] p-4 ${analyticsCheckTone[check.status]}`}>
+                <div className="flex items-start justify-between gap-3">
+                  <h3 className="text-xs font-extrabold text-ink">{check.label}</h3>
+                  <span className="rounded-full bg-white/75 px-2 py-1 text-[8px] font-extrabold uppercase">{check.status}</span>
+                </div>
+                <p className="mt-2 text-[10px] leading-4 text-black/50">{check.detail}</p>
+                <p className="mt-3 rounded-xl bg-white/75 px-3 py-2 text-[10px] font-bold leading-4 text-black/55">{check.evidence}</p>
+                <div className="mt-3 flex items-center justify-between gap-3">
+                  <p className="text-[10px] font-bold leading-4 text-moss">{check.action}</p>
+                  <a href={check.actionHref} className="shrink-0 rounded-full bg-ink px-3 py-2 text-[9px] font-extrabold text-white">Open</a>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
 
       <div className="mt-5 grid gap-5 xl:grid-cols-[1fr_.82fr]">
         <section className="rounded-2xl border border-black/[0.07] bg-white p-5 sm:p-7">

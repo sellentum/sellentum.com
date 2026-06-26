@@ -41,6 +41,7 @@ Findly is a compact guided-selling SaaS product for ecommerce brands. A merchant
 - Shared public branding layer so finder, advisor, semantic search and configurator embeds all inherit merchant brand name, primary colour, widget title, welcome message and CTA copy consistently
 - Copyable JavaScript widget that opens a finder, advisor, semantic search or configurator in a lazy-loaded modal iframe or direct inline iframe, with install QA checks and launch handoff packets for generated snippets
 - Analytics for sessions, journey replay, real period-over-period trends, funnel diagnosis, views, starts, completions, recommendations, buy clicks, selected answers, search/advisor themes, matched intent signals, product demand and zero-party opportunity suggestions
+- Analytics QA that validates event-contract coverage, session linkage, required metadata, event sequence and product attribution before launch decisions
 - Discovery gap analytics that detect no-result paths, thin recommendation sets, missing shopper language, low-confidence matches and stalled surfaced products
 - Real dashboard command center with period trends, live performance bars, launch score, command queue, milestones and experience mix built from actual workspace data
 - Brand, colour, widget copy and launcher-position settings
@@ -132,6 +133,7 @@ Import the repository into Vercel, add the variables from `.env.example`, and de
 - `components/` — reusable navigation, shell, modal and state components
 - `lib/store.tsx` — demo/Supabase data adapter
 - `lib/analytics.ts` — session-aware analytics snapshots, period trends and funnel diagnostics
+- `lib/analytics-quality.ts` — event-contract QA for required metadata, session linkage, event ordering and product attribution
 - `lib/dashboard-command-center.ts` — overview-page command center combining analytics, catalog intelligence, readiness, recommendation QA and discovery gaps
 - `lib/insights.ts` — zero-party insight extraction for shopper answers, query themes, catalog signals, product demand and deterministic merchant opportunities
 - `lib/journey-insights.ts` — anonymous shopper journey reconstruction, drop-off detection and recent path summaries

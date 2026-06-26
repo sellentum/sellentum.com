@@ -153,6 +153,7 @@ function assertSessionAnalytics() {
   const session = readFileSync("lib/session.ts", "utf8");
   const analytics = readFileSync("app/dashboard/analytics/page.tsx", "utf8");
   const analyticsHelpers = readFileSync("lib/analytics.ts", "utf8");
+  const analyticsQuality = readFileSync("lib/analytics-quality.ts", "utf8");
   const insights = readFileSync("lib/insights.ts", "utf8");
   const journeys = readFileSync("lib/journey-insights.ts", "utf8");
   const discoveryGaps = readFileSync("lib/discovery-gaps.ts", "utf8");
@@ -170,6 +171,12 @@ function assertSessionAnalytics() {
   assert(analytics.includes("Shopper journey replay"), "Analytics dashboard should expose session-level journey replay");
   assert(analytics.includes("buildDiscoveryGapReport"), "Analytics dashboard should use shared discovery gap intelligence");
   assert(analytics.includes("Discovery gap planner"), "Analytics dashboard should expose a discovery gap planner");
+  assert(analytics.includes("buildAnalyticsQualityReport"), "Analytics dashboard should use shared analytics quality QA");
+  assert(analytics.includes("Analytics QA"), "Analytics dashboard should expose an analytics QA panel");
+  assert(analytics.includes("Event-contract health"), "Analytics dashboard should expose event-contract health checks");
+  assert(analyticsQuality.includes("buildAnalyticsQualityReport"), "Analytics quality helper should expose a reusable report builder");
+  assert(analyticsQuality.includes("requiredEventFields"), "Analytics quality helper should validate required event metadata");
+  assert(analyticsQuality.includes("sessionSequenceIssues"), "Analytics quality helper should validate event sequence integrity");
   assert(insights.includes("buildZeroPartyInsights"), "Insight helper should expose a reusable zero-party report builder");
   assert(insights.includes("ProductDemandInsight"), "Insight helper should calculate product demand from recommendations and clicks");
   assert(journeys.includes("buildShopperJourneyReport"), "Journey helper should expose a reusable session report builder");
@@ -408,6 +415,10 @@ async function assertDeterministicLogic() {
   writeFileSync(compiledJourneyInsights, readFileSync(compiledJourneyInsights, "utf8")
     .replace('from "./analytics";', 'from "./analytics.js";')
     .replace('from "./utils";', 'from "./utils.js";'));
+  const compiledAnalyticsQuality = `${compileDir}/lib/analytics-quality.js`;
+  writeFileSync(compiledAnalyticsQuality, readFileSync(compiledAnalyticsQuality, "utf8")
+    .replace('from "./analytics";', 'from "./analytics.js";')
+    .replace('from "./utils";', 'from "./utils.js";'));
   const compiledRecommendationQa = `${compileDir}/lib/recommendation-qa.js`;
   writeFileSync(compiledRecommendationQa, readFileSync(compiledRecommendationQa, "utf8")
     .replace('from "./finder-flow";', 'from "./finder-flow.js";')
@@ -446,6 +457,7 @@ async function assertDeterministicLogic() {
   const demo = await import(pathToFileURL(`${compileDir}/lib/demo-data.js`));
   const utils = await import(pathToFileURL(`${compileDir}/lib/utils.js`));
   const analytics = await import(pathToFileURL(`${compileDir}/lib/analytics.js`));
+  const analyticsQuality = await import(pathToFileURL(`${compileDir}/lib/analytics-quality.js`));
   const journeyInsights = await import(pathToFileURL(`${compileDir}/lib/journey-insights.js`));
   const finderFlow = await import(pathToFileURL(`${compileDir}/lib/finder-flow.js`));
   const insights = await import(pathToFileURL(`${compileDir}/lib/insights.js`));
@@ -562,6 +574,18 @@ async function assertDeterministicLogic() {
   assert(trends.widget_view.current === 1 && trends.widget_view.previous === 1 && trends.quiz_complete.label === "New", "Expected analytics trends to use real previous-period values");
   const diagnosis = analytics.buildFunnelDiagnosis(analytics.buildAnalyticsSnapshot(periods.current));
   assert(diagnosis.title && diagnosis.recommendation, "Expected funnel diagnosis to produce merchant guidance");
+  const qualityReport = analyticsQuality.buildAnalyticsQualityReport([
+    { id: "qa1", user_id: "demo-user", quiz_id: "quiz_footwear", event_type: "widget_view", metadata: { session_id: "qa", experience_type: "finder", experience_id: "quiz_footwear" }, created_at: "2026-06-25T10:00:00Z" },
+    { id: "qa2", user_id: "demo-user", quiz_id: "quiz_footwear", event_type: "quiz_start", metadata: { session_id: "qa", experience_type: "finder", experience_id: "quiz_footwear" }, created_at: "2026-06-25T10:01:00Z" },
+    { id: "qa3", user_id: "demo-user", quiz_id: "quiz_footwear", event_type: "quiz_complete", metadata: { session_id: "qa", experience_type: "finder", experience_id: "quiz_footwear", result_count: 1 }, created_at: "2026-06-25T10:02:00Z" },
+    { id: "qa4", user_id: "demo-user", quiz_id: "quiz_footwear", product_id: "prod_trail", event_type: "product_recommended", metadata: { session_id: "qa", experience_type: "finder", experience_id: "quiz_footwear", rank: 1, product_name: "Terra Trail Runner" }, created_at: "2026-06-25T10:03:00Z" },
+    { id: "qa5", user_id: "demo-user", quiz_id: "quiz_footwear", product_id: "prod_trail", event_type: "buy_click", metadata: { session_id: "qa", experience_type: "finder", experience_id: "quiz_footwear", product_name: "Terra Trail Runner" }, created_at: "2026-06-25T10:04:00Z" },
+  ]);
+  assert(qualityReport.status === "healthy" && qualityReport.summary.completeEventTypes === 5, "Expected complete analytics event contract to pass QA");
+  const brokenQualityReport = analyticsQuality.buildAnalyticsQualityReport([
+    { id: "bad1", user_id: "demo-user", quiz_id: "quiz_footwear", event_type: "buy_click", metadata: { experience_type: "finder" }, created_at: "2026-06-25T10:00:00Z" },
+  ]);
+  assert(brokenQualityReport.status === "needs-attention" && brokenQualityReport.summary.missingRequiredMetadata > 0, "Expected broken analytics events to fail QA");
   const journeyReport = journeyInsights.buildShopperJourneyReport(analyticsEvents, demo.demoProducts);
   assert(journeyReport.summary.sessions === 2 && journeyReport.summary.completed === 1, "Expected journey report to group events into anonymous sessions");
   assert(journeyReport.summary.abandonedAfterStart === 0 && journeyReport.dropoffs.some((item) => item.stage === "completed"), "Expected journey report to expose deterministic drop-off stages");
