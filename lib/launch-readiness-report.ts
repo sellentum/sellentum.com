@@ -68,6 +68,7 @@ const sectionWeights: Record<string, number> = {
   experiences: 1.25,
   "recommendation-qa": 1.3,
   "embed-analytics": 1.1,
+  "analytics-quality": 1.2,
 };
 
 const priorityWeight: Record<LaunchActionPriority, number> = {
@@ -89,6 +90,7 @@ function sectionOwner(section: LaunchReportSection) {
   if (section.id === "experiences") return "Experience";
   if (section.id === "recommendation-qa") return "Recommendation QA";
   if (section.id === "embed-analytics") return "Growth";
+  if (section.id === "analytics-quality") return "Analytics";
   return section.label;
 }
 
@@ -97,12 +99,14 @@ function sectionImpact(section: LaunchReportSection, check: LaunchReportCheck) {
   if (section.id === "catalog") return check.id.includes("semantic") || check.id.includes("enrichment") ? "Search relevance" : "Recommendation quality";
   if (section.id === "experiences") return "Launch coverage";
   if (section.id === "recommendation-qa") return "Recommendation reliability";
+  if (section.id === "analytics-quality") return check.id.includes("product") ? "Attribution confidence" : "Measurement trust";
   if (check.id.includes("event") || check.id.includes("session") || check.id.includes("intent")) return "Measurement";
   return "Conversion";
 }
 
 function checkEffort(check: LaunchReportCheck) {
-  if (["app-url", "openai", "settings", "event-volume", "session-events", "intent-events"].includes(check.id)) return "Small";
+  if (["app-url", "openai", "settings", "event-volume", "session-events", "intent-events", "analytics-quality-score", "analytics-contract-coverage"].includes(check.id)) return "Small";
+  if (check.id.includes("analytics-")) return "Small";
   if (check.id.includes("readiness") || check.id.includes("qa") || check.id.includes("catalog-")) return "Medium";
   if (check.id.includes("supabase") || check.id.includes("semantic-runtime")) return "Medium";
   return "Small";
@@ -117,6 +121,7 @@ function checkPriority(section: LaunchReportSection, check: LaunchReportCheck): 
   if (section.id === "recommendation-qa") return "high";
   if (section.id === "environment" && check.id.includes("supabase")) return "high";
   if (section.id === "experiences" && (check.id.includes("readiness") || check.id === "advisor")) return "high";
+  if (section.id === "analytics-quality" && check.status === "warn") return "high";
   if (check.id === "openai" || check.id.includes("semantic") || check.id.includes("event") || check.id.includes("session")) return "medium";
   return "low";
 }
@@ -149,6 +154,11 @@ function actionTitle(check: LaunchReportCheck) {
     "event-volume": "Run a live end-to-end widget test",
     "session-events": "Verify anonymous session tracking",
     "intent-events": "Verify shopper-intent analytics",
+    "analytics-quality-score": "Raise the Analytics QA score",
+    "analytics-required-metadata": "Fix missing event metadata",
+    "analytics-event-sequence": "Fix telemetry event order",
+    "analytics-product-attribution": "Restore product attribution",
+    "analytics-contract-coverage": "Generate every launch-contract event",
   };
 
   return titles[check.id] || `Review ${check.label.toLowerCase()}`;
@@ -209,6 +219,11 @@ function strengthCopy(check: LaunchReportCheck) {
     "event-volume": "Analytics events are already flowing into Findly.",
     "session-events": "Shopper sessions can be grouped into journey analytics.",
     "intent-events": "Zero-party intent metadata is being captured.",
+    "analytics-quality-score": "Analytics QA is strong enough to support launch decisions.",
+    "analytics-required-metadata": "Tracked events include the required launch-contract metadata.",
+    "analytics-event-sequence": "Event order supports trustworthy journey analysis.",
+    "analytics-product-attribution": "Product recommendation and click events are attributable.",
+    "analytics-contract-coverage": "All five analytics contract events have been captured.",
     "catalog-matching-signals": "The catalog has structured signals for deterministic matching.",
     "catalog-commerce-assets": "Result cards have enough media and links to convert.",
   };

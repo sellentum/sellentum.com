@@ -88,6 +88,9 @@ type PreflightPayload = {
     recommendation_qa_blockers: number;
     recommendation_qa_warnings: number;
     analytics_events: number;
+    analytics_quality_score: number;
+    analytics_quality_issues: number;
+    analytics_missing_event_types: number;
     sessions: number;
     session_events: number;
     intent_events: number;
@@ -286,6 +289,9 @@ export default function PreflightPage() {
           [payload.summary.finder_readiness_blockers + payload.summary.configurator_readiness_blockers, "Readiness blockers"],
           [payload.summary.finder_readiness_warnings + payload.summary.configurator_readiness_warnings, "Readiness warnings"],
           [payload.summary.analytics_events, "Analytics events"],
+          [`${payload.summary.analytics_quality_score}%`, "Analytics QA"],
+          [payload.summary.analytics_quality_issues, "Telemetry issues"],
+          [payload.summary.analytics_missing_event_types, "Missing event types"],
           [payload.summary.sessions, "Sessions"],
           [payload.summary.intent_events, "Intent events"],
           [totals.checks, "Checks run"],

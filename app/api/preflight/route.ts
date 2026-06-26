@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { demoConfigurator, demoEvents, demoProducts, demoQuiz, demoSettings } from "@/lib/demo-data";
+import { buildAnalyticsQualityReport } from "@/lib/analytics-quality";
 import { getWorkspaceIdentity } from "@/lib/api-auth";
 import { analyzeCatalogIntelligence, type CatalogIntelligenceSeverity } from "@/lib/catalog-intelligence";
 import { analyzeConfiguratorReadiness } from "@/lib/configurator-readiness";
@@ -83,6 +84,7 @@ function buildPreflight({ products, quizzes, configurators, events, settings, mo
   const finderReadiness = quizzes.map((quiz) => ({ quiz, report: analyzeQuizReadiness(quiz, products) }));
   const configuratorReadiness = configurators.map((configurator) => ({ configurator, report: analyzeConfiguratorReadiness(configurator, products) }));
   const recommendationQa = buildRecommendationQaReport(quizzes, products);
+  const analyticsQuality = buildAnalyticsQualityReport(events);
   const readyFinders = finderReadiness.filter(({ quiz, report }) => quiz.published && report.canPublish);
   const readyConfigurators = configuratorReadiness.filter(({ configurator, report }) => configurator.published && report.canPublish);
   const publishedFinders = quizzes.filter((quiz) => quiz.published);
@@ -187,6 +189,58 @@ function buildPreflight({ products, quizzes, configurators, events, settings, mo
         check("intent-events", "Intent metadata", "Selected answers, advisor queries and configurator choices power zero-party insights.", intentEvents ? "pass" : "warn", intentEvents ? `${intentEvents} event${intentEvents === 1 ? "" : "s"} include shopper-intent metadata.` : "No answer/query/selection metadata captured yet.", "/dashboard/analytics", "Review intent"),
       ],
     },
+    {
+      id: "analytics-quality",
+      label: "Analytics quality",
+      description: "The telemetry contract should be complete enough to trust launch decisions.",
+      checks: [
+        check(
+          "analytics-quality-score",
+          "Analytics QA score",
+          "Summarizes required metadata, session linkage, event order and product attribution.",
+          analyticsQuality.score >= 85 ? "pass" : analyticsQuality.score >= 65 ? "warn" : "fail",
+          `${analyticsQuality.score}% quality score · ${analyticsQuality.summary.events} events · ${analyticsQuality.summary.sessions} sessions.`,
+          "/dashboard/analytics",
+          "Open Analytics QA",
+        ),
+        check(
+          "analytics-required-metadata",
+          "Required event metadata",
+          "Every launch-contract event should carry the fields needed for journey replay and attribution.",
+          analyticsQuality.summary.missingRequiredMetadata ? "fail" : analyticsQuality.summary.events ? "pass" : "warn",
+          analyticsQuality.summary.missingRequiredMetadata ? `${analyticsQuality.summary.missingRequiredMetadata} required metadata field${analyticsQuality.summary.missingRequiredMetadata === 1 ? " is" : "s are"} missing.` : analyticsQuality.summary.events ? "Captured events include required metadata." : "No events are available to inspect yet.",
+          "/dashboard/analytics",
+          "Review event health",
+        ),
+        check(
+          "analytics-event-sequence",
+          "Event sequence integrity",
+          "A healthy shopper journey should flow from widget view to start, results, recommendations and buy click.",
+          analyticsQuality.summary.sequenceIssues ? "warn" : analyticsQuality.summary.events ? "pass" : "warn",
+          analyticsQuality.summary.sequenceIssues ? `${analyticsQuality.summary.sequenceIssues} sequence issue${analyticsQuality.summary.sequenceIssues === 1 ? "" : "s"} detected.` : analyticsQuality.summary.events ? "Captured sessions follow the expected event order." : "Run one storefront QA journey to prove event order.",
+          "/dashboard/launch",
+          "Run QA runbook",
+        ),
+        check(
+          "analytics-product-attribution",
+          "Product attribution",
+          "Recommendation and buy-click events should connect back to catalog products.",
+          analyticsQuality.summary.productEventsWithoutProduct ? "fail" : analyticsQuality.summary.orphanProductEvents ? "warn" : analyticsQuality.summary.events ? "pass" : "warn",
+          analyticsQuality.summary.productEventsWithoutProduct ? `${analyticsQuality.summary.productEventsWithoutProduct} product event${analyticsQuality.summary.productEventsWithoutProduct === 1 ? "" : "s"} lack product identity.` : analyticsQuality.summary.orphanProductEvents ? `${analyticsQuality.summary.orphanProductEvents} product event${analyticsQuality.summary.orphanProductEvents === 1 ? "" : "s"} appeared out of sequence.` : analyticsQuality.summary.events ? "Product events are attributable to catalog items." : "No product recommendation or click events captured yet.",
+          "/dashboard/products",
+          "Review products",
+        ),
+        check(
+          "analytics-contract-coverage",
+          "Five-event contract coverage",
+          "Preflight should see widget_view, quiz_start, quiz_complete, product_recommended and buy_click before launch.",
+          analyticsQuality.missingEventTypes.length ? "warn" : "pass",
+          analyticsQuality.missingEventTypes.length ? `Missing event types: ${analyticsQuality.missingEventTypes.join(", ")}.` : "All five launch-contract event types have been captured.",
+          "/dashboard/launch",
+          "Generate test events",
+        ),
+      ],
+    },
   ].map((section) => ({ ...section, status: worstStatus(section.checks) }));
 
   const checks = sections.flatMap((section) => section.checks);
@@ -218,6 +272,9 @@ function buildPreflight({ products, quizzes, configurators, events, settings, mo
       recommendation_qa_blockers: recommendationQa.blockers.length,
       recommendation_qa_warnings: recommendationQa.warnings.length,
       analytics_events: events.length,
+      analytics_quality_score: analyticsQuality.score,
+      analytics_quality_issues: analyticsQuality.summary.missingRequiredMetadata + analyticsQuality.summary.sequenceIssues + analyticsQuality.summary.productEventsWithoutProduct,
+      analytics_missing_event_types: analyticsQuality.missingEventTypes.length,
       sessions,
       session_events: sessionEvents,
       intent_events: intentEvents,

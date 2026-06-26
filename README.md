@@ -45,7 +45,7 @@ Findly is a compact guided-selling SaaS product for ecommerce brands. A merchant
 - Discovery gap analytics that detect no-result paths, thin recommendation sets, missing shopper language, low-confidence matches and stalled surfaced products
 - Real dashboard command center with period trends, live performance bars, launch score, command queue, milestones and experience mix built from actual workspace data
 - Brand, colour, widget copy and launcher-position settings
-- Launch preflight checks for catalog readiness, builder readiness diagnostics, synthetic recommendation QA, AI/env keys, published experiences, widget setup and analytics coverage
+- Launch preflight checks for catalog readiness, builder readiness diagnostics, synthetic recommendation QA, AI/env keys, published experiences, widget setup, analytics coverage and telemetry quality
 - Prioritized launch-readiness report that turns preflight checks into a scored production plan with owners, evidence, effort and next actions
 - Supabase schema, indexes, triggers and row-level security
 - Fully interactive local demo mode when credentials are absent

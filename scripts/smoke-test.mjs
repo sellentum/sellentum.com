@@ -379,25 +379,32 @@ function assertPreflightReadinessWorkflow() {
   const route = readFileSync("app/api/preflight/route.ts", "utf8");
   const page = readFileSync("app/dashboard/preflight/page.tsx", "utf8");
   const recommendationQa = readFileSync("lib/recommendation-qa.ts", "utf8");
+  const analyticsQuality = readFileSync("lib/analytics-quality.ts", "utf8");
   const launchReport = readFileSync("lib/launch-readiness-report.ts", "utf8");
   assert(route.includes("analyzeQuizReadiness"), "Preflight should reuse finder publish-readiness diagnostics");
   assert(route.includes("analyzeConfiguratorReadiness"), "Preflight should reuse configurator publish-readiness diagnostics");
   assert(route.includes("buildRecommendationQaReport"), "Preflight should run synthetic recommendation QA");
+  assert(route.includes("buildAnalyticsQualityReport"), "Preflight should run analytics quality QA");
   assert(route.includes("buildLaunchReadinessReport"), "Preflight should build a prioritized launch-readiness report");
   assert(route.includes("launch_report"), "Preflight API should expose the launch-readiness report");
   assert(route.includes("Recommendation reliability"), "Preflight should expose a recommendation reliability section");
+  assert(route.includes("Analytics quality"), "Preflight should expose an analytics quality section");
   assert(route.includes("finder_readiness_blockers"), "Preflight summary should expose finder readiness blockers");
   assert(route.includes("configurator_readiness_blockers"), "Preflight summary should expose configurator readiness blockers");
   assert(route.includes("recommendation_qa_score"), "Preflight summary should expose recommendation QA score");
+  assert(route.includes("analytics_quality_score"), "Preflight summary should expose analytics quality score");
   assert(page.includes("Launch readiness score"), "Preflight page should surface the launch readiness score");
   assert(page.includes("Priority launch plan"), "Preflight page should surface prioritized launch actions");
   assert(page.includes("Readiness blockers"), "Preflight page should show readiness blocker counts");
   assert(page.includes("QA scenarios"), "Preflight page should show recommendation QA scenario counts");
+  assert(page.includes("Analytics QA"), "Preflight page should show analytics quality summary fields");
   assert(launchReport.includes("buildLaunchReadinessReport"), "Launch readiness helper should expose a reusable report builder");
   assert(launchReport.includes("nextActions"), "Launch readiness report should include prioritized next actions");
   assert(launchReport.includes("Recommendation reliability"), "Launch readiness report should classify recommendation QA impact");
+  assert(launchReport.includes("analytics-quality"), "Launch readiness report should score analytics quality coverage");
   assert(recommendationQa.includes("buildRecommendationQaReport"), "Recommendation QA helper should expose a reusable report builder");
   assert(recommendationQa.includes("auditProductMatches"), "Recommendation QA should use the deterministic product scorer");
+  assert(analyticsQuality.includes("buildAnalyticsQualityReport"), "Analytics quality helper should expose a reusable report builder");
 }
 
 async function assertDeterministicLogic() {
@@ -560,6 +567,8 @@ async function assertDeterministicLogic() {
   assert(demo.demoEvents.some((event) => event.metadata?.experience_type === "search" && typeof event.metadata.query === "string"), "Expected seeded search analytics to include shopper query metadata");
   assert(demo.demoEvents.some((event) => Array.isArray(event.metadata?.selected_option_names) && event.metadata.selected_option_names.length), "Expected seeded configurator analytics to include selected option names");
   assert(demo.demoEvents.some((event) => typeof event.metadata?.session_id === "string"), "Expected seeded analytics to include anonymous session metadata");
+  assert(demo.demoEvents.some((event) => event.event_type === "product_recommended" && typeof event.metadata?.rank === "number"), "Expected seeded recommendation analytics to include rank metadata");
+  assert(demo.demoEvents.some((event) => event.event_type === "quiz_complete" && typeof event.metadata?.result_count === "number"), "Expected seeded completion analytics to include result count metadata");
 
   const now = new Date("2026-06-25T12:00:00Z");
   const analyticsEvents = [
