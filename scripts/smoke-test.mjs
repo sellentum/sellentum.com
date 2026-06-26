@@ -215,6 +215,19 @@ function assertLaunchStudioWorkflow() {
   assert(overview.includes("/dashboard/launch"), "Dashboard overview should route quick-start work through Launch Studio");
 }
 
+function assertDashboardCommandCenterWorkflow() {
+  const overview = readFileSync("app/dashboard/page.tsx", "utf8");
+  const commandCenter = readFileSync("lib/dashboard-command-center.ts", "utf8");
+  assert(overview.includes("buildDashboardCommandCenter"), "Dashboard overview should use the shared command-center helper");
+  assert(overview.includes("Command queue"), "Dashboard overview should expose prioritized command-center actions");
+  assert(overview.includes("Real shopper activity"), "Dashboard overview should label the activity chart as real data");
+  assert(!overview.includes("+12.4%") && !overview.includes("[36, 52, 42"), "Dashboard overview should not use placeholder trend percentages or static chart data");
+  assert(commandCenter.includes("buildDashboardCommandCenter"), "Command-center helper should expose a reusable report builder");
+  assert(commandCenter.includes("buildDiscoveryGapReport"), "Command-center helper should reuse discovery gap analytics");
+  assert(commandCenter.includes("buildRecommendationQaReport"), "Command-center helper should reuse recommendation QA");
+  assert(commandCenter.includes("analyzeCatalogIntelligence"), "Command-center helper should reuse catalog intelligence");
+}
+
 function assertSemanticSearchWorkflow() {
   const route = readFileSync("app/api/search/route.ts", "utf8");
   const publicRoute = readFileSync("app/api/public/search/[id]/route.ts", "utf8");
@@ -377,6 +390,14 @@ async function assertDeterministicLogic() {
   writeFileSync(compiledDiscoveryGaps, readFileSync(compiledDiscoveryGaps, "utf8")
     .replace('from "./utils";', 'from "./utils.js";')
     .replace('from "@/lib/utils";', 'from "./utils.js";'));
+  const compiledDashboardCommandCenter = `${compileDir}/lib/dashboard-command-center.js`;
+  writeFileSync(compiledDashboardCommandCenter, readFileSync(compiledDashboardCommandCenter, "utf8")
+    .replace('from "@/lib/analytics";', 'from "./analytics.js";')
+    .replace('from "@/lib/catalog-intelligence";', 'from "./catalog-intelligence.js";')
+    .replace('from "@/lib/configurator-readiness";', 'from "./configurator-readiness.js";')
+    .replace('from "@/lib/discovery-gaps";', 'from "./discovery-gaps.js";')
+    .replace('from "@/lib/quiz-readiness";', 'from "./quiz-readiness.js";')
+    .replace('from "@/lib/recommendation-qa";', 'from "./recommendation-qa.js";'));
 
   const demo = await import(pathToFileURL(`${compileDir}/lib/demo-data.js`));
   const utils = await import(pathToFileURL(`${compileDir}/lib/utils.js`));
@@ -403,6 +424,7 @@ async function assertDeterministicLogic() {
   const launchPacket = await import(pathToFileURL(`${compileDir}/lib/launch-packet.js`));
   const launchReadinessReport = await import(pathToFileURL(`${compileDir}/lib/launch-readiness-report.js`));
   const discoveryGaps = await import(pathToFileURL(`${compileDir}/lib/discovery-gaps.js`));
+  const dashboardCommandCenter = await import(pathToFileURL(`${compileDir}/lib/dashboard-command-center.js`));
   const configuratorReadiness = await import(pathToFileURL(`${compileDir}/lib/configurator-readiness.js`));
 
   const answers = [
@@ -513,6 +535,11 @@ async function assertDeterministicLogic() {
   assert(gapReport.termGaps.some((gap) => gap.term === "orthopedic" && gap.coverage === "missing"), "Expected discovery gap report to identify missing shopper language");
   assert(gapReport.summary.lowConfidenceRecommendations === 1 && gapReport.productGaps.some((gap) => gap.productName === "Cloud Rest Walker"), "Expected discovery gap report to flag low-confidence and stalled product gaps");
   assert(gapReport.actions[0]?.id === "fix-no-result-paths", "Expected discovery gap report to prioritize no-result fixes first");
+  const commandCenter = dashboardCommandCenter.buildDashboardCommandCenter({ products: demo.demoProducts, quizzes: [demo.demoQuiz], configurators: [demo.demoConfigurator], events: demo.demoEvents, settings: demo.demoSettings });
+  assert(commandCenter.snapshot.widget_view > 0 && commandCenter.performance.length === 14, "Expected dashboard command center to build real 14-day analytics");
+  assert(commandCenter.launchScore > 0 && commandCenter.catalogScore >= 80 && commandCenter.summary.readyFinders === 1, "Expected dashboard command center to summarize launch readiness");
+  assert(commandCenter.experienceMix.search > 0 && commandCenter.experienceMix.configurator > 0, "Expected dashboard command center to calculate real experience mix");
+  assert(commandCenter.actions.length && commandCenter.milestones.some((item) => item.id === "analytics" && item.done), "Expected dashboard command center to produce actions and milestone status");
 
   const importPreview = catalogImport.normalizeCatalogImportRows([
     { title: "Trail Shoe", "sale price": "£1,299.50", collection: "Footwear", attributes: "Grip|Waterproof", keywords: "trail,wet", benefits: "wet-weather protection|outdoor confidence", "semantic text": "Rain-ready trail grip for weekend hikes", link: "store.example/trail" },
@@ -677,6 +704,7 @@ async function main() {
   assertExplanationRuntimeSafety();
   assertSessionAnalytics();
   assertLaunchStudioWorkflow();
+  assertDashboardCommandCenterWorkflow();
   assertSemanticSearchWorkflow();
   assertCatalogImportWorkflow();
   assertQuizReadinessWorkflow();

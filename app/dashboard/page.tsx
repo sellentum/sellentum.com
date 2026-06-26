@@ -1,20 +1,29 @@
 "use client";
 
+import { useMemo } from "react";
 import Link from "next/link";
-import { BarChart3, BookOpenCheck, Boxes, Check, ChevronRight, CirclePlay, Eye, MousePointerClick, PackagePlus, Rocket, Search, Sparkles, TrendingUp, Upload } from "lucide-react";
+import { AlertTriangle, ArrowDownRight, ArrowUpRight, BookOpenCheck, Check, ChevronRight, CirclePlay, Eye, MousePointerClick, PackagePlus, Rocket, Sparkles, Wrench } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { LoadingState } from "@/components/loading-state";
+import { buildDashboardCommandCenter } from "@/lib/dashboard-command-center";
 
 export default function DashboardOverview() {
   const { ready, products, quizzes, configurators, events, settings } = useStore();
+  const commandCenter = useMemo(() => buildDashboardCommandCenter({ products, quizzes, configurators, events, settings }), [products, quizzes, configurators, events, settings]);
   if (!ready) return <LoadingState />;
-  const counts = (type: string) => events.filter((event) => event.event_type === type).length;
-  const views = counts("widget_view");
-  const completions = counts("quiz_complete");
-  const clicks = counts("buy_click");
-  const published = quizzes.filter((quiz) => quiz.published).length;
-  const liveConfigurators = configurators.filter((configurator) => configurator.published).length;
+  const { snapshot, trends } = commandCenter;
+  const views = snapshot.widget_view;
+  const completions = snapshot.quiz_complete;
+  const clicks = snapshot.buy_click;
+  const published = commandCenter.summary.publishedFinders;
+  const liveConfigurators = commandCenter.summary.publishedConfigurators;
   const today = new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
+  const metricCards: Array<{ label: string; value: string | number; icon: typeof Eye; trend?: typeof trends.widget_view; badge?: string }> = [
+    { label: "Widget views", value: views, icon: Eye, trend: trends.widget_view },
+    { label: "Completed journeys", value: completions, icon: Check, trend: trends.quiz_complete },
+    { label: "Buy clicks", value: clicks, icon: MousePointerClick, trend: trends.buy_click },
+    { label: "Launch score", value: `${commandCenter.launchScore}%`, icon: Rocket, badge: commandCenter.launchLabel },
+  ];
 
   return (
     <div className="animate-rise">
@@ -24,31 +33,28 @@ export default function DashboardOverview() {
       </div>
 
       <div className="mt-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        {[
-          ["Widget views", views, Eye, "+12.4%"], ["Quiz completions", completions, Check, "+8.1%"], ["Buy clicks", clicks, MousePointerClick, "+16.8%"], ["Completion rate", views ? `${Math.round(completions / views * 100)}%` : "0%", TrendingUp, "+3.2%"],
-        ].map(([label, value, Icon, trend]) => { const MetricIcon = Icon as typeof Eye; return <div key={String(label)} className="rounded-2xl border border-black/[0.07] bg-white p-5"><div className="flex items-center justify-between"><span className="grid h-9 w-9 place-items-center rounded-xl bg-[#f1f3ed] text-moss"><MetricIcon size={17} /></span><span className="rounded-full bg-lime/35 px-2 py-1 text-[9px] font-extrabold text-moss">{String(trend)}</span></div><p className="mt-6 text-xs font-bold text-black/40">{String(label)}</p><p className="display mt-1 text-4xl">{String(value)}</p></div>; })}
+        {metricCards.map((metric) => {
+          const MetricIcon = metric.icon;
+          const trend = metric.trend;
+          const direction = trend?.direction || "flat";
+          return <div key={metric.label} className="rounded-2xl border border-black/[0.07] bg-white p-5"><div className="flex items-center justify-between"><span className="grid h-9 w-9 place-items-center rounded-xl bg-[#f1f3ed] text-moss"><MetricIcon size={17} /></span>{trend ? <span className={`flex items-center gap-1 rounded-full px-2 py-1 text-[9px] font-extrabold ${direction === "down" ? "bg-red-50 text-red-600" : direction === "flat" ? "bg-black/5 text-black/35" : "bg-lime/35 text-moss"}`}>{direction === "down" ? <ArrowDownRight size={10} /> : <ArrowUpRight size={10} />}{trend.label}</span> : <span className="rounded-full bg-lime/35 px-2 py-1 text-[9px] font-extrabold text-moss">{metric.badge}</span>}</div><p className="mt-6 text-xs font-bold text-black/40">{metric.label}</p><p className="display mt-1 text-4xl">{String(metric.value)}</p>{trend && <p className="mt-1 text-[9px] font-bold text-black/25">Previous 14 days: {trend.previous}</p>}</div>;
+        })}
       </div>
 
       <div className="mt-5 grid gap-5 xl:grid-cols-[1.4fr_.8fr]">
         <section className="rounded-2xl border border-black/[0.07] bg-white p-5 sm:p-7">
-          <div className="flex items-center justify-between"><div><h2 className="text-sm font-extrabold">Performance</h2><p className="mt-1 text-xs text-black/35">Shopper activity over the last 14 days</p></div><select className="rounded-lg border border-black/10 bg-white px-2 py-1.5 text-[10px] font-bold"><option>Last 14 days</option></select></div>
+          <div className="flex items-center justify-between"><div><h2 className="text-sm font-extrabold">Performance</h2><p className="mt-1 text-xs text-black/35">Real shopper activity over the last 14 days</p></div><span className="rounded-full bg-lime/35 px-3 py-1.5 text-[9px] font-extrabold text-moss">Live data</span></div>
           <div className="mt-8 flex h-52 items-end gap-2 sm:gap-3">
-            {[36, 52, 42, 61, 70, 49, 77, 64, 82, 58, 73, 89, 78, 96].map((height, index) => <div key={index} className="group flex h-full flex-1 items-end"><div style={{ height: `${height}%` }} className="relative w-full rounded-t-md bg-[#dfe6dc] transition group-hover:bg-lime"><div style={{ height: `${Math.max(16, height - 34)}%` }} className="absolute bottom-0 w-full rounded-t-md bg-moss" /></div></div>)}
-          </div><div className="mt-3 flex justify-between text-[9px] font-bold text-black/25"><span>11 Jun</span><span>14 Jun</span><span>17 Jun</span><span>20 Jun</span><span>25 Jun</span></div>
-          <div className="mt-5 flex gap-5 border-t border-black/5 pt-4 text-[10px] font-bold text-black/45"><span className="flex items-center gap-1.5"><i className="h-2 w-2 rounded-full bg-moss" /> Completed</span><span className="flex items-center gap-1.5"><i className="h-2 w-2 rounded-full bg-[#dfe6dc]" /> Started</span></div>
+            {commandCenter.performance.map((day) => <div key={day.label} className="group flex h-full flex-1 flex-col justify-end"><div className="relative flex flex-1 items-end"><div style={{ height: `${Math.max(5, day.views / commandCenter.maxPerformance * 100)}%` }} className="relative w-full rounded-t-md bg-[#dfe6dc] transition group-hover:bg-lime/50"><div style={{ height: `${Math.max(2, day.completions / commandCenter.maxPerformance * 100)}%` }} className="absolute bottom-0 w-full rounded-t-md bg-moss" /></div></div><span className="mt-2 hidden text-center text-[8px] font-bold text-black/25 sm:block">{day.label.split(" ")[0]}</span></div>)}
+          </div><div className="mt-3 flex justify-between text-[9px] font-bold text-black/25"><span>{commandCenter.performance[0]?.label || "Start"}</span><span>{commandCenter.performance[Math.floor(commandCenter.performance.length / 2)]?.label || "Mid"}</span><span>{commandCenter.performance.at(-1)?.label || "Today"}</span></div>
+          <div className="mt-5 flex gap-5 border-t border-black/5 pt-4 text-[10px] font-bold text-black/45"><span className="flex items-center gap-1.5"><i className="h-2 w-2 rounded-full bg-moss" /> Completed</span><span className="flex items-center gap-1.5"><i className="h-2 w-2 rounded-full bg-[#dfe6dc]" /> Views</span></div>
         </section>
 
         <section className="rounded-2xl border border-black/[0.07] bg-ink p-6 text-white">
           <div className="flex items-center justify-between"><div className="grid h-10 w-10 place-items-center rounded-xl bg-lime text-ink"><Sparkles size={18} /></div><span className="text-[9px] font-bold uppercase tracking-wider text-white/30">Quick start</span></div>
           <h2 className="display mt-7 text-3xl">Your launch checklist</h2><p className="mt-2 text-xs leading-5 text-white/45">The essentials for getting your first guided experience live.</p>
           <div className="mt-6 space-y-2">
-            {[
-              ["Add your products", products.length > 0, "/dashboard/products"],
-              ["Enrich and generate", quizzes.some((q) => q.questions.length > 0), "/dashboard/launch"],
-              ["Publish a finder", published > 0, "/dashboard/launch"],
-              ["Install your widget", events.some((event) => event.event_type === "widget_view"), "/dashboard/launch"],
-              ["Run launch preflight", products.length > 1 && published > 0, "/dashboard/preflight"],
-            ].map(([label, done, href]) => <Link key={String(label)} href={String(href)} className="flex items-center gap-3 rounded-xl bg-white/[0.06] px-3 py-3 text-xs font-bold"><span className={`grid h-5 w-5 place-items-center rounded-full border ${done ? "border-lime bg-lime text-ink" : "border-white/20"}`}>{done && <Check size={11} />}</span><span className={done ? "text-white/45 line-through" : "text-white"}>{String(label)}</span><ChevronRight className="ml-auto text-white/25" size={14} /></Link>)}
+            {commandCenter.milestones.map((item) => <Link key={item.id} href={item.href} className="flex items-center gap-3 rounded-xl bg-white/[0.06] px-3 py-3 text-xs font-bold"><span className={`grid h-5 w-5 place-items-center rounded-full border ${item.done ? "border-lime bg-lime text-ink" : "border-white/20"}`}>{item.done && <Check size={11} />}</span><span className={item.done ? "text-white/45 line-through" : "text-white"}>{item.label}</span><ChevronRight className="ml-auto text-white/25" size={14} /></Link>)}
           </div>
         </section>
       </div>
@@ -59,8 +65,14 @@ export default function DashboardOverview() {
       </div>
 
       <div className="mt-5 grid gap-5 lg:grid-cols-2">
-        <section className="rounded-2xl border border-black/[0.07] bg-white p-5 sm:p-6"><div className="flex items-center justify-between"><div><h2 className="text-sm font-extrabold">Catalog health</h2><p className="mt-1 text-xs text-black/35">Keep your recommendations useful</p></div><Link href="/dashboard/products" className="text-xs font-extrabold text-moss">Manage</Link></div><div className="mt-6 flex items-center gap-5"><div className="grid h-20 w-20 shrink-0 place-items-center rounded-full border-[8px] border-lime bg-white"><span className="display text-2xl">{Math.min(100, products.length ? 92 : 0)}</span></div><div className="space-y-2 text-xs"><p className="flex items-center gap-2 font-bold"><Boxes size={14} className="text-moss" /> {products.length} active products</p><p className="flex items-center gap-2 font-bold"><Upload size={14} className="text-moss" /> Catalog ready to recommend</p><p className="flex items-center gap-2 font-bold"><BarChart3 size={14} className="text-moss" /> {events.filter((e) => e.event_type === "product_recommended").length} recommendations served</p></div></div></section>
-        <section className="rounded-2xl border border-black/[0.07] bg-ink p-6 text-white"><div className="flex items-center justify-between"><div><h2 className="text-sm font-extrabold">Experience mix</h2><p className="mt-1 text-xs text-white/35">Finders, advisors, search and configurators share one catalog.</p></div><Sparkles className="text-lime" size={18} /></div><div className="mt-6 grid grid-cols-4 gap-2 text-center"><div className="rounded-xl bg-white/[.06] p-4"><p className="text-2xl font-extrabold">{quizzes.length}</p><p className="mt-1 text-[9px] text-white/35">Finders</p></div><div className="rounded-xl bg-white/[.06] p-4"><p className="text-2xl font-extrabold">1</p><p className="mt-1 text-[9px] text-white/35">Advisor</p></div><Link href="/dashboard/search" className="rounded-xl bg-white/[.06] p-4 transition hover:bg-white/[.1]"><Search className="mx-auto text-lime" size={18} /><p className="mt-2 text-[9px] text-white/35">Search</p></Link><div className="rounded-xl bg-white/[.06] p-4"><p className="text-2xl font-extrabold">{configurators.length}</p><p className="mt-1 text-[9px] text-white/35">Configurators</p></div></div><Link href="/dashboard/settings" className="mt-5 inline-flex items-center gap-2 text-xs font-extrabold text-lime">Choose embed experience <ChevronRight size={13} /></Link></section>
+        <section className="rounded-2xl border border-black/[0.07] bg-white p-5 sm:p-6">
+          <div className="flex items-center justify-between"><div><h2 className="flex items-center gap-2 text-sm font-extrabold"><Wrench size={15} className="text-moss" /> Command queue</h2><p className="mt-1 text-xs text-black/35">The next highest-leverage fixes from catalog, QA and analytics.</p></div><Link href="/dashboard/preflight" className="text-xs font-extrabold text-moss">Preflight</Link></div>
+          <div className="mt-5 space-y-2">
+            {commandCenter.actions.slice(0, 3).map((action) => <Link key={action.id} href={action.href} className="flex items-start gap-3 rounded-xl border border-black/[0.07] p-3.5 hover:bg-canvas"><span className={`mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-xl ${action.priority === "critical" ? "bg-red-50 text-red-600" : action.priority === "high" ? "bg-amber-50 text-amber-700" : "bg-lime/35 text-moss"}`}>{action.priority === "critical" ? <AlertTriangle size={15} /> : <ChevronRight size={15} />}</span><span className="min-w-0 flex-1"><span className="block text-xs font-extrabold">{action.title}</span><span className="mt-1 block text-[10px] leading-4 text-black/35">{action.detail}</span></span><span className="shrink-0 rounded-full bg-black/[0.04] px-2 py-1 text-[8px] font-extrabold uppercase text-black/35">{action.label}</span></Link>)}
+            {!commandCenter.actions.length && <div className="rounded-xl border border-lime/40 bg-lime/10 p-4"><p className="flex items-center gap-2 text-xs font-extrabold text-moss"><Check size={14} /> No urgent launch actions</p><p className="mt-1 text-[10px] leading-4 text-black/40">Keep collecting sessions and rerun preflight before the next campaign.</p></div>}
+          </div>
+        </section>
+        <section className="rounded-2xl border border-black/[0.07] bg-ink p-6 text-white"><div className="flex items-center justify-between"><div><h2 className="text-sm font-extrabold">Experience mix</h2><p className="mt-1 text-xs text-white/35">Actual event mix across every embedded surface.</p></div><Sparkles className="text-lime" size={18} /></div><div className="mt-6 grid grid-cols-4 gap-2 text-center"><div className="rounded-xl bg-white/[.06] p-4"><p className="text-2xl font-extrabold">{commandCenter.experienceMix.finder}</p><p className="mt-1 text-[9px] text-white/35">Finder</p></div><div className="rounded-xl bg-white/[.06] p-4"><p className="text-2xl font-extrabold">{commandCenter.experienceMix.assistant}</p><p className="mt-1 text-[9px] text-white/35">Advisor</p></div><Link href="/dashboard/search" className="rounded-xl bg-white/[.06] p-4 transition hover:bg-white/[.1]"><p className="text-2xl font-extrabold">{commandCenter.experienceMix.search}</p><p className="mt-1 text-[9px] text-white/35">Search</p></Link><div className="rounded-xl bg-white/[.06] p-4"><p className="text-2xl font-extrabold">{commandCenter.experienceMix.configurator}</p><p className="mt-1 text-[9px] text-white/35">Config</p></div></div><div className="mt-5 grid grid-cols-3 gap-2 text-center"><div className="rounded-xl bg-white/[.06] p-3"><p className="text-lg font-extrabold">{commandCenter.catalogScore}%</p><p className="mt-1 text-[8px] text-white/35">Catalog</p></div><div className="rounded-xl bg-white/[.06] p-3"><p className="text-lg font-extrabold">{commandCenter.discoveryScore}</p><p className="mt-1 text-[8px] text-white/35">Gap score</p></div><div className="rounded-xl bg-white/[.06] p-3"><p className="text-lg font-extrabold">{commandCenter.summary.recommendationQaScore}%</p><p className="mt-1 text-[8px] text-white/35">QA</p></div></div><Link href="/dashboard/settings" className="mt-5 inline-flex items-center gap-2 text-xs font-extrabold text-lime">Choose embed experience <ChevronRight size={13} /></Link></section>
       </div>
     </div>
   );
