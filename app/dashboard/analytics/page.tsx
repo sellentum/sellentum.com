@@ -1,11 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { AlertTriangle, ArrowDownRight, ArrowUpRight, Check, ChevronDown, Clock3, Eye, GitBranch, ListChecks, MessageCircle, MousePointerClick, PackagePlus, Search, Sparkles, Tags, Trophy, UsersRound } from "lucide-react";
+import { AlertTriangle, ArrowDownRight, ArrowUpRight, Check, ChevronDown, Clock3, Eye, GitBranch, ListChecks, MessageCircle, MousePointerClick, PackagePlus, Radar, Search, ShieldAlert, Sparkles, Tags, Trophy, UsersRound, Wrench } from "lucide-react";
 import { LoadingState } from "@/components/loading-state";
 import { useStore } from "@/lib/store";
 import type { ExperienceType } from "@/lib/types";
 import { buildAnalyticsSnapshot, buildAnalyticsTrends, buildFunnelDiagnosis, countAnalyticsEvents, getAnalyticsPeriods, stageRate } from "@/lib/analytics";
+import { buildDiscoveryGapReport, type DiscoveryGapSeverity } from "@/lib/discovery-gaps";
 import { buildZeroPartyInsights } from "@/lib/insights";
 import { buildShopperJourneyReport } from "@/lib/journey-insights";
 import { filterEventsByExperience, formatCurrency, getEventExperienceType } from "@/lib/utils";
@@ -27,6 +28,13 @@ const experienceOptions: Array<{ value: ExperienceFilter; icon: typeof Sparkles 
   { value: "search", icon: Search },
   { value: "configurator", icon: PackagePlus },
 ];
+
+const discoverySeverityTone: Record<DiscoveryGapSeverity, string> = {
+  critical: "border-red-200 bg-red-50 text-red-700",
+  watch: "border-amber-200 bg-amber-50 text-amber-800",
+  info: "border-black/[0.06] bg-[#f7f8f4] text-black/60",
+  win: "border-lime/60 bg-lime/20 text-moss",
+};
 
 function formatDuration(seconds: number) {
   if (seconds < 60) return `${seconds}s`;
@@ -71,6 +79,7 @@ export default function AnalyticsPage() {
     return { product, recommended: productRecommended, clicks: productClicks };
   }).sort((a, b) => b.recommended - a.recommended || b.clicks - a.clicks || a.product.name.localeCompare(b.product.name)), [products, filteredEvents]);
 
+  const discoveryGapReport = useMemo(() => buildDiscoveryGapReport(filteredEvents, products), [filteredEvents, products]);
   const zeroPartyInsights = useMemo(() => buildZeroPartyInsights(filteredEvents, products), [filteredEvents, products]);
   const journeyReport = useMemo(() => buildShopperJourneyReport(filteredEvents, products), [filteredEvents, products]);
 
@@ -217,6 +226,96 @@ export default function AnalyticsPage() {
               <span className="mt-2 hidden text-center text-[8px] font-bold text-black/25 sm:block">{day.label.split(" ")[0]}</span>
             </div>
           ))}
+        </div>
+      </section>
+
+      <section className="mt-5 grid gap-5 xl:grid-cols-[.78fr_1.22fr]">
+        <div className="rounded-2xl border border-black/[0.07] bg-ink p-6 text-white">
+          <div className="flex items-center justify-between gap-4">
+            <span className={`grid h-11 w-11 place-items-center rounded-xl ${discoveryGapReport.status === "needs-attention" ? "bg-red-400 text-white" : discoveryGapReport.status === "watch" ? "bg-amber-300 text-ink" : "bg-lime text-ink"}`}>{discoveryGapReport.status === "needs-attention" ? <ShieldAlert size={19} /> : <Radar size={19} />}</span>
+            <span className="rounded-full bg-white/10 px-3 py-1.5 text-[9px] font-extrabold uppercase tracking-wider text-white/55">{discoveryGapReport.status.replace("-", " ")}</span>
+          </div>
+          <h2 className="display mt-6 text-3xl">Discovery gap planner</h2>
+          <p className="mt-2 text-xs leading-5 text-white/45">Findly turns failed paths, thin results, missing search language and stalled recommendations into deterministic fixes.</p>
+          <div className="mt-6 grid grid-cols-[120px_1fr] gap-4">
+            <div className="rounded-2xl bg-white/[.07] p-4 text-center">
+              <p className="display text-5xl">{discoveryGapReport.score}</p>
+              <p className="mt-1 text-[8px] font-extrabold uppercase tracking-wider text-white/35">Gap score</p>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                ["No results", discoveryGapReport.summary.zeroResultJourneys],
+                ["Thin results", discoveryGapReport.summary.thinResultJourneys],
+                ["Term gaps", discoveryGapReport.summary.missingTermSignals],
+                ["Stalled SKUs", discoveryGapReport.summary.stalledProducts],
+              ].map(([label, value]) => <div key={String(label)} className="rounded-2xl bg-white/[.07] p-3">
+                <p className="text-xl font-extrabold">{String(value)}</p>
+                <p className="mt-1 text-[8px] font-bold text-white/35">{String(label)}</p>
+              </div>)}
+            </div>
+          </div>
+          <div className="mt-5 space-y-2">
+            {discoveryGapReport.strengths.slice(0, 3).map((strength) => (
+              <div key={strength} className="flex items-start gap-2 rounded-2xl bg-lime/10 p-3">
+                <Check size={13} className="mt-0.5 shrink-0 text-lime" />
+                <p className="text-[10px] leading-4 text-white/55">{strength}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-black/[0.07] bg-white p-5 sm:p-7">
+          <div className="flex items-center justify-between">
+            <div><h2 className="text-sm font-extrabold">Priority discovery fixes</h2><p className="mt-1 text-[10px] text-black/35">Actionable issues from {activeExperienceLabel.toLowerCase()} over {range.toLowerCase()}</p></div>
+            <span className="grid h-9 w-9 place-items-center rounded-xl bg-[#f0f2ec] text-moss"><Wrench size={16} /></span>
+          </div>
+          <div className="mt-6 grid gap-3 xl:grid-cols-2">
+            {discoveryGapReport.actions.length ? discoveryGapReport.actions.slice(0, 4).map((action) => (
+              <article key={action.id} className={`rounded-2xl border p-4 ${discoverySeverityTone[action.severity]}`}>
+                <div className="flex items-start justify-between gap-3">
+                  <h3 className="text-xs font-extrabold text-ink">{action.title}</h3>
+                  <span className="rounded-full bg-white/70 px-2 py-1 text-[8px] font-extrabold uppercase">{action.severity}</span>
+                </div>
+                <p className="mt-2 text-[10px] leading-4 text-black/45">{action.detail}</p>
+                <p className="mt-3 rounded-xl bg-white/70 px-3 py-2 text-[10px] font-bold leading-4 text-black/55">{action.evidence}</p>
+                <div className="mt-3 flex items-center justify-between gap-3">
+                  <p className="text-[10px] font-bold leading-4 text-moss">{action.recommendation}</p>
+                  <a href={action.actionHref} className="shrink-0 rounded-full bg-ink px-3 py-2 text-[9px] font-extrabold text-white">{action.actionLabel}</a>
+                </div>
+              </article>
+            )) : (
+              <div className="rounded-2xl border border-dashed border-black/10 p-8 text-center xl:col-span-2">
+                <p className="text-xs font-extrabold">No discovery gaps detected</p>
+                <p className="mt-1 text-[10px] leading-4 text-black/35">Keep collecting sessions. This planner will flag no-result paths, missing terms and stalled recommendations as they appear.</p>
+              </div>
+            )}
+          </div>
+          <div className="mt-5 grid gap-3 xl:grid-cols-2">
+            <div className="rounded-2xl border border-black/[0.06] bg-[#f7f8f4] p-4">
+              <div className="flex items-center justify-between"><h3 className="text-xs font-extrabold">Catalog language gaps</h3><Search size={14} className="text-moss" /></div>
+              <div className="mt-3 space-y-2">
+                {discoveryGapReport.termGaps.slice(0, 5).map((gap) => (
+                  <div key={gap.term} className="rounded-xl bg-white px-3 py-2">
+                    <div className="flex items-center justify-between gap-3"><p className="text-[10px] font-extrabold">{gap.term}</p><span className={`rounded-full px-2 py-0.5 text-[8px] font-extrabold ${gap.coverage === "missing" ? "bg-red-50 text-red-700" : "bg-amber-50 text-amber-700"}`}>{gap.coverage}</span></div>
+                    <p className="mt-1 text-[8px] font-bold text-black/35">{gap.count} signals · {gap.matchingProducts} matching products · {gap.sources.join(" · ")}</p>
+                  </div>
+                ))}
+                {!discoveryGapReport.termGaps.length && <p className="rounded-xl bg-white px-3 py-5 text-center text-[10px] text-black/35">No missing or thin shopper language in this filter.</p>}
+              </div>
+            </div>
+            <div className="rounded-2xl border border-black/[0.06] bg-[#f7f8f4] p-4">
+              <div className="flex items-center justify-between"><h3 className="text-xs font-extrabold">Stalled surfaced products</h3><MousePointerClick size={14} className="text-moss" /></div>
+              <div className="mt-3 space-y-2">
+                {discoveryGapReport.productGaps.slice(0, 5).map((gap) => (
+                  <div key={gap.productId || gap.productName} className="rounded-xl bg-white px-3 py-2">
+                    <div className="flex items-center justify-between gap-3"><p className="truncate text-[10px] font-extrabold">{gap.productName}</p><span className="rounded-full bg-black/5 px-2 py-0.5 text-[8px] font-extrabold text-black/35">{Math.round(gap.clickRate)}%</span></div>
+                    <p className="mt-1 text-[8px] font-bold text-black/35">{gap.recommended} surfaced · {gap.clicks} buy clicks · {gap.sources.join(" · ")}</p>
+                  </div>
+                ))}
+                {!discoveryGapReport.productGaps.length && <p className="rounded-xl bg-white px-3 py-5 text-center text-[10px] text-black/35">No repeatedly surfaced product is under-clicked yet.</p>}
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 

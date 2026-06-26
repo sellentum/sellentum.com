@@ -349,30 +349,77 @@ const demoConfiguratorMetadata = {
   progress: 100,
 };
 
-export const demoEvents: AnalyticsEvent[] = Array.from({ length: 84 }, (_, index) => {
-  const types: AnalyticsEvent["event_type"][] = ["widget_view", "quiz_start", "widget_view", "product_recommended", "quiz_complete", "buy_click"];
-  const eventType = types[index % types.length];
-  const product = demoProducts[index % demoProducts.length];
-  const date = new Date();
-  date.setDate(date.getDate() - (index % 14));
-  const advisor = demoAdvisorQueries[index % demoAdvisorQueries.length];
-  const isConfigurator = index % 7 === 0;
-  const isAssistant = !isConfigurator && index % 11 === 0;
-  const isSearch = !isConfigurator && !isAssistant && index % 13 === 0;
-  const sessionMetadata = { session_id: `demo_session_${Math.floor(index / 6)}`, session_started_at: date.toISOString() };
-  return {
-    id: `event_${index}`,
+const demoGapDate = new Date();
+demoGapDate.setDate(demoGapDate.getDate() - 1);
+
+export const demoEvents: AnalyticsEvent[] = [
+  ...Array.from({ length: 84 }, (_, index) => {
+    const types: AnalyticsEvent["event_type"][] = ["widget_view", "quiz_start", "widget_view", "product_recommended", "quiz_complete", "buy_click"];
+    const eventType = types[index % types.length];
+    const product = demoProducts[index % demoProducts.length];
+    const date = new Date();
+    date.setDate(date.getDate() - (index % 14));
+    const advisor = demoAdvisorQueries[index % demoAdvisorQueries.length];
+    const isConfigurator = index % 7 === 0;
+    const isAssistant = !isConfigurator && index % 11 === 0;
+    const isSearch = !isConfigurator && !isAssistant && index % 13 === 0;
+    const sessionMetadata = { session_id: `demo_session_${Math.floor(index / 6)}`, session_started_at: date.toISOString() };
+    return {
+      id: `event_${index}`,
+      user_id: DEMO_USER_ID,
+      quiz_id: isConfigurator ? demoConfigurator.id : demoQuiz.id,
+      product_id: eventType === "product_recommended" || eventType === "buy_click" ? product.id : undefined,
+      event_type: eventType,
+      metadata: isConfigurator
+        ? { ...demoConfiguratorMetadata, ...sessionMetadata, product_name: product.name }
+        : isAssistant
+          ? { experience_type: "assistant", experience_id: demoQuiz.id, experience_name: demoQuiz.name, ...sessionMetadata, query: advisor.query, terms: advisor.terms, max_budget: advisor.max_budget, source: "rules", matched_signals: advisor.terms, product_name: product.name }
+          : isSearch
+            ? { experience_type: "search", experience_id: demoQuiz.id, experience_name: demoQuiz.name, ...sessionMetadata, query: advisor.query, terms: advisor.terms, search_action: "search_submit", matched_signals: advisor.terms, product_name: product.name }
+            : { experience_type: "finder", experience_id: demoQuiz.id, experience_name: demoQuiz.name, ...sessionMetadata, answers: demoFinderAnswers, answer_summary: demoFinderAnswers.map((answer) => answer.answer), matched_reasons: ["Trails & outdoors", "Soft cushioning"], product_name: product.name },
+      created_at: date.toISOString(),
+    };
+  }),
+  {
+    id: "event_gap_search_0",
     user_id: DEMO_USER_ID,
-    quiz_id: isConfigurator ? demoConfigurator.id : demoQuiz.id,
-    product_id: eventType === "product_recommended" || eventType === "buy_click" ? product.id : undefined,
-    event_type: eventType,
-    metadata: isConfigurator
-      ? { ...demoConfiguratorMetadata, ...sessionMetadata, product_name: product.name }
-      : isAssistant
-        ? { experience_type: "assistant", experience_id: demoQuiz.id, experience_name: demoQuiz.name, ...sessionMetadata, query: advisor.query, terms: advisor.terms, max_budget: advisor.max_budget, source: "rules", matched_signals: advisor.terms, product_name: product.name }
-        : isSearch
-          ? { experience_type: "search", experience_id: demoQuiz.id, experience_name: demoQuiz.name, ...sessionMetadata, query: advisor.query, terms: advisor.terms, search_action: "search_submit", matched_signals: advisor.terms, product_name: product.name }
-          : { experience_type: "finder", experience_id: demoQuiz.id, experience_name: demoQuiz.name, ...sessionMetadata, answers: demoFinderAnswers, answer_summary: demoFinderAnswers.map((answer) => answer.answer), matched_reasons: ["Trails & outdoors", "Soft cushioning"], product_name: product.name },
-    created_at: date.toISOString(),
-  };
-});
+    quiz_id: demoQuiz.id,
+    event_type: "quiz_start",
+    metadata: {
+      experience_type: "search",
+      experience_id: demoQuiz.id,
+      experience_name: demoQuiz.name,
+      session_id: "demo_gap_search",
+      session_started_at: demoGapDate.toISOString(),
+      search_action: "search_submit",
+      query: "orthopedic office shoe under £90",
+      terms: ["orthopedic", "office"],
+      max_budget: 90,
+      result_count: 0,
+    },
+    created_at: demoGapDate.toISOString(),
+  },
+  {
+    id: "event_gap_finder_0",
+    user_id: DEMO_USER_ID,
+    quiz_id: demoQuiz.id,
+    event_type: "quiz_complete",
+    metadata: {
+      experience_type: "finder",
+      experience_id: demoQuiz.id,
+      experience_name: demoQuiz.name,
+      session_id: "demo_gap_finder",
+      session_started_at: demoGapDate.toISOString(),
+      answers: [
+        { question: "Where will you wear them most?", answer: "Office comfort" },
+        { question: "What’s your comfortable budget?", answer: "Under £50" },
+      ],
+      answer_summary: ["Office comfort", "Under £50"],
+      question_path: ["q_use", "q_budget"],
+      result_count: 0,
+      recovery_status: "no-results",
+      recovery_primary_action: "Relax the budget or add office-comfort catalog signals.",
+    },
+    created_at: demoGapDate.toISOString(),
+  },
+];

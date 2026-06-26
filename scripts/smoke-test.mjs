@@ -143,6 +143,7 @@ function assertSessionAnalytics() {
   const analyticsHelpers = readFileSync("lib/analytics.ts", "utf8");
   const insights = readFileSync("lib/insights.ts", "utf8");
   const journeys = readFileSync("lib/journey-insights.ts", "utf8");
+  const discoveryGaps = readFileSync("lib/discovery-gaps.ts", "utf8");
   for (const file of ["app/finder/[id]/page.tsx", "app/assistant/[id]/page.tsx", "app/configurator/[id]/page.tsx", "app/search/[id]/page.tsx"]) {
     assert(readFileSync(file, "utf8").includes("getSessionMetadata"), `${file} should attach anonymous session metadata to analytics events`);
   }
@@ -155,10 +156,15 @@ function assertSessionAnalytics() {
   assert(analytics.includes("Intent opportunities"), "Analytics dashboard should surface deterministic intent opportunities");
   assert(analytics.includes("buildShopperJourneyReport"), "Analytics dashboard should use shared shopper journey reconstruction");
   assert(analytics.includes("Shopper journey replay"), "Analytics dashboard should expose session-level journey replay");
+  assert(analytics.includes("buildDiscoveryGapReport"), "Analytics dashboard should use shared discovery gap intelligence");
+  assert(analytics.includes("Discovery gap planner"), "Analytics dashboard should expose a discovery gap planner");
   assert(insights.includes("buildZeroPartyInsights"), "Insight helper should expose a reusable zero-party report builder");
   assert(insights.includes("ProductDemandInsight"), "Insight helper should calculate product demand from recommendations and clicks");
   assert(journeys.includes("buildShopperJourneyReport"), "Journey helper should expose a reusable session report builder");
   assert(journeys.includes("analyticsEventSessionId"), "Journey helper should group events by anonymous session");
+  assert(discoveryGaps.includes("buildDiscoveryGapReport"), "Discovery gap helper should expose a reusable deterministic report builder");
+  assert(discoveryGaps.includes("zeroResultJourneys"), "Discovery gap helper should detect no-result journeys");
+  assert(discoveryGaps.includes("termGaps"), "Discovery gap helper should detect missing shopper language");
   assert(!analytics.includes("percentChangePlaceholder"), "Analytics dashboard should not display placeholder trend percentages");
 }
 
@@ -367,6 +373,10 @@ async function assertDeterministicLogic() {
   writeFileSync(compiledExperienceLaunch, readFileSync(compiledExperienceLaunch, "utf8")
     .replace('from "./widget-snippet";', 'from "./widget-snippet.js";')
     .replace('from "@/lib/widget-snippet";', 'from "./widget-snippet.js";'));
+  const compiledDiscoveryGaps = `${compileDir}/lib/discovery-gaps.js`;
+  writeFileSync(compiledDiscoveryGaps, readFileSync(compiledDiscoveryGaps, "utf8")
+    .replace('from "./utils";', 'from "./utils.js";')
+    .replace('from "@/lib/utils";', 'from "./utils.js";'));
 
   const demo = await import(pathToFileURL(`${compileDir}/lib/demo-data.js`));
   const utils = await import(pathToFileURL(`${compileDir}/lib/utils.js`));
@@ -392,6 +402,7 @@ async function assertDeterministicLogic() {
   const experienceLaunch = await import(pathToFileURL(`${compileDir}/lib/experience-launch.js`));
   const launchPacket = await import(pathToFileURL(`${compileDir}/lib/launch-packet.js`));
   const launchReadinessReport = await import(pathToFileURL(`${compileDir}/lib/launch-readiness-report.js`));
+  const discoveryGaps = await import(pathToFileURL(`${compileDir}/lib/discovery-gaps.js`));
   const configuratorReadiness = await import(pathToFileURL(`${compileDir}/lib/configurator-readiness.js`));
 
   const answers = [
@@ -492,6 +503,16 @@ async function assertDeterministicLogic() {
   assert(zeroPartyReport.queryThemes.some((item) => item.label === "trail" && item.count >= 3), "Expected zero-party insights to cluster repeated query themes");
   assert(zeroPartyReport.productDemand[0]?.productName === "Terra Trail Runner" && zeroPartyReport.productDemand[0].clicks === 1, "Expected zero-party insights to connect recommendations and buy clicks to products");
   assert(zeroPartyReport.opportunities.length && zeroPartyReport.summary.uniqueSignals >= 3, "Expected zero-party insights to generate deterministic merchant opportunities");
+  const gapReport = discoveryGaps.buildDiscoveryGapReport([
+    { id: "g1", user_id: "demo-user", quiz_id: "quiz_footwear", event_type: "quiz_start", metadata: { session_id: "g1", experience_type: "search", query: "orthopedic office shoe under 90", terms: ["orthopedic", "office"], result_count: 0 }, created_at: "2026-06-25T10:01:00Z" },
+    { id: "g2", user_id: "demo-user", quiz_id: "quiz_footwear", event_type: "quiz_complete", metadata: { session_id: "g2", experience_type: "finder", result_count: 1, recovery_status: "thin-results", answer_summary: ["Office comfort"] }, created_at: "2026-06-25T10:02:00Z" },
+    { id: "g3", user_id: "demo-user", quiz_id: "quiz_footwear", product_id: "prod_cloud", event_type: "product_recommended", metadata: { session_id: "g3", experience_type: "search", product_name: "Cloud Rest Walker", confidence: "low", score: 0.4 }, created_at: "2026-06-25T10:03:00Z" },
+    { id: "g4", user_id: "demo-user", quiz_id: "quiz_footwear", product_id: "prod_cloud", event_type: "product_recommended", metadata: { session_id: "g4", experience_type: "finder", product_name: "Cloud Rest Walker" }, created_at: "2026-06-25T10:04:00Z" },
+  ], demo.demoProducts);
+  assert(gapReport.status === "needs-attention" && gapReport.summary.zeroResultJourneys === 1, "Expected discovery gap report to flag no-result journeys");
+  assert(gapReport.termGaps.some((gap) => gap.term === "orthopedic" && gap.coverage === "missing"), "Expected discovery gap report to identify missing shopper language");
+  assert(gapReport.summary.lowConfidenceRecommendations === 1 && gapReport.productGaps.some((gap) => gap.productName === "Cloud Rest Walker"), "Expected discovery gap report to flag low-confidence and stalled product gaps");
+  assert(gapReport.actions[0]?.id === "fix-no-result-paths", "Expected discovery gap report to prioritize no-result fixes first");
 
   const importPreview = catalogImport.normalizeCatalogImportRows([
     { title: "Trail Shoe", "sale price": "£1,299.50", collection: "Footwear", attributes: "Grip|Waterproof", keywords: "trail,wet", benefits: "wet-weather protection|outdoor confidence", "semantic text": "Rain-ready trail grip for weekend hikes", link: "store.example/trail" },
