@@ -95,6 +95,7 @@ function assertSessionAnalytics() {
   const analytics = readFileSync("app/dashboard/analytics/page.tsx", "utf8");
   const analyticsHelpers = readFileSync("lib/analytics.ts", "utf8");
   const insights = readFileSync("lib/insights.ts", "utf8");
+  const journeys = readFileSync("lib/journey-insights.ts", "utf8");
   for (const file of ["app/finder/[id]/page.tsx", "app/assistant/[id]/page.tsx", "app/configurator/[id]/page.tsx", "app/search/[id]/page.tsx"]) {
     assert(readFileSync(file, "utf8").includes("getSessionMetadata"), `${file} should attach anonymous session metadata to analytics events`);
   }
@@ -105,8 +106,12 @@ function assertSessionAnalytics() {
   assert(analytics.includes("buildZeroPartyInsights"), "Analytics dashboard should use shared zero-party insight intelligence");
   assert(analytics.includes("Zero-party intent hub"), "Analytics dashboard should expose a zero-party intent hub");
   assert(analytics.includes("Intent opportunities"), "Analytics dashboard should surface deterministic intent opportunities");
+  assert(analytics.includes("buildShopperJourneyReport"), "Analytics dashboard should use shared shopper journey reconstruction");
+  assert(analytics.includes("Shopper journey replay"), "Analytics dashboard should expose session-level journey replay");
   assert(insights.includes("buildZeroPartyInsights"), "Insight helper should expose a reusable zero-party report builder");
   assert(insights.includes("ProductDemandInsight"), "Insight helper should calculate product demand from recommendations and clicks");
+  assert(journeys.includes("buildShopperJourneyReport"), "Journey helper should expose a reusable session report builder");
+  assert(journeys.includes("analyticsEventSessionId"), "Journey helper should group events by anonymous session");
   assert(!analytics.includes("percentChangePlaceholder"), "Analytics dashboard should not display placeholder trend percentages");
 }
 
@@ -262,10 +267,15 @@ async function assertDeterministicLogic() {
   writeFileSync(compiledQuizBlueprint, readFileSync(compiledQuizBlueprint, "utf8")
     .replace('from "./quiz-generation";', 'from "./quiz-generation.js";')
     .replace('from "./rule-coverage";', 'from "./rule-coverage.js";'));
+  const compiledJourneyInsights = `${compileDir}/lib/journey-insights.js`;
+  writeFileSync(compiledJourneyInsights, readFileSync(compiledJourneyInsights, "utf8")
+    .replace('from "./analytics";', 'from "./analytics.js";')
+    .replace('from "./utils";', 'from "./utils.js";'));
 
   const demo = await import(pathToFileURL(`${compileDir}/lib/demo-data.js`));
   const utils = await import(pathToFileURL(`${compileDir}/lib/utils.js`));
   const analytics = await import(pathToFileURL(`${compileDir}/lib/analytics.js`));
+  const journeyInsights = await import(pathToFileURL(`${compileDir}/lib/journey-insights.js`));
   const finderFlow = await import(pathToFileURL(`${compileDir}/lib/finder-flow.js`));
   const insights = await import(pathToFileURL(`${compileDir}/lib/insights.js`));
   const catalogIntelligence = await import(pathToFileURL(`${compileDir}/lib/catalog-intelligence.js`));
@@ -360,6 +370,10 @@ async function assertDeterministicLogic() {
   assert(trends.widget_view.current === 1 && trends.widget_view.previous === 1 && trends.quiz_complete.label === "New", "Expected analytics trends to use real previous-period values");
   const diagnosis = analytics.buildFunnelDiagnosis(analytics.buildAnalyticsSnapshot(periods.current));
   assert(diagnosis.title && diagnosis.recommendation, "Expected funnel diagnosis to produce merchant guidance");
+  const journeyReport = journeyInsights.buildShopperJourneyReport(analyticsEvents, demo.demoProducts);
+  assert(journeyReport.summary.sessions === 2 && journeyReport.summary.completed === 1, "Expected journey report to group events into anonymous sessions");
+  assert(journeyReport.summary.abandonedAfterStart === 0 && journeyReport.dropoffs.some((item) => item.stage === "completed"), "Expected journey report to expose deterministic drop-off stages");
+  assert(journeyReport.journeys[0].steps.some((step) => step.label.includes("Completed")), "Expected journey report to preserve shopper path steps");
   const zeroPartyEvents = [
     { id: "z1", user_id: "demo-user", quiz_id: "quiz_footwear", event_type: "quiz_complete", metadata: { session_id: "z1", experience_type: "finder", answers: [{ question: "Where?", answer: "Trails & outdoors" }], matched_reasons: ["trail"], product_name: "Terra Trail Runner" }, created_at: "2026-06-25T10:03:00Z" },
     { id: "z2", user_id: "demo-user", quiz_id: "quiz_footwear", product_id: "prod_trail", event_type: "product_recommended", metadata: { session_id: "z1", experience_type: "finder", product_name: "Terra Trail Runner", matched_reasons: ["trail"] }, created_at: "2026-06-25T10:04:00Z" },

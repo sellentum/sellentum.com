@@ -1,12 +1,13 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ArrowDownRight, ArrowUpRight, Check, ChevronDown, Clock3, Eye, ListChecks, MessageCircle, MousePointerClick, PackagePlus, Search, Sparkles, Tags, Trophy, UsersRound } from "lucide-react";
+import { AlertTriangle, ArrowDownRight, ArrowUpRight, Check, ChevronDown, Clock3, Eye, GitBranch, ListChecks, MessageCircle, MousePointerClick, PackagePlus, Search, Sparkles, Tags, Trophy, UsersRound } from "lucide-react";
 import { LoadingState } from "@/components/loading-state";
 import { useStore } from "@/lib/store";
 import type { ExperienceType } from "@/lib/types";
 import { buildAnalyticsSnapshot, buildAnalyticsTrends, buildFunnelDiagnosis, countAnalyticsEvents, getAnalyticsPeriods, stageRate } from "@/lib/analytics";
 import { buildZeroPartyInsights } from "@/lib/insights";
+import { buildShopperJourneyReport } from "@/lib/journey-insights";
 import { filterEventsByExperience, formatCurrency, getEventExperienceType } from "@/lib/utils";
 
 type ExperienceFilter = ExperienceType | "all";
@@ -26,6 +27,11 @@ const experienceOptions: Array<{ value: ExperienceFilter; icon: typeof Sparkles 
   { value: "search", icon: Search },
   { value: "configurator", icon: PackagePlus },
 ];
+
+function formatDuration(seconds: number) {
+  if (seconds < 60) return `${seconds}s`;
+  return `${Math.floor(seconds / 60)}m ${seconds % 60}s`;
+}
 
 export default function AnalyticsPage() {
   const { ready, events, products, quizzes, configurators } = useStore();
@@ -66,6 +72,7 @@ export default function AnalyticsPage() {
   }).sort((a, b) => b.recommended - a.recommended || b.clicks - a.clicks || a.product.name.localeCompare(b.product.name)), [products, filteredEvents]);
 
   const zeroPartyInsights = useMemo(() => buildZeroPartyInsights(filteredEvents, products), [filteredEvents, products]);
+  const journeyReport = useMemo(() => buildShopperJourneyReport(filteredEvents, products), [filteredEvents, products]);
 
   const byDay = useMemo(() => Array.from({ length: rangeDays }, (_, reverseIndex) => {
     const offset = rangeDays - 1 - reverseIndex;
@@ -210,6 +217,68 @@ export default function AnalyticsPage() {
               <span className="mt-2 hidden text-center text-[8px] font-bold text-black/25 sm:block">{day.label.split(" ")[0]}</span>
             </div>
           ))}
+        </div>
+      </section>
+
+      <section className="mt-5 grid gap-5 xl:grid-cols-[.82fr_1.18fr]">
+        <div className="rounded-2xl border border-black/[0.07] bg-ink p-6 text-white">
+          <div className="flex items-center justify-between gap-4">
+            <div className="grid h-10 w-10 place-items-center rounded-xl bg-lime text-ink"><GitBranch size={18} /></div>
+            <span className="rounded-full bg-white/10 px-3 py-1.5 text-[9px] font-extrabold uppercase text-white/55">{journeyReport.summary.sessions} sessions</span>
+          </div>
+          <h2 className="display mt-6 text-3xl">Shopper journey replay</h2>
+          <p className="mt-2 text-xs leading-5 text-white/45">Session-level paths reconstructed from widget views, starts, completions, recommendations and buy clicks.</p>
+          <div className="mt-6 grid grid-cols-2 gap-2">
+            {[
+              ["Completed", journeyReport.summary.completed],
+              ["Clicked", journeyReport.summary.clicked],
+              ["Started drop-off", journeyReport.summary.abandonedAfterStart],
+              ["Avg duration", formatDuration(journeyReport.summary.averageDurationSeconds)],
+            ].map(([label, value]) => <div key={String(label)} className="rounded-2xl bg-white/[.07] p-3">
+              <p className="text-xl font-extrabold">{String(value)}</p>
+              <p className="mt-1 text-[8px] font-bold text-white/35">{String(label)}</p>
+            </div>)}
+          </div>
+          <div className="mt-5 space-y-2">
+            {journeyReport.dropoffs.slice(0, 2).map((dropoff) => <div key={dropoff.stage} className={`rounded-2xl p-3 ${dropoff.count ? "bg-amber-300/10" : "bg-lime/10"}`}>
+              <div className="flex items-start gap-2">
+                {dropoff.count ? <AlertTriangle size={13} className="mt-0.5 shrink-0 text-amber-100" /> : <Check size={13} className="mt-0.5 shrink-0 text-lime" />}
+                <div>
+                  <p className="text-[10px] font-extrabold">{dropoff.label} · {dropoff.count} sessions</p>
+                  <p className="mt-1 text-[9px] leading-4 text-white/45">{dropoff.count ? dropoff.recommendation : "No meaningful drop-off at this stage for the selected filter."}</p>
+                </div>
+              </div>
+            </div>)}
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-black/[0.07] bg-white p-5 sm:p-7">
+          <div className="flex items-center justify-between">
+            <div><h2 className="text-sm font-extrabold">Recent shopper paths</h2><p className="mt-1 text-[10px] text-black/35">A lightweight session replay for {activeExperienceLabel.toLowerCase()}</p></div>
+            <span className="grid h-9 w-9 place-items-center rounded-xl bg-[#f0f2ec] text-moss"><Clock3 size={16} /></span>
+          </div>
+          <div className="mt-5 space-y-3">
+            {journeyReport.journeys.slice(0, 4).map((journey) => {
+              const outcomeTone = journey.outcome === "clicked" ? "bg-lime/35 text-moss" : journey.outcome === "completed" ? "bg-blue-50 text-blue-700" : journey.outcome === "started" ? "bg-amber-50 text-amber-700" : "bg-black/5 text-black/35";
+              return <article key={journey.sessionId} className="rounded-2xl border border-black/[0.07] bg-[#f8f8f4] p-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2"><span className={`rounded-full px-2.5 py-1 text-[8px] font-extrabold uppercase ${outcomeTone}`}>{journey.outcome}</span><span className="text-[8px] font-bold text-black/25">{journey.experienceType}</span></div>
+                    <h3 className="mt-3 truncate text-xs font-extrabold">{journey.intentSummary}</h3>
+                    <p className="mt-1 text-[9px] font-bold text-black/35">{journey.experienceName} · {journey.eventCount} events · {formatDuration(journey.durationSeconds)}</p>
+                  </div>
+                  <span className="shrink-0 text-[8px] font-bold text-black/30">{new Date(journey.lastSeenAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}</span>
+                </div>
+                <div className="mt-4 grid gap-1.5 xl:grid-cols-3">
+                  {journey.steps.slice(0, 6).map((step, index) => <div key={`${journey.sessionId}-${step.createdAt}-${index}`} className="rounded-xl bg-white px-2.5 py-2">
+                    <p className="truncate text-[8px] font-extrabold text-black/45">{index + 1}. {step.label}</p>
+                  </div>)}
+                </div>
+                {(journey.recommendedProducts.length || journey.clickedProducts.length) ? <p className="mt-3 truncate text-[9px] font-bold text-black/35">Products: {[...new Set([...journey.clickedProducts, ...journey.recommendedProducts])].slice(0, 3).join(", ")}</p> : null}
+              </article>;
+            })}
+            {!journeyReport.journeys.length && <div className="rounded-2xl border border-dashed border-black/10 p-10 text-center"><p className="text-xs font-extrabold">No sessions in this filter yet</p><p className="mt-1 text-[10px] text-black/35">Open a published experience to capture shopper paths.</p></div>}
+          </div>
         </div>
       </section>
 
