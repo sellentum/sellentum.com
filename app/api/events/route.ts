@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { handlePublicError, publicRateLimit, readBoundedJson, sanitizeAnalyticsMetadata } from "@/lib/public-runtime-guard";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { ExperienceType } from "@/lib/types";
 
@@ -12,8 +13,12 @@ const eventSchema = z.object({
 
 export async function POST(request: Request) {
   try {
-    const parsed = eventSchema.safeParse(await request.json());
+    const body = await readBoundedJson(request, 16_000);
+    const parsed = eventSchema.safeParse(body);
     if (!parsed.success) return NextResponse.json({ error: "Invalid analytics event." }, { status: 400 });
+    const limited = publicRateLimit(request, "analytics-event", parsed.data.quizId, 120);
+    if (limited) return limited;
+
     const supabase = createAdminClient();
     if (!supabase) return NextResponse.json({ accepted: true, persisted: false });
     const requestedType = parsed.data.metadata?.experience_type;
@@ -34,12 +39,12 @@ export async function POST(request: Request) {
       quiz_id: experience.id,
       product_id: parsed.data.productId || null,
       event_type: parsed.data.eventType,
-      metadata: { ...(parsed.data.metadata || {}), experience_type: experienceType },
+      metadata: sanitizeAnalyticsMetadata({ ...(parsed.data.metadata || {}), experience_type: experienceType }),
     });
     if (error) throw error;
     return NextResponse.json({ accepted: true, persisted: true });
   } catch (error) {
     console.error("Analytics event failed", error);
-    return NextResponse.json({ error: "Could not record event." }, { status: 500 });
+    return handlePublicError(error, "Could not record event.");
   }
 }

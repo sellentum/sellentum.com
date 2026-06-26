@@ -3,7 +3,7 @@ import { z } from "zod";
 import { resolveFinderAnswerPath } from "@/lib/finder-flow";
 import { runFinderRecommendations } from "@/lib/finder-engine";
 import { normalizeWidgetSettings } from "@/lib/public-experience";
-import { checkRateLimit } from "@/lib/rate-limit";
+import { handlePublicError, publicRateLimit, readBoundedJson } from "@/lib/public-runtime-guard";
 import { getSemanticProductCandidates } from "@/lib/semantic-candidates";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { AnswerOption, Product, Question, Quiz } from "@/lib/types";
@@ -46,8 +46,10 @@ async function loadPublishedFinder(id: string) {
   return { supabase, quiz: bySlug.data ? normalizeQuiz(bySlug.data as unknown as QuizRow) : null, error: null };
 }
 
-export async function GET(_: Request, context: { params: Promise<{ id: string }> }) {
+export async function GET(request: Request, context: { params: Promise<{ id: string }> }) {
   const { id } = await context.params;
+  const limited = publicRateLimit(request, "public-finder-config", id, 120);
+  if (limited) return limited;
   const { supabase, quiz, error } = await loadPublishedFinder(id);
   if (!supabase) return NextResponse.json({ error }, { status: 503 });
   if (error || !quiz) return NextResponse.json({ error: "Published finder not found." }, { status: 404 });
@@ -64,10 +66,10 @@ export async function GET(_: Request, context: { params: Promise<{ id: string }>
 export async function POST(request: Request, context: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await context.params;
-    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "local";
-    if (!checkRateLimit(`public-finder:${ip}:${id}`, 40).allowed) return NextResponse.json({ error: "Too many requests. Please try again shortly." }, { status: 429 });
+    const limited = publicRateLimit(request, "public-finder", id, 40);
+    if (limited) return limited;
 
-    const parsed = recommendationSchema.safeParse(await request.json());
+    const parsed = recommendationSchema.safeParse(await readBoundedJson(request, 10_000));
     if (!parsed.success) return NextResponse.json({ error: "Invalid finder answers." }, { status: 400 });
 
     const { supabase, quiz, error } = await loadPublishedFinder(id);
@@ -128,6 +130,6 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
     });
   } catch (error) {
     console.error("Published finder recommendation failed", error);
-    return NextResponse.json({ error: "The finder could not generate recommendations." }, { status: 500 });
+    return handlePublicError(error, "The finder could not generate recommendations.");
   }
 }

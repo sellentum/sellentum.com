@@ -3,7 +3,7 @@ import { z } from "zod";
 import { validateConfiguratorSelection } from "@/lib/configurator-engine";
 import { buildConfiguratorSelectionGuidance } from "@/lib/configurator-guidance";
 import { normalizeWidgetSettings } from "@/lib/public-experience";
-import { checkRateLimit } from "@/lib/rate-limit";
+import { handlePublicError, publicRateLimit, readBoundedJson } from "@/lib/public-runtime-guard";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Configurator, ConfiguratorStep, Product } from "@/lib/types";
 
@@ -45,8 +45,10 @@ async function loadPublishedConfigurator(id: string) {
   return { supabase, configurator: bySlug.data ? normalizeConfigurator(bySlug.data as unknown as ConfiguratorRow) : null, error: null };
 }
 
-export async function GET(_: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const limited = publicRateLimit(request, "public-configurator-config", id, 120);
+  if (limited) return limited;
   const { supabase, configurator, error } = await loadPublishedConfigurator(id);
   if (!supabase) return NextResponse.json({ error }, { status: 404 });
   if (error || !configurator) return NextResponse.json({ error: "Published configurator not found." }, { status: 404 });
@@ -66,10 +68,10 @@ export async function GET(_: Request, { params }: { params: Promise<{ id: string
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
-    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "local";
-    if (!checkRateLimit(`public-configurator:${ip}:${id}`, 40).allowed) return NextResponse.json({ error: "Too many requests. Please try again shortly." }, { status: 429 });
+    const limited = publicRateLimit(request, "public-configurator", id, 40);
+    if (limited) return limited;
 
-    const parsed = validationSchema.safeParse(await request.json());
+    const parsed = validationSchema.safeParse(await readBoundedJson(request, 10_000));
     if (!parsed.success) return NextResponse.json({ error: "Invalid configurator selection." }, { status: 400 });
 
     const { supabase, configurator, error } = await loadPublishedConfigurator(id);
@@ -94,6 +96,6 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     }, { status: result.valid ? 200 : 400 });
   } catch (error) {
     console.error("Published configurator validation failed", error);
-    return NextResponse.json({ error: "The configurator could not validate that bundle." }, { status: 500 });
+    return handlePublicError(error, "The configurator could not validate that bundle.");
   }
 }

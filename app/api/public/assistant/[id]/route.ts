@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { buildAdvisorIntentText, extractBudget, runAdvisorSearch } from "@/lib/assistant-engine";
-import { checkRateLimit } from "@/lib/rate-limit";
+import { handlePublicError, publicRateLimit, readBoundedJson } from "@/lib/public-runtime-guard";
 import { getSemanticProductCandidates } from "@/lib/semantic-candidates";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Product, Quiz } from "@/lib/types";
@@ -27,10 +27,10 @@ async function loadPublishedQuiz(id: string) {
 export async function POST(request: Request, context: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await context.params;
-    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "local";
-    if (!checkRateLimit(`public-advisor:${ip}:${id}`, 25).allowed) return NextResponse.json({ error: "Too many requests. Please try again shortly." }, { status: 429 });
+    const limited = publicRateLimit(request, "public-advisor", id, 25);
+    if (limited) return limited;
 
-    const parsed = requestSchema.safeParse(await request.json());
+    const parsed = requestSchema.safeParse(await readBoundedJson(request, 12_000));
     if (!parsed.success) return NextResponse.json({ error: "Tell us what you need in a little more detail." }, { status: 400 });
 
     const { supabase, quiz, error } = await loadPublishedQuiz(id);
@@ -75,6 +75,6 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
     });
   } catch (error) {
     console.error("Published advisor failed", error);
-    return NextResponse.json({ error: "The product advisor could not complete that search." }, { status: 500 });
+    return handlePublicError(error, "The product advisor could not complete that search.");
   }
 }

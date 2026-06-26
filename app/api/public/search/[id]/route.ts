@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { normalizeWidgetSettings } from "@/lib/public-experience";
-import { checkRateLimit } from "@/lib/rate-limit";
+import { handlePublicError, publicRateLimit, readBoundedJson } from "@/lib/public-runtime-guard";
 import { explainSearchReport } from "@/lib/search-explanations";
 import { runSemanticProductSearch } from "@/lib/search-engine";
 import { buildSearchRecoveryReport } from "@/lib/search-recovery";
@@ -26,8 +26,10 @@ async function loadPublishedSearchContext(id: string) {
   return { supabase, quiz: bySlug.data as Pick<Quiz, "id" | "user_id" | "name" | "slug" | "published"> | null, error: null };
 }
 
-export async function GET(_: Request, context: { params: Promise<{ id: string }> }) {
+export async function GET(request: Request, context: { params: Promise<{ id: string }> }) {
   const { id } = await context.params;
+  const limited = publicRateLimit(request, "public-search-config", id, 120);
+  if (limited) return limited;
   const { supabase, quiz, error } = await loadPublishedSearchContext(id);
   if (!supabase) return NextResponse.json({ error }, { status: 503 });
   if (error || !quiz) return NextResponse.json({ error: "Published search experience not found." }, { status: 404 });
@@ -47,10 +49,10 @@ export async function GET(_: Request, context: { params: Promise<{ id: string }>
 export async function POST(request: Request, context: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await context.params;
-    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "local";
-    if (!checkRateLimit(`public-search:${ip}:${id}`, 40).allowed) return NextResponse.json({ error: "Too many searches. Please try again shortly." }, { status: 429 });
+    const limited = publicRateLimit(request, "public-search", id, 40);
+    if (limited) return limited;
 
-    const parsed = searchSchema.safeParse(await request.json());
+    const parsed = searchSchema.safeParse(await readBoundedJson(request, 8_000));
     if (!parsed.success) return NextResponse.json({ error: "Enter a product search query." }, { status: 400 });
 
     const { supabase, quiz, error } = await loadPublishedSearchContext(id);
@@ -81,6 +83,6 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
     });
   } catch (error) {
     console.error("Published semantic search failed", error);
-    return NextResponse.json({ error: "The product search could not complete." }, { status: 500 });
+    return handlePublicError(error, "The product search could not complete.");
   }
 }

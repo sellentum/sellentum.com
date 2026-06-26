@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { runAdvisorSearch } from "@/lib/assistant-engine";
-import { checkRateLimit } from "@/lib/rate-limit";
+import { handlePublicError, publicRateLimit, readBoundedJson } from "@/lib/public-runtime-guard";
 import type { Product } from "@/lib/types";
 
 const productSchema = z.object({
@@ -32,14 +32,14 @@ const requestSchema = z.object({
 
 export async function POST(request: Request) {
   try {
-    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "local";
-    if (!checkRateLimit(`assistant:${ip}`, 25).allowed) return NextResponse.json({ error: "Too many requests. Please try again shortly." }, { status: 429 });
-    const parsed = requestSchema.safeParse(await request.json());
+    const limited = publicRateLimit(request, "assistant", "demo", 25);
+    if (limited) return limited;
+    const parsed = requestSchema.safeParse(await readBoundedJson(request, 80_000));
     if (!parsed.success) return NextResponse.json({ error: "Tell us what you need in a little more detail." }, { status: 400 });
     const result = await runAdvisorSearch({ query: parsed.data.query, products: parsed.data.products as Product[], history: parsed.data.history || [] });
     return NextResponse.json(result);
   } catch (error) {
     console.error("Conversational discovery failed", error);
-    return NextResponse.json({ error: "The product advisor could not complete that search." }, { status: 500 });
+    return handlePublicError(error, "The product advisor could not complete that search.");
   }
 }

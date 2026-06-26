@@ -41,6 +41,7 @@ Findly is a compact guided-selling SaaS product for ecommerce brands. A merchant
 - Configurator compatibility guidance that explains blocked options, conflicting choices and safe alternatives
 - Shared public branding layer so finder, advisor, semantic search and configurator embeds all inherit merchant brand name, primary colour, widget title, welcome message and CTA copy consistently
 - Copyable JavaScript widget that opens a finder, advisor, semantic search or configurator in a lazy-loaded modal iframe or direct inline iframe, with install QA checks and launch handoff packets for generated snippets
+- Public runtime guardrails with bounded JSON bodies, shared rate-limit responses and sanitized analytics metadata for embedded finder, advisor, search, configurator and event APIs
 - Analytics for sessions, journey replay, real period-over-period trends, funnel diagnosis, views, starts, completions, recommendations, buy clicks, selected answers, search/advisor themes, matched intent signals, product demand and zero-party opportunity suggestions
 - Analytics QA that validates event-contract coverage, session linkage, required metadata, event sequence and product attribution before launch decisions
 - Discovery gap analytics that detect no-result paths, thin recommendation sets, missing shopper language, low-confidence matches and stalled surfaced products
@@ -159,6 +160,7 @@ Import the repository into Vercel, add the variables from `.env.example`, and de
 - `lib/search-explanations.ts` — grounded OpenAI/fallback copy for already-ranked semantic search results
 - `lib/recommendation-explanations.ts` — shared grounded OpenAI/fallback copy for already-ranked finder recommendations
 - `lib/widget-snippet.ts` — shared widget snippet generation and install-readiness diagnostics for Settings and Launch Studio
+- `lib/public-runtime-guard.ts` — bounded JSON parsing, public rate-limit responses and analytics metadata sanitization for embeddable runtimes
 - `lib/experience-launch.ts` — multi-experience launch cards for finder, advisor, semantic search and configurator embeds
 - `lib/launch-packet.ts` — copyable developer handoff text for preview URLs, embed snippets, QA checks and analytics contracts
 - `lib/launch-contract.ts` — deterministic launch contract for runtime endpoints, widget attributes, analytics payloads and troubleshooting

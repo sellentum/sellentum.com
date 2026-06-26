@@ -192,6 +192,32 @@ function assertSessionAnalytics() {
   assert(!analytics.includes("percentChangePlaceholder"), "Analytics dashboard should not display placeholder trend percentages");
 }
 
+function assertPublicRuntimeGuardrails() {
+  const guard = readFileSync("lib/public-runtime-guard.ts", "utf8");
+  const rateLimit = readFileSync("lib/rate-limit.ts", "utf8");
+  const eventsRoute = readFileSync("app/api/events/route.ts", "utf8");
+  const assistantRoute = readFileSync("app/api/assistant/route.ts", "utf8");
+  const publicRoutes = [
+    "app/api/public/finder/[id]/route.ts",
+    "app/api/public/search/[id]/route.ts",
+    "app/api/public/assistant/[id]/route.ts",
+    "app/api/public/configurator/[id]/route.ts",
+  ];
+
+  assert(guard.includes("readBoundedJson"), "Public runtime guard should expose bounded JSON parsing");
+  assert(guard.includes("publicRateLimit"), "Public runtime guard should expose shared rate-limit responses");
+  assert(guard.includes("sanitizeAnalyticsMetadata"), "Public runtime guard should sanitize analytics metadata");
+  assert(rateLimit.includes("retryAfter") && rateLimit.includes("resetAt"), "Rate limiter should expose retry timing for public responses");
+  assert(eventsRoute.includes("readBoundedJson") && eventsRoute.includes("publicRateLimit") && eventsRoute.includes("sanitizeAnalyticsMetadata"), "Analytics event route should bound bodies, rate-limit and sanitize metadata");
+  assert(assistantRoute.includes("readBoundedJson") && assistantRoute.includes("publicRateLimit"), "Demo advisor route should bound browser-supplied product payloads");
+  for (const file of publicRoutes) {
+    const source = readFileSync(file, "utf8");
+    assert(source.includes("publicRateLimit"), `${file} should use the shared public rate limiter`);
+    assert(source.includes("readBoundedJson"), `${file} should parse bounded JSON request bodies`);
+    assert(source.includes("handlePublicError"), `${file} should return clean public request errors`);
+  }
+}
+
 function assertLaunchStudioWorkflow() {
   const page = readFileSync("app/dashboard/launch/page.tsx", "utf8");
   const generator = readFileSync("app/api/quizzes/generate/route.ts", "utf8");
@@ -878,6 +904,7 @@ async function main() {
   assertPublicBrandingRuntime();
   assertExplanationRuntimeSafety();
   assertSessionAnalytics();
+  assertPublicRuntimeGuardrails();
   assertLaunchStudioWorkflow();
   assertDashboardCommandCenterWorkflow();
   assertCommercialImpactWorkflow();
