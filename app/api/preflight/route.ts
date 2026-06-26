@@ -3,6 +3,7 @@ import { demoConfigurator, demoEvents, demoProducts, demoQuiz, demoSettings } fr
 import { getWorkspaceIdentity } from "@/lib/api-auth";
 import { analyzeCatalogIntelligence, type CatalogIntelligenceSeverity } from "@/lib/catalog-intelligence";
 import { analyzeConfiguratorReadiness } from "@/lib/configurator-readiness";
+import { buildLaunchReadinessReport } from "@/lib/launch-readiness-report";
 import { analyzeQuizReadiness } from "@/lib/quiz-readiness";
 import { buildRecommendationQaReport } from "@/lib/recommendation-qa";
 import type { AnalyticsEvent, Configurator, Product, Quiz, WidgetSettings } from "@/lib/types";
@@ -190,6 +191,7 @@ function buildPreflight({ products, quizzes, configurators, events, settings, mo
 
   const checks = sections.flatMap((section) => section.checks);
   const overall = worstStatus(checks);
+  const launchReport = buildLaunchReadinessReport(sections);
 
   return {
     mode,
@@ -220,6 +222,7 @@ function buildPreflight({ products, quizzes, configurators, events, settings, mo
       session_events: sessionEvents,
       intent_events: intentEvents,
     },
+    launch_report: launchReport,
     sections,
   };
 }

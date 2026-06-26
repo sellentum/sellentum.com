@@ -25,6 +25,46 @@ type PreflightSection = {
   checks: PreflightCheck[];
 };
 
+type LaunchReportAction = {
+  id: string;
+  title: string;
+  detail: string;
+  evidence: string;
+  priority: "critical" | "high" | "medium" | "low";
+  owner: string;
+  impact: string;
+  effort: "Small" | "Medium" | "Large";
+  actionHref?: string;
+  actionLabel?: string;
+  checkIds: string[];
+};
+
+type LaunchReadinessReport = {
+  status: "ready" | "review" | "blocked";
+  score: number;
+  headline: string;
+  narrative: string;
+  confidence: "high" | "medium" | "low";
+  counts: {
+    checks: number;
+    passed: number;
+    warnings: number;
+    blockers: number;
+  };
+  coverage: Array<{
+    id: string;
+    label: string;
+    status: CheckStatus;
+    score: number;
+    passed: number;
+    warnings: number;
+    blockers: number;
+    checks: number;
+  }>;
+  nextActions: LaunchReportAction[];
+  strengths: string[];
+};
+
 type PreflightPayload = {
   mode: "demo" | "supabase";
   generated_at: string;
@@ -52,6 +92,7 @@ type PreflightPayload = {
     session_events: number;
     intent_events: number;
   };
+  launch_report: LaunchReadinessReport;
   sections: PreflightSection[];
 };
 
@@ -59,6 +100,13 @@ const statusCopy: Record<CheckStatus, { label: string; className: string; icon: 
   pass: { label: "Ready", className: "bg-lime/35 text-moss", icon: CheckCircle2 },
   warn: { label: "Needs review", className: "bg-amber-50 text-amber-700", icon: AlertTriangle },
   fail: { label: "Blocked", className: "bg-red-50 text-red-700", icon: ShieldAlert },
+};
+
+const priorityCopy: Record<LaunchReportAction["priority"], string> = {
+  critical: "bg-red-50 text-red-700",
+  high: "bg-orange-50 text-orange-700",
+  medium: "bg-amber-50 text-amber-700",
+  low: "bg-lime/35 text-moss",
 };
 
 function StatusPill({ status }: { status: CheckStatus }) {
@@ -148,6 +196,80 @@ export default function PreflightPage() {
           </div>
         </div>
       </div>
+
+      <section className="mt-6 grid gap-5 xl:grid-cols-[420px_1fr]">
+        <div className="rounded-[30px] border border-black/[0.07] bg-white p-6">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="eyebrow text-moss">Launch readiness score</p>
+              <h2 className="mt-3 text-5xl font-extrabold tracking-[-.07em]">{payload.launch_report.score}%</h2>
+            </div>
+            <span className={`rounded-full px-3 py-1 text-[9px] font-extrabold uppercase tracking-wider ${payload.launch_report.status === "blocked" ? "bg-red-50 text-red-700" : payload.launch_report.status === "review" ? "bg-amber-50 text-amber-700" : "bg-lime/35 text-moss"}`}>{payload.launch_report.status}</span>
+          </div>
+          <h3 className="mt-6 text-2xl font-extrabold tracking-[-.05em]">{payload.launch_report.headline}</h3>
+          <p className="mt-3 text-xs leading-5 text-black/45">{payload.launch_report.narrative}</p>
+          <div className="mt-5 grid grid-cols-4 gap-2 text-center">
+            <div className="rounded-2xl bg-[#f8f8f4] p-3"><p className="text-xl font-extrabold">{payload.launch_report.counts.passed}</p><p className="mt-1 text-[8px] font-bold text-black/30">Pass</p></div>
+            <div className="rounded-2xl bg-[#f8f8f4] p-3"><p className="text-xl font-extrabold">{payload.launch_report.counts.warnings}</p><p className="mt-1 text-[8px] font-bold text-black/30">Warn</p></div>
+            <div className="rounded-2xl bg-[#f8f8f4] p-3"><p className="text-xl font-extrabold">{payload.launch_report.counts.blockers}</p><p className="mt-1 text-[8px] font-bold text-black/30">Block</p></div>
+            <div className="rounded-2xl bg-[#f8f8f4] p-3"><p className="text-xl font-extrabold capitalize">{payload.launch_report.confidence}</p><p className="mt-1 text-[8px] font-bold text-black/30">Confidence</p></div>
+          </div>
+        </div>
+
+        <div className="rounded-[30px] border border-black/[0.07] bg-white p-6">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="eyebrow text-moss">Priority launch plan</p>
+              <h2 className="mt-2 text-2xl font-extrabold tracking-[-.05em]">{payload.launch_report.nextActions.length ? "Fix these in order." : "No priority fixes right now."}</h2>
+            </div>
+            <Link href="/dashboard/launch" className="hidden items-center gap-1 text-[10px] font-extrabold text-moss xl:flex">Open Launch Studio <ArrowRight size={11} /></Link>
+          </div>
+
+          {payload.launch_report.nextActions.length ? (
+            <div className="mt-5 grid gap-3 xl:grid-cols-2">
+              {payload.launch_report.nextActions.slice(0, 4).map((action) => (
+                <article key={action.id} className="rounded-2xl border border-black/[0.06] bg-[#f8f8f4] p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <span className={`rounded-full px-2.5 py-1 text-[8px] font-extrabold uppercase tracking-wider ${priorityCopy[action.priority]}`}>{action.priority}</span>
+                    <span className="rounded-full bg-white px-2.5 py-1 text-[8px] font-extrabold uppercase tracking-wider text-black/35">{action.effort}</span>
+                  </div>
+                  <h3 className="mt-3 text-sm font-extrabold">{action.title}</h3>
+                  <p className="mt-2 text-[10px] leading-4 text-black/40">{action.detail}</p>
+                  <p className="mt-3 rounded-xl bg-white px-3 py-2 text-[10px] font-bold leading-4 text-black/50">{action.evidence}</p>
+                  <div className="mt-3 flex items-center justify-between gap-3">
+                    <p className="text-[9px] font-bold uppercase tracking-wider text-black/30">{action.owner} · {action.impact}</p>
+                    {action.actionHref && action.actionLabel && <Link href={action.actionHref} className="shrink-0 text-[9px] font-extrabold text-moss">{action.actionLabel}</Link>}
+                  </div>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <div className="mt-5 grid gap-3 xl:grid-cols-2">
+              {payload.launch_report.strengths.slice(0, 4).map((strength) => (
+                <div key={strength} className="flex items-start gap-3 rounded-2xl border border-black/[0.06] bg-[#f8f8f4] p-4">
+                  <span className="grid h-8 w-8 place-items-center rounded-xl bg-lime/35 text-moss"><CheckCircle2 size={15} /></span>
+                  <p className="text-xs font-bold leading-5 text-black/55">{strength}</p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="mt-5 grid gap-2 xl:grid-cols-5">
+            {payload.launch_report.coverage.map((item) => (
+              <div key={item.id} className="rounded-2xl border border-black/[0.06] bg-white p-3">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="truncate text-[9px] font-extrabold text-black/55">{item.label}</p>
+                  <StatusPill status={item.status} />
+                </div>
+                <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-black/[0.06]">
+                  <div className={`h-full rounded-full ${item.status === "fail" ? "bg-red-400" : item.status === "warn" ? "bg-amber-400" : "bg-moss"}`} style={{ width: `${item.score}%` }} />
+                </div>
+                <p className="mt-2 text-[9px] font-bold text-black/35">{item.score}% · {item.passed}/{item.checks} checks ready</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-12">
         {[

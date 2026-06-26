@@ -317,15 +317,23 @@ function assertPreflightReadinessWorkflow() {
   const route = readFileSync("app/api/preflight/route.ts", "utf8");
   const page = readFileSync("app/dashboard/preflight/page.tsx", "utf8");
   const recommendationQa = readFileSync("lib/recommendation-qa.ts", "utf8");
+  const launchReport = readFileSync("lib/launch-readiness-report.ts", "utf8");
   assert(route.includes("analyzeQuizReadiness"), "Preflight should reuse finder publish-readiness diagnostics");
   assert(route.includes("analyzeConfiguratorReadiness"), "Preflight should reuse configurator publish-readiness diagnostics");
   assert(route.includes("buildRecommendationQaReport"), "Preflight should run synthetic recommendation QA");
+  assert(route.includes("buildLaunchReadinessReport"), "Preflight should build a prioritized launch-readiness report");
+  assert(route.includes("launch_report"), "Preflight API should expose the launch-readiness report");
   assert(route.includes("Recommendation reliability"), "Preflight should expose a recommendation reliability section");
   assert(route.includes("finder_readiness_blockers"), "Preflight summary should expose finder readiness blockers");
   assert(route.includes("configurator_readiness_blockers"), "Preflight summary should expose configurator readiness blockers");
   assert(route.includes("recommendation_qa_score"), "Preflight summary should expose recommendation QA score");
+  assert(page.includes("Launch readiness score"), "Preflight page should surface the launch readiness score");
+  assert(page.includes("Priority launch plan"), "Preflight page should surface prioritized launch actions");
   assert(page.includes("Readiness blockers"), "Preflight page should show readiness blocker counts");
   assert(page.includes("QA scenarios"), "Preflight page should show recommendation QA scenario counts");
+  assert(launchReport.includes("buildLaunchReadinessReport"), "Launch readiness helper should expose a reusable report builder");
+  assert(launchReport.includes("nextActions"), "Launch readiness report should include prioritized next actions");
+  assert(launchReport.includes("Recommendation reliability"), "Launch readiness report should classify recommendation QA impact");
   assert(recommendationQa.includes("buildRecommendationQaReport"), "Recommendation QA helper should expose a reusable report builder");
   assert(recommendationQa.includes("auditProductMatches"), "Recommendation QA should use the deterministic product scorer");
 }
@@ -383,6 +391,7 @@ async function assertDeterministicLogic() {
   const widgetSnippet = await import(pathToFileURL(`${compileDir}/lib/widget-snippet.js`));
   const experienceLaunch = await import(pathToFileURL(`${compileDir}/lib/experience-launch.js`));
   const launchPacket = await import(pathToFileURL(`${compileDir}/lib/launch-packet.js`));
+  const launchReadinessReport = await import(pathToFileURL(`${compileDir}/lib/launch-readiness-report.js`));
   const configuratorReadiness = await import(pathToFileURL(`${compileDir}/lib/configurator-readiness.js`));
 
   const answers = [
@@ -600,6 +609,31 @@ async function assertDeterministicLogic() {
   const brokenConfigurator = { ...demo.demoConfigurator, steps: [{ ...demo.demoConfigurator.steps[0], options: [{ ...demo.demoConfigurator.steps[0].options[0], product_id: "missing_product" }] }] };
   const brokenConfiguratorReadiness = configuratorReadiness.analyzeConfiguratorReadiness(brokenConfigurator, demo.demoProducts);
   assert(!brokenConfiguratorReadiness.canPublish && brokenConfiguratorReadiness.blockers.some((item) => item.id === "available-linked-products"), "Expected missing linked products to block configurator publishing");
+
+  const readinessReport = launchReadinessReport.buildLaunchReadinessReport([
+    {
+      id: "environment",
+      label: "Environment",
+      description: "Runtime setup",
+      status: "warn",
+      checks: [
+        { id: "app-url", label: "App URL", description: "Production origin", status: "pass", detail: "URL configured." },
+        { id: "openai", label: "OpenAI key", description: "AI quality", status: "warn", detail: "Fallbacks will run." },
+      ],
+    },
+    {
+      id: "recommendation-qa",
+      label: "Recommendation reliability",
+      description: "Synthetic shopper tests",
+      status: "fail",
+      checks: [
+        { id: "qa-no-results", label: "No-result paths", description: "Paths should recommend products", status: "fail", detail: "One path returned no eligible products.", actionHref: "/dashboard/lab", actionLabel: "Debug paths" },
+      ],
+    },
+  ]);
+  assert(readinessReport.status === "blocked" && readinessReport.score < 80, "Expected launch readiness report to block launch when recommendation QA fails");
+  assert(readinessReport.nextActions[0]?.priority === "critical" && readinessReport.nextActions[0]?.actionHref === "/dashboard/lab", "Expected launch readiness report to prioritize critical QA blockers");
+  assert(readinessReport.coverage.some((item) => item.id === "recommendation-qa" && item.blockers === 1), "Expected launch readiness coverage to summarize blocker counts by section");
 
 }
 
