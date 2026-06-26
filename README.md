@@ -9,7 +9,7 @@ Findly is a compact guided-selling SaaS product for ecommerce brands. A merchant
 - Product catalog CRUD plus CSV upload with flexible header aliases, row-level validation and import preview (`name`, `price`, and `category` are required)
 - AI catalog enrichment with normalized attributes, buyer needs, semantic search text and optional OpenAI embeddings
 - Catalog intelligence scoring for enrichment coverage, semantic-search readiness, matching signals, product media and commerce links
-- Ontology map for inspecting category clusters, buyer needs, tags, features, thin signals and AI-ready quiz question ideas
+- Ontology map for inspecting category clusters, buyer needs, tags, features, spec-to-benefit translations, thin signals and AI-ready quiz question ideas
 - AI quiz blueprint review in Launch Studio so merchants can inspect planned questions, catalog coverage and generation risks before publishing
 - Launch Studio workflow that enriches a catalog, generates a finder, publishes it, prepares the embed snippet and copies a developer launch packet from one screen
 - Ontology-guided finder generation that uses category clusters, repeated buyer needs and product features before falling back to OpenAI copy
@@ -120,6 +120,7 @@ Import the repository into Vercel, add the variables from `.env.example`, and de
 - `lib/analytics.ts` — session-aware analytics snapshots, period trends and funnel diagnostics
 - `lib/insights.ts` — zero-party insight extraction for shopper answers, query themes, catalog signals, product demand and deterministic merchant opportunities
 - `lib/journey-insights.ts` — anonymous shopper journey reconstruction, drop-off detection and recent path summaries
+- `lib/catalog-benefits.ts` — deterministic spec-to-benefit translation for shopper-friendly ontology insights and question ideas
 - `lib/catalog-intelligence.ts` — catalog health scoring for enrichment coverage, matching signals, semantic text, media and commerce links
 - `lib/catalog-ontology.ts` — category, buyer-need, tag and feature clustering for ontology mapping and question ideas
 - `lib/quiz-generation.ts` — ontology-guided quiz generation fallback and OpenAI grounding summary

@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { AlertTriangle, ArrowRight, Boxes, BrainCircuit, GitBranch, HelpCircle, Network, Search, Sparkles, Tags } from "lucide-react";
+import { AlertTriangle, ArrowRight, Boxes, BrainCircuit, GitBranch, HelpCircle, Lightbulb, Network, Search, Sparkles, Tags } from "lucide-react";
 import { LoadingState } from "@/components/loading-state";
+import { buildCatalogBenefitReport } from "@/lib/catalog-benefits";
 import { buildCatalogOntology } from "@/lib/catalog-ontology";
 import { useStore } from "@/lib/store";
 import { formatCurrency } from "@/lib/utils";
@@ -19,6 +20,7 @@ export default function OntologyPage() {
   if (!ready) return <LoadingState label="Mapping catalog ontology…" />;
 
   const ontology = buildCatalogOntology(products);
+  const benefitReport = buildCatalogBenefitReport(products);
 
   if (!products.length) {
     return <div className="grid min-h-[620px] place-items-center rounded-[30px] border border-black/[0.07] bg-white p-10 text-center">
@@ -44,12 +46,13 @@ export default function OntologyPage() {
       </div>
     </div>
 
-    <div className="mt-8 grid gap-4 lg:grid-cols-4">
+    <div className="mt-8 grid gap-4 lg:grid-cols-5">
       {[
         [ontology.activeProducts, "Active products", Boxes],
         [ontology.categoryClusters.length, "Category clusters", Network],
         [ontology.topSignals.length, "Top signals", Tags],
         [ontology.suggestedQuestions.length, "Question ideas", BrainCircuit],
+        [`${benefitReport.coverage}%`, "Benefit coverage", Lightbulb],
       ].map(([value, label, Icon]) => { const MetricIcon = Icon as typeof Boxes; return <div key={String(label)} className="rounded-2xl border border-black/[0.07] bg-white p-5">
         <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#eef1e8] text-moss"><MetricIcon size={18} /></span>
         <p className="display mt-5 text-4xl">{String(value)}</p>
@@ -110,6 +113,31 @@ export default function OntologyPage() {
           <div className="mt-4 flex flex-wrap gap-2">
             {ontology.topSignals.map((signal) => <span key={`${signal.type}-${signal.key}`} className="rounded-full bg-white/[.08] px-3 py-1.5 text-[9px] font-extrabold text-white/65">{signal.label} · {signal.productCount}</span>)}
           </div>
+        </section>
+
+        <section className="rounded-[28px] border border-black/[0.07] bg-white p-5">
+          <div className="flex items-center justify-between gap-4">
+            <p className="flex items-center gap-2 text-xs font-extrabold"><Lightbulb size={14} className="text-moss" /> Spec-to-benefit translator</p>
+            <span className="rounded-full bg-lime/30 px-2.5 py-1 text-[8px] font-extrabold text-moss">{benefitReport.productsWithBenefits}/{benefitReport.activeProducts || 0} products</span>
+          </div>
+          <p className="mt-2 text-[10px] leading-5 text-black/40">Findly converts technical catalog language into shopper outcomes for questions, search tuning and recommendation copy.</p>
+          <div className="mt-4 space-y-3">
+            {benefitReport.benefits.slice(0, 4).map((benefit) => <article key={benefit.id} className="rounded-2xl bg-canvas p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h3 className="text-xs font-extrabold">{benefit.label}</h3>
+                  <p className="mt-1 text-[9px] leading-4 text-black/45">{benefit.benefit}</p>
+                </div>
+                <span className="rounded-full bg-white px-2 py-1 text-[8px] font-extrabold text-black/35">{benefit.productCount} SKUs</span>
+              </div>
+              <p className="mt-3 rounded-xl bg-white px-3 py-2 text-[9px] font-bold leading-4 text-moss">Ask: {benefit.shopperQuestion}</p>
+              <p className="mt-2 text-[8px] font-bold uppercase tracking-wide text-black/25">Signals: {benefit.sourceTerms.join(" · ")}{benefit.sampleProducts.length ? ` · ${benefit.sampleProducts.slice(0, 2).join(", ")}` : ""}</p>
+            </article>)}
+            {!benefitReport.benefits.length && <p className="rounded-2xl bg-canvas p-4 text-[10px] font-bold leading-5 text-black/35">No benefit patterns detected yet. Add richer features, tags or buyer needs, then run enrichment.</p>}
+          </div>
+          {benefitReport.gaps.length ? <div className="mt-4 space-y-2">
+            {benefitReport.gaps.slice(0, 2).map((gap) => <p key={gap} className="rounded-2xl bg-amber-50 p-3 text-[10px] font-bold leading-5 text-amber-700">{gap}</p>)}
+          </div> : null}
         </section>
 
         <section className="rounded-[28px] border border-black/[0.07] bg-white p-5">

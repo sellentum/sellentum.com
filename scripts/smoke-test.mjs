@@ -205,6 +205,7 @@ function assertCatalogImportWorkflow() {
   const importer = readFileSync("lib/catalog-import.ts", "utf8");
   const intelligence = readFileSync("lib/catalog-intelligence.ts", "utf8");
   const ontology = readFileSync("lib/catalog-ontology.ts", "utf8");
+  const benefits = readFileSync("lib/catalog-benefits.ts", "utf8");
   const preflight = readFileSync("app/api/preflight/route.ts", "utf8");
   const preflightPage = readFileSync("app/dashboard/preflight/page.tsx", "utf8");
   assert(page.includes("normalizeCatalogImportRows"), "Product CSV import should use the shared catalog import normalizer");
@@ -216,6 +217,9 @@ function assertCatalogImportWorkflow() {
   assert(intelligence.includes("analyzeCatalogIntelligence"), "Catalog intelligence helper should expose a deterministic analyzer");
   assert(ontology.includes("buildCatalogOntology"), "Catalog ontology helper should expose a deterministic attribute mapper");
   assert(ontologyPage.includes("buildCatalogOntology"), "Ontology dashboard should use the shared catalog ontology mapper");
+  assert(benefits.includes("buildCatalogBenefitReport"), "Catalog benefit helper should expose deterministic spec-to-benefit translation");
+  assert(ontologyPage.includes("buildCatalogBenefitReport"), "Ontology dashboard should use the shared catalog benefit translator");
+  assert(ontologyPage.includes("Spec-to-benefit translator"), "Ontology dashboard should surface spec-to-benefit translation");
   assert(ontologyPage.includes("Suggested finder questions"), "Ontology dashboard should surface AI-ready finder question ideas");
   assert(shell.includes("/dashboard/ontology"), "Dashboard navigation should expose the ontology map");
   assert(preflight.includes("analyzeCatalogIntelligence"), "Preflight should reuse shared catalog intelligence diagnostics");
@@ -280,6 +284,7 @@ async function assertDeterministicLogic() {
   const insights = await import(pathToFileURL(`${compileDir}/lib/insights.js`));
   const catalogIntelligence = await import(pathToFileURL(`${compileDir}/lib/catalog-intelligence.js`));
   const catalogOntology = await import(pathToFileURL(`${compileDir}/lib/catalog-ontology.js`));
+  const catalogBenefits = await import(pathToFileURL(`${compileDir}/lib/catalog-benefits.js`));
   const catalogImport = await import(pathToFileURL(`${compileDir}/lib/catalog-import.js`));
   const quizGeneration = await import(pathToFileURL(`${compileDir}/lib/quiz-generation.js`));
   const quizBlueprint = await import(pathToFileURL(`${compileDir}/lib/quiz-blueprint.js`));
@@ -405,6 +410,10 @@ async function assertDeterministicLogic() {
   assert(ontologyReport.categoryClusters.length >= 2, "Expected ontology map to cluster demo products by category");
   assert(ontologyReport.topSignals.some((signal) => signal.key === "trail"), "Expected ontology map to expose repeated trail signal");
   assert(ontologyReport.suggestedQuestions.some((question) => question.options.length >= 2), "Expected ontology map to generate suggested finder questions");
+  const benefitReport = catalogBenefits.buildCatalogBenefitReport(demo.demoProducts);
+  assert(benefitReport.coverage >= 60 && benefitReport.benefits.length >= 3, "Expected catalog benefit report to translate demo product signals into shopper benefits");
+  assert(benefitReport.benefits.some((benefit) => benefit.id === "wet-weather" || benefit.id === "trail-grip"), "Expected benefit report to detect weather or trail confidence benefits");
+  assert(benefitReport.suggestedQuestion.options.length, "Expected benefit report to produce benefit-led question options");
   const generatedSuggestion = quizGeneration.buildOntologyQuizSuggestion(demo.demoProducts, "Help shoppers choose the right footwear");
   assert(generatedSuggestion.questions.length >= 2, "Expected ontology-guided quiz generation to produce multiple questions");
   assert(generatedSuggestion.questions.some((question) => question.options.some((option) => option.match_type === "category" || option.match_type === "tag" || option.match_type === "feature")), "Expected generated quiz to use ontology-backed catalog rules");
