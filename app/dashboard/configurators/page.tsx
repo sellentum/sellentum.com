@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { AlertTriangle, ArrowLeft, Check, ChevronDown, ExternalLink, GripVertical, LoaderCircle, PackagePlus, Plus, Save, Settings2, Sparkles, Trash2, X } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Check, ChevronDown, ExternalLink, GripVertical, LoaderCircle, PackagePlus, Plus, Save, Settings2, Sparkles, Trash2, Wand2, X } from "lucide-react";
 import { LoadingState } from "@/components/loading-state";
 import { useStore } from "@/lib/store";
+import type { ConfiguratorBlueprintSuggestion } from "@/lib/configurator-blueprint";
 import { buildConfiguratorQaReport } from "@/lib/configurator-qa";
 import { analyzeConfiguratorReadiness } from "@/lib/configurator-readiness";
-import type { Configurator, ConfiguratorOption, ConfiguratorStep } from "@/lib/types";
+import type { Configurator, ConfiguratorOption, ConfiguratorStep, Product } from "@/lib/types";
 import { describeConfiguratorSelection, flattenConfiguratorOptions, formatCurrency, getConfiguratorTotal, slugify, uid } from "@/lib/utils";
 
 function commaList(value: string[]) {
@@ -16,6 +17,64 @@ function commaList(value: string[]) {
 
 function parseCommaList(value: string) {
   return value.split(",").map((item) => item.trim()).filter(Boolean);
+}
+
+function productPayload(products: Product[]) {
+  return products.filter((product) => product.active).map(({ id, name, price, image_url, category, description, features, tags, buyer_needs, search_text, active }) => ({
+    id,
+    name,
+    price,
+    image_url,
+    category,
+    description,
+    features,
+    tags,
+    buyer_needs: buyer_needs || [],
+    search_text: search_text || "",
+    active,
+  }));
+}
+
+function applyConfiguratorSuggestion(configurator: Configurator, suggestion: ConfiguratorBlueprintSuggestion): Configurator {
+  const optionIds = new Map<string, string>();
+  for (const step of suggestion.steps) {
+    for (const option of step.options) optionIds.set(option.key, uid("config_opt"));
+  }
+
+  return {
+    ...configurator,
+    name: suggestion.name,
+    slug: `${slugify(suggestion.name || "generated-configurator")}-${Date.now().toString().slice(-5)}`,
+    title: suggestion.title,
+    subtitle: suggestion.subtitle,
+    hero_image_url: suggestion.hero_image_url,
+    base_price: suggestion.base_price,
+    published: false,
+    steps: suggestion.steps.map((step, stepIndex) => {
+      const stepId = uid("config_step");
+      return {
+        id: stepId,
+        configurator_id: configurator.id,
+        title: step.title,
+        helper_text: step.helper_text,
+        selection_type: step.selection_type,
+        required: step.required,
+        position: stepIndex,
+        options: step.options.map((option, optionIndex) => ({
+          id: optionIds.get(option.key) || uid("config_opt"),
+          step_id: stepId,
+          label: option.label,
+          description: option.description,
+          image_url: option.image_url,
+          price_delta: option.price_delta,
+          product_id: option.product_id,
+          tags: option.tags,
+          incompatible_option_ids: option.incompatible_option_keys.map((key) => optionIds.get(key)).filter((id): id is string => Boolean(id)),
+          position: optionIndex,
+        })),
+      };
+    }),
+  };
 }
 
 function ConfiguratorEditor({ selected, onBack }: { selected: Configurator; onBack: () => void }) {
@@ -284,6 +343,9 @@ function ConfiguratorEditor({ selected, onBack }: { selected: Configurator; onBa
 export default function ConfiguratorsPage() {
   const { ready, configurators, createConfigurator, saveConfigurator, products, events } = useStore();
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [generating, setGenerating] = useState(false);
+  const [generationError, setGenerationError] = useState("");
+  const [generationNotice, setGenerationNotice] = useState("");
   const selected = configurators.find((configurator) => configurator.id === selectedId);
 
   if (!ready) return <LoadingState label="Loading configurators…" />;
@@ -319,12 +381,43 @@ export default function ConfiguratorsPage() {
     setSelectedId(configurator.id);
   }
 
+  async function generate() {
+    setGenerating(true);
+    setGenerationError("");
+    setGenerationNotice("");
+    try {
+      const response = await fetch("/api/configurators/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          goal: "Generate a compact visual product configurator with product-linked anchor choices, shopper-friendly priority options and compatibility guardrails where catalog signals differ.",
+          products: productPayload(products),
+        }),
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Could not generate a configurator.");
+      const configurator = applyConfiguratorSuggestion(createConfigurator(), payload.suggestion as ConfiguratorBlueprintSuggestion);
+      await saveConfigurator(configurator);
+      setSelectedId(configurator.id);
+      setGenerationNotice(`${configurator.name} was generated as a draft using ${payload.source === "openai" ? "OpenAI with catalog guardrails" : "the deterministic catalog blueprint"}. Review Path QA before publishing.`);
+    } catch (err) {
+      setGenerationError(err instanceof Error ? err.message : "Configurator generation failed.");
+    } finally {
+      setGenerating(false);
+    }
+  }
+
   return (
     <div className="animate-rise">
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div><p className="eyebrow text-moss">Visual selling</p><h1 className="display mt-2 text-4xl sm:text-5xl">Configurators</h1><p className="mt-2 text-sm text-black/45">Create guided bundles with compatible options, product-linked pricing and a polished customer workflow.</p></div>
-        <button onClick={create} className="btn-primary self-start"><Plus size={16} /> Create configurator</button>
+        <div className="flex flex-wrap gap-2">
+          <button onClick={generate} disabled={generating || productPayload(products).length < 2} className="btn-secondary self-start !px-4 !py-2.5"><Wand2 size={15} className="text-moss" /> {generating ? "Generating…" : "Generate configurator"}</button>
+          <button onClick={create} className="btn-primary self-start"><Plus size={16} /> Create configurator</button>
+        </div>
       </div>
+      {generationError && <p className="mt-5 rounded-xl bg-red-50 p-3 text-xs font-bold text-red-700">{generationError}</p>}
+      {generationNotice && <p className="mt-5 rounded-xl bg-lime/25 p-3 text-xs font-bold text-moss">{generationNotice}</p>}
 
       {configurators.length ? (
         <div className="mt-8 grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
@@ -357,11 +450,11 @@ export default function ConfiguratorsPage() {
               </article>
             );
           })}
-          <button onClick={create} className="grid min-h-[360px] place-items-center rounded-2xl border-2 border-dashed border-black/10 text-center transition hover:border-moss/30 hover:bg-white"><span><span className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-white shadow-sm"><PackagePlus size={20} /></span><span className="mt-4 block text-sm font-extrabold">Create another configurator</span><span className="mt-1 block text-xs text-black/35">Start from your catalog</span></span></button>
+          <button onClick={generate} disabled={generating || productPayload(products).length < 2} className="grid min-h-[360px] place-items-center rounded-2xl border-2 border-dashed border-black/10 text-center transition hover:border-moss/30 hover:bg-white disabled:opacity-50"><span><span className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-white shadow-sm"><Wand2 size={20} /></span><span className="mt-4 block text-sm font-extrabold">Generate another configurator</span><span className="mt-1 block text-xs text-black/35">Use catalog signals and product links</span></span></button>
         </div>
       ) : (
         <div className="mt-8 grid min-h-[450px] place-items-center rounded-2xl border-2 border-dashed border-black/10 bg-white/40 p-8 text-center">
-          <div><span className="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-lime/45 text-moss"><PackagePlus size={25} /></span><h2 className="display mt-5 text-3xl">Build your first configurable bundle</h2><p className="mx-auto mt-2 max-w-md text-xs leading-5 text-black/40">Start with a product, add choices, then define which combinations should be allowed.</p><button onClick={create} className="btn-primary mt-5"><Plus size={15} /> Create configurator</button></div>
+          <div><span className="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-lime/45 text-moss"><PackagePlus size={25} /></span><h2 className="display mt-5 text-3xl">Build your first configurable bundle</h2><p className="mx-auto mt-2 max-w-md text-xs leading-5 text-black/40">Start from your catalog, generate compatible steps, then review Path QA before publishing.</p><div className="mt-5 flex justify-center gap-2"><button onClick={generate} disabled={generating || productPayload(products).length < 2} className="btn-primary"><Wand2 size={15} /> {generating ? "Generating…" : "Generate configurator"}</button><button onClick={create} className="btn-secondary"><Plus size={15} /> Manual build</button></div></div>
         </div>
       )}
     </div>

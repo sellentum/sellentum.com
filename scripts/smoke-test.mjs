@@ -426,9 +426,18 @@ function assertQuizReadinessWorkflow() {
 
 function assertConfiguratorReadinessWorkflow() {
   const page = readFileSync("app/dashboard/configurators/page.tsx", "utf8");
+  const route = readFileSync("app/api/configurators/generate/route.ts", "utf8");
+  const blueprint = readFileSync("lib/configurator-blueprint.ts", "utf8");
   const readiness = readFileSync("lib/configurator-readiness.ts", "utf8");
   const qa = readFileSync("lib/configurator-qa.ts", "utf8");
   assert(page.includes("analyzeConfiguratorReadiness"), "Configurator builder should run publish-readiness diagnostics");
+  assert(page.includes("/api/configurators/generate"), "Configurator dashboard should call authenticated configurator generation");
+  assert(page.includes("Generate configurator"), "Configurator dashboard should expose one-click configurator generation");
+  assert(page.includes("applyConfiguratorSuggestion"), "Configurator dashboard should turn generated blueprints into editable configurators");
+  assert(route.includes("buildConfiguratorBlueprint"), "Configurator generation route should use deterministic catalog blueprints");
+  assert(route.includes("new OpenAI"), "Configurator generation route should optionally use OpenAI for richer structure and copy");
+  assert(blueprint.includes("buildConfiguratorBlueprint"), "Configurator blueprint helper should expose a reusable report builder");
+  assert(blueprint.includes("incompatible_option_keys"), "Configurator blueprint should infer compatibility guardrails");
   assert(page.includes("buildConfiguratorQaReport"), "Configurator builder should run deterministic path QA");
   assert(page.includes("Publish readiness"), "Configurator builder should surface publish-readiness feedback");
   assert(page.includes("Path QA"), "Configurator builder should surface path QA feedback");
@@ -528,6 +537,9 @@ async function assertDeterministicLogic() {
   const compiledConfiguratorQa = `${compileDir}/lib/configurator-qa.js`;
   writeFileSync(compiledConfiguratorQa, readFileSync(compiledConfiguratorQa, "utf8")
     .replace('from "@/lib/utils";', 'from "./utils.js";'));
+  const compiledConfiguratorBlueprint = `${compileDir}/lib/configurator-blueprint.js`;
+  writeFileSync(compiledConfiguratorBlueprint, readFileSync(compiledConfiguratorBlueprint, "utf8")
+    .replace('from "./catalog-benefits";', 'from "./catalog-benefits.js";'));
   const compiledSearchEngine = `${compileDir}/lib/search-engine.js`;
   writeFileSync(compiledSearchEngine, readFileSync(compiledSearchEngine, "utf8").replace('from "./catalog-benefits";', 'from "./catalog-benefits.js";'));
   const compiledShopperLanguagePlanner = `${compileDir}/lib/shopper-language-planner.js`;
@@ -587,6 +599,7 @@ async function assertDeterministicLogic() {
   const recommendationRecovery = await import(pathToFileURL(`${compileDir}/lib/recommendation-recovery.js`));
   const configuratorGuidance = await import(pathToFileURL(`${compileDir}/lib/configurator-guidance.js`));
   const configuratorQa = await import(pathToFileURL(`${compileDir}/lib/configurator-qa.js`));
+  const configuratorBlueprint = await import(pathToFileURL(`${compileDir}/lib/configurator-blueprint.js`));
   const recommendationTrace = await import(pathToFileURL(`${compileDir}/lib/recommendation-trace.js`));
   const ruleCoverage = await import(pathToFileURL(`${compileDir}/lib/rule-coverage.js`));
   const searchEngine = await import(pathToFileURL(`${compileDir}/lib/search-engine.js`));
@@ -682,6 +695,11 @@ async function assertDeterministicLogic() {
   assert(configuratorQaReport.actions.length || configuratorQaReport.score > 0, "Expected configurator QA to produce a score or remediation actions");
   const brokenConfiguratorQa = configuratorQa.buildConfiguratorQaReport([{ ...demo.demoConfigurator, steps: [{ ...demo.demoConfigurator.steps[0], options: [] }] }], demo.demoProducts);
   assert(brokenConfiguratorQa.status === "fail" && brokenConfiguratorQa.actions.some((action) => action.id === "fix-configurator-completion" || action.id === "create-configurator-qa"), "Expected broken configurator QA to produce launch-blocking actions");
+  const configuratorBlueprintReport = configuratorBlueprint.buildConfiguratorBlueprint(demo.demoProducts, "Generate a trail kit configurator");
+  assert(configuratorBlueprintReport.canGenerate && configuratorBlueprintReport.suggestion.steps.length >= 2, "Expected configurator blueprint to generate multi-step visual selling flow");
+  assert(configuratorBlueprintReport.compatibilityRules > 0 && configuratorBlueprintReport.suggestion.steps.some((step) => step.options.some((option) => option.product_id)), "Expected configurator blueprint to include product-linked options and compatibility guardrails");
+  const blockedConfiguratorBlueprint = configuratorBlueprint.buildConfiguratorBlueprint([{ ...demo.demoProducts[0], id: "single_config_product" }], "");
+  assert(!blockedConfiguratorBlueprint.canGenerate && blockedConfiguratorBlueprint.status === "blocked", "Expected configurator blueprint to block generation for a single-product catalog");
 
   const eventTypes = [
     { quiz_id: "quiz_footwear", metadata: { experience_type: "assistant" } },

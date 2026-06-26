@@ -35,6 +35,7 @@ Findly is a compact guided-selling SaaS product for ecommerce brands. A merchant
 - Grounded AI/fallback explanations for semantic search results after deterministic ranking
 - Semantic search recovery with missing-term guidance, budget relaxation suggestions and closest catalog near misses for weak or blocked queries
 - Pgvector-backed advisor candidate retrieval for enriched Supabase catalogs, with deterministic ranking as the final selector
+- AI-assisted configurator generation that turns active catalog products into draft visual bundle builders with product-linked anchor choices and compatibility guardrails
 - Visual configurator builder with steps, options, product-linked price deltas, compatibility rules and publish-readiness diagnostics
 - Configurator path QA that simulates valid bundles, product-linked completion paths and incompatible option guardrails before launch
 - Customer finder with welcome, progress, AI explanations, side-by-side result comparison, restart and buy-click tracking
@@ -172,6 +173,7 @@ Import the repository into Vercel, add the variables from `.env.example`, and de
 - `lib/storefront-qa-runbook.ts` — deterministic manual QA script for storefront install, analytics proof, recovery testing and rollback
 - `lib/rule-coverage.ts` — deterministic answer-rule coverage helper used by the finder builder and readiness checks
 - `lib/quiz-readiness.ts` — publish-readiness diagnostics for finder structure, catalog mapping and rule quality
+- `lib/configurator-blueprint.ts` — deterministic configurator blueprint generation from active products, shopper signals, benefits and compatibility inference
 - `lib/configurator-readiness.ts` — publish-readiness diagnostics for configurator structure, linked products, pricing and compatibility rules
 - `lib/configurator-qa.ts` — deterministic configurator path QA for required-step completion, product-linked bundles and incompatibility guardrails
 - `lib/configurator-guidance.ts` — deterministic shopper-facing compatibility explanations and safe alternatives for configurator choices
@@ -185,6 +187,7 @@ Import the repository into Vercel, add the variables from `.env.example`, and de
 - `supabase/schema.sql` — PostgreSQL schema and RLS policies
 - `app/api/catalog/enrich` — authenticated catalog enrichment and embedding generation
 - `app/api/quizzes/generate` — authenticated guided-selling flow generation
+- `app/api/configurators/generate` — authenticated visual configurator generation with OpenAI copy/structure and deterministic catalog fallback
 - `app/api/assistant` — rate-limited hybrid conversational discovery with deterministic clarification when shopper intent is vague
 - `app/api/public/assistant/[id]` — published advisor runtime that validates the experience and loads active products server-side
 - `lib/advisor-recovery.ts` — deterministic conversational recovery guidance for broad, weak or budget-blocked advisor requests
