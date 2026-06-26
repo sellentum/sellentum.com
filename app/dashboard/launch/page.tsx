@@ -6,13 +6,14 @@ import { AlertTriangle, ArrowRight, BookOpenCheck, Boxes, BrainCircuit, Check, C
 import { LoadingState } from "@/components/loading-state";
 import { useStore } from "@/lib/store";
 import { buildLaunchExperienceCards } from "@/lib/experience-launch";
+import { buildLaunchContract, formatLaunchContract } from "@/lib/launch-contract";
 import { buildLaunchPacket } from "@/lib/launch-packet";
 import { buildQuizBlueprint } from "@/lib/quiz-blueprint";
 import type { GeneratedQuizSuggestion, Product, ProductInput } from "@/lib/types";
 import { slugify, uid } from "@/lib/utils";
-import type { WidgetEmbedExperience } from "@/lib/widget-snippet";
+import type { WidgetEmbedExperience, WidgetSnippetConfig } from "@/lib/widget-snippet";
 
-type BusyAction = "enrich" | "generate" | "copy" | "packet" | null;
+type BusyAction = "enrich" | "generate" | "copy" | "packet" | "contract" | null;
 
 function productPayload(products: Product[]) {
   return products.map(({ id, name, price, category, description, features, tags, buyer_needs }) => ({
@@ -56,6 +57,7 @@ export default function LaunchStudioPage() {
   const [source, setSource] = useState<"rules" | "ontology" | "openai" | "">("");
   const [copied, setCopied] = useState(false);
   const [packetCopied, setPacketCopied] = useState(false);
+  const [contractCopied, setContractCopied] = useState(false);
 
   useEffect(() => setOrigin(window.location.origin), []);
 
@@ -85,6 +87,23 @@ export default function LaunchStudioPage() {
   const snippet = selectedLaunchExperience.snippet;
   const installReport = selectedLaunchExperience.installReport;
   const publicUrl = selectedLaunchExperience.publicUrl || `${originBase}/finder/${finderForSnippet?.slug || finderForSnippet?.id || "YOUR_FINDER_ID"}`;
+  const contractConfig: WidgetSnippetConfig = {
+    origin,
+    experience: selectedLaunchExperience.experience,
+    mode: selectedLaunchExperience.mode,
+    id: selectedLaunchExperience.id,
+    color: settings.primary_color,
+    label: selectedLaunchExperience.launcherLabel,
+    position: settings.launcher_position === "bottom-left" ? "left" : "right",
+  };
+  const launchContract = buildLaunchContract({
+    config: contractConfig,
+    installReport,
+    publicUrl,
+    activeProducts: activeProducts.length,
+    enrichedPercent,
+  });
+  const launchContractText = formatLaunchContract(launchContract);
   const launchPacket = buildLaunchPacket({
     origin,
     publicUrl,
@@ -205,6 +224,21 @@ export default function LaunchStudioPage() {
       setTimeout(() => setPacketCopied(false), 1800);
     } catch {
       setError("Could not copy the launch packet automatically. Select the preview and copy it manually.");
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function copyLaunchContract() {
+    setBusy("contract");
+    setError("");
+    try {
+      await navigator.clipboard.writeText(launchContractText);
+      setContractCopied(true);
+      setNotice(`${selectedLaunchExperience.label} launch contract copied. It includes endpoints, widget attributes, analytics payloads and troubleshooting.`);
+      setTimeout(() => setContractCopied(false), 1800);
+    } catch {
+      setError("Could not copy the launch contract automatically. Select the preview and copy it manually.");
     } finally {
       setBusy(null);
     }
@@ -364,6 +398,21 @@ export default function LaunchStudioPage() {
               <div className="rounded-2xl bg-canvas p-3"><p className="text-[9px] font-extrabold uppercase tracking-wide text-black/30">Analytics contract</p><p className="mt-1 text-[10px] font-bold text-black/55">5 tracked events</p></div>
             </div>
             <pre className="mt-4 max-h-40 overflow-hidden rounded-2xl border border-black/[0.07] bg-[#f8f8f4] p-4 text-[9px] leading-4 text-black/45"><code>{launchPacket.split("\n").slice(0, 20).join("\n")}</code></pre>
+          </div>
+          <div className="border-t border-black/[0.06] bg-[#f8f8f4] p-5">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 className="flex items-center gap-2 text-sm font-extrabold"><ShieldCheck size={15} className="text-moss" /> Launch contract</h2>
+                <p className="mt-1 text-[10px] leading-4 text-black/35">A stricter implementation spec with endpoints, widget attributes, analytics payload requirements, QA checks and troubleshooting.</p>
+              </div>
+              <button onClick={copyLaunchContract} disabled={busy !== null} className="btn-secondary shrink-0 !px-3 !py-2 text-xs">{busy === "contract" ? <LoaderCircle size={13} className="animate-spin" /> : contractCopied ? <Check size={13} /> : <Clipboard size={13} />}{contractCopied ? "Copied" : "Copy contract"}</button>
+            </div>
+            <div className="mt-4 grid gap-3 sm:grid-cols-3">
+              <div className="rounded-2xl bg-white p-3"><p className="text-lg font-extrabold">{launchContract.apiEndpoints.length}</p><p className="text-[8px] font-bold text-black/30">Runtime endpoints</p></div>
+              <div className="rounded-2xl bg-white p-3"><p className="text-lg font-extrabold">{launchContract.events.length}</p><p className="text-[8px] font-bold text-black/30">Tracked events</p></div>
+              <div className="rounded-2xl bg-white p-3"><p className="text-lg font-extrabold">{launchContract.checks.filter((item) => item.status === "ready").length}/{launchContract.checks.length}</p><p className="text-[8px] font-bold text-black/30">Checks ready</p></div>
+            </div>
+            <pre className="mt-4 max-h-48 overflow-hidden rounded-2xl border border-black/[0.07] bg-white p-4 text-[9px] leading-4 text-black/45"><code>{launchContractText.split("\n").slice(0, 28).join("\n")}</code></pre>
           </div>
           <div className="grid gap-3 p-5 sm:grid-cols-3">
             {selectedLaunchExperience.id && <Link href={selectedLaunchExperience.publicUrl.replace(originBase, "")} target="_blank" className="btn-primary justify-center !px-3 !py-2.5 text-xs"><ExternalLink size={13} /> Preview {selectedLaunchExperience.experience}</Link>}

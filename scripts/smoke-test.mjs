@@ -189,6 +189,7 @@ function assertLaunchStudioWorkflow() {
   const widgetSnippet = readFileSync("lib/widget-snippet.ts", "utf8");
   const experienceLaunch = readFileSync("lib/experience-launch.ts", "utf8");
   const launchPacket = readFileSync("lib/launch-packet.ts", "utf8");
+  const launchContract = readFileSync("lib/launch-contract.ts", "utf8");
   const shell = readFileSync("components/dashboard-shell.tsx", "utf8");
   const overview = readFileSync("app/dashboard/page.tsx", "utf8");
   assert(page.includes("/api/catalog/enrich"), "Launch Studio should call catalog enrichment");
@@ -213,6 +214,12 @@ function assertLaunchStudioWorkflow() {
   assert(page.includes("buildLaunchPacket"), "Launch Studio should use the shared launch packet helper");
   assert(page.includes("Developer handoff"), "Launch Studio should expose a developer handoff packet");
   assert(page.includes("Copy packet"), "Launch Studio should let merchants copy the developer launch packet");
+  assert(page.includes("buildLaunchContract"), "Launch Studio should build a deterministic launch contract");
+  assert(page.includes("Launch contract"), "Launch Studio should expose a launch contract panel");
+  assert(page.includes("Copy contract"), "Launch Studio should let merchants copy the launch contract");
+  assert(launchContract.includes("buildLaunchContract"), "Launch contract helper should expose reusable contract generation");
+  assert(launchContract.includes("formatLaunchContract"), "Launch contract helper should expose reusable contract formatting");
+  assert(launchContract.includes("Analytics contract") && launchContract.includes("data-experience"), "Launch contract should document analytics events and widget attributes");
   assert(settings.includes("Embed mode"), "Settings should let merchants choose modal or inline embed mode");
   assert(settings.includes("buildWidgetSnippet"), "Settings should use the shared widget snippet helper");
   assert(settings.includes("buildWidgetInstallReport"), "Settings should expose widget install readiness diagnostics");
@@ -412,6 +419,10 @@ async function assertDeterministicLogic() {
   writeFileSync(compiledExperienceLaunch, readFileSync(compiledExperienceLaunch, "utf8")
     .replace('from "./widget-snippet";', 'from "./widget-snippet.js";')
     .replace('from "@/lib/widget-snippet";', 'from "./widget-snippet.js";'));
+  const compiledLaunchContract = `${compileDir}/lib/launch-contract.js`;
+  writeFileSync(compiledLaunchContract, readFileSync(compiledLaunchContract, "utf8")
+    .replace('from "./widget-snippet";', 'from "./widget-snippet.js";')
+    .replace('from "@/lib/widget-snippet";', 'from "./widget-snippet.js";'));
   const compiledDiscoveryGaps = `${compileDir}/lib/discovery-gaps.js`;
   writeFileSync(compiledDiscoveryGaps, readFileSync(compiledDiscoveryGaps, "utf8")
     .replace('from "./utils";', 'from "./utils.js";')
@@ -450,6 +461,7 @@ async function assertDeterministicLogic() {
   const widgetSnippet = await import(pathToFileURL(`${compileDir}/lib/widget-snippet.js`));
   const experienceLaunch = await import(pathToFileURL(`${compileDir}/lib/experience-launch.js`));
   const launchPacket = await import(pathToFileURL(`${compileDir}/lib/launch-packet.js`));
+  const launchContract = await import(pathToFileURL(`${compileDir}/lib/launch-contract.js`));
   const launchReadinessReport = await import(pathToFileURL(`${compileDir}/lib/launch-readiness-report.js`));
   const advisorRecovery = await import(pathToFileURL(`${compileDir}/lib/advisor-recovery.js`));
   const discoveryGaps = await import(pathToFileURL(`${compileDir}/lib/discovery-gaps.js`));
@@ -671,6 +683,16 @@ async function assertDeterministicLogic() {
   assert(packet.includes("Findly launch packet") && packet.includes("Stable embed ID: quiz_footwear"), "Expected launch packet to include a title and stable embed ID");
   assert(packet.includes("Analytics events tracked") && packet.includes("buy_click"), "Expected launch packet to document analytics events");
   assert(packet.includes(generatedWidgetSnippet), "Expected launch packet to include the generated embed snippet");
+  const contract = launchContract.buildLaunchContract({
+    config: { origin: "https://findly.example", experience: "finder", mode: "modal", id: "quiz_footwear", color: "#22352a", label: "Find my match", position: "right" },
+    installReport: readyInstallReport,
+    publicUrl: "https://findly.example/finder/quiz_footwear",
+    activeProducts: demo.demoProducts.length,
+    enrichedPercent: 75,
+  });
+  assert(contract.apiEndpoints.includes("https://findly.example/api/widget.js") && contract.events.some((event) => event.event === "buy_click"), "Expected launch contract to include runtime endpoints and buy-click analytics");
+  const contractText = launchContract.formatLaunchContract(contract);
+  assert(contractText.includes("Analytics contract") && contractText.includes('data-experience="finder"'), "Expected formatted launch contract to document analytics and widget attributes");
 
   const readyQuiz = quizReadiness.analyzeQuizReadiness(demo.demoQuiz, demo.demoProducts);
   assert(readyQuiz.canPublish && readyQuiz.score >= 80, "Expected seeded demo finder to pass publish-readiness checks");
