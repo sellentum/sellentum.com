@@ -161,6 +161,8 @@ function assertSemanticSearchWorkflow() {
   const page = readFileSync("app/dashboard/search/page.tsx", "utf8");
   const publicPage = readFileSync("app/search/[id]/page.tsx", "utf8");
   const explanations = readFileSync("lib/search-explanations.ts", "utf8");
+  const benefits = readFileSync("lib/catalog-benefits.ts", "utf8");
+  const advisor = readFileSync("lib/assistant-engine.ts", "utf8");
   const settings = readFileSync("app/dashboard/settings/page.tsx", "utf8");
   const eventsRoute = readFileSync("app/api/events/route.ts", "utf8");
   const utils = readFileSync("lib/utils.ts", "utf8");
@@ -191,6 +193,9 @@ function assertSemanticSearchWorkflow() {
   assert(shell.includes("/dashboard/search"), "Dashboard navigation should expose Search Lab");
   assert(overview.includes("/dashboard/search"), "Dashboard overview should expose Search Lab");
   assert(engine.includes("extractSearchIntentTokens"), "Search engine should parse natural-language intent tokens");
+  assert(engine.includes("expandBenefitIntentTokens"), "Search engine should expand shopper benefit language into catalog terms");
+  assert(advisor.includes("expandBenefitIntentTokens"), "Advisor engine should expand shopper benefit language into catalog terms");
+  assert(benefits.includes("expandBenefitIntentTokens"), "Catalog benefits helper should expose benefit-aware intent expansion");
   assert(engine.includes("extractSearchBudget"), "Search engine should parse budget constraints");
   assert(engine.includes("buildTermCoverage"), "Search engine should diagnose active-catalog coverage for each parsed term");
   assert(engine.includes("SearchTermCoverage"), "Search engine should expose term coverage in the shared search report type");
@@ -286,6 +291,8 @@ async function assertDeterministicLogic() {
   writeFileSync(compiledRecommendationQa, readFileSync(compiledRecommendationQa, "utf8")
     .replace('from "./finder-flow";', 'from "./finder-flow.js";')
     .replace('from "./utils";', 'from "./utils.js";'));
+  const compiledSearchEngine = `${compileDir}/lib/search-engine.js`;
+  writeFileSync(compiledSearchEngine, readFileSync(compiledSearchEngine, "utf8").replace('from "./catalog-benefits";', 'from "./catalog-benefits.js";'));
 
   const demo = await import(pathToFileURL(`${compileDir}/lib/demo-data.js`));
   const utils = await import(pathToFileURL(`${compileDir}/lib/utils.js`));
@@ -426,6 +433,8 @@ async function assertDeterministicLogic() {
   assert(benefitReport.coverage >= 60 && benefitReport.benefits.length >= 3, "Expected catalog benefit report to translate demo product signals into shopper benefits");
   assert(benefitReport.benefits.some((benefit) => benefit.id === "wet-weather" || benefit.id === "trail-grip"), "Expected benefit report to detect weather or trail confidence benefits");
   assert(benefitReport.suggestedQuestion.options.length, "Expected benefit report to produce benefit-led question options");
+  const benefitIntentTerms = catalogBenefits.expandBenefitIntentTokens("I need wet-weather protection");
+  assert(benefitIntentTerms.includes("water") && benefitIntentTerms.includes("rain"), "Expected benefit intent expansion to map shopper benefit language to concrete catalog terms");
   const generatedSuggestion = quizGeneration.buildOntologyQuizSuggestion(demo.demoProducts, "Help shoppers choose the right footwear");
   assert(generatedSuggestion.questions.length >= 2, "Expected ontology-guided quiz generation to produce multiple questions");
   assert(generatedSuggestion.questions.some((question) => question.options.some((option) => option.match_type === "category" || option.match_type === "tag" || option.match_type === "feature")), "Expected generated quiz to use ontology-backed catalog rules");
@@ -443,6 +452,8 @@ async function assertDeterministicLogic() {
   assert(trailSearch.intent.coverage.some((item) => item.term === "trail" && item.status !== "missing"), "Expected semantic search coverage to identify catalog-backed terms");
   assert(trailSearch.results[0]?.product.id === "prod_trail", `Expected semantic search to rank Terra Trail Runner first, got ${trailSearch.results[0]?.product.name || "nothing"}`);
   assert(trailSearch.results[0]?.matchedSignals.some((signal) => signal.source === "budget"), "Expected semantic search to include budget eligibility signals");
+  const benefitSearch = searchEngine.runSemanticProductSearch({ query: "wet-weather protection under £140", products: demo.demoProducts, limit: 3 });
+  assert(benefitSearch.intent.terms.includes("water") && benefitSearch.results[0]?.product.id === "prod_trail", "Expected benefit-aware search to translate wet-weather protection into water-resistant product evidence");
   const citySearch = searchEngine.runSemanticProductSearch({ query: "lightweight city travel shoe", products: demo.demoProducts, limit: 3 });
   assert(citySearch.results[0]?.product.id === "prod_city", `Expected semantic search to rank Aero City Knit first, got ${citySearch.results[0]?.product.name || "nothing"}`);
   const budgetSearch = searchEngine.runSemanticProductSearch({ query: "running shoes under £100", products: demo.demoProducts, limit: 4 });

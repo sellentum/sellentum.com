@@ -24,6 +24,7 @@ Findly is a compact guided-selling SaaS product for ecommerce brands. A merchant
 - Conversational product advisor combining semantic similarity, deterministic field signals, hard budget constraints and clarification turns for vague requests
 - Published advisor runtime that loads the merchant catalog server-side instead of trusting browser-supplied products
 - Customer-facing semantic search experience for natural-language product discovery over a published catalog context
+- Benefit-aware semantic search and advisor token expansion so shopper outcome language maps back to concrete catalog terms
 - Grounded AI/fallback explanations for semantic search results after deterministic ranking
 - Pgvector-backed advisor candidate retrieval for enriched Supabase catalogs, with deterministic ranking as the final selector
 - Visual configurator builder with steps, options, product-linked price deltas, compatibility rules and publish-readiness diagnostics
@@ -129,7 +130,7 @@ Import the repository into Vercel, add the variables from `.env.example`, and de
 - `lib/finder-flow.ts` — deterministic conditional question routing and server-side answer-path validation
 - `lib/recommendation-qa.ts` — synthetic finder-path recommendation QA for no-result and thin-result launch risks
 - `lib/catalog-import.ts` — flexible CSV header mapping, row validation and import previews
-- `lib/search-engine.ts` — deterministic semantic search ranking, intent parsing, parsed-term catalog coverage and budget eligibility checks
+- `lib/search-engine.ts` — deterministic benefit-aware semantic search ranking, intent parsing, parsed-term catalog coverage and budget eligibility checks
 - `lib/search-tuning.ts` — merchant-facing search tuning guidance from term coverage, weak confidence and budget blockers
 - `lib/search-explanations.ts` — grounded OpenAI/fallback copy for already-ranked semantic search results
 - `lib/widget-snippet.ts` — shared widget snippet generation and install-readiness diagnostics for Settings and Launch Studio

@@ -1,3 +1,4 @@
+import { expandBenefitIntentTokens } from "./catalog-benefits";
 import type { Product } from "@/lib/types";
 
 export type ProductSearchSignal = {
@@ -122,7 +123,11 @@ export function extractSearchIntentTokens(query: string) {
   const base = (normalize(query).match(/[a-z][a-z-]{1,}/g) || [])
     .map(stem)
     .filter((word) => !stopWords.has(word));
-  return unique(base.flatMap((word) => [word, ...(synonyms[word] || [])]));
+  const expanded = [
+    ...base.flatMap((word) => [word, ...(synonyms[word] || [])]),
+    ...expandBenefitIntentTokens(query),
+  ];
+  return unique(expanded);
 }
 
 export function extractSearchBudget(query: string) {

@@ -1,6 +1,7 @@
 import "server-only";
 
 import OpenAI from "openai";
+import { expandBenefitIntentTokens } from "./catalog-benefits";
 import type { ConversationalMatch, Product } from "@/lib/types";
 
 export type AdvisorHistoryItem = { role: "user" | "assistant"; content: string };
@@ -42,7 +43,10 @@ export function extractAdvisorTokens(value: string) {
   const base = (value.toLowerCase().match(/[a-z][a-z-]{1,}/g) || [])
     .map((word) => word.endsWith("ies") && word.length > 4 ? `${word.slice(0, -3)}y` : word.endsWith("s") && !word.endsWith("ss") && word.length > 3 ? word.slice(0, -1) : word)
     .filter((word) => !stopWords.has(word));
-  return [...new Set(base.flatMap((word) => [word, ...(synonyms[word] || [])]))];
+  return [...new Set([
+    ...base.flatMap((word) => [word, ...(synonyms[word] || [])]),
+    ...expandBenefitIntentTokens(value),
+  ])];
 }
 
 export function extractBudget(query: string) {

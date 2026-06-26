@@ -47,6 +47,8 @@ const benefitRules: BenefitRule[] = [
   { id: "compatibility", terms: ["compatible", "compatibility", "fits", "kit", "bundle", "modular", "addon", "add-on"], label: "Compatible setup", benefit: "Helps shoppers avoid choosing parts or options that do not work together.", shopperQuestion: "Do you need Findly to keep selected parts compatible?", category: "confidence" },
 ];
 
+const intentStopWords = new Set(["about", "after", "also", "and", "are", "can", "choosing", "does", "findly", "for", "from", "helps", "important", "into", "matter", "most", "need", "option", "product", "products", "shopping", "should", "that", "the", "this", "use", "when", "which", "with", "you", "your"]);
+
 function normalise(value: string) {
   return value.toLowerCase().replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim();
 }
@@ -69,6 +71,20 @@ function productText(product: Product) {
 
 function matchedTerms(text: string, terms: string[]) {
   return terms.filter((term) => text.includes(normalise(term)));
+}
+
+function tokenise(value: string) {
+  return normalise(value).match(/[a-z][a-z-]{2,}/g)?.filter((word) => !intentStopWords.has(word)) || [];
+}
+
+function ruleIntentVocabulary(rule: BenefitRule) {
+  return [...new Set([
+    ...rule.terms.flatMap(tokenise),
+    ...tokenise(rule.label),
+    ...tokenise(rule.benefit),
+    ...tokenise(rule.shopperQuestion),
+    rule.category,
+  ])];
 }
 
 function benefitMatchesProduct(rule: BenefitRule, product: Product) {
@@ -129,4 +145,15 @@ export function buildCatalogBenefitReport(products: Product[]): CatalogBenefitRe
     },
     gaps,
   };
+}
+
+export function expandBenefitIntentTokens(value: string) {
+  const query = normalise(value);
+  const queryTokens = new Set(tokenise(value));
+  return [...new Set(benefitRules.flatMap((rule) => {
+    const vocabulary = ruleIntentVocabulary(rule);
+    const phraseMatch = rule.terms.some((term) => query.includes(normalise(term))) || query.includes(normalise(rule.label));
+    const tokenMatch = vocabulary.some((term) => queryTokens.has(term));
+    return phraseMatch || tokenMatch ? rule.terms.flatMap(tokenise) : [];
+  }))];
 }
