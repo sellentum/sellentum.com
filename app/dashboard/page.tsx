@@ -2,14 +2,16 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
-import { AlertTriangle, ArrowDownRight, ArrowUpRight, BookOpenCheck, Check, ChevronRight, CirclePlay, Eye, MousePointerClick, PackagePlus, Rocket, Sparkles, Wrench } from "lucide-react";
+import { AlertTriangle, ArrowDownRight, ArrowRight, ArrowUpRight, BookOpenCheck, Check, ChevronRight, CirclePlay, Eye, MousePointerClick, PackagePlus, Rocket, Sparkles, Wrench } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { LoadingState } from "@/components/loading-state";
 import { buildDashboardCommandCenter } from "@/lib/dashboard-command-center";
+import { buildConversionPlaybook } from "@/lib/conversion-playbook";
 
 export default function DashboardOverview() {
   const { ready, products, quizzes, configurators, events, settings } = useStore();
   const commandCenter = useMemo(() => buildDashboardCommandCenter({ products, quizzes, configurators, events, settings }), [products, quizzes, configurators, events, settings]);
+  const conversionPlaybook = useMemo(() => buildConversionPlaybook({ products, quizzes, configurators, events, settings }), [products, quizzes, configurators, events, settings]);
   if (!ready) return <LoadingState />;
   const { snapshot, trends } = commandCenter;
   const views = snapshot.widget_view;
@@ -74,6 +76,41 @@ export default function DashboardOverview() {
         </section>
         <section className="rounded-2xl border border-black/[0.07] bg-ink p-6 text-white"><div className="flex items-center justify-between"><div><h2 className="text-sm font-extrabold">Experience mix</h2><p className="mt-1 text-xs text-white/35">Actual event mix across every embedded surface.</p></div><Sparkles className="text-lime" size={18} /></div><div className="mt-6 grid grid-cols-4 gap-2 text-center"><div className="rounded-xl bg-white/[.06] p-4"><p className="text-2xl font-extrabold">{commandCenter.experienceMix.finder}</p><p className="mt-1 text-[9px] text-white/35">Finder</p></div><div className="rounded-xl bg-white/[.06] p-4"><p className="text-2xl font-extrabold">{commandCenter.experienceMix.assistant}</p><p className="mt-1 text-[9px] text-white/35">Advisor</p></div><Link href="/dashboard/search" className="rounded-xl bg-white/[.06] p-4 transition hover:bg-white/[.1]"><p className="text-2xl font-extrabold">{commandCenter.experienceMix.search}</p><p className="mt-1 text-[9px] text-white/35">Search</p></Link><div className="rounded-xl bg-white/[.06] p-4"><p className="text-2xl font-extrabold">{commandCenter.experienceMix.configurator}</p><p className="mt-1 text-[9px] text-white/35">Config</p></div></div><div className="mt-5 grid grid-cols-3 gap-2 text-center"><div className="rounded-xl bg-white/[.06] p-3"><p className="text-lg font-extrabold">{commandCenter.catalogScore}%</p><p className="mt-1 text-[8px] text-white/35">Catalog</p></div><div className="rounded-xl bg-white/[.06] p-3"><p className="text-lg font-extrabold">{commandCenter.discoveryScore}</p><p className="mt-1 text-[8px] text-white/35">Gap score</p></div><div className="rounded-xl bg-white/[.06] p-3"><p className="text-lg font-extrabold">{commandCenter.summary.recommendationQaScore}%</p><p className="mt-1 text-[8px] text-white/35">QA</p></div></div><Link href="/dashboard/settings" className="mt-5 inline-flex items-center gap-2 text-xs font-extrabold text-lime">Choose embed experience <ChevronRight size={13} /></Link></section>
       </div>
+
+      <section className="mt-5 rounded-2xl border border-black/[0.07] bg-white p-5 sm:p-6">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h2 className="flex items-center gap-2 text-sm font-extrabold"><Sparkles size={15} className="text-moss" /> Conversion playbook</h2>
+            <p className="mt-1 text-xs text-black/35">Deterministic next steps from analytics quality, funnel rates, discovery gaps and product demand.</p>
+          </div>
+          <span className={`rounded-full px-3 py-1.5 text-[9px] font-extrabold uppercase ${conversionPlaybook.status === "blocked" ? "bg-red-50 text-red-700" : conversionPlaybook.status === "watch" ? "bg-amber-50 text-amber-700" : "bg-lime/35 text-moss"}`}>{conversionPlaybook.score}% · {conversionPlaybook.status}</span>
+        </div>
+        <div className="mt-5 grid gap-3 lg:grid-cols-[260px_1fr]">
+          <div className="rounded-2xl bg-ink p-5 text-white">
+            <p className="eyebrow text-lime">Next optimization loop</p>
+            <h3 className="mt-4 text-2xl font-extrabold leading-tight tracking-[-.045em]">{conversionPlaybook.headline}</h3>
+            <div className="mt-5 grid grid-cols-3 gap-2 text-center">
+              <div className="rounded-xl bg-white/[.07] p-3"><p className="text-lg font-extrabold">{conversionPlaybook.summary.startRate}%</p><p className="mt-1 text-[8px] text-white/35">Start</p></div>
+              <div className="rounded-xl bg-white/[.07] p-3"><p className="text-lg font-extrabold">{conversionPlaybook.summary.completionRate}%</p><p className="mt-1 text-[8px] text-white/35">Done</p></div>
+              <div className="rounded-xl bg-white/[.07] p-3"><p className="text-lg font-extrabold">{conversionPlaybook.summary.clickRate}%</p><p className="mt-1 text-[8px] text-white/35">Click</p></div>
+            </div>
+          </div>
+          <div className="grid gap-3 xl:grid-cols-3">
+            {conversionPlaybook.actions.slice(0, 3).map((action) => (
+              <Link key={action.id} href={action.href} className="rounded-2xl border border-black/[0.07] bg-[#f8f8f4] p-4 transition hover:-translate-y-0.5 hover:bg-white">
+                <div className="flex items-start justify-between gap-3">
+                  <span className={`rounded-full px-2 py-1 text-[8px] font-extrabold uppercase ${action.priority === "critical" ? "bg-red-100 text-red-700" : action.priority === "high" ? "bg-orange-100 text-orange-700" : action.priority === "medium" ? "bg-amber-100 text-amber-700" : "bg-lime/40 text-moss"}`}>{action.priority}</span>
+                  <span className="rounded-full bg-white px-2 py-1 text-[8px] font-extrabold text-black/35">{action.metricLabel}: {action.metricValue}</span>
+                </div>
+                <h3 className="mt-4 text-xs font-extrabold leading-5">{action.title}</h3>
+                <p className="mt-2 text-[10px] leading-4 text-black/40">{action.detail}</p>
+                <p className="mt-3 rounded-xl bg-white px-3 py-2 text-[9px] font-bold leading-4 text-black/45">{action.evidence}</p>
+                <span className="mt-3 inline-flex items-center gap-1 text-[9px] font-extrabold text-moss">{action.cta}<ArrowRight size={10} /></span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

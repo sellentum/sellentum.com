@@ -251,14 +251,20 @@ function assertLaunchStudioWorkflow() {
 function assertDashboardCommandCenterWorkflow() {
   const overview = readFileSync("app/dashboard/page.tsx", "utf8");
   const commandCenter = readFileSync("lib/dashboard-command-center.ts", "utf8");
+  const conversionPlaybook = readFileSync("lib/conversion-playbook.ts", "utf8");
   assert(overview.includes("buildDashboardCommandCenter"), "Dashboard overview should use the shared command-center helper");
+  assert(overview.includes("buildConversionPlaybook"), "Dashboard overview should use the shared conversion playbook helper");
   assert(overview.includes("Command queue"), "Dashboard overview should expose prioritized command-center actions");
+  assert(overview.includes("Conversion playbook"), "Dashboard overview should expose a deterministic conversion playbook");
   assert(overview.includes("Real shopper activity"), "Dashboard overview should label the activity chart as real data");
   assert(!overview.includes("+12.4%") && !overview.includes("[36, 52, 42"), "Dashboard overview should not use placeholder trend percentages or static chart data");
   assert(commandCenter.includes("buildDashboardCommandCenter"), "Command-center helper should expose a reusable report builder");
   assert(commandCenter.includes("buildDiscoveryGapReport"), "Command-center helper should reuse discovery gap analytics");
   assert(commandCenter.includes("buildRecommendationQaReport"), "Command-center helper should reuse recommendation QA");
   assert(commandCenter.includes("analyzeCatalogIntelligence"), "Command-center helper should reuse catalog intelligence");
+  assert(conversionPlaybook.includes("buildConversionPlaybook"), "Conversion playbook helper should expose a reusable report builder");
+  assert(conversionPlaybook.includes("buildAnalyticsQualityReport"), "Conversion playbook should consider analytics quality before optimization");
+  assert(conversionPlaybook.includes("buildZeroPartyInsights"), "Conversion playbook should consider zero-party product demand");
 }
 
 function assertSemanticSearchWorkflow() {
@@ -460,6 +466,14 @@ async function assertDeterministicLogic() {
     .replace('from "@/lib/discovery-gaps";', 'from "./discovery-gaps.js";')
     .replace('from "@/lib/quiz-readiness";', 'from "./quiz-readiness.js";')
     .replace('from "@/lib/recommendation-qa";', 'from "./recommendation-qa.js";'));
+  const compiledConversionPlaybook = `${compileDir}/lib/conversion-playbook.js`;
+  writeFileSync(compiledConversionPlaybook, readFileSync(compiledConversionPlaybook, "utf8")
+    .replace('from "./analytics";', 'from "./analytics.js";')
+    .replace('from "./analytics-quality";', 'from "./analytics-quality.js";')
+    .replace('from "./catalog-intelligence";', 'from "./catalog-intelligence.js";')
+    .replace('from "./discovery-gaps";', 'from "./discovery-gaps.js";')
+    .replace('from "./insights";', 'from "./insights.js";')
+    .replace('from "./recommendation-qa";', 'from "./recommendation-qa.js";'));
 
   const demo = await import(pathToFileURL(`${compileDir}/lib/demo-data.js`));
   const utils = await import(pathToFileURL(`${compileDir}/lib/utils.js`));
@@ -494,6 +508,7 @@ async function assertDeterministicLogic() {
   const discoveryGaps = await import(pathToFileURL(`${compileDir}/lib/discovery-gaps.js`));
   const dashboardCommandCenter = await import(pathToFileURL(`${compileDir}/lib/dashboard-command-center.js`));
   const configuratorReadiness = await import(pathToFileURL(`${compileDir}/lib/configurator-readiness.js`));
+  const conversionPlaybook = await import(pathToFileURL(`${compileDir}/lib/conversion-playbook.js`));
 
   const answers = [
     { questionId: "q_use", question: "Where?", optionId: "o_trail", answer: "Trails & outdoors", matchType: "tag", matchValue: "trail", weight: 5 },
@@ -635,6 +650,10 @@ async function assertDeterministicLogic() {
   assert(commandCenter.launchScore > 0 && commandCenter.catalogScore >= 80 && commandCenter.summary.readyFinders === 1, "Expected dashboard command center to summarize launch readiness");
   assert(commandCenter.experienceMix.search > 0 && commandCenter.experienceMix.configurator > 0, "Expected dashboard command center to calculate real experience mix");
   assert(commandCenter.actions.length && commandCenter.milestones.some((item) => item.id === "analytics" && item.done), "Expected dashboard command center to produce actions and milestone status");
+  const playbook = conversionPlaybook.buildConversionPlaybook({ products: demo.demoProducts, quizzes: [demo.demoQuiz], configurators: [demo.demoConfigurator], events: demo.demoEvents, settings: demo.demoSettings });
+  assert(playbook.actions.length && playbook.score >= 0 && playbook.summary.analyticsQualityScore >= 0, "Expected conversion playbook to produce prioritized merchant actions");
+  const emptyPlaybook = conversionPlaybook.buildConversionPlaybook({ products: [], quizzes: [], configurators: [], events: [], settings: demo.demoSettings });
+  assert(emptyPlaybook.status === "blocked" && emptyPlaybook.actions.some((action) => action.id === "generate-first-session" || action.id === "publish-experience"), "Expected empty conversion playbook to guide first launch actions");
 
   const importPreview = catalogImport.normalizeCatalogImportRows([
     { title: "Trail Shoe", "sale price": "£1,299.50", collection: "Footwear", attributes: "Grip|Waterproof", keywords: "trail,wet", benefits: "wet-weather protection|outdoor confidence", "semantic text": "Rain-ready trail grip for weekend hikes", link: "store.example/trail" },
