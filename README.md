@@ -10,7 +10,7 @@ Findly is a compact guided-selling SaaS product for ecommerce brands. A merchant
 - AI catalog enrichment with normalized attributes, buyer needs, semantic search text and optional OpenAI embeddings
 - Catalog intelligence scoring for enrichment coverage, semantic-search readiness, matching signals, product media and commerce links
 - Ontology map for inspecting category clusters, buyer needs, tags, features, thin signals and AI-ready quiz question ideas
-- Launch Studio workflow that enriches a catalog, generates a finder, publishes it, and prepares the embed snippet from one screen
+- Launch Studio workflow that enriches a catalog, generates a finder, publishes it, prepares the embed snippet and copies a developer launch packet from one screen
 - Ontology-guided finder generation that uses category clusters, repeated buyer needs and product features before falling back to OpenAI copy
 - Visual finder builder with questions, answer options, optional conditional branching, weights, tag/category/feature/budget rules, per-answer catalog coverage and publish-readiness diagnostics
 - Finder merchandising controls to pin, boost or exclude specific products without handing selection to AI
@@ -29,7 +29,7 @@ Findly is a compact guided-selling SaaS product for ecommerce brands. A merchant
 - Published finder runtime that validates the selected branched answer path, builds a semantic buyer profile and ranks products server-side
 - Customer-facing configurator with live bundle price, compatibility filtering, review and buy-click tracking
 - Published configurator runtime that revalidates final bundles server-side before review/buy
-- Copyable JavaScript widget that opens a finder, advisor, semantic search or configurator in a lazy-loaded modal iframe or direct inline iframe, with install QA checks for generated snippets
+- Copyable JavaScript widget that opens a finder, advisor, semantic search or configurator in a lazy-loaded modal iframe or direct inline iframe, with install QA checks and launch handoff packets for generated snippets
 - Analytics for sessions, real period-over-period trends, funnel diagnosis, views, starts, completions, recommendations, buy clicks, selected answers, search/advisor themes, matched intent signals, product demand and zero-party opportunity suggestions
 - Brand, colour, widget copy and launcher-position settings
 - Launch preflight checks for catalog readiness, builder readiness diagnostics, AI/env keys, published experiences, widget setup and analytics coverage
@@ -127,6 +127,7 @@ Import the repository into Vercel, add the variables from `.env.example`, and de
 - `lib/search-tuning.ts` — merchant-facing search tuning guidance from term coverage, weak confidence and budget blockers
 - `lib/search-explanations.ts` — grounded OpenAI/fallback copy for already-ranked semantic search results
 - `lib/widget-snippet.ts` — shared widget snippet generation and install-readiness diagnostics for Settings and Launch Studio
+- `lib/launch-packet.ts` — copyable developer handoff text for preview URLs, embed snippets, QA checks and analytics contracts
 - `lib/rule-coverage.ts` — deterministic answer-rule coverage helper used by the finder builder and readiness checks
 - `lib/quiz-readiness.ts` — publish-readiness diagnostics for finder structure, catalog mapping and rule quality
 - `lib/configurator-readiness.ts` — publish-readiness diagnostics for configurator structure, linked products, pricing and compatibility rules

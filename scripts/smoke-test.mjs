@@ -116,6 +116,7 @@ function assertLaunchStudioWorkflow() {
   const quizGeneration = readFileSync("lib/quiz-generation.ts", "utf8");
   const settings = readFileSync("app/dashboard/settings/page.tsx", "utf8");
   const widgetSnippet = readFileSync("lib/widget-snippet.ts", "utf8");
+  const launchPacket = readFileSync("lib/launch-packet.ts", "utf8");
   const shell = readFileSync("components/dashboard-shell.tsx", "utf8");
   const overview = readFileSync("app/dashboard/page.tsx", "utf8");
   assert(page.includes("/api/catalog/enrich"), "Launch Studio should call catalog enrichment");
@@ -127,12 +128,17 @@ function assertLaunchStudioWorkflow() {
   assert(page.includes("quiz.published = true"), "Launch Studio should publish the generated finder");
   assert(page.includes("buildWidgetSnippet"), "Launch Studio should use the shared widget snippet helper");
   assert(page.includes("Embed QA checklist"), "Launch Studio should expose widget install QA checks");
+  assert(page.includes("buildLaunchPacket"), "Launch Studio should use the shared launch packet helper");
+  assert(page.includes("Developer handoff"), "Launch Studio should expose a developer handoff packet");
+  assert(page.includes("Copy packet"), "Launch Studio should let merchants copy the developer launch packet");
   assert(settings.includes("Embed mode"), "Settings should let merchants choose modal or inline embed mode");
   assert(settings.includes("buildWidgetSnippet"), "Settings should use the shared widget snippet helper");
   assert(settings.includes("buildWidgetInstallReport"), "Settings should expose widget install readiness diagnostics");
   assert(widgetSnippet.includes("data-mode=\"${config.mode}\""), "Widget snippet helper should include the selected embed mode");
   assert(widgetSnippet.includes("data-experience=\"${config.experience}\""), "Widget snippet helper should include the selected experience type");
   assert(widgetSnippet.includes("buildWidgetInstallReport"), "Widget snippet helper should expose install QA reporting");
+  assert(launchPacket.includes("buildLaunchPacket"), "Launch packet helper should expose reusable handoff generation");
+  assert(launchPacket.includes("Analytics events tracked"), "Launch packet should document the analytics event contract");
   assert(page.includes("/dashboard/preflight"), "Launch Studio should link to production preflight");
   assert(shell.includes("/dashboard/launch"), "Dashboard navigation should expose Launch Studio");
   assert(overview.includes("/dashboard/launch"), "Dashboard overview should route quick-start work through Launch Studio");
@@ -261,6 +267,7 @@ async function assertDeterministicLogic() {
   const searchEngine = await import(pathToFileURL(`${compileDir}/lib/search-engine.js`));
   const searchTuning = await import(pathToFileURL(`${compileDir}/lib/search-tuning.js`));
   const widgetSnippet = await import(pathToFileURL(`${compileDir}/lib/widget-snippet.js`));
+  const launchPacket = await import(pathToFileURL(`${compileDir}/lib/launch-packet.js`));
   const configuratorReadiness = await import(pathToFileURL(`${compileDir}/lib/configurator-readiness.js`));
 
   const answers = [
@@ -402,6 +409,20 @@ async function assertDeterministicLogic() {
   assert(!blockedInstallReport.canInstall && blockedInstallReport.checks.some((item) => item.id === "id" && item.severity === "blocker"), "Expected widget install report to block placeholder/missing experience IDs");
   const readyInstallReport = widgetSnippet.buildWidgetInstallReport({ origin: "https://findly.example", experience: "finder", mode: "modal", id: "quiz_footwear", color: "#22352a", label: "Find my match", position: "right" });
   assert(readyInstallReport.canInstall && readyInstallReport.targetPath === "/finder/quiz_footwear", "Expected widget install report to pass for a complete finder embed");
+  const packet = launchPacket.buildLaunchPacket({
+    origin: "https://findly.example/",
+    publicUrl: "https://findly.example/finder/footwear-finder",
+    widgetExperience: "Guided product finder",
+    embedSnippet: generatedWidgetSnippet,
+    installReport: readyInstallReport,
+    settings: demo.demoSettings,
+    finder: demo.demoQuiz,
+    activeProducts: demo.demoProducts.length,
+    enrichedPercent: 75,
+  });
+  assert(packet.includes("Findly launch packet") && packet.includes("Stable embed ID: quiz_footwear"), "Expected launch packet to include a title and stable embed ID");
+  assert(packet.includes("Analytics events tracked") && packet.includes("buy_click"), "Expected launch packet to document analytics events");
+  assert(packet.includes(generatedWidgetSnippet), "Expected launch packet to include the generated embed snippet");
 
   const readyQuiz = quizReadiness.analyzeQuizReadiness(demo.demoQuiz, demo.demoProducts);
   assert(readyQuiz.canPublish && readyQuiz.score >= 80, "Expected seeded demo finder to pass publish-readiness checks");

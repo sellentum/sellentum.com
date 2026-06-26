@@ -2,14 +2,15 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowRight, BookOpenCheck, Boxes, Check, Clipboard, Code2, ExternalLink, Gauge, LoaderCircle, Rocket, ShieldCheck, Sparkles, Wand2 } from "lucide-react";
+import { ArrowRight, BookOpenCheck, Boxes, Check, Clipboard, Code2, ExternalLink, FileText, Gauge, LoaderCircle, Rocket, ShieldCheck, Sparkles, Wand2 } from "lucide-react";
 import { LoadingState } from "@/components/loading-state";
 import { useStore } from "@/lib/store";
+import { buildLaunchPacket } from "@/lib/launch-packet";
 import type { GeneratedQuizSuggestion, Product, ProductInput } from "@/lib/types";
 import { slugify, uid } from "@/lib/utils";
 import { buildWidgetInstallReport, buildWidgetSnippet } from "@/lib/widget-snippet";
 
-type BusyAction = "enrich" | "generate" | "copy" | null;
+type BusyAction = "enrich" | "generate" | "copy" | "packet" | null;
 
 function productPayload(products: Product[]) {
   return products.map(({ id, name, price, category, description, features, tags, buyer_needs }) => ({
@@ -51,9 +52,11 @@ export default function LaunchStudioPage() {
   const [createdQuizId, setCreatedQuizId] = useState("");
   const [source, setSource] = useState<"rules" | "ontology" | "openai" | "">("");
   const [copied, setCopied] = useState(false);
+  const [packetCopied, setPacketCopied] = useState(false);
 
   useEffect(() => setOrigin(window.location.origin), []);
 
+  const originBase = origin.replace(/\/+$/, "");
   const activeProducts = useMemo(() => products.filter((product) => product.active), [products]);
   const enrichedProducts = useMemo(() => activeProducts.filter((product) => product.enrichment_status === "enriched" || Boolean(product.search_text) || Boolean(product.buyer_needs?.length)), [activeProducts]);
   const selectedFinder = useMemo(() => quizzes.find((quiz) => quiz.id === createdQuizId) || quizzes.find((quiz) => quiz.published) || quizzes[0], [createdQuizId, quizzes]);
@@ -80,6 +83,18 @@ export default function LaunchStudioPage() {
     color: settings.primary_color,
     label: settings.button_text,
     position: settings.launcher_position === "bottom-left" ? "left" : "right",
+  });
+  const publicUrl = `${originBase}/finder/${finderForSnippet?.slug || finderForSnippet?.id || "YOUR_FINDER_ID"}`;
+  const launchPacket = buildLaunchPacket({
+    origin,
+    publicUrl,
+    widgetExperience: "Guided product finder",
+    embedSnippet: snippet,
+    installReport,
+    settings,
+    finder: finderForSnippet,
+    activeProducts: activeProducts.length,
+    enrichedPercent,
   });
 
   async function enrichCatalog() {
@@ -176,6 +191,21 @@ export default function LaunchStudioPage() {
     }
   }
 
+  async function copyLaunchPacket() {
+    setBusy("packet");
+    setError("");
+    try {
+      await navigator.clipboard.writeText(launchPacket);
+      setPacketCopied(true);
+      setNotice("Developer launch packet copied. It includes the URL, snippet, readiness checks and analytics events.");
+      setTimeout(() => setPacketCopied(false), 1800);
+    } catch {
+      setError("Could not copy the launch packet automatically. Select the preview and copy it manually.");
+    } finally {
+      setBusy(null);
+    }
+  }
+
   if (!ready) return <LoadingState label="Opening Launch Studio…" />;
 
   return (
@@ -261,6 +291,21 @@ export default function LaunchStudioPage() {
                 <p className="mt-0.5 text-[8px] font-bold leading-3 text-black/35">{item.detail}</p>
               </div>)}
             </div>
+          </div>
+          <div className="border-t border-black/[0.06] bg-white p-5">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 className="flex items-center gap-2 text-sm font-extrabold"><FileText size={15} className="text-moss" /> Developer handoff</h2>
+                <p className="mt-1 text-[10px] leading-4 text-black/35">Copy a launch packet with the preview URL, embed snippet, install QA status and analytics contract.</p>
+              </div>
+              <button onClick={copyLaunchPacket} disabled={busy !== null} className="btn-secondary shrink-0 !px-3 !py-2 text-xs">{busy === "packet" ? <LoaderCircle size={13} className="animate-spin" /> : packetCopied ? <Check size={13} /> : <Clipboard size={13} />}{packetCopied ? "Copied" : "Copy packet"}</button>
+            </div>
+            <div className="mt-4 grid gap-3 sm:grid-cols-3">
+              <div className="rounded-2xl bg-canvas p-3"><p className="text-[9px] font-extrabold uppercase tracking-wide text-black/30">Preview URL</p><p className="mt-1 truncate text-[10px] font-bold text-black/55">{publicUrl}</p></div>
+              <div className="rounded-2xl bg-canvas p-3"><p className="text-[9px] font-extrabold uppercase tracking-wide text-black/30">Stable embed ID</p><p className="mt-1 truncate text-[10px] font-bold text-black/55">{finderForSnippet?.id || "YOUR_FINDER_ID"}</p></div>
+              <div className="rounded-2xl bg-canvas p-3"><p className="text-[9px] font-extrabold uppercase tracking-wide text-black/30">Analytics contract</p><p className="mt-1 text-[10px] font-bold text-black/55">5 tracked events</p></div>
+            </div>
+            <pre className="mt-4 max-h-40 overflow-hidden rounded-2xl border border-black/[0.07] bg-[#f8f8f4] p-4 text-[9px] leading-4 text-black/45"><code>{launchPacket.split("\n").slice(0, 20).join("\n")}</code></pre>
           </div>
           <div className="grid gap-3 p-5 sm:grid-cols-3">
             {finderForSnippet && <Link href={`/finder/${finderForSnippet.slug || finderForSnippet.id}`} target="_blank" className="btn-primary justify-center !px-3 !py-2.5 text-xs"><ExternalLink size={13} /> Preview finder</Link>}
