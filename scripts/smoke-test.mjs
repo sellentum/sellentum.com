@@ -56,6 +56,7 @@ function assertPublishedFinderRuntime() {
   const lab = readFileSync("app/dashboard/lab/page.tsx", "utf8");
   const readiness = readFileSync("lib/quiz-readiness.ts", "utf8");
   const flow = readFileSync("lib/finder-flow.ts", "utf8");
+  const trace = readFileSync("lib/recommendation-trace.ts", "utf8");
   const schema = readFileSync("supabase/schema.sql", "utf8");
   assert(route.includes("runFinderRecommendations"), "Published finder route should use the server-side finder engine");
   assert(route.includes("resolveFinderAnswerPath"), "Published finder route should reconstruct the valid branched answer path from stored option rules");
@@ -75,6 +76,10 @@ function assertPublishedFinderRuntime() {
   assert(builder.includes("Branching tip"), "Finder builder should explain conditional routing");
   assert(lab.includes("buildFinderQuestionPath"), "Recommendation lab should simulate the same conditional finder path as shoppers");
   assert(lab.includes("Skipped by this branch"), "Recommendation lab should expose questions skipped by the current branch");
+  assert(lab.includes("buildRecommendationTraceReport"), "Recommendation lab should generate a merchant-readable decision trace");
+  assert(lab.includes("Recommendation decision trace"), "Recommendation lab should show a deterministic recommendation trace panel");
+  assert(trace.includes("buildRecommendationTraceReport"), "Recommendation trace helper should expose a reusable deterministic report builder");
+  assert(trace.includes("tuningActions"), "Recommendation trace should include merchant tuning actions");
   assert(readiness.includes("Conditional routing"), "Quiz readiness should validate conditional finder routes");
   assert(flow.includes("resolveFinderAnswerPath"), "Finder flow helper should expose deterministic answer-path resolution");
   assert(flow.includes("defaultFinderSelections"), "Finder flow helper should expose branch-aware default selections for merchant testing");
@@ -334,6 +339,7 @@ async function assertDeterministicLogic() {
   const quizBlueprint = await import(pathToFileURL(`${compileDir}/lib/quiz-blueprint.js`));
   const quizReadiness = await import(pathToFileURL(`${compileDir}/lib/quiz-readiness.js`));
   const recommendationQa = await import(pathToFileURL(`${compileDir}/lib/recommendation-qa.js`));
+  const recommendationTrace = await import(pathToFileURL(`${compileDir}/lib/recommendation-trace.js`));
   const ruleCoverage = await import(pathToFileURL(`${compileDir}/lib/rule-coverage.js`));
   const searchEngine = await import(pathToFileURL(`${compileDir}/lib/search-engine.js`));
   const searchTuning = await import(pathToFileURL(`${compileDir}/lib/search-tuning.js`));
@@ -383,6 +389,9 @@ async function assertDeterministicLogic() {
   assert(excluded.every((match) => match.product.id !== "prod_trail"), "Expected an excluded product to be removed from recommendations");
   const overrideAudit = utils.auditProductMatches(demo.demoProducts, answers, [{ id: "override_boost_cloud", product_id: "prod_cloud", action: "boost", weight: 10, note: "Comfort campaign" }]);
   assert(overrideAudit.some((audit) => audit.product.id === "prod_cloud" && audit.signals.some((signal) => signal.note.includes("Comfort campaign"))), "Expected override audits to expose merchandising signals");
+  const traceReport = recommendationTrace.buildRecommendationTraceReport({ quiz: demo.demoQuiz, products: demo.demoProducts, answers, audits });
+  assert(traceReport.topProduct?.productId === "prod_trail" && traceReport.summary.includes("Terra Trail Runner"), "Expected recommendation trace to explain the deterministic winning product");
+  assert(traceReport.products.some((product) => product.status === "blocked") && traceReport.tuningActions.length, "Expected recommendation trace to include blocked products and tuning actions");
 
   let selected = [];
   selected = utils.updateConfiguratorSelection(demo.demoConfigurator, selected, "config_step_base", "config_opt_terra");

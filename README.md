@@ -17,7 +17,7 @@ Findly is a compact guided-selling SaaS product for ecommerce brands. A merchant
 - Finder merchandising controls to pin, boost or exclude specific products without handing selection to AI
 - One-click product finder generation from the current catalog
 - Deterministic top-three recommendation engine with budget eligibility filtering, buyer-profile intent scoring and merchant overrides
-- Branch-aware recommendation lab for testing shopper answer paths and inspecting score breakdowns before publishing
+- Branch-aware recommendation lab for testing shopper answer paths, inspecting score breakdowns and copying a deterministic decision trace before publishing
 - Synthetic recommendation QA in Launch Preflight to catch no-result and thin-result finder paths before embedding
 - Semantic Search Lab and authenticated search API for testing natural-language product discovery, parsed-term catalog coverage and deterministic tuning guidance over the active catalog
 - OpenAI match explanations with a safe fact-based fallback when no API key is present

@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { Beaker, CheckCircle2, ExternalLink, FlaskConical, HelpCircle, Plus, ShieldCheck, SlidersHorizontal, Sparkles, XCircle } from "lucide-react";
+import { Beaker, CheckCircle2, Clipboard, ExternalLink, FlaskConical, HelpCircle, Plus, ShieldCheck, SlidersHorizontal, Sparkles, XCircle } from "lucide-react";
 import { LoadingState } from "@/components/loading-state";
 import { useStore } from "@/lib/store";
 import { answerToFinderAnswer, buildFinderQuestionPath, defaultFinderSelections } from "@/lib/finder-flow";
+import { buildRecommendationTraceReport } from "@/lib/recommendation-trace";
 import type { FinderAnswer, Quiz } from "@/lib/types";
 import { auditProductMatches, buildFinderBuyerProfile, extractIntentTokens, formatCurrency } from "@/lib/utils";
 
@@ -17,6 +18,7 @@ export default function LabPage() {
   const { ready, quizzes, products } = useStore();
   const [selectedId, setSelectedId] = useState("");
   const [selections, setSelections] = useState<Record<string, string>>({});
+  const [copiedTrace, setCopiedTrace] = useState(false);
   const selectedQuiz = quizzes.find((quiz) => quiz.id === selectedId) || quizzes[0];
 
   useEffect(() => {
@@ -39,6 +41,18 @@ export default function LabPage() {
   const recommended = audits.filter((audit) => audit.eligible).slice(0, 3);
   const winner = recommended[0];
   const maxScore = Math.max(1, ...audits.map((audit) => audit.score));
+  const trace = useMemo(() => buildRecommendationTraceReport({ quiz: selectedQuiz, products, answers, audits }), [selectedQuiz, products, answers, audits]);
+  const tracePayload = useMemo(() => JSON.stringify(trace, null, 2), [trace]);
+
+  async function copyTrace() {
+    try {
+      await navigator.clipboard.writeText(tracePayload);
+      setCopiedTrace(true);
+      setTimeout(() => setCopiedTrace(false), 1600);
+    } catch {
+      setCopiedTrace(false);
+    }
+  }
 
   if (!ready) return <LoadingState label="Loading recommendation lab…" />;
 
@@ -171,6 +185,81 @@ export default function LabPage() {
                   })}</div> : <p className="mt-2 text-[10px] leading-4 text-black/35">No pins, boosts or exclusions are active for this finder.</p>}
                 </div>
               </div>
+            </div>
+          </section>
+
+          <section className="overflow-hidden rounded-[28px] border border-black/[0.07] bg-white">
+            <div className="flex items-center justify-between gap-4 border-b border-black/[0.07] px-5 py-4">
+              <div>
+                <p className="eyebrow text-moss">Recommendation decision trace</p>
+                <h2 className="mt-1 text-lg font-extrabold tracking-[-.04em]">Merchant-readable proof of why this path wins</h2>
+              </div>
+              <button onClick={copyTrace} className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-canvas px-3 py-2 text-[10px] font-extrabold text-black/45 hover:border-moss/30 hover:text-moss"><Clipboard size={12} /> {copiedTrace ? "Copied" : "Copy trace"}</button>
+            </div>
+            <div className="grid gap-0 xl:grid-cols-[1fr_360px]">
+              <div className="p-5">
+                <p className="text-sm font-bold leading-6 text-black/55">{trace.summary}</p>
+                {trace.topProduct && (
+                  <div className="mt-5 rounded-2xl bg-lime/15 p-4">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <p className="text-[9px] font-extrabold uppercase tracking-wider text-moss">Selected product</p>
+                        <h3 className="mt-1 text-xl font-extrabold tracking-[-.05em]">{trace.topProduct.productName}</h3>
+                      </div>
+                      <span className="rounded-full bg-white px-3 py-1.5 text-[10px] font-extrabold text-moss">Score {trace.topProduct.score.toFixed(2)}</span>
+                    </div>
+                    <p className="mt-3 text-[11px] leading-5 text-black/50">{trace.topProduct.explanation}</p>
+                    <div className="mt-3 flex flex-wrap gap-1.5">
+                      {trace.topProduct.proofPoints.map((point) => <span key={point} className="rounded-full bg-white px-2.5 py-1 text-[9px] font-extrabold text-black/45">{point}</span>)}
+                    </div>
+                  </div>
+                )}
+                <div className="mt-5 grid gap-3 lg:grid-cols-3">
+                  {[
+                    [trace.eligibleProducts, "Eligible"],
+                    [trace.blockedProducts, "Blocked"],
+                    [trace.scoreSpread.gap.toFixed(1), "Score gap"],
+                  ].map(([value, label]) => <div key={label} className="rounded-2xl border border-black/[0.06] bg-canvas p-4">
+                    <p className="text-2xl font-extrabold tracking-[-.05em]">{value}</p>
+                    <p className="mt-1 text-[9px] font-bold uppercase tracking-wider text-black/30">{label}</p>
+                  </div>)}
+                </div>
+                <div className="mt-5 overflow-hidden rounded-2xl border border-black/[0.06]">
+                  <div className="grid grid-cols-[1fr_90px_110px] bg-canvas px-4 py-3 text-[9px] font-extrabold uppercase tracking-wider text-black/35">
+                    <span>Product trace</span>
+                    <span>Score</span>
+                    <span>Status</span>
+                  </div>
+                  <div className="divide-y divide-black/[0.06]">
+                    {trace.products.slice(0, 5).map((product) => (
+                      <div key={product.productId} className="grid grid-cols-[1fr_90px_110px] gap-3 px-4 py-3">
+                        <div>
+                          <p className="text-xs font-extrabold">{product.productName}</p>
+                          <p className="mt-1 line-clamp-1 text-[9px] text-black/35">{product.blocker || product.decisiveSignals.slice(0, 2).join(" · ") || "No decisive signal"}</p>
+                        </div>
+                        <p className="text-xs font-extrabold">{product.score.toFixed(2)}</p>
+                        <span className={`w-fit rounded-full px-2 py-1 text-[8px] font-extrabold uppercase ${product.status === "recommended" ? "bg-lime text-moss" : product.status === "blocked" ? "bg-red-50 text-red-600" : "bg-black/5 text-black/35"}`}>{product.status}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <aside className="border-t border-black/[0.07] bg-[#f3f5ef] p-5 xl:border-l xl:border-t-0">
+                <p className="flex items-center gap-2 text-xs font-extrabold"><ShieldCheck size={14} className="text-moss" /> Tuning actions</p>
+                <p className="mt-2 text-[10px] leading-5 text-black/40">Use these to fix weak finder paths before embedding on a storefront.</p>
+                <div className="mt-4 space-y-2">
+                  {trace.tuningActions.map((action) => (
+                    <div key={action.id} className={`rounded-2xl border p-3 ${action.priority === "high" ? "border-red-100 bg-red-50" : action.priority === "medium" ? "border-amber-100 bg-amber-50" : "border-lime/40 bg-lime/15"}`}>
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="text-[10px] font-extrabold leading-4">{action.title}</p>
+                        <span className={`rounded-full px-2 py-0.5 text-[8px] font-extrabold uppercase ${action.priority === "high" ? "bg-red-100 text-red-600" : action.priority === "medium" ? "bg-amber-100 text-amber-700" : "bg-lime text-moss"}`}>{action.priority}</span>
+                      </div>
+                      <p className="mt-1.5 text-[9px] leading-4 text-black/45">{action.detail}</p>
+                    </div>
+                  ))}
+                </div>
+                <pre className="mt-4 max-h-44 overflow-hidden rounded-2xl bg-ink p-3 text-[8px] leading-4 text-white/55">{tracePayload.slice(0, 1100)}{tracePayload.length > 1100 ? "\n…" : ""}</pre>
+              </aside>
             </div>
           </section>
 
