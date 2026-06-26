@@ -5,11 +5,12 @@ import { useEffect, useMemo, useState } from "react";
 import { AlertTriangle, ArrowRight, BookOpenCheck, Boxes, BrainCircuit, Check, Clipboard, Code2, ExternalLink, FileText, Gauge, LoaderCircle, Rocket, ShieldCheck, Sparkles, Wand2 } from "lucide-react";
 import { LoadingState } from "@/components/loading-state";
 import { useStore } from "@/lib/store";
+import { buildLaunchExperienceCards } from "@/lib/experience-launch";
 import { buildLaunchPacket } from "@/lib/launch-packet";
 import { buildQuizBlueprint } from "@/lib/quiz-blueprint";
 import type { GeneratedQuizSuggestion, Product, ProductInput } from "@/lib/types";
 import { slugify, uid } from "@/lib/utils";
-import { buildWidgetInstallReport, buildWidgetSnippet } from "@/lib/widget-snippet";
+import type { WidgetEmbedExperience } from "@/lib/widget-snippet";
 
 type BusyAction = "enrich" | "generate" | "copy" | "packet" | null;
 
@@ -45,8 +46,9 @@ function productInputFromEnrichment(original: Product, enriched: { normalized_ca
 }
 
 export default function LaunchStudioPage() {
-  const { ready, products, quizzes, settings, saveProduct, createQuiz, saveQuiz } = useStore();
+  const { ready, products, quizzes, configurators, settings, saveProduct, createQuiz, saveQuiz } = useStore();
   const [origin, setOrigin] = useState("https://your-findly-app.vercel.app");
+  const [selectedExperience, setSelectedExperience] = useState<WidgetEmbedExperience>("finder");
   const [busy, setBusy] = useState<BusyAction>(null);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
@@ -63,39 +65,38 @@ export default function LaunchStudioPage() {
   const selectedFinder = useMemo(() => quizzes.find((quiz) => quiz.id === createdQuizId) || quizzes.find((quiz) => quiz.published) || quizzes[0], [createdQuizId, quizzes]);
   const liveFinder = selectedFinder?.published ? selectedFinder : quizzes.find((quiz) => quiz.published);
   const finderForSnippet = liveFinder || selectedFinder;
+  const publishedConfigurator = useMemo(() => configurators.find((configurator) => configurator.published) || configurators[0], [configurators]);
   const enrichedPercent = activeProducts.length ? Math.round((enrichedProducts.length / activeProducts.length) * 100) : 0;
   const hasLaunchableCatalog = activeProducts.length >= 2;
   const hasLaunchableFinder = Boolean(liveFinder && liveFinder.questions.length > 0);
   const launchScore = [hasLaunchableCatalog, enrichedPercent >= 60, hasLaunchableFinder].filter(Boolean).length;
   const quizBlueprint = useMemo(() => buildQuizBlueprint(activeProducts), [activeProducts]);
   const blueprintStatusLabel = quizBlueprint.status === "ready" ? "Ready" : quizBlueprint.status === "needs-review" ? "Review" : "Blocked";
-  const snippet = buildWidgetSnippet({
+  const launchExperienceCards = useMemo(() => buildLaunchExperienceCards({
     origin,
-    experience: "finder",
+    settings,
+    finders: quizzes,
+    configurators,
     mode: "modal",
-    id: finderForSnippet?.id || "YOUR_FINDER_ID",
-    color: settings.primary_color,
-    label: settings.button_text,
-    position: settings.launcher_position === "bottom-left" ? "left" : "right",
-  });
-  const installReport = buildWidgetInstallReport({
-    origin,
-    experience: "finder",
-    mode: "modal",
-    id: finderForSnippet?.id,
-    color: settings.primary_color,
-    label: settings.button_text,
-    position: settings.launcher_position === "bottom-left" ? "left" : "right",
-  });
-  const publicUrl = `${originBase}/finder/${finderForSnippet?.slug || finderForSnippet?.id || "YOUR_FINDER_ID"}`;
+    preferredFinderId: finderForSnippet?.id,
+    preferredConfiguratorId: publishedConfigurator?.id,
+  }), [origin, settings, quizzes, configurators, finderForSnippet?.id, publishedConfigurator?.id]);
+  const selectedLaunchExperience = launchExperienceCards.find((card) => card.experience === selectedExperience) || launchExperienceCards[0];
+  const snippet = selectedLaunchExperience.snippet;
+  const installReport = selectedLaunchExperience.installReport;
+  const publicUrl = selectedLaunchExperience.publicUrl || `${originBase}/finder/${finderForSnippet?.slug || finderForSnippet?.id || "YOUR_FINDER_ID"}`;
   const launchPacket = buildLaunchPacket({
     origin,
     publicUrl,
-    widgetExperience: "Guided product finder",
+    widgetExperience: selectedLaunchExperience.label,
     embedSnippet: snippet,
     installReport,
     settings,
-    finder: finderForSnippet,
+    experienceName: selectedLaunchExperience.name || selectedLaunchExperience.label,
+    experienceStatus: selectedLaunchExperience.statusLabel,
+    stableEmbedId: selectedLaunchExperience.id,
+    sourceLabel: selectedLaunchExperience.source === "configurator" ? "Configurator" : "Finder context",
+    finder: selectedLaunchExperience.source === "finder" ? finderForSnippet : undefined,
     activeProducts: activeProducts.length,
     enrichedPercent,
   });
@@ -185,7 +186,7 @@ export default function LaunchStudioPage() {
     try {
       await navigator.clipboard.writeText(snippet);
       setCopied(true);
-      setNotice("Widget snippet copied. Paste it before your storefront’s closing </body> tag.");
+      setNotice(`${selectedLaunchExperience.label} snippet copied. Paste it before your storefront’s closing </body> tag.`);
       setTimeout(() => setCopied(false), 1800);
     } catch {
       setError("Could not copy automatically. Select the snippet and copy it manually.");
@@ -200,7 +201,7 @@ export default function LaunchStudioPage() {
     try {
       await navigator.clipboard.writeText(launchPacket);
       setPacketCopied(true);
-      setNotice("Developer launch packet copied. It includes the URL, snippet, readiness checks and analytics events.");
+      setNotice(`${selectedLaunchExperience.label} launch packet copied. It includes the URL, snippet, readiness checks and analytics events.`);
       setTimeout(() => setPacketCopied(false), 1800);
     } catch {
       setError("Could not copy the launch packet automatically. Select the preview and copy it manually.");
@@ -257,7 +258,7 @@ export default function LaunchStudioPage() {
               { label: "Catalog has enough active products", detail: `${activeProducts.length} active product${activeProducts.length === 1 ? "" : "s"} available`, done: hasLaunchableCatalog, href: "/dashboard/products", icon: Boxes },
               { label: "Catalog is discovery-ready", detail: `${enrichedProducts.length}/${activeProducts.length || 0} active products enriched or carrying buyer-needs/search text`, done: enrichedPercent >= 60, href: "/dashboard/products", icon: Sparkles },
               { label: "Finder is generated and published", detail: liveFinder ? `${liveFinder.name} · ${liveFinder.questions.length} questions` : "No published finder yet", done: hasLaunchableFinder, href: "/dashboard/quizzes", icon: BookOpenCheck },
-              { label: "Widget snippet is ready", detail: finderForSnippet ? "A copy-paste script can launch the finder in a modal iframe" : "Generate or publish a finder first", done: Boolean(finderForSnippet), href: "/dashboard/settings", icon: Code2 },
+              { label: "Widget snippets are ready", detail: launchExperienceCards.some((card) => card.status === "ready") ? "Finder, advisor, search or configurator snippets can be copied from this launch screen" : "Publish a finder or configurator first", done: launchExperienceCards.some((card) => card.status === "ready"), href: "/dashboard/settings", icon: Code2 },
             ].map((item, index) => {
               const Icon = item.icon;
               return <article key={item.label} className="rounded-2xl border border-black/[0.06] bg-[#f8f8f4] p-4">
@@ -315,9 +316,26 @@ export default function LaunchStudioPage() {
           <div className="flex items-start justify-between gap-4 border-b border-black/[0.07] p-5 sm:p-6">
             <div>
               <h2 className="text-sm font-extrabold">Install widget</h2>
-              <p className="mt-1 text-[10px] text-black/35">Paste this into any storefront once the finder is published.</p>
+              <p className="mt-1 text-[10px] text-black/35">Choose a published discovery surface, then paste the snippet into any storefront.</p>
             </div>
-            <button onClick={copySnippet} disabled={!finderForSnippet || busy !== null} className="btn-secondary !px-3 !py-2 text-xs">{busy === "copy" ? <LoaderCircle size={13} className="animate-spin" /> : copied ? <Check size={13} /> : <Clipboard size={13} />}{copied ? "Copied" : "Copy"}</button>
+            <button onClick={copySnippet} disabled={selectedLaunchExperience.status !== "ready" || busy !== null} className="btn-secondary !px-3 !py-2 text-xs">{busy === "copy" ? <LoaderCircle size={13} className="animate-spin" /> : copied ? <Check size={13} /> : <Clipboard size={13} />}{copied ? "Copied" : "Copy"}</button>
+          </div>
+          <div className="grid gap-3 border-b border-black/[0.06] bg-[#f8f8f4] p-5 sm:grid-cols-2">
+            {launchExperienceCards.map((card) => (
+              <button key={card.experience} onClick={() => setSelectedExperience(card.experience)} className={`rounded-2xl border p-4 text-left transition hover:-translate-y-0.5 ${selectedExperience === card.experience ? "border-ink bg-white shadow-sm" : "border-black/[0.06] bg-white/65 hover:border-moss/30"}`}>
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-xs font-extrabold">{card.label}</p>
+                    <p className="mt-1 text-[9px] leading-4 text-black/40">{card.purpose}</p>
+                  </div>
+                  <span className={`rounded-full px-2 py-1 text-[8px] font-extrabold uppercase ${card.status === "ready" ? "bg-lime/35 text-moss" : card.status === "draft" ? "bg-amber-50 text-amber-700" : "bg-red-50 text-red-600"}`}>{card.statusLabel}</span>
+                </div>
+                <div className="mt-3 flex items-center justify-between gap-3 text-[8px] font-bold text-black/35">
+                  <span className="truncate">{card.name || "No source selected"}</span>
+                  <span>{card.id || "Missing ID"}</span>
+                </div>
+              </button>
+            ))}
           </div>
           <pre className="min-h-[220px] overflow-x-auto bg-ink p-5 text-[10px] leading-5 text-lime/80"><code>{snippet}</code></pre>
           <div className="border-t border-black/[0.06] bg-[#f8f8f4] p-5">
@@ -342,13 +360,13 @@ export default function LaunchStudioPage() {
             </div>
             <div className="mt-4 grid gap-3 sm:grid-cols-3">
               <div className="rounded-2xl bg-canvas p-3"><p className="text-[9px] font-extrabold uppercase tracking-wide text-black/30">Preview URL</p><p className="mt-1 truncate text-[10px] font-bold text-black/55">{publicUrl}</p></div>
-              <div className="rounded-2xl bg-canvas p-3"><p className="text-[9px] font-extrabold uppercase tracking-wide text-black/30">Stable embed ID</p><p className="mt-1 truncate text-[10px] font-bold text-black/55">{finderForSnippet?.id || "YOUR_FINDER_ID"}</p></div>
+              <div className="rounded-2xl bg-canvas p-3"><p className="text-[9px] font-extrabold uppercase tracking-wide text-black/30">Stable embed ID</p><p className="mt-1 truncate text-[10px] font-bold text-black/55">{selectedLaunchExperience.id || "YOUR_EXPERIENCE_ID"}</p></div>
               <div className="rounded-2xl bg-canvas p-3"><p className="text-[9px] font-extrabold uppercase tracking-wide text-black/30">Analytics contract</p><p className="mt-1 text-[10px] font-bold text-black/55">5 tracked events</p></div>
             </div>
             <pre className="mt-4 max-h-40 overflow-hidden rounded-2xl border border-black/[0.07] bg-[#f8f8f4] p-4 text-[9px] leading-4 text-black/45"><code>{launchPacket.split("\n").slice(0, 20).join("\n")}</code></pre>
           </div>
           <div className="grid gap-3 p-5 sm:grid-cols-3">
-            {finderForSnippet && <Link href={`/finder/${finderForSnippet.slug || finderForSnippet.id}`} target="_blank" className="btn-primary justify-center !px-3 !py-2.5 text-xs"><ExternalLink size={13} /> Preview finder</Link>}
+            {selectedLaunchExperience.id && <Link href={selectedLaunchExperience.publicUrl.replace(originBase, "")} target="_blank" className="btn-primary justify-center !px-3 !py-2.5 text-xs"><ExternalLink size={13} /> Preview {selectedLaunchExperience.experience}</Link>}
             <Link href="/dashboard/lab" className="btn-secondary justify-center !px-3 !py-2.5 text-xs"><ShieldCheck size={13} /> Test logic</Link>
             <Link href="/dashboard/preflight" className="btn-secondary justify-center !px-3 !py-2.5 text-xs"><Rocket size={13} /> Run preflight</Link>
           </div>

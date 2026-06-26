@@ -8,6 +8,10 @@ export type LaunchPacketInput = {
   embedSnippet: string;
   installReport: WidgetInstallReport;
   settings: WidgetSettings;
+  experienceName?: string;
+  experienceStatus?: string;
+  stableEmbedId?: string;
+  sourceLabel?: string;
   finder?: Pick<Quiz, "id" | "name" | "slug" | "published" | "questions">;
   activeProducts: number;
   enrichedPercent: number;
@@ -27,8 +31,10 @@ function readinessLabel(report: WidgetInstallReport) {
 
 export function buildLaunchPacket(input: LaunchPacketInput) {
   const origin = cleanOrigin(input.origin);
-  const finderName = input.finder?.name || "Unselected finder";
-  const finderStatus = input.finder?.published ? "Published" : input.finder ? "Draft / not yet published" : "Not selected";
+  const sourceLabel = input.sourceLabel || "Finder";
+  const experienceName = input.experienceName || input.finder?.name || "Unselected experience";
+  const experienceStatus = input.experienceStatus || (input.finder?.published ? "Published" : input.finder ? "Draft / not yet published" : "Not selected");
+  const stableEmbedId = input.stableEmbedId || input.finder?.id || "YOUR_EXPERIENCE_ID";
   const checks = input.installReport.checks.map((check) => {
     const icon = check.severity === "pass" ? "PASS" : check.severity === "warning" ? "WARN" : "BLOCK";
     return `- ${icon}: ${check.label} — ${check.detail}`;
@@ -40,9 +46,9 @@ export function buildLaunchPacket(input: LaunchPacketInput) {
     "",
     `Brand: ${input.settings.brand_name || "Your brand"}`,
     `Experience: ${input.widgetExperience}`,
-    `Finder: ${finderName}`,
-    `Finder status: ${finderStatus}`,
-    `Stable embed ID: ${input.finder?.id || "YOUR_FINDER_ID"}`,
+    `${sourceLabel}: ${experienceName}`,
+    `${sourceLabel} status: ${experienceStatus}`,
+    `Stable embed ID: ${stableEmbedId}`,
     `Preview URL: ${input.publicUrl}`,
     `Widget script origin: ${origin}/api/widget.js`,
     `Install readiness: ${readinessLabel(input.installReport)}`,

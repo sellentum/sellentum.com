@@ -149,6 +149,7 @@ function assertLaunchStudioWorkflow() {
   const quizBlueprint = readFileSync("lib/quiz-blueprint.ts", "utf8");
   const settings = readFileSync("app/dashboard/settings/page.tsx", "utf8");
   const widgetSnippet = readFileSync("lib/widget-snippet.ts", "utf8");
+  const experienceLaunch = readFileSync("lib/experience-launch.ts", "utf8");
   const launchPacket = readFileSync("lib/launch-packet.ts", "utf8");
   const shell = readFileSync("components/dashboard-shell.tsx", "utf8");
   const overview = readFileSync("app/dashboard/page.tsx", "utf8");
@@ -164,8 +165,13 @@ function assertLaunchStudioWorkflow() {
   assert(quizBlueprint.includes("buildQuizBlueprint"), "Quiz blueprint helper should expose a reusable report builder");
   assert(quizBlueprint.includes("getAnswerOptionCoverage"), "Quiz blueprint should validate planned answer options against the catalog");
   assert(page.includes("quiz.published = true"), "Launch Studio should publish the generated finder");
-  assert(page.includes("buildWidgetSnippet"), "Launch Studio should use the shared widget snippet helper");
+  assert(experienceLaunch.includes("buildWidgetSnippet"), "Launch Studio embed registry should use the shared widget snippet helper");
   assert(page.includes("Embed QA checklist"), "Launch Studio should expose widget install QA checks");
+  assert(page.includes("buildLaunchExperienceCards"), "Launch Studio should build a multi-experience embed registry");
+  assert(page.includes("launchExperienceCards.map"), "Launch Studio should let merchants choose from multiple embeddable experiences");
+  assert(page.includes("selectedLaunchExperience.snippet"), "Launch Studio should render the selected experience snippet");
+  assert(experienceLaunch.includes("buildLaunchExperienceCards"), "Launch experience helper should expose reusable multi-experience launch cards");
+  assert(experienceLaunch.includes("\"assistant\"") && experienceLaunch.includes("\"search\"") && experienceLaunch.includes("\"configurator\""), "Launch experience helper should include advisor, search and configurator embeds");
   assert(page.includes("buildLaunchPacket"), "Launch Studio should use the shared launch packet helper");
   assert(page.includes("Developer handoff"), "Launch Studio should expose a developer handoff packet");
   assert(page.includes("Copy packet"), "Launch Studio should let merchants copy the developer launch packet");
@@ -176,6 +182,7 @@ function assertLaunchStudioWorkflow() {
   assert(widgetSnippet.includes("data-experience=\"${config.experience}\""), "Widget snippet helper should include the selected experience type");
   assert(widgetSnippet.includes("buildWidgetInstallReport"), "Widget snippet helper should expose install QA reporting");
   assert(launchPacket.includes("buildLaunchPacket"), "Launch packet helper should expose reusable handoff generation");
+  assert(launchPacket.includes("sourceLabel"), "Launch packet should support non-finder experience labels");
   assert(launchPacket.includes("Analytics events tracked"), "Launch packet should document the analytics event contract");
   assert(page.includes("/dashboard/preflight"), "Launch Studio should link to production preflight");
   assert(shell.includes("/dashboard/launch"), "Dashboard navigation should expose Launch Studio");
@@ -324,6 +331,10 @@ async function assertDeterministicLogic() {
     .replace('from "./utils";', 'from "./utils.js";'));
   const compiledSearchEngine = `${compileDir}/lib/search-engine.js`;
   writeFileSync(compiledSearchEngine, readFileSync(compiledSearchEngine, "utf8").replace('from "./catalog-benefits";', 'from "./catalog-benefits.js";'));
+  const compiledExperienceLaunch = `${compileDir}/lib/experience-launch.js`;
+  writeFileSync(compiledExperienceLaunch, readFileSync(compiledExperienceLaunch, "utf8")
+    .replace('from "./widget-snippet";', 'from "./widget-snippet.js";')
+    .replace('from "@/lib/widget-snippet";', 'from "./widget-snippet.js";'));
 
   const demo = await import(pathToFileURL(`${compileDir}/lib/demo-data.js`));
   const utils = await import(pathToFileURL(`${compileDir}/lib/utils.js`));
@@ -345,6 +356,7 @@ async function assertDeterministicLogic() {
   const searchTuning = await import(pathToFileURL(`${compileDir}/lib/search-tuning.js`));
   const publicExperience = await import(pathToFileURL(`${compileDir}/lib/public-experience.js`));
   const widgetSnippet = await import(pathToFileURL(`${compileDir}/lib/widget-snippet.js`));
+  const experienceLaunch = await import(pathToFileURL(`${compileDir}/lib/experience-launch.js`));
   const launchPacket = await import(pathToFileURL(`${compileDir}/lib/launch-packet.js`));
   const configuratorReadiness = await import(pathToFileURL(`${compileDir}/lib/configurator-readiness.js`));
 
@@ -513,6 +525,10 @@ async function assertDeterministicLogic() {
   assert(!blockedInstallReport.canInstall && blockedInstallReport.checks.some((item) => item.id === "id" && item.severity === "blocker"), "Expected widget install report to block placeholder/missing experience IDs");
   const readyInstallReport = widgetSnippet.buildWidgetInstallReport({ origin: "https://findly.example", experience: "finder", mode: "modal", id: "quiz_footwear", color: "#22352a", label: "Find my match", position: "right" });
   assert(readyInstallReport.canInstall && readyInstallReport.targetPath === "/finder/quiz_footwear", "Expected widget install report to pass for a complete finder embed");
+  const launchCards = experienceLaunch.buildLaunchExperienceCards({ origin: "https://findly.example", settings: demo.demoSettings, finders: [demo.demoQuiz], configurators: [demo.demoConfigurator], mode: "modal" });
+  assert(launchCards.length === 4 && launchCards.every((card) => card.snippet.includes(`data-experience="${card.experience}"`)), "Expected launch experience helper to generate snippets for all four embeddable experiences");
+  assert(launchCards.find((card) => card.experience === "assistant")?.id === demo.demoQuiz.id && launchCards.find((card) => card.experience === "search")?.targetPath === "/search/quiz_footwear", "Expected advisor/search launch cards to reuse the published finder context");
+  assert(launchCards.find((card) => card.experience === "configurator")?.targetPath === "/configurator/config_trail_kit", "Expected configurator launch card to use the published configurator context");
   const packet = launchPacket.buildLaunchPacket({
     origin: "https://findly.example/",
     publicUrl: "https://findly.example/finder/footwear-finder",
