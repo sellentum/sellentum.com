@@ -12,6 +12,7 @@ Findly is a compact guided-selling SaaS product for ecommerce brands. A merchant
 - Ontology map for inspecting category clusters, buyer needs, tags, features, spec-to-benefit translations, thin signals and AI-ready quiz question ideas
 - Shopper language planner that compares catalog facts, generated quiz terms and real search/advisor queries to find covered, thin and missing shopper vocabulary before launch
 - AI quiz blueprint review in Launch Studio so merchants can inspect planned questions, catalog coverage and generation risks before publishing
+- Industry starter kits that install editable sample products, finder questions, deterministic answer rules and product-linked configurator drafts for faster merchant onboarding
 - Launch Studio workflow that enriches a catalog, generates a finder, publishes it, prepares finder/advisor/search/configurator embed snippets and copies a developer launch packet from one screen
 - Copyable launch contract with runtime endpoints, widget data attributes, analytics payload requirements, QA checks and troubleshooting guidance for storefront handoff
 - Storefront QA runbook for staging install, shopper-journey proof, telemetry verification, recovery-path testing and rollback planning
@@ -152,6 +153,7 @@ Import the repository into Vercel, add the variables from `.env.example`, and de
 - `lib/commercial-impact.ts` — deterministic assisted-revenue and ROI-opportunity reporting from product recommendation and buy-click events
 - `lib/conversion-playbook.ts` — deterministic merchant optimization actions from funnel, catalog, QA and zero-party intent signals
 - `lib/dashboard-command-center.ts` — overview-page command center combining analytics, catalog intelligence, readiness, recommendation QA and discovery gaps
+- `lib/starter-kits.ts` and `app/dashboard/templates` — vertical launch templates that materialize starter catalog products, finder rules and configurator drafts into the workspace
 - `lib/insights.ts` — zero-party insight extraction for shopper answers, query themes, catalog signals, product demand and deterministic merchant opportunities
 - `lib/journey-insights.ts` — anonymous shopper journey reconstruction, drop-off detection and recent path summaries
 - `lib/discovery-gaps.ts` — deterministic analytics intelligence for no-result paths, missing terms, thin results and stalled product recommendations

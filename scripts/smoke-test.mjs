@@ -306,6 +306,27 @@ function assertDashboardCommandCenterWorkflow() {
   assert(conversionPlaybook.includes("buildZeroPartyInsights"), "Conversion playbook should consider zero-party product demand");
 }
 
+function assertStarterKitWorkflow() {
+  const page = readFileSync("app/dashboard/templates/page.tsx", "utf8");
+  const starterKits = readFileSync("lib/starter-kits.ts", "utf8");
+  const shell = readFileSync("components/dashboard-shell.tsx", "utf8");
+  const overview = readFileSync("app/dashboard/page.tsx", "utf8");
+  const readme = readFileSync("README.md", "utf8");
+  assert(starterKits.includes("performance-footwear") && starterKits.includes("beauty-routine") && starterKits.includes("home-office"), "Starter kits should cover multiple ecommerce verticals");
+  assert(starterKits.includes("materializeStarterKit"), "Starter kit helper should materialize editable workspace records");
+  assert(starterKits.includes("buildStarterKitReadiness"), "Starter kit helper should expose launch-readiness diagnostics");
+  assert(starterKits.includes("next_question_key"), "Starter kits should support answer-level branching");
+  assert(starterKits.includes("product_key"), "Starter kits should support product-linked configurator options");
+  assert(page.includes("saveProduct(product.input, product.id)"), "Templates page should save starter products with stable generated IDs");
+  assert(page.includes("saveQuiz(payload.quiz)"), "Templates page should save the generated finder draft");
+  assert(page.includes("saveConfigurator(payload.configurator)"), "Templates page should save the generated configurator draft");
+  assert(page.includes("Install starter kit"), "Templates page should expose a one-click starter install action");
+  assert(page.includes("Readiness checks"), "Templates page should show starter readiness before install");
+  assert(shell.includes("/dashboard/templates"), "Dashboard navigation should expose starter templates");
+  assert(overview.includes("/dashboard/templates"), "Dashboard overview should route merchants to templates");
+  assert(readme.includes("Industry starter kits"), "README should document starter kit onboarding");
+}
+
 function assertCommercialImpactWorkflow() {
   const analyticsPage = readFileSync("app/dashboard/analytics/page.tsx", "utf8");
   const commercialImpact = readFileSync("lib/commercial-impact.ts", "utf8");
@@ -594,6 +615,9 @@ async function assertDeterministicLogic() {
   const compiledCommercialImpact = `${compileDir}/lib/commercial-impact.js`;
   writeFileSync(compiledCommercialImpact, readFileSync(compiledCommercialImpact, "utf8")
     .replace('from "./analytics";', 'from "./analytics.js";'));
+  const compiledStarterKits = `${compileDir}/lib/starter-kits.js`;
+  writeFileSync(compiledStarterKits, readFileSync(compiledStarterKits, "utf8")
+    .replace('from "@/lib/utils";', 'from "./utils.js";'));
 
   const demo = await import(pathToFileURL(`${compileDir}/lib/demo-data.js`));
   const utils = await import(pathToFileURL(`${compileDir}/lib/utils.js`));
@@ -636,6 +660,7 @@ async function assertDeterministicLogic() {
   const configuratorReadiness = await import(pathToFileURL(`${compileDir}/lib/configurator-readiness.js`));
   const conversionPlaybook = await import(pathToFileURL(`${compileDir}/lib/conversion-playbook.js`));
   const commercialImpact = await import(pathToFileURL(`${compileDir}/lib/commercial-impact.js`));
+  const starterKitHelpers = await import(pathToFileURL(`${compileDir}/lib/starter-kits.js`));
 
   const answers = [
     { questionId: "q_use", question: "Where?", optionId: "o_trail", answer: "Trails & outdoors", matchType: "tag", matchValue: "trail", weight: 5 },
@@ -932,6 +957,22 @@ async function assertDeterministicLogic() {
   const runbookText = storefrontQaRunbook.formatStorefrontQaRunbook(runbook);
   assert(runbookText.includes("Acceptance criteria") && runbookText.includes("/api/events") && runbookText.includes(generatedWidgetSnippet), "Expected formatted storefront QA runbook to include acceptance criteria, analytics endpoint and embed snippet");
 
+  assert(starterKitHelpers.starterKits.length >= 3, "Expected multiple vertical starter kits");
+  const firstStarterKit = starterKitHelpers.starterKits[0];
+  const starterReadiness = starterKitHelpers.buildStarterKitReadiness(firstStarterKit);
+  assert(starterReadiness.status === "ready" && starterReadiness.score >= 80, "Expected starter kit readiness to pass before install");
+  const starterPayload = starterKitHelpers.materializeStarterKit(firstStarterKit, "demo-user");
+  assert(starterPayload.products.length >= 3 && starterPayload.quiz.questions.length >= 3 && starterPayload.configurator.steps.length >= 2, "Expected starter kit install payload to include products, finder and configurator");
+  const starterProductIds = new Set(starterPayload.products.map((item) => item.id));
+  const linkedConfiguratorProductIds = starterPayload.configurator.steps.flatMap((step) => step.options.map((option) => option.product_id).filter(Boolean));
+  assert(linkedConfiguratorProductIds.length >= 3 && linkedConfiguratorProductIds.every((id) => starterProductIds.has(id)), "Expected starter configurator product links to point at generated products");
+  const starterQuestionIds = new Set(starterPayload.quiz.questions.map((question) => question.id));
+  const branchTargets = starterPayload.quiz.questions.flatMap((question) => question.options.map((option) => option.next_question_id).filter(Boolean));
+  assert(branchTargets.length > 0 && branchTargets.every((id) => starterQuestionIds.has(id)), "Expected starter finder branches to point at generated questions");
+  const starterConfiguratorOptionIds = new Set(starterPayload.configurator.steps.flatMap((step) => step.options.map((option) => option.id)));
+  const incompatibleOptionIds = starterPayload.configurator.steps.flatMap((step) => step.options.flatMap((option) => option.incompatible_option_ids));
+  assert(incompatibleOptionIds.length > 0 && incompatibleOptionIds.every((id) => starterConfiguratorOptionIds.has(id)), "Expected starter configurator compatibility rules to point at generated options");
+
   const readyQuiz = quizReadiness.analyzeQuizReadiness(demo.demoQuiz, demo.demoProducts);
   assert(readyQuiz.canPublish && readyQuiz.score >= 80, "Expected seeded demo finder to pass publish-readiness checks");
   const qaReport = recommendationQa.buildRecommendationQaReport([demo.demoQuiz], demo.demoProducts);
@@ -1012,6 +1053,7 @@ async function main() {
   assertPublicRuntimeGuardrails();
   assertLaunchStudioWorkflow();
   assertDashboardCommandCenterWorkflow();
+  assertStarterKitWorkflow();
   assertCommercialImpactWorkflow();
   assertSemanticSearchWorkflow();
   assertCatalogImportWorkflow();

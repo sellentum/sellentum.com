@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
-import { AlertTriangle, ArrowDownRight, ArrowRight, ArrowUpRight, BookOpenCheck, Check, ChevronRight, CirclePlay, Eye, MousePointerClick, PackagePlus, Rocket, Sparkles, Wrench } from "lucide-react";
+import { AlertTriangle, ArrowDownRight, ArrowRight, ArrowUpRight, BookOpenCheck, Check, ChevronRight, CirclePlay, Eye, LayoutTemplate, MousePointerClick, PackagePlus, Rocket, Sparkles, Wrench } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { LoadingState } from "@/components/loading-state";
 import { buildDashboardCommandCenter } from "@/lib/dashboard-command-center";
@@ -31,7 +31,10 @@ export default function DashboardOverview() {
     <div className="animate-rise">
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div><p className="eyebrow text-moss">{today}</p><h1 className="display mt-2 text-4xl sm:text-5xl">Good evening, Alex.</h1><p className="mt-2 text-sm text-black/45">Here’s how {settings.brand_name} is helping shoppers choose.</p></div>
-        <Link href="/dashboard/launch" className="btn-primary self-start"><Rocket size={15} className="text-lime" /> Launch a finder</Link>
+        <div className="flex gap-3">
+          <Link href="/dashboard/templates" className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-xs font-extrabold text-ink shadow-sm transition hover:-translate-y-0.5"><LayoutTemplate size={15} className="text-moss" /> Use a template</Link>
+          <Link href="/dashboard/launch" className="btn-primary self-start"><Rocket size={15} className="text-lime" /> Launch a finder</Link>
+        </div>
       </div>
 
       <div className="mt-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
