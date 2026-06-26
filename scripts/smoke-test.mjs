@@ -63,6 +63,7 @@ function assertPublishedFinderRuntime() {
   const readiness = readFileSync("lib/quiz-readiness.ts", "utf8");
   const flow = readFileSync("lib/finder-flow.ts", "utf8");
   const trace = readFileSync("lib/recommendation-trace.ts", "utf8");
+  const scenarioCoverage = readFileSync("lib/scenario-coverage.ts", "utf8");
   const recovery = readFileSync("lib/recommendation-recovery.ts", "utf8");
   const schema = readFileSync("supabase/schema.sql", "utf8");
   assert(route.includes("runFinderRecommendations"), "Published finder route should use the server-side finder engine");
@@ -88,8 +89,12 @@ function assertPublishedFinderRuntime() {
   assert(lab.includes("Skipped by this branch"), "Recommendation lab should expose questions skipped by the current branch");
   assert(lab.includes("buildRecommendationTraceReport"), "Recommendation lab should generate a merchant-readable decision trace");
   assert(lab.includes("Recommendation decision trace"), "Recommendation lab should show a deterministic recommendation trace panel");
+  assert(lab.includes("buildScenarioCoverageReport"), "Recommendation lab should use the shared scenario coverage helper");
+  assert(lab.includes("Scenario coverage suite"), "Recommendation lab should expose bounded scenario coverage before launch");
   assert(trace.includes("buildRecommendationTraceReport"), "Recommendation trace helper should expose a reusable deterministic report builder");
   assert(trace.includes("tuningActions"), "Recommendation trace should include merchant tuning actions");
+  assert(scenarioCoverage.includes("buildScenarioCoverageReport"), "Scenario coverage helper should expose a reusable report builder");
+  assert(scenarioCoverage.includes("answerCoverageRate") && scenarioCoverage.includes("productCoverageRate"), "Scenario coverage should score answer and product coverage");
   assert(recovery.includes("buildRecommendationRecoveryReport"), "Recommendation recovery helper should expose deterministic no-result recovery");
   assert(recovery.includes("Above selected budget"), "Recommendation recovery should identify budget blockers");
   assert(readiness.includes("Conditional routing"), "Quiz readiness should validate conditional finder routes");
@@ -450,6 +455,10 @@ async function assertDeterministicLogic() {
   writeFileSync(compiledRecommendationQa, readFileSync(compiledRecommendationQa, "utf8")
     .replace('from "./finder-flow";', 'from "./finder-flow.js";')
     .replace('from "./utils";', 'from "./utils.js";'));
+  const compiledScenarioCoverage = `${compileDir}/lib/scenario-coverage.js`;
+  writeFileSync(compiledScenarioCoverage, readFileSync(compiledScenarioCoverage, "utf8")
+    .replace('from "./finder-flow";', 'from "./finder-flow.js";')
+    .replace('from "./utils";', 'from "./utils.js";'));
   const compiledRecommendationRecovery = `${compileDir}/lib/recommendation-recovery.js`;
   writeFileSync(compiledRecommendationRecovery, readFileSync(compiledRecommendationRecovery, "utf8")
     .replace('from "./utils";', 'from "./utils.js";')
@@ -507,6 +516,7 @@ async function assertDeterministicLogic() {
   const quizBlueprint = await import(pathToFileURL(`${compileDir}/lib/quiz-blueprint.js`));
   const quizReadiness = await import(pathToFileURL(`${compileDir}/lib/quiz-readiness.js`));
   const recommendationQa = await import(pathToFileURL(`${compileDir}/lib/recommendation-qa.js`));
+  const scenarioCoverage = await import(pathToFileURL(`${compileDir}/lib/scenario-coverage.js`));
   const recommendationRecovery = await import(pathToFileURL(`${compileDir}/lib/recommendation-recovery.js`));
   const configuratorGuidance = await import(pathToFileURL(`${compileDir}/lib/configurator-guidance.js`));
   const recommendationTrace = await import(pathToFileURL(`${compileDir}/lib/recommendation-trace.js`));
@@ -572,6 +582,11 @@ async function assertDeterministicLogic() {
   const traceReport = recommendationTrace.buildRecommendationTraceReport({ quiz: demo.demoQuiz, products: demo.demoProducts, answers, audits });
   assert(traceReport.topProduct?.productId === "prod_trail" && traceReport.summary.includes("Terra Trail Runner"), "Expected recommendation trace to explain the deterministic winning product");
   assert(traceReport.products.some((product) => product.status === "blocked") && traceReport.tuningActions.length, "Expected recommendation trace to include blocked products and tuning actions");
+  const scenarioCoverageReport = scenarioCoverage.buildScenarioCoverageReport(demo.demoQuiz, demo.demoProducts);
+  assert(scenarioCoverageReport.summary.scenarios > 1 && scenarioCoverageReport.summary.answerCoverageRate > 0 && scenarioCoverageReport.summary.routeCoverageRate > 0, "Expected scenario coverage to sweep multiple branch-aware finder paths");
+  assert(scenarioCoverageReport.productCoverage.some((product) => product.surfacedInScenarios > 0) && scenarioCoverageReport.actions.length, "Expected scenario coverage to expose product coverage and merchant actions");
+  const blockedScenarioCoverage = scenarioCoverage.buildScenarioCoverageReport(undefined, demo.demoProducts);
+  assert(blockedScenarioCoverage.status === "blocked" && blockedScenarioCoverage.actions.some((action) => action.id === "create-finder"), "Expected missing finder scenario coverage to guide finder creation");
 
   let selected = [];
   selected = utils.updateConfiguratorSelection(demo.demoConfigurator, selected, "config_step_base", "config_opt_terra");

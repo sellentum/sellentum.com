@@ -2,17 +2,31 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { Beaker, CheckCircle2, Clipboard, ExternalLink, FlaskConical, HelpCircle, Plus, ShieldCheck, SlidersHorizontal, Sparkles, XCircle } from "lucide-react";
+import { Beaker, CheckCircle2, Clipboard, ExternalLink, FlaskConical, HelpCircle, Layers3, Plus, ShieldCheck, SlidersHorizontal, Sparkles, XCircle } from "lucide-react";
 import { LoadingState } from "@/components/loading-state";
 import { useStore } from "@/lib/store";
 import { answerToFinderAnswer, buildFinderQuestionPath, defaultFinderSelections } from "@/lib/finder-flow";
 import { buildRecommendationTraceReport } from "@/lib/recommendation-trace";
+import { buildScenarioCoverageReport, type ScenarioCoveragePriority, type ScenarioCoverageStatus } from "@/lib/scenario-coverage";
 import type { FinderAnswer, Quiz } from "@/lib/types";
 import { auditProductMatches, buildFinderBuyerProfile, extractIntentTokens, formatCurrency } from "@/lib/utils";
 
 function defaultSelections(quiz?: Quiz) {
   return quiz ? defaultFinderSelections(quiz) : {};
 }
+
+const scenarioStatusTone: Record<ScenarioCoverageStatus, string> = {
+  blocked: "bg-red-50 text-red-700",
+  watch: "bg-amber-50 text-amber-700",
+  healthy: "bg-lime/35 text-moss",
+};
+
+const scenarioPriorityTone: Record<ScenarioCoveragePriority, string> = {
+  critical: "bg-red-50 text-red-700",
+  high: "bg-orange-50 text-orange-700",
+  medium: "bg-amber-50 text-amber-700",
+  low: "bg-lime/35 text-moss",
+};
 
 export default function LabPage() {
   const { ready, quizzes, products } = useStore();
@@ -43,6 +57,7 @@ export default function LabPage() {
   const maxScore = Math.max(1, ...audits.map((audit) => audit.score));
   const trace = useMemo(() => buildRecommendationTraceReport({ quiz: selectedQuiz, products, answers, audits }), [selectedQuiz, products, answers, audits]);
   const tracePayload = useMemo(() => JSON.stringify(trace, null, 2), [trace]);
+  const scenarioCoverage = useMemo(() => buildScenarioCoverageReport(selectedQuiz, products), [selectedQuiz, products]);
 
   async function copyTrace() {
     try {
@@ -158,6 +173,101 @@ export default function LabPage() {
               </div>
             ))}
           </div>
+
+          <section className="overflow-hidden rounded-[28px] border border-black/[0.07] bg-white">
+            <div className="grid gap-0 xl:grid-cols-[360px_1fr]">
+              <div className="bg-ink p-6 text-white">
+                <div className="flex items-center justify-between gap-4">
+                  <span className="grid h-11 w-11 place-items-center rounded-2xl bg-lime text-ink"><Layers3 size={19} /></span>
+                  <span className={`rounded-full px-3 py-1.5 text-[9px] font-extrabold uppercase ${scenarioCoverage.status === "healthy" ? "bg-lime text-moss" : scenarioCoverage.status === "watch" ? "bg-amber-200 text-amber-800" : "bg-red-100 text-red-700"}`}>{scenarioCoverage.status}</span>
+                </div>
+                <p className="eyebrow mt-7 text-lime">Scenario coverage suite</p>
+                <h2 className="mt-3 text-3xl font-extrabold tracking-[-.055em]">{scenarioCoverage.headline}</h2>
+                <p className="mt-3 text-xs leading-5 text-white/45">A bounded QA sweep that varies finder answers, follows branch routing and checks whether each likely shopper path can return a useful result set.</p>
+                <div className="mt-6 grid grid-cols-[110px_1fr] gap-3">
+                  <div className="rounded-2xl bg-white/[.07] p-4 text-center">
+                    <p className="display text-5xl">{scenarioCoverage.score}</p>
+                    <p className="mt-1 text-[8px] font-extrabold uppercase tracking-wider text-white/35">Suite score</p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      ["Scenarios", scenarioCoverage.summary.scenarios],
+                      ["Healthy", scenarioCoverage.summary.passing],
+                      ["Warnings", scenarioCoverage.summary.warnings],
+                      ["Blocked", scenarioCoverage.summary.blockers],
+                    ].map(([label, value]) => <div key={String(label)} className="rounded-2xl bg-white/[.07] p-3">
+                      <p className="text-xl font-extrabold">{String(value)}</p>
+                      <p className="mt-1 text-[8px] font-bold text-white/35">{String(label)}</p>
+                    </div>)}
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-5">
+                <div className="grid gap-3 xl:grid-cols-4">
+                  {[
+                    ["Answer coverage", `${Math.round(scenarioCoverage.summary.answerCoverageRate)}%`],
+                    ["Route coverage", `${Math.round(scenarioCoverage.summary.routeCoverageRate)}%`],
+                    ["Product coverage", `${Math.round(scenarioCoverage.summary.productCoverageRate)}%`],
+                    ["Avg eligible", scenarioCoverage.summary.averageEligibleProducts],
+                  ].map(([label, value]) => <div key={String(label)} className="rounded-2xl bg-[#f7f8f4] p-4">
+                    <p className="text-2xl font-extrabold tracking-[-.05em]">{String(value)}</p>
+                    <p className="mt-1 text-[9px] font-bold uppercase tracking-wider text-black/30">{String(label)}</p>
+                  </div>)}
+                </div>
+
+                <div className="mt-4 grid gap-3 xl:grid-cols-[1fr_320px]">
+                  <div className="grid gap-3 xl:grid-cols-2">
+                    {scenarioCoverage.scenarios.slice(0, 4).map((scenario) => (
+                      <article key={scenario.id} className="rounded-2xl border border-black/[0.06] bg-[#f8f8f4] p-4">
+                        <div className="flex items-start justify-between gap-3">
+                          <h3 className="text-xs font-extrabold leading-5">{scenario.label}</h3>
+                          <span className={`rounded-full px-2 py-1 text-[8px] font-extrabold uppercase ${scenarioStatusTone[scenario.status]}`}>{scenario.status}</span>
+                        </div>
+                        <p className="mt-2 text-[10px] leading-4 text-black/45">{scenario.detail}</p>
+                        <div className="mt-3 flex flex-wrap gap-1.5">
+                          {scenario.answers.slice(0, 4).map((answer) => <span key={answer} className="rounded-full bg-white px-2.5 py-1 text-[8px] font-extrabold text-black/40">{answer}</span>)}
+                        </div>
+                        <div className="mt-3 grid grid-cols-3 gap-1.5 text-center">
+                          <span className="rounded-xl bg-white p-2"><b className="block text-xs">{scenario.eligibleProducts}</b><i className="not-italic text-[8px] text-black/30">Eligible</i></span>
+                          <span className="rounded-xl bg-white p-2"><b className="block text-xs">{scenario.blockedProducts}</b><i className="not-italic text-[8px] text-black/30">Blocked</i></span>
+                          <span className="rounded-xl bg-white p-2"><b className="block text-xs">{scenario.topScore}</b><i className="not-italic text-[8px] text-black/30">Top score</i></span>
+                        </div>
+                        <p className="mt-3 text-[10px] font-bold leading-4 text-moss">{scenario.recommendation}</p>
+                      </article>
+                    ))}
+                  </div>
+
+                  <aside className="rounded-2xl bg-ink p-4 text-white">
+                    <p className="flex items-center gap-2 text-xs font-extrabold"><ShieldCheck size={14} className="text-lime" /> Scenario actions</p>
+                    <div className="mt-4 space-y-2">
+                      {scenarioCoverage.actions.slice(0, 3).map((action) => (
+                        <div key={action.id} className="rounded-2xl bg-white/[.07] p-3">
+                          <div className="flex items-start justify-between gap-2">
+                            <p className="text-[10px] font-extrabold leading-4">{action.title}</p>
+                            <span className={`rounded-full px-2 py-0.5 text-[8px] font-extrabold uppercase ${scenarioPriorityTone[action.priority]}`}>{action.priority}</span>
+                          </div>
+                          <p className="mt-2 text-[9px] leading-4 text-white/45">{action.evidence}</p>
+                          <p className="mt-2 text-[9px] leading-4 text-lime">{action.recommendation}</p>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="mt-4 rounded-2xl bg-white/[.07] p-3">
+                      <p className="text-[9px] font-extrabold uppercase tracking-wider text-white/35">Product coverage</p>
+                      <div className="mt-2 space-y-1.5">
+                        {scenarioCoverage.productCoverage.slice(0, 4).map((product) => (
+                          <div key={product.productId} className="flex items-center justify-between gap-3 rounded-xl bg-white/[.06] px-3 py-2">
+                            <span className="truncate text-[9px] font-extrabold">{product.productName}</span>
+                            <span className="shrink-0 rounded-full bg-lime px-2 py-0.5 text-[8px] font-extrabold text-moss">{Math.round(product.coverageRate)}%</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </aside>
+                </div>
+              </div>
+            </div>
+          </section>
 
           <section className="overflow-hidden rounded-[28px] border border-black/[0.07] bg-white">
             <div className="grid gap-0 xl:grid-cols-[1fr_340px]">

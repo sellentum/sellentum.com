@@ -20,6 +20,7 @@ Findly is a compact guided-selling SaaS product for ecommerce brands. A merchant
 - One-click product finder generation from the current catalog
 - Deterministic top-three recommendation engine with budget eligibility filtering, buyer-profile intent scoring and merchant overrides
 - Branch-aware recommendation lab for testing shopper answer paths, inspecting score breakdowns and copying a deterministic decision trace before publishing
+- Scenario coverage suite in the recommendation lab that sweeps likely finder paths, branch routing, answer coverage, product coverage and blocked/thin recommendation risks before launch
 - Deterministic no-result recovery that explains blocked finder paths and suggests safer next-step adjustments instead of dead-ending shoppers
 - Synthetic recommendation QA in Launch Preflight to catch no-result and thin-result finder paths before embedding
 - Semantic Search Lab and authenticated search API for testing natural-language product discovery, parsed-term catalog coverage and deterministic tuning guidance over the active catalog
@@ -149,6 +150,7 @@ Import the repository into Vercel, add the variables from `.env.example`, and de
 - `lib/quiz-blueprint.ts` — launch-ready preview of generated finder questions, option coverage and catalog risks
 - `lib/finder-flow.ts` — deterministic conditional question routing and server-side answer-path validation
 - `lib/recommendation-qa.ts` — synthetic finder-path recommendation QA for no-result and thin-result launch risks
+- `lib/scenario-coverage.ts` — bounded branch-aware finder scenario QA with answer, route and product coverage scoring
 - `lib/recommendation-recovery.ts` — deterministic shopper-facing recovery guidance for no-result and thin-result finder paths
 - `lib/catalog-import.ts` — flexible CSV header mapping, row validation and import previews
 - `lib/search-engine.ts` — deterministic benefit-aware semantic search ranking, intent parsing, parsed-term catalog coverage and budget eligibility checks
