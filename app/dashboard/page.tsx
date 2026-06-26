@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
-import { AlertTriangle, ArrowDownRight, ArrowRight, ArrowUpRight, BookOpenCheck, Check, ChevronRight, CirclePlay, Eye, LayoutTemplate, MousePointerClick, PackagePlus, Rocket, Sparkles, Wrench } from "lucide-react";
+import { AlertTriangle, ArrowDownRight, ArrowRight, ArrowUpRight, BookOpenCheck, BrainCircuit, Check, ChevronRight, CirclePlay, Eye, LayoutTemplate, MousePointerClick, PackagePlus, Rocket, Sparkles, Wrench } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { LoadingState } from "@/components/loading-state";
 import { buildDashboardCommandCenter } from "@/lib/dashboard-command-center";
@@ -33,6 +33,7 @@ export default function DashboardOverview() {
         <div><p className="eyebrow text-moss">{today}</p><h1 className="display mt-2 text-4xl sm:text-5xl">Good evening, Alex.</h1><p className="mt-2 text-sm text-black/45">Here’s how {settings.brand_name} is helping shoppers choose.</p></div>
         <div className="flex gap-3">
           <Link href="/dashboard/templates" className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-xs font-extrabold text-ink shadow-sm transition hover:-translate-y-0.5"><LayoutTemplate size={15} className="text-moss" /> Use a template</Link>
+          <Link href="/dashboard/decision-graph" className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-xs font-extrabold text-ink shadow-sm transition hover:-translate-y-0.5"><BrainCircuit size={15} className="text-moss" /> Decision graph</Link>
           <Link href="/dashboard/launch" className="btn-primary self-start"><Rocket size={15} className="text-lime" /> Launch a finder</Link>
         </div>
       </div>

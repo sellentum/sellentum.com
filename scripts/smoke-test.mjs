@@ -327,6 +327,27 @@ function assertStarterKitWorkflow() {
   assert(readme.includes("Industry starter kits"), "README should document starter kit onboarding");
 }
 
+function assertDecisionGraphWorkflow() {
+  const page = readFileSync("app/dashboard/decision-graph/page.tsx", "utf8");
+  const helper = readFileSync("lib/decision-graph.ts", "utf8");
+  const shell = readFileSync("components/dashboard-shell.tsx", "utf8");
+  const overview = readFileSync("app/dashboard/page.tsx", "utf8");
+  const readme = readFileSync("README.md", "utf8");
+  assert(helper.includes("buildDecisionGraph"), "Decision graph helper should expose a reusable graph builder");
+  assert(helper.includes("answer_rule"), "Decision graph should model answer-rule relationships");
+  assert(helper.includes("configurator_product"), "Decision graph should model configurator product links");
+  assert(helper.includes("shopper_language"), "Decision graph should model observed shopper language");
+  assert(helper.includes("Product selection") || helper.includes("productsForRule"), "Decision graph should evaluate deterministic product selection coverage");
+  assert(page.includes("buildDecisionGraph"), "Decision graph dashboard should use the shared graph helper");
+  assert(page.includes("Finder rule coverage"), "Decision graph dashboard should expose finder rule audits");
+  assert(page.includes("Configurator compatibility graph"), "Decision graph dashboard should expose configurator link and compatibility audits");
+  assert(page.includes("Shopper language links"), "Decision graph dashboard should expose shopper-language mapping");
+  assert(page.includes("Why this is safe AI"), "Decision graph dashboard should explain safe AI guardrails");
+  assert(shell.includes("/dashboard/decision-graph"), "Dashboard navigation should expose the decision graph");
+  assert(overview.includes("/dashboard/decision-graph"), "Dashboard overview should link to the decision graph");
+  assert(readme.includes("Decision graph workbench"), "README should document the decision graph workbench");
+}
+
 function assertCommercialImpactWorkflow() {
   const analyticsPage = readFileSync("app/dashboard/analytics/page.tsx", "utf8");
   const commercialImpact = readFileSync("lib/commercial-impact.ts", "utf8");
@@ -618,6 +639,9 @@ async function assertDeterministicLogic() {
   const compiledStarterKits = `${compileDir}/lib/starter-kits.js`;
   writeFileSync(compiledStarterKits, readFileSync(compiledStarterKits, "utf8")
     .replace('from "@/lib/utils";', 'from "./utils.js";'));
+  const compiledDecisionGraph = `${compileDir}/lib/decision-graph.js`;
+  writeFileSync(compiledDecisionGraph, readFileSync(compiledDecisionGraph, "utf8")
+    .replace('from "@/lib/utils";', 'from "./utils.js";'));
 
   const demo = await import(pathToFileURL(`${compileDir}/lib/demo-data.js`));
   const utils = await import(pathToFileURL(`${compileDir}/lib/utils.js`));
@@ -661,6 +685,7 @@ async function assertDeterministicLogic() {
   const conversionPlaybook = await import(pathToFileURL(`${compileDir}/lib/conversion-playbook.js`));
   const commercialImpact = await import(pathToFileURL(`${compileDir}/lib/commercial-impact.js`));
   const starterKitHelpers = await import(pathToFileURL(`${compileDir}/lib/starter-kits.js`));
+  const decisionGraph = await import(pathToFileURL(`${compileDir}/lib/decision-graph.js`));
 
   const answers = [
     { questionId: "q_use", question: "Where?", optionId: "o_trail", answer: "Trails & outdoors", matchType: "tag", matchValue: "trail", weight: 5 },
@@ -973,6 +998,24 @@ async function assertDeterministicLogic() {
   const incompatibleOptionIds = starterPayload.configurator.steps.flatMap((step) => step.options.flatMap((option) => option.incompatible_option_ids));
   assert(incompatibleOptionIds.length > 0 && incompatibleOptionIds.every((id) => starterConfiguratorOptionIds.has(id)), "Expected starter configurator compatibility rules to point at generated options");
 
+  const graphReport = decisionGraph.buildDecisionGraph({ products: demo.demoProducts, quizzes: [demo.demoQuiz], configurators: [demo.demoConfigurator], events: demo.demoEvents });
+  assert(graphReport.score >= 70 && graphReport.nodes.length > 0 && graphReport.edges.length > 0, "Expected decision graph to build a connected report for the demo workspace");
+  assert(graphReport.lanes.length === 4 && graphReport.lanes.every((lane) => typeof lane.score === "number"), "Expected decision graph to score catalog, finder, configurator and language lanes");
+  assert(graphReport.ruleAudits.some((audit) => audit.answerLabel === "Trails & outdoors" && audit.status === "pass" && audit.linkedProducts.includes("Terra Trail Runner")), "Expected decision graph to connect finder answer rules to catalog products");
+  assert(graphReport.configuratorAudits.some((audit) => audit.optionLabel === "Terra Trail Runner" && audit.linkedProductName === "Terra Trail Runner"), "Expected decision graph to connect configurator options to products");
+  assert(graphReport.actions.length && graphReport.hotspots.length, "Expected decision graph to produce merchant actions and influential graph hotspots");
+  const graphWithLanguageGap = decisionGraph.buildDecisionGraph({
+    products: demo.demoProducts,
+    quizzes: [demo.demoQuiz],
+    configurators: [demo.demoConfigurator],
+    events: [
+      ...demo.demoEvents,
+      { id: "gap_event", user_id: "demo-user", quiz_id: "quiz_footwear", event_type: "quiz_complete", metadata: { experience_type: "search", query: "orthopedic office shoe", terms: ["orthopedic", "office"], result_count: 0, recovery_status: "no-results" }, created_at: "2026-06-25T12:00:00Z" },
+    ],
+  });
+  assert(graphWithLanguageGap.termAudits.some((audit) => audit.term === "orthopedic" && audit.status === "fail"), "Expected decision graph to detect unresolved observed shopper language");
+  assert(graphWithLanguageGap.actions.some((action) => action.id === "map-unresolved-shopper-language"), "Expected decision graph to recommend mapping unresolved shopper language");
+
   const readyQuiz = quizReadiness.analyzeQuizReadiness(demo.demoQuiz, demo.demoProducts);
   assert(readyQuiz.canPublish && readyQuiz.score >= 80, "Expected seeded demo finder to pass publish-readiness checks");
   const qaReport = recommendationQa.buildRecommendationQaReport([demo.demoQuiz], demo.demoProducts);
@@ -1054,6 +1097,7 @@ async function main() {
   assertLaunchStudioWorkflow();
   assertDashboardCommandCenterWorkflow();
   assertStarterKitWorkflow();
+  assertDecisionGraphWorkflow();
   assertCommercialImpactWorkflow();
   assertSemanticSearchWorkflow();
   assertCatalogImportWorkflow();
