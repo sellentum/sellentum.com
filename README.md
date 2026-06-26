@@ -13,6 +13,7 @@ Findly is a compact guided-selling SaaS product for ecommerce brands. A merchant
 - AI quiz blueprint review in Launch Studio so merchants can inspect planned questions, catalog coverage and generation risks before publishing
 - Launch Studio workflow that enriches a catalog, generates a finder, publishes it, prepares finder/advisor/search/configurator embed snippets and copies a developer launch packet from one screen
 - Copyable launch contract with runtime endpoints, widget data attributes, analytics payload requirements, QA checks and troubleshooting guidance for storefront handoff
+- Storefront QA runbook for staging install, shopper-journey proof, telemetry verification, recovery-path testing and rollback planning
 - Ontology-guided finder generation that uses category clusters, repeated buyer needs and product features before falling back to OpenAI copy
 - Visual finder builder with questions, answer options, optional conditional branching, weights, tag/category/feature/budget rules, per-answer catalog coverage and publish-readiness diagnostics
 - Finder merchandising controls to pin, boost or exclude specific products without handing selection to AI
@@ -153,6 +154,7 @@ Import the repository into Vercel, add the variables from `.env.example`, and de
 - `lib/experience-launch.ts` — multi-experience launch cards for finder, advisor, semantic search and configurator embeds
 - `lib/launch-packet.ts` — copyable developer handoff text for preview URLs, embed snippets, QA checks and analytics contracts
 - `lib/launch-contract.ts` — deterministic launch contract for runtime endpoints, widget attributes, analytics payloads and troubleshooting
+- `lib/storefront-qa-runbook.ts` — deterministic manual QA script for storefront install, analytics proof, recovery testing and rollback
 - `lib/rule-coverage.ts` — deterministic answer-rule coverage helper used by the finder builder and readiness checks
 - `lib/quiz-readiness.ts` — publish-readiness diagnostics for finder structure, catalog mapping and rule quality
 - `lib/configurator-readiness.ts` — publish-readiness diagnostics for configurator structure, linked products, pricing and compatibility rules

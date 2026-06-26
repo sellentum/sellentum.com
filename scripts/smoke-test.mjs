@@ -190,6 +190,7 @@ function assertLaunchStudioWorkflow() {
   const experienceLaunch = readFileSync("lib/experience-launch.ts", "utf8");
   const launchPacket = readFileSync("lib/launch-packet.ts", "utf8");
   const launchContract = readFileSync("lib/launch-contract.ts", "utf8");
+  const storefrontQaRunbook = readFileSync("lib/storefront-qa-runbook.ts", "utf8");
   const shell = readFileSync("components/dashboard-shell.tsx", "utf8");
   const overview = readFileSync("app/dashboard/page.tsx", "utf8");
   assert(page.includes("/api/catalog/enrich"), "Launch Studio should call catalog enrichment");
@@ -220,6 +221,12 @@ function assertLaunchStudioWorkflow() {
   assert(launchContract.includes("buildLaunchContract"), "Launch contract helper should expose reusable contract generation");
   assert(launchContract.includes("formatLaunchContract"), "Launch contract helper should expose reusable contract formatting");
   assert(launchContract.includes("Analytics contract") && launchContract.includes("data-experience"), "Launch contract should document analytics events and widget attributes");
+  assert(page.includes("buildStorefrontQaRunbook"), "Launch Studio should build a deterministic storefront QA runbook");
+  assert(page.includes("Storefront QA runbook"), "Launch Studio should expose a storefront QA runbook panel");
+  assert(page.includes("Copy runbook"), "Launch Studio should let merchants copy the storefront QA runbook");
+  assert(storefrontQaRunbook.includes("buildStorefrontQaRunbook"), "Storefront QA helper should expose reusable runbook generation");
+  assert(storefrontQaRunbook.includes("formatStorefrontQaRunbook"), "Storefront QA helper should expose reusable runbook formatting");
+  assert(storefrontQaRunbook.includes("Acceptance criteria") && storefrontQaRunbook.includes("Rollback plan"), "Storefront QA runbook should document acceptance criteria and rollback");
   assert(settings.includes("Embed mode"), "Settings should let merchants choose modal or inline embed mode");
   assert(settings.includes("buildWidgetSnippet"), "Settings should use the shared widget snippet helper");
   assert(settings.includes("buildWidgetInstallReport"), "Settings should expose widget install readiness diagnostics");
@@ -462,6 +469,7 @@ async function assertDeterministicLogic() {
   const experienceLaunch = await import(pathToFileURL(`${compileDir}/lib/experience-launch.js`));
   const launchPacket = await import(pathToFileURL(`${compileDir}/lib/launch-packet.js`));
   const launchContract = await import(pathToFileURL(`${compileDir}/lib/launch-contract.js`));
+  const storefrontQaRunbook = await import(pathToFileURL(`${compileDir}/lib/storefront-qa-runbook.js`));
   const launchReadinessReport = await import(pathToFileURL(`${compileDir}/lib/launch-readiness-report.js`));
   const advisorRecovery = await import(pathToFileURL(`${compileDir}/lib/advisor-recovery.js`));
   const discoveryGaps = await import(pathToFileURL(`${compileDir}/lib/discovery-gaps.js`));
@@ -693,6 +701,15 @@ async function assertDeterministicLogic() {
   assert(contract.apiEndpoints.includes("https://findly.example/api/widget.js") && contract.events.some((event) => event.event === "buy_click"), "Expected launch contract to include runtime endpoints and buy-click analytics");
   const contractText = launchContract.formatLaunchContract(contract);
   assert(contractText.includes("Analytics contract") && contractText.includes('data-experience="finder"'), "Expected formatted launch contract to document analytics and widget attributes");
+  const runbook = storefrontQaRunbook.buildStorefrontQaRunbook({
+    contract,
+    embedSnippet: generatedWidgetSnippet,
+    experienceLabel: "Guided finder",
+    experienceName: "Footwear finder",
+  });
+  assert(runbook.steps.length >= 5 && runbook.analyticsEvents.includes("buy_click"), "Expected storefront QA runbook to include manual QA steps and analytics proof points");
+  const runbookText = storefrontQaRunbook.formatStorefrontQaRunbook(runbook);
+  assert(runbookText.includes("Acceptance criteria") && runbookText.includes("/api/events") && runbookText.includes(generatedWidgetSnippet), "Expected formatted storefront QA runbook to include acceptance criteria, analytics endpoint and embed snippet");
 
   const readyQuiz = quizReadiness.analyzeQuizReadiness(demo.demoQuiz, demo.demoProducts);
   assert(readyQuiz.canPublish && readyQuiz.score >= 80, "Expected seeded demo finder to pass publish-readiness checks");

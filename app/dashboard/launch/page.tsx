@@ -9,11 +9,12 @@ import { buildLaunchExperienceCards } from "@/lib/experience-launch";
 import { buildLaunchContract, formatLaunchContract } from "@/lib/launch-contract";
 import { buildLaunchPacket } from "@/lib/launch-packet";
 import { buildQuizBlueprint } from "@/lib/quiz-blueprint";
+import { buildStorefrontQaRunbook, formatStorefrontQaRunbook } from "@/lib/storefront-qa-runbook";
 import type { GeneratedQuizSuggestion, Product, ProductInput } from "@/lib/types";
 import { slugify, uid } from "@/lib/utils";
 import type { WidgetEmbedExperience, WidgetSnippetConfig } from "@/lib/widget-snippet";
 
-type BusyAction = "enrich" | "generate" | "copy" | "packet" | "contract" | null;
+type BusyAction = "enrich" | "generate" | "copy" | "packet" | "contract" | "runbook" | null;
 
 function productPayload(products: Product[]) {
   return products.map(({ id, name, price, category, description, features, tags, buyer_needs }) => ({
@@ -58,6 +59,7 @@ export default function LaunchStudioPage() {
   const [copied, setCopied] = useState(false);
   const [packetCopied, setPacketCopied] = useState(false);
   const [contractCopied, setContractCopied] = useState(false);
+  const [runbookCopied, setRunbookCopied] = useState(false);
 
   useEffect(() => setOrigin(window.location.origin), []);
 
@@ -104,6 +106,13 @@ export default function LaunchStudioPage() {
     enrichedPercent,
   });
   const launchContractText = formatLaunchContract(launchContract);
+  const storefrontQaRunbook = buildStorefrontQaRunbook({
+    contract: launchContract,
+    embedSnippet: snippet,
+    experienceLabel: selectedLaunchExperience.label,
+    experienceName: selectedLaunchExperience.name || selectedLaunchExperience.label,
+  });
+  const storefrontQaRunbookText = formatStorefrontQaRunbook(storefrontQaRunbook);
   const launchPacket = buildLaunchPacket({
     origin,
     publicUrl,
@@ -239,6 +248,21 @@ export default function LaunchStudioPage() {
       setTimeout(() => setContractCopied(false), 1800);
     } catch {
       setError("Could not copy the launch contract automatically. Select the preview and copy it manually.");
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function copyStorefrontQaRunbook() {
+    setBusy("runbook");
+    setError("");
+    try {
+      await navigator.clipboard.writeText(storefrontQaRunbookText);
+      setRunbookCopied(true);
+      setNotice(`${selectedLaunchExperience.label} storefront QA runbook copied. Use it to verify staging install, shopper journey, analytics and rollback.`);
+      setTimeout(() => setRunbookCopied(false), 1800);
+    } catch {
+      setError("Could not copy the storefront QA runbook automatically. Select the preview and copy it manually.");
     } finally {
       setBusy(null);
     }
@@ -413,6 +437,21 @@ export default function LaunchStudioPage() {
               <div className="rounded-2xl bg-white p-3"><p className="text-lg font-extrabold">{launchContract.checks.filter((item) => item.status === "ready").length}/{launchContract.checks.length}</p><p className="text-[8px] font-bold text-black/30">Checks ready</p></div>
             </div>
             <pre className="mt-4 max-h-48 overflow-hidden rounded-2xl border border-black/[0.07] bg-white p-4 text-[9px] leading-4 text-black/45"><code>{launchContractText.split("\n").slice(0, 28).join("\n")}</code></pre>
+          </div>
+          <div className="border-t border-black/[0.06] bg-white p-5">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 className="flex items-center gap-2 text-sm font-extrabold"><BookOpenCheck size={15} className="text-moss" /> Storefront QA runbook</h2>
+                <p className="mt-1 text-[10px] leading-4 text-black/35">A manual go-live script for staging install, shopper journey, telemetry proof, recovery paths and rollback.</p>
+              </div>
+              <button onClick={copyStorefrontQaRunbook} disabled={busy !== null} className="btn-secondary shrink-0 !px-3 !py-2 text-xs">{busy === "runbook" ? <LoaderCircle size={13} className="animate-spin" /> : runbookCopied ? <Check size={13} /> : <Clipboard size={13} />}{runbookCopied ? "Copied" : "Copy runbook"}</button>
+            </div>
+            <div className="mt-4 grid gap-3 sm:grid-cols-3">
+              <div className="rounded-2xl bg-canvas p-3"><p className="text-lg font-extrabold">{storefrontQaRunbook.steps.length}</p><p className="text-[8px] font-bold text-black/30">Manual QA steps</p></div>
+              <div className="rounded-2xl bg-canvas p-3"><p className="text-lg font-extrabold">{storefrontQaRunbook.analyticsEvents.length}</p><p className="text-[8px] font-bold text-black/30">Events to prove</p></div>
+              <div className="rounded-2xl bg-canvas p-3"><p className="text-lg font-extrabold capitalize">{storefrontQaRunbook.status}</p><p className="text-[8px] font-bold text-black/30">QA status</p></div>
+            </div>
+            <pre className="mt-4 max-h-48 overflow-hidden rounded-2xl border border-black/[0.07] bg-[#f8f8f4] p-4 text-[9px] leading-4 text-black/45"><code>{storefrontQaRunbookText.split("\n").slice(0, 28).join("\n")}</code></pre>
           </div>
           <div className="grid gap-3 p-5 sm:grid-cols-3">
             {selectedLaunchExperience.id && <Link href={selectedLaunchExperience.publicUrl.replace(originBase, "")} target="_blank" className="btn-primary justify-center !px-3 !py-2.5 text-xs"><ExternalLink size={13} /> Preview {selectedLaunchExperience.experience}</Link>}
