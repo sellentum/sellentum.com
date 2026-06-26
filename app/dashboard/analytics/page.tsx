@@ -1,12 +1,13 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { AlertTriangle, ArrowDownRight, ArrowUpRight, Check, ChevronDown, Clock3, Eye, GitBranch, ListChecks, MessageCircle, MousePointerClick, PackagePlus, Radar, Search, ShieldAlert, Sparkles, Tags, Trophy, UsersRound, Wrench } from "lucide-react";
+import { AlertTriangle, ArrowDownRight, ArrowUpRight, Check, ChevronDown, CircleDollarSign, Clock3, Eye, GitBranch, ListChecks, MessageCircle, MousePointerClick, PackagePlus, Radar, Search, ShieldAlert, Sparkles, Tags, Trophy, UsersRound, Wrench } from "lucide-react";
 import { LoadingState } from "@/components/loading-state";
 import { useStore } from "@/lib/store";
 import type { ExperienceType } from "@/lib/types";
 import { buildAnalyticsQualityReport, type AnalyticsQualityCheckStatus, type AnalyticsQualityStatus } from "@/lib/analytics-quality";
 import { buildAnalyticsSnapshot, buildAnalyticsTrends, buildFunnelDiagnosis, countAnalyticsEvents, getAnalyticsPeriods, stageRate } from "@/lib/analytics";
+import { buildCommercialImpactReport, type CommercialImpactPriority, type CommercialImpactStatus } from "@/lib/commercial-impact";
 import { buildDiscoveryGapReport, type DiscoveryGapSeverity } from "@/lib/discovery-gaps";
 import { buildZeroPartyInsights } from "@/lib/insights";
 import { buildShopperJourneyReport } from "@/lib/journey-insights";
@@ -47,6 +48,20 @@ const analyticsCheckTone: Record<AnalyticsQualityCheckStatus, string> = {
   pass: "bg-lime/25 text-moss",
   warn: "bg-amber-50 text-amber-700",
   fail: "bg-red-50 text-red-700",
+};
+
+const commercialImpactTone: Record<CommercialImpactStatus, string> = {
+  empty: "bg-black/5 text-black/40",
+  building: "bg-blue-50 text-blue-700",
+  risk: "bg-red-50 text-red-700",
+  healthy: "bg-lime/35 text-moss",
+};
+
+const commercialPriorityTone: Record<CommercialImpactPriority, string> = {
+  critical: "bg-red-50 text-red-700",
+  high: "bg-amber-50 text-amber-700",
+  medium: "bg-blue-50 text-blue-700",
+  low: "bg-lime/35 text-moss",
 };
 
 function formatDuration(seconds: number) {
@@ -96,6 +111,7 @@ export default function AnalyticsPage() {
   const zeroPartyInsights = useMemo(() => buildZeroPartyInsights(filteredEvents, products), [filteredEvents, products]);
   const journeyReport = useMemo(() => buildShopperJourneyReport(filteredEvents, products), [filteredEvents, products]);
   const analyticsQuality = useMemo(() => buildAnalyticsQualityReport(filteredEvents), [filteredEvents]);
+  const commercialImpact = useMemo(() => buildCommercialImpactReport(filteredEvents, products), [filteredEvents, products]);
 
   const byDay = useMemo(() => Array.from({ length: rangeDays }, (_, reverseIndex) => {
     const offset = rangeDays - 1 - reverseIndex;
@@ -178,6 +194,78 @@ export default function AnalyticsPage() {
           );
         })}
       </div>
+
+      <section className="mt-5 grid gap-5 xl:grid-cols-[.72fr_1.28fr]">
+        <div className="rounded-2xl border border-black/[0.07] bg-ink p-6 text-white">
+          <div className="flex items-center justify-between gap-4">
+            <span className={`grid h-11 w-11 place-items-center rounded-xl ${commercialImpact.status === "healthy" ? "bg-lime text-ink" : commercialImpact.status === "risk" ? "bg-red-400 text-white" : "bg-white/10 text-lime"}`}><CircleDollarSign size={20} /></span>
+            <span className={`rounded-full px-3 py-1.5 text-[9px] font-extrabold uppercase ${commercialImpact.status === "healthy" ? "bg-lime text-moss" : commercialImpact.status === "risk" ? "bg-red-100 text-red-700" : "bg-white/10 text-white/55"}`}>{commercialImpact.status}</span>
+          </div>
+          <h2 className="display mt-6 text-3xl">Commercial impact</h2>
+          <p className="mt-2 text-xs leading-5 text-white/45">{commercialImpact.headline}</p>
+          <div className="mt-6 grid grid-cols-[140px_1fr] gap-4">
+            <div className="rounded-2xl bg-white/[.07] p-4 text-center">
+              <p className="display text-5xl">{commercialImpact.score}</p>
+              <p className="mt-1 text-[8px] font-extrabold uppercase tracking-wider text-white/35">Impact score</p>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                ["Assisted value", formatCurrency(commercialImpact.summary.influencedRevenue)],
+                ["Unclicked value", formatCurrency(commercialImpact.summary.unclickedRecommendedValue)],
+                ["Avg click value", formatCurrency(commercialImpact.summary.averageClickedProductValue)],
+                ["Demand cover", `${Math.round(commercialImpact.summary.demandCoverageRate)}%`],
+              ].map(([label, value]) => <div key={String(label)} className="rounded-2xl bg-white/[.07] p-3">
+                <p className="text-lg font-extrabold">{String(value)}</p>
+                <p className="mt-1 text-[8px] font-bold text-white/35">{String(label)}</p>
+              </div>)}
+            </div>
+          </div>
+          <p className="mt-5 rounded-2xl bg-white/[.06] p-3 text-[10px] leading-4 text-white/45">{commercialImpact.confidence}</p>
+        </div>
+
+        <div className="rounded-2xl border border-black/[0.07] bg-white p-5 sm:p-7">
+          <div className="flex items-center justify-between">
+            <div><h2 className="text-sm font-extrabold">ROI opportunity board</h2><p className="mt-1 text-[10px] text-black/35">Estimated product value influenced by {activeExperienceLabel.toLowerCase()} over {range.toLowerCase()}</p></div>
+            <span className={`rounded-full px-3 py-1.5 text-[9px] font-extrabold uppercase ${commercialImpactTone[commercialImpact.status]}`}>{commercialImpact.summary.buyClicks} buy clicks</span>
+          </div>
+          <div className="mt-6 grid gap-3 xl:grid-cols-[1fr_.8fr]">
+            <div className="space-y-3">
+              {commercialImpact.actions.slice(0, 3).map((action) => (
+                <article key={action.id} className="rounded-2xl border border-black/[0.06] bg-[#f7f8f4] p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <h3 className="text-xs font-extrabold">{action.title}</h3>
+                    <span className={`rounded-full px-2 py-1 text-[8px] font-extrabold uppercase ${commercialPriorityTone[action.priority]}`}>{action.priority}</span>
+                  </div>
+                  <p className="mt-2 text-[10px] leading-4 text-black/45">{action.detail}</p>
+                  <p className="mt-3 rounded-xl bg-white px-3 py-2 text-[10px] font-bold leading-4 text-black/55">{action.evidence}</p>
+                  <div className="mt-3 flex items-center justify-between gap-3">
+                    <p className="text-[10px] font-bold leading-4 text-moss">{action.recommendation}</p>
+                    <a href={action.actionHref} className="shrink-0 rounded-full bg-ink px-3 py-2 text-[9px] font-extrabold text-white">{action.metric}</a>
+                  </div>
+                </article>
+              ))}
+            </div>
+            <div className="rounded-2xl bg-ink p-4 text-white">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xs font-extrabold">Top value paths</h3>
+                <Trophy size={15} className="text-lime" />
+              </div>
+              <div className="mt-4 space-y-2">
+                {commercialImpact.topProducts.slice(0, 4).map((product) => (
+                  <div key={product.productId} className="rounded-xl bg-white/[.07] px-3 py-2">
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="truncate text-[10px] font-extrabold">{product.productName}</p>
+                      <span className="rounded-full bg-lime px-2 py-0.5 text-[8px] font-extrabold text-moss">{Math.round(product.clickRate)}%</span>
+                    </div>
+                    <p className="mt-1 text-[8px] font-bold text-white/35">{product.recommended} surfaced · {product.clicks} clicks · {formatCurrency(product.influencedRevenue)}</p>
+                  </div>
+                ))}
+                {!commercialImpact.topProducts.length && <p className="rounded-xl bg-white/[.07] px-3 py-5 text-center text-[10px] leading-4 text-white/35">Product value paths will appear after recommendations or buy clicks.</p>}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <section className="mt-5 grid gap-5 xl:grid-cols-[.68fr_1.32fr]">
         <div className="rounded-2xl border border-black/[0.07] bg-ink p-6 text-white">

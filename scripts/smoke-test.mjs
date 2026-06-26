@@ -267,6 +267,20 @@ function assertDashboardCommandCenterWorkflow() {
   assert(conversionPlaybook.includes("buildZeroPartyInsights"), "Conversion playbook should consider zero-party product demand");
 }
 
+function assertCommercialImpactWorkflow() {
+  const analyticsPage = readFileSync("app/dashboard/analytics/page.tsx", "utf8");
+  const commercialImpact = readFileSync("lib/commercial-impact.ts", "utf8");
+  assert(analyticsPage.includes("buildCommercialImpactReport"), "Analytics dashboard should use the shared commercial impact helper");
+  assert(analyticsPage.includes("Commercial impact"), "Analytics dashboard should expose a commercial impact panel");
+  assert(analyticsPage.includes("ROI opportunity board"), "Analytics dashboard should expose deterministic ROI opportunities");
+  assert(analyticsPage.includes("commercialImpact.confidence"), "Analytics dashboard should render assisted-value confidence boundaries");
+  assert(commercialImpact.includes("buildCommercialImpactReport"), "Commercial impact helper should expose a reusable report builder");
+  assert(commercialImpact.includes("Directional: based on Findly recommendation and buy-click events"), "Commercial impact helper should disclose assisted-value confidence boundaries");
+  assert(commercialImpact.includes("influencedRevenue"), "Commercial impact helper should calculate assisted product value");
+  assert(commercialImpact.includes("unclickedRecommendedValue"), "Commercial impact helper should calculate unclicked recommendation value");
+  assert(commercialImpact.includes("demandCoverageRate"), "Commercial impact helper should calculate catalog demand coverage");
+}
+
 function assertSemanticSearchWorkflow() {
   const route = readFileSync("app/api/search/route.ts", "utf8");
   const publicRoute = readFileSync("app/api/public/search/[id]/route.ts", "utf8");
@@ -474,6 +488,9 @@ async function assertDeterministicLogic() {
     .replace('from "./discovery-gaps";', 'from "./discovery-gaps.js";')
     .replace('from "./insights";', 'from "./insights.js";')
     .replace('from "./recommendation-qa";', 'from "./recommendation-qa.js";'));
+  const compiledCommercialImpact = `${compileDir}/lib/commercial-impact.js`;
+  writeFileSync(compiledCommercialImpact, readFileSync(compiledCommercialImpact, "utf8")
+    .replace('from "./analytics";', 'from "./analytics.js";'));
 
   const demo = await import(pathToFileURL(`${compileDir}/lib/demo-data.js`));
   const utils = await import(pathToFileURL(`${compileDir}/lib/utils.js`));
@@ -509,6 +526,7 @@ async function assertDeterministicLogic() {
   const dashboardCommandCenter = await import(pathToFileURL(`${compileDir}/lib/dashboard-command-center.js`));
   const configuratorReadiness = await import(pathToFileURL(`${compileDir}/lib/configurator-readiness.js`));
   const conversionPlaybook = await import(pathToFileURL(`${compileDir}/lib/conversion-playbook.js`));
+  const commercialImpact = await import(pathToFileURL(`${compileDir}/lib/commercial-impact.js`));
 
   const answers = [
     { questionId: "q_use", question: "Where?", optionId: "o_trail", answer: "Trails & outdoors", matchType: "tag", matchValue: "trail", weight: 5 },
@@ -654,6 +672,11 @@ async function assertDeterministicLogic() {
   assert(playbook.actions.length && playbook.score >= 0 && playbook.summary.analyticsQualityScore >= 0, "Expected conversion playbook to produce prioritized merchant actions");
   const emptyPlaybook = conversionPlaybook.buildConversionPlaybook({ products: [], quizzes: [], configurators: [], events: [], settings: demo.demoSettings });
   assert(emptyPlaybook.status === "blocked" && emptyPlaybook.actions.some((action) => action.id === "generate-first-session" || action.id === "publish-experience"), "Expected empty conversion playbook to guide first launch actions");
+  const impactReport = commercialImpact.buildCommercialImpactReport(demo.demoEvents, demo.demoProducts);
+  assert(impactReport.summary.influencedRevenue > 0 && impactReport.summary.unclickedRecommendedValue >= 0, "Expected commercial impact report to estimate assisted and unclicked product value");
+  assert(impactReport.topProducts.length && impactReport.actions.length && impactReport.confidence.includes("not checkout-order attribution"), "Expected commercial impact report to expose product paths, actions and confidence boundaries");
+  const emptyImpactReport = commercialImpact.buildCommercialImpactReport([], demo.demoProducts);
+  assert(emptyImpactReport.status === "empty" && emptyImpactReport.actions.some((action) => action.id === "capture-first-impact-session"), "Expected empty commercial impact report to guide first revenue proof actions");
 
   const importPreview = catalogImport.normalizeCatalogImportRows([
     { title: "Trail Shoe", "sale price": "£1,299.50", collection: "Footwear", attributes: "Grip|Waterproof", keywords: "trail,wet", benefits: "wet-weather protection|outdoor confidence", "semantic text": "Rain-ready trail grip for weekend hikes", link: "store.example/trail" },
@@ -842,6 +865,7 @@ async function main() {
   assertSessionAnalytics();
   assertLaunchStudioWorkflow();
   assertDashboardCommandCenterWorkflow();
+  assertCommercialImpactWorkflow();
   assertSemanticSearchWorkflow();
   assertCatalogImportWorkflow();
   assertQuizReadinessWorkflow();
