@@ -3,6 +3,7 @@ import { z } from "zod";
 import { getWorkspaceIdentity } from "@/lib/api-auth";
 import { demoProducts } from "@/lib/demo-data";
 import { runSemanticProductSearch } from "@/lib/search-engine";
+import { buildSearchRecoveryReport } from "@/lib/search-recovery";
 import type { Product } from "@/lib/types";
 
 const searchSchema = z.object({
@@ -25,7 +26,8 @@ export async function POST(request: Request) {
       products = (data || []) as Product[];
     }
 
-    return NextResponse.json(runSemanticProductSearch({ query: parsed.data.query, products, limit: parsed.data.limit || 6 }));
+    const report = runSemanticProductSearch({ query: parsed.data.query, products, limit: parsed.data.limit || 6 });
+    return NextResponse.json({ ...report, recovery: buildSearchRecoveryReport(report) });
   } catch (error) {
     console.error("Search failed", error);
     return NextResponse.json({ error: "Could not run product search." }, { status: 500 });

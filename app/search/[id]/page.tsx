@@ -8,6 +8,7 @@ import { buildPublicExperienceCopy, normalizeWidgetSettings } from "@/lib/public
 import { getSessionMetadata } from "@/lib/session";
 import type { ProductSearchReport } from "@/lib/search-engine";
 import { runSemanticProductSearch } from "@/lib/search-engine";
+import { buildSearchRecoveryReport, type SearchRecoveryReport } from "@/lib/search-recovery";
 import { useStore } from "@/lib/store";
 import type { Product, Quiz, WidgetSettings } from "@/lib/types";
 import { formatCurrency } from "@/lib/utils";
@@ -20,6 +21,7 @@ type SearchData = {
 };
 
 type SearchEventType = "widget_view" | "quiz_start" | "product_recommended" | "buy_click";
+type SearchReportWithRecovery = ProductSearchReport & { recovery?: SearchRecoveryReport };
 
 const starterQueries = [
   "durable everyday option under £100",
@@ -27,8 +29,12 @@ const starterQueries = [
   "premium gift-ready choice",
 ];
 
-function emptyReport(query: string, products: Product[] = []): ProductSearchReport {
-  return runSemanticProductSearch({ query, products, limit: 6 });
+function withRecovery(report: ProductSearchReport): SearchReportWithRecovery {
+  return { ...report, recovery: buildSearchRecoveryReport(report) };
+}
+
+function emptyReport(query: string, products: Product[] = []): SearchReportWithRecovery {
+  return withRecovery(runSemanticProductSearch({ query, products, limit: 6 }));
 }
 
 export default function PublicSearchPage({ params }: { params: Promise<{ id: string }> }) {
@@ -36,7 +42,7 @@ export default function PublicSearchPage({ params }: { params: Promise<{ id: str
   const store = useStore();
   const [data, setData] = useState<SearchData | null>(null);
   const [query, setQuery] = useState(starterQueries[0]);
-  const [report, setReport] = useState<ProductSearchReport>(() => emptyReport(starterQueries[0]));
+  const [report, setReport] = useState<SearchReportWithRecovery>(() => emptyReport(starterQueries[0]));
   const [loading, setLoading] = useState(true);
   const [searching, setSearching] = useState(false);
   const [error, setError] = useState("");
@@ -49,7 +55,7 @@ export default function PublicSearchPage({ params }: { params: Promise<{ id: str
     const localData = { experience: { id: localQuiz.id, name: localQuiz.name, slug: localQuiz.slug }, products: store.products, settings: store.settings, catalog: { active_products: store.products.filter((product) => product.active).length } };
     if (store.mode === "demo" || localQuiz.id === id || localQuiz.slug === id) {
       setData({ ...localData, settings: normalizeWidgetSettings(localData.settings) });
-      setReport(runSemanticProductSearch({ query: starterQueries[0], products: store.products, limit: 6 }));
+      setReport(withRecovery(runSemanticProductSearch({ query: starterQueries[0], products: store.products, limit: 6 })));
       setLoading(false);
       return;
     }
@@ -75,7 +81,7 @@ export default function PublicSearchPage({ params }: { params: Promise<{ id: str
     setSearching(true);
     try {
       const nextReport = store.mode === "demo" && data.products
-        ? runSemanticProductSearch({ query: nextQuery, products: data.products, limit: 6 })
+        ? withRecovery(runSemanticProductSearch({ query: nextQuery, products: data.products, limit: 6 }))
         : await fetch(`/api/public/search/${encodeURIComponent(data.experience.slug || data.experience.id)}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -83,10 +89,11 @@ export default function PublicSearchPage({ params }: { params: Promise<{ id: str
         }).then(async (response) => {
           const payload = await response.json();
           if (!response.ok) throw new Error(payload.error || "Search failed.");
-          return payload as ProductSearchReport;
+          return payload as SearchReportWithRecovery;
         });
       setReport(nextReport);
-      await track("quiz_start", undefined, { search_action: "search_submit", query: nextReport.query, terms: nextReport.intent.terms, max_budget: nextReport.intent.maxBudget, result_count: nextReport.results.length, explanation_source: nextReport.explanationSource || "deterministic" });
+      const recovery = nextReport.recovery || buildSearchRecoveryReport(nextReport);
+      await track("quiz_start", undefined, { search_action: "search_submit", query: nextReport.query, terms: nextReport.intent.terms, max_budget: nextReport.intent.maxBudget, result_count: nextReport.results.length, explanation_source: nextReport.explanationSource || "deterministic", recovery_status: recovery.status, recovery_primary_action: recovery.primaryAction });
       await Promise.all(nextReport.results.slice(0, 3).map((result, index) => track("product_recommended", result.product.id, { query: nextReport.query, rank: index + 1, score: result.score, confidence: result.confidence, matched_signals: result.matchedSignals.map((signal) => signal.term), explanation_source: nextReport.explanationSource || "deterministic", product_name: result.product.name })));
     } catch (err) {
       setSearchError(err instanceof Error ? err.message : "Search failed.");
@@ -101,6 +108,7 @@ export default function PublicSearchPage({ params }: { params: Promise<{ id: str
   const topResult = report.results[0];
   const maxScore = Math.max(1, ...report.results.map((result) => result.score));
   const suggestions = useMemo(() => report.suggestions.length ? report.suggestions : starterQueries, [report.suggestions]);
+  const recovery = report.recovery || buildSearchRecoveryReport(report);
 
   if (loading) return <main className="grid min-h-screen place-items-center bg-[#e8eadf]"><div className="text-center"><LoaderCircle className="mx-auto animate-spin text-moss" /><p className="mt-3 text-xs font-bold text-black/40">Preparing product search…</p></div></main>;
   if (error || !data) return <main className="grid min-h-screen place-items-center bg-canvas p-6 text-center"><div><span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-black/5"><Search size={21} /></span><h1 className="display mt-5 text-4xl">This search experience isn’t available.</h1><p className="mt-2 text-sm text-black/45">{error || "It may be unpublished or no longer exist."}</p><Link href="/" className="btn-primary mt-5">Visit Findly</Link></div></main>;
@@ -153,6 +161,33 @@ export default function PublicSearchPage({ params }: { params: Promise<{ id: str
             {report.intent.coverage.slice(0, 10).map((item) => <span key={item.term} className={`rounded-full px-2.5 py-1 text-[9px] font-extrabold ${item.status === "covered" ? "bg-lime/35 text-moss" : item.status === "thin" ? "bg-amber-50 text-amber-700" : "bg-canvas text-black/35"}`}>{item.term}</span>)}
           </div>
 
+          {recovery.status !== "healthy" && <section className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-[10px] font-extrabold uppercase tracking-wider text-amber-700">{recovery.status === "no-results" ? "No exact eligible match" : "Refine this search"}</p>
+                <h3 className="mt-1 text-sm font-extrabold">{recovery.primaryAction}</h3>
+                <p className="mt-1 text-[10px] leading-4 text-black/45">{recovery.summary}</p>
+              </div>
+              <button onClick={() => submitSearch(recovery.suggestions[0]?.query || report.suggestions[0] || starterQueries[0])} className="shrink-0 rounded-full bg-ink px-3 py-2 text-[9px] font-extrabold text-white">Try fix</button>
+            </div>
+            <div className="mt-3 grid gap-2 lg:grid-cols-2">
+              {recovery.suggestions.slice(0, 4).map((suggestion) => <button key={suggestion.id} onClick={() => suggestion.query && submitSearch(suggestion.query)} className="rounded-xl bg-white px-3 py-2 text-left">
+                <p className="text-[10px] font-extrabold">{suggestion.title}</p>
+                <p className="mt-1 text-[9px] leading-4 text-black/40">{suggestion.detail}</p>
+              </button>)}
+            </div>
+            {recovery.nearMisses.length ? <div className="mt-3 rounded-xl bg-white p-3">
+              <p className="text-[10px] font-extrabold text-black/55">Closest catalog options</p>
+              <div className="mt-2 grid gap-2 lg:grid-cols-3">
+                {recovery.nearMisses.map((item) => <div key={item.productId} className="rounded-xl border border-black/[0.06] p-2">
+                  <p className="truncate text-[10px] font-extrabold">{item.productName}</p>
+                  <p className="mt-1 text-[8px] font-bold text-black/35">{item.category} · {formatCurrency(item.price)}</p>
+                  <p className="mt-1 line-clamp-2 text-[8px] leading-3 text-black/35">{item.reason}</p>
+                </div>)}
+              </div>
+            </div> : null}
+          </section>}
+
           <div className="mt-6 space-y-3">
             {report.results.map((result, index) => <article key={result.product.id} className="grid gap-4 rounded-2xl border border-black/[0.07] bg-white p-4 shadow-sm sm:grid-cols-[120px_1fr]">
               <div className="relative h-28 overflow-hidden rounded-2xl bg-canvas">
@@ -179,8 +214,8 @@ export default function PublicSearchPage({ params }: { params: Promise<{ id: str
             {!report.results.length && <div className="grid min-h-[280px] place-items-center rounded-2xl border border-dashed border-black/10 bg-canvas/60 p-10 text-center">
               <div>
                 <Search className="mx-auto text-black/25" />
-                <h3 className="mt-4 text-sm font-extrabold">Start with a search</h3>
-                <p className="mx-auto mt-2 max-w-sm text-xs leading-5 text-black/40">Try a product use case, must-have feature, category or budget.</p>
+                <h3 className="mt-4 text-sm font-extrabold">{report.query ? "No eligible products for this search" : "Start with a search"}</h3>
+                <p className="mx-auto mt-2 max-w-sm text-xs leading-5 text-black/40">{report.query ? "Use the recovery suggestions above to broaden the query or relax constraints." : "Try a product use case, must-have feature, category or budget."}</p>
               </div>
             </div>}
           </div>

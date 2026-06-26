@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { ArrowRight, Boxes, BrainCircuit, ExternalLink, Gauge, Search, ShieldCheck, Sparkles, WandSparkles } from "lucide-react";
 import { LoadingState } from "@/components/loading-state";
 import { runSemanticProductSearch } from "@/lib/search-engine";
+import { buildSearchRecoveryReport } from "@/lib/search-recovery";
 import { buildSearchTuningReport } from "@/lib/search-tuning";
 import { useStore } from "@/lib/store";
 import { formatCurrency } from "@/lib/utils";
@@ -20,6 +21,7 @@ export default function SearchLabPage() {
   const { ready, products } = useStore();
   const [query, setQuery] = useState(starterQueries[0]);
   const report = useMemo(() => runSemanticProductSearch({ query, products, limit: 6 }), [query, products]);
+  const recovery = useMemo(() => buildSearchRecoveryReport(report), [report]);
   const tuning = useMemo(() => buildSearchTuningReport(report), [report]);
   const winner = report.results[0];
 
@@ -99,6 +101,38 @@ export default function SearchLabPage() {
 
     <div className="mt-5 grid gap-5 xl:grid-cols-[1fr_360px]">
       <main className="space-y-3">
+        {recovery.status !== "healthy" && <section className="rounded-[26px] border border-amber-200 bg-amber-50 p-5">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="eyebrow text-amber-700">Search recovery</p>
+              <h2 className="mt-2 text-xl font-extrabold tracking-[-.04em]">{recovery.primaryAction}</h2>
+              <p className="mt-2 text-xs leading-5 text-black/45">{recovery.summary}</p>
+            </div>
+            <span className={`shrink-0 rounded-full px-3 py-1.5 text-[9px] font-extrabold uppercase ${recovery.status === "no-results" ? "bg-red-100 text-red-700" : "bg-white text-amber-700"}`}>{recovery.status}</span>
+          </div>
+          <div className="mt-4 grid gap-3 lg:grid-cols-2">
+            {recovery.suggestions.map((suggestion) => (
+              <button key={suggestion.id} onClick={() => suggestion.query && setQuery(suggestion.query)} className="rounded-2xl bg-white p-3 text-left">
+                <p className="text-xs font-extrabold">{suggestion.title}</p>
+                <p className="mt-1 text-[10px] leading-4 text-black/40">{suggestion.detail}</p>
+                {suggestion.query && <p className="mt-2 text-[9px] font-extrabold text-moss">Try: {suggestion.query}</p>}
+              </button>
+            ))}
+          </div>
+          {recovery.nearMisses.length ? <div className="mt-4 rounded-2xl bg-white p-4">
+            <p className="text-xs font-extrabold">Closest catalog options</p>
+            <div className="mt-3 grid gap-2 lg:grid-cols-3">
+              {recovery.nearMisses.map((item) => (
+                <div key={item.productId} className="rounded-xl border border-black/[0.06] p-3">
+                  <p className="truncate text-[10px] font-extrabold">{item.productName}</p>
+                  <p className="mt-1 text-[8px] font-bold text-black/35">{item.category} · {formatCurrency(item.price)}</p>
+                  <p className="mt-1 line-clamp-2 text-[8px] leading-3 text-black/40">{item.reason}</p>
+                </div>
+              ))}
+            </div>
+          </div> : null}
+        </section>}
+
         {report.results.map((result, index) => <article key={result.product.id} className="grid gap-5 rounded-[26px] border border-black/[0.07] bg-white p-5 shadow-sm xl:grid-cols-[280px_1fr]">
           <div className="flex items-start gap-4">
             <div className="grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-2xl bg-canvas">

@@ -4,6 +4,7 @@ import { normalizeWidgetSettings } from "@/lib/public-experience";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { explainSearchReport } from "@/lib/search-explanations";
 import { runSemanticProductSearch } from "@/lib/search-engine";
+import { buildSearchRecoveryReport } from "@/lib/search-recovery";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Product, Quiz } from "@/lib/types";
 
@@ -74,6 +75,7 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
 
     return NextResponse.json({
       ...report,
+      recovery: buildSearchRecoveryReport(report),
       experience: { id: quiz.id, name: quiz.name, slug: quiz.slug },
       retrieval: { source: "catalog_scan", candidate_count: products?.length || 0, explanation_source: report.explanationSource || "fallback" },
     });

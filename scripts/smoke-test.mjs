@@ -234,6 +234,7 @@ function assertSemanticSearchWorkflow() {
   const page = readFileSync("app/dashboard/search/page.tsx", "utf8");
   const publicPage = readFileSync("app/search/[id]/page.tsx", "utf8");
   const explanations = readFileSync("lib/search-explanations.ts", "utf8");
+  const searchRecovery = readFileSync("lib/search-recovery.ts", "utf8");
   const benefits = readFileSync("lib/catalog-benefits.ts", "utf8");
   const advisor = readFileSync("lib/assistant-engine.ts", "utf8");
   const settings = readFileSync("app/dashboard/settings/page.tsx", "utf8");
@@ -245,12 +246,16 @@ function assertSemanticSearchWorkflow() {
   const tuning = readFileSync("lib/search-tuning.ts", "utf8");
   assert(route.includes("getWorkspaceIdentity"), "Search service should require an authenticated workspace");
   assert(route.includes("runSemanticProductSearch"), "Search service should use the shared semantic search engine");
+  assert(route.includes("buildSearchRecoveryReport"), "Search service should return deterministic search recovery guidance");
   assert(publicRoute.includes("eq(\"published\", true)"), "Published search route should validate published finder context");
   assert(publicRoute.includes("runSemanticProductSearch"), "Published search route should use the shared semantic search engine");
   assert(publicRoute.includes("explainSearchReport"), "Published search route should generate grounded explanations after ranking");
+  assert(publicRoute.includes("buildSearchRecoveryReport"), "Published search route should return deterministic search recovery guidance");
   assert(publicRoute.includes("explanation_source"), "Published search route should expose explanation source metadata");
   assert(explanations.includes("already selected deterministically"), "Search explanation prompt should keep AI out of product selection");
   assert(page.includes("runSemanticProductSearch"), "Search Lab should run the shared semantic search engine");
+  assert(page.includes("buildSearchRecoveryReport"), "Search Lab should expose deterministic search recovery");
+  assert(page.includes("Search recovery"), "Search Lab should show a recovery/debug panel");
   assert(page.includes("Catalog term coverage"), "Search Lab should expose deterministic catalog coverage for parsed terms");
   assert(page.includes("buildSearchTuningReport"), "Search Lab should turn term coverage into deterministic tuning guidance");
   assert(page.includes("Search tuning plan"), "Search Lab should show a merchant-facing search tuning plan");
@@ -258,6 +263,8 @@ function assertSemanticSearchWorkflow() {
   assert(publicPage.includes("/api/public/search/"), "Public search page should call the published search runtime outside demo mode");
   assert(publicPage.includes("experience_type: \"search\""), "Public search analytics should identify search experiences");
   assert(publicPage.includes("explanation_source"), "Public search analytics should record explanation source");
+  assert(publicPage.includes("recovery_status"), "Public search analytics should record recovery status");
+  assert(publicPage.includes("Closest catalog options"), "Public search should show near-miss options when exact matching is weak or blocked");
   assert(publicPage.includes("report.intent.coverage"), "Public search should render term coverage chips from the shared search report");
   assert(settings.includes("<option value=\"search\">Semantic search</option>"), "Settings should expose semantic search as an embeddable experience");
   assert(settings.includes("WidgetEmbedExperience"), "Settings snippet should support search through the generic experience field");
@@ -272,6 +279,9 @@ function assertSemanticSearchWorkflow() {
   assert(engine.includes("extractSearchBudget"), "Search engine should parse budget constraints");
   assert(engine.includes("buildTermCoverage"), "Search engine should diagnose active-catalog coverage for each parsed term");
   assert(engine.includes("SearchTermCoverage"), "Search engine should expose term coverage in the shared search report type");
+  assert(engine.includes("nearMisses"), "Search engine should expose blocked near misses for recovery flows");
+  assert(searchRecovery.includes("buildSearchRecoveryReport"), "Search recovery helper should expose deterministic recovery guidance");
+  assert(searchRecovery.includes("relax-budget"), "Search recovery should suggest budget relaxation when constraints block products");
   assert(tuning.includes("buildSearchTuningReport"), "Search tuning helper should expose deterministic merchant recommendations");
   assert(tuning.includes("missingTerms"), "Search tuning helper should prioritize missing catalog language");
 }
@@ -417,6 +427,7 @@ async function assertDeterministicLogic() {
   const recommendationTrace = await import(pathToFileURL(`${compileDir}/lib/recommendation-trace.js`));
   const ruleCoverage = await import(pathToFileURL(`${compileDir}/lib/rule-coverage.js`));
   const searchEngine = await import(pathToFileURL(`${compileDir}/lib/search-engine.js`));
+  const searchRecovery = await import(pathToFileURL(`${compileDir}/lib/search-recovery.js`));
   const searchTuning = await import(pathToFileURL(`${compileDir}/lib/search-tuning.js`));
   const publicExperience = await import(pathToFileURL(`${compileDir}/lib/public-experience.js`));
   const widgetSnippet = await import(pathToFileURL(`${compileDir}/lib/widget-snippet.js`));
@@ -589,6 +600,10 @@ async function assertDeterministicLogic() {
   assert(citySearch.results[0]?.product.id === "prod_city", `Expected semantic search to rank Aero City Knit first, got ${citySearch.results[0]?.product.name || "nothing"}`);
   const budgetSearch = searchEngine.runSemanticProductSearch({ query: "running shoes under £100", products: demo.demoProducts, limit: 4 });
   assert(budgetSearch.blockedProducts >= 2 && budgetSearch.results.every((result) => result.product.price <= 100), "Expected semantic search budget constraints to block over-budget products");
+  const impossibleBudgetSearch = searchEngine.runSemanticProductSearch({ query: "trail shoes under £10", products: demo.demoProducts, limit: 3 });
+  const searchRecoveryReport = searchRecovery.buildSearchRecoveryReport(impossibleBudgetSearch);
+  assert(impossibleBudgetSearch.results.length === 0 && impossibleBudgetSearch.nearMisses.length > 0, "Expected impossible budget search to return blocked near misses");
+  assert(searchRecoveryReport.status === "no-results" && searchRecoveryReport.budgetBlocked && searchRecoveryReport.suggestions.some((suggestion) => suggestion.id === "relax-budget"), "Expected search recovery to suggest relaxing impossible budgets");
   const uncoveredSearch = searchEngine.runSemanticProductSearch({ query: "orthopedic office shoe", products: demo.demoProducts, limit: 3 });
   assert(uncoveredSearch.intent.coverage.some((item) => item.status === "missing"), "Expected semantic search coverage to flag missing catalog terms");
   const tuningReport = searchTuning.buildSearchTuningReport(uncoveredSearch);

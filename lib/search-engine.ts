@@ -39,6 +39,7 @@ export type ProductSearchReport = {
   blockedProducts: number;
   suggestions: string[];
   results: ProductSearchResult[];
+  nearMisses: ProductSearchResult[];
 };
 
 const synonyms: Record<string, string[]> = {
@@ -261,6 +262,9 @@ export function runSemanticProductSearch({ query, products, limit = 6 }: { query
   const eligible = scored.filter((result) => result.eligible);
   const meaningfulResults = eligible.filter((result) => result.score > 0 || (!trimmedQuery && result.product.active));
   const results = (meaningfulResults.length ? meaningfulResults : eligible).slice(0, limit);
+  const nearMisses = scored
+    .filter((result) => !result.eligible && (result.score > 0 || maxBudget !== null))
+    .slice(0, 4);
 
   return {
     query: trimmedQuery,
@@ -271,5 +275,6 @@ export function runSemanticProductSearch({ query, products, limit = 6 }: { query
     blockedProducts: scored.length - eligible.length,
     suggestions: buildSuggestions(products),
     results,
+    nearMisses,
   };
 }
