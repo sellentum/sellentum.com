@@ -117,6 +117,20 @@ function assertPublicBrandingRuntime() {
   assert(!search.includes("waterproof hiking shoes"), "Search starter prompts should not be tied to the demo shoe catalog");
 }
 
+function assertExplanationRuntimeSafety() {
+  const route = readFileSync("app/api/explain/route.ts", "utf8");
+  const finderEngine = readFileSync("lib/finder-engine.ts", "utf8");
+  const explanations = readFileSync("lib/recommendation-explanations.ts", "utf8");
+  assert(route.includes("checkRateLimit(`explain:"), "Standalone explanation API should rate-limit public OpenAI/fallback requests");
+  assert(route.includes("explainRecommendation"), "Standalone explanation API should use the shared recommendation explanation helper");
+  assert(route.includes("fallbackRecommendationExplanation"), "Standalone explanation API should fall back to deterministic explanation copy after failures");
+  assert(!route.includes("new OpenAI"), "Standalone explanation API should not duplicate direct OpenAI client logic");
+  assert(finderEngine.includes("explainRecommendation"), "Finder engine should use the shared recommendation explanation helper");
+  assert(finderEngine.includes("fallbackRecommendationExplanation"), "Finder engine should use shared deterministic fallback explanations");
+  assert(explanations.includes("Use only the supplied facts"), "Recommendation explanation helper should keep AI explanations grounded to supplied facts");
+  assert(explanations.includes("fallbackRecommendationExplanation"), "Recommendation explanation helper should expose deterministic fallback copy");
+}
+
 function assertSessionAnalytics() {
   const session = readFileSync("lib/session.ts", "utf8");
   const analytics = readFileSync("app/dashboard/analytics/page.tsx", "utf8");
@@ -587,6 +601,7 @@ async function main() {
   assertPublishedFinderRuntime();
   assertPublishedConfiguratorRuntime();
   assertPublicBrandingRuntime();
+  assertExplanationRuntimeSafety();
   assertSessionAnalytics();
   assertLaunchStudioWorkflow();
   assertSemanticSearchWorkflow();
