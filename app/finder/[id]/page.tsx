@@ -7,8 +7,9 @@ import { useStore } from "@/lib/store";
 import { getSessionMetadata } from "@/lib/session";
 import { getNextFinderQuestionIndex } from "@/lib/finder-flow";
 import { buildPublicExperienceCopy, normalizeWidgetSettings } from "@/lib/public-experience";
+import { buildRecommendationRecoveryReport, type RecommendationRecovery } from "@/lib/recommendation-recovery";
 import type { FinderAnswer, Product, Quiz, Recommendation, WidgetSettings } from "@/lib/types";
-import { compareFinderRecommendations, formatCurrency, recommendProducts } from "@/lib/utils";
+import { auditProductMatches, compareFinderRecommendations, formatCurrency } from "@/lib/utils";
 
 type FinderData = { quiz: Quiz; products: Product[]; settings: WidgetSettings };
 type FinderEventType = "widget_view" | "quiz_start" | "quiz_complete" | "product_recommended" | "buy_click";
@@ -36,6 +37,7 @@ export default function FinderPage({ params }: { params: Promise<{ id: string }>
   const [visitedStepIndexes, setVisitedStepIndexes] = useState<number[]>([]);
   const [answers, setAnswers] = useState<FinderAnswer[]>([]);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
+  const [recovery, setRecovery] = useState<RecommendationRecovery | null>(null);
   const [recommending, setRecommending] = useState(false);
   const viewed = useRef(false);
 
@@ -58,6 +60,7 @@ export default function FinderPage({ params }: { params: Promise<{ id: string }>
   function start() {
     if (!data) return;
     setRecommendationError("");
+    setRecovery(null);
     setStep(0);
     setVisitedStepIndexes([0]);
     track("quiz_start", undefined, { question_count: data.quiz.questions.length, flow_type: "conditional" });
@@ -74,6 +77,7 @@ export default function FinderPage({ params }: { params: Promise<{ id: string }>
     const nextStep = getNextFinderQuestionIndex(data.quiz, step, option, currentPath);
     const questionPath = currentPath.map((index) => data.quiz.questions[index]?.id).filter(Boolean);
     setRecommendationError("");
+    setRecovery(null);
     setAnswers(nextAnswers);
     setVisitedStepIndexes(currentPath);
     if (nextStep >= 0) {
@@ -88,9 +92,12 @@ export default function FinderPage({ params }: { params: Promise<{ id: string }>
     setRecommending(true);
 
     if (store.mode === "demo") {
-      const matches = recommendProducts(data.products, nextAnswers, 3, { overrides: data.quiz.recommendation_overrides || [] });
+      const audits = auditProductMatches(data.products, nextAnswers, { overrides: data.quiz.recommendation_overrides || [] });
+      const matches = audits.filter((audit) => audit.eligible).slice(0, 3).map(({ product, score, matchedReasons }) => ({ product, score, matchedReasons }));
+      const nextRecovery = buildRecommendationRecoveryReport({ products: data.products, answers: nextAnswers, audits, recommendedCount: matches.length });
       const answerMetadata = serializeAnswers(nextAnswers);
-      setRecommendations(matches); track("quiz_complete", undefined, { answers: answerMetadata, answer_summary: nextAnswers.map((answer) => answer.answer), question_path: questionPath, result_count: matches.length });
+      setRecovery(nextRecovery);
+      setRecommendations(matches); track("quiz_complete", undefined, { answers: answerMetadata, answer_summary: nextAnswers.map((answer) => answer.answer), question_path: questionPath, result_count: matches.length, recovery_status: nextRecovery.status, recovery_primary_action: nextRecovery.primaryAction });
       matches.forEach((match, index) => track("product_recommended", match.product.id, { answers: answerMetadata, question_path: questionPath, rank: index + 1, score: match.score, matched_reasons: match.matchedReasons, product_name: match.product.name }));
       const explained = await Promise.all(matches.map(async (match) => { try { const response = await fetch("/api/explain", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ product: { name: match.product.name, description: match.product.description, category: match.product.category, features: match.product.features, tags: match.product.tags }, answers: nextAnswers.map(({ question: q, answer }) => ({ question: q, answer })), matchedReasons: match.matchedReasons }) }); const json = await response.json(); return { ...match, explanation: json.explanation }; } catch { return match; } }));
       setRecommendations(explained);
@@ -108,18 +115,21 @@ export default function FinderPage({ params }: { params: Promise<{ id: string }>
       if (!response.ok) throw new Error(payload.error || "The finder could not generate recommendations.");
       const serverAnswers = (payload.answers || nextAnswers) as FinderAnswer[];
       const matches = (payload.recommendations || []) as Recommendation[];
+      const nextRecovery = (payload.recovery || null) as RecommendationRecovery | null;
       const answerMetadata = serializeAnswers(serverAnswers);
+      setRecovery(nextRecovery);
       setRecommendations(matches);
-      track("quiz_complete", undefined, { answers: answerMetadata, answer_summary: serverAnswers.map((answer) => answer.answer), question_path: payload.retrieval?.question_path || questionPath, result_count: matches.length });
+      track("quiz_complete", undefined, { answers: answerMetadata, answer_summary: serverAnswers.map((answer) => answer.answer), question_path: payload.retrieval?.question_path || questionPath, result_count: matches.length, recovery_status: nextRecovery?.status, recovery_primary_action: nextRecovery?.primaryAction });
       matches.forEach((match, index) => track("product_recommended", match.product.id, { answers: answerMetadata, question_path: payload.retrieval?.question_path || questionPath, rank: index + 1, score: match.score, matched_reasons: match.matchedReasons, product_name: match.product.name }));
     } catch (err) {
       setRecommendationError(err instanceof Error ? err.message : "The finder could not generate recommendations.");
+      setRecovery(null);
       track("quiz_complete", undefined, { answers: serializeAnswers(nextAnswers), answer_summary: nextAnswers.map((answer) => answer.answer), question_path: questionPath, result_count: 0, error: "recommendation_failed" });
     } finally {
       setRecommending(false);
     }
   }
-  function restart() { setStep(-1); setVisitedStepIndexes([]); setAnswers([]); setRecommendations([]); setRecommendationError(""); setRecommending(false); viewed.current = true; }
+  function restart() { setStep(-1); setVisitedStepIndexes([]); setAnswers([]); setRecommendations([]); setRecovery(null); setRecommendationError(""); setRecommending(false); viewed.current = true; }
   const settings = useMemo(() => normalizeWidgetSettings(data?.settings), [data?.settings]);
   const finderCopy = useMemo(() => buildPublicExperienceCopy("finder", settings, { title: data?.quiz.welcome_title, description: data?.quiz.welcome_message }), [settings, data?.quiz.welcome_title, data?.quiz.welcome_message]);
   const accent = finderCopy.accentColor;
@@ -241,11 +251,52 @@ export default function FinderPage({ params }: { params: Promise<{ id: string }>
                     </table>
                   </section>
                 )}
+
+                {recovery?.status === "thin" && recovery.suggestions.length > 0 && (
+                  <section className="mt-6 rounded-2xl border border-amber-100 bg-amber-50 p-5 text-left">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <p className="eyebrow text-amber-700">Want more options?</p>
+                        <h2 className="mt-1 text-sm font-extrabold text-amber-950">{recovery.primaryAction}</h2>
+                        <p className="mt-1 text-xs leading-5 text-amber-900/65">{recovery.summary}</p>
+                      </div>
+                      <button onClick={restart} className="shrink-0 rounded-full bg-white px-3 py-2 text-[10px] font-extrabold text-amber-800">Adjust answers</button>
+                    </div>
+                    <div className="mt-3 grid gap-2 md:grid-cols-2">
+                      {recovery.suggestions.slice(0, 2).map((suggestion) => <div key={suggestion.id} className="rounded-xl bg-white/80 p-3"><p className="text-[10px] font-extrabold text-amber-950">{suggestion.title}</p><p className="mt-1 text-[9px] leading-4 text-amber-900/55">{suggestion.detail}</p></div>)}
+                    </div>
+                  </section>
+                )}
               </>
             ) : (
-              <div className="mx-auto mt-10 max-w-lg rounded-2xl border border-black/10 p-8 text-center">
+              <div className="mx-auto mt-10 max-w-2xl rounded-2xl border border-black/10 p-8 text-center">
                 <h2 className="text-sm font-extrabold">{recommendationError ? "We couldn’t generate matches" : "No exact matches yet"}</h2>
-                <p className="mt-2 text-xs text-black/40">{recommendationError || "Your current budget or preferences filtered out every active product. Try broadening an answer."}</p>
+                <p className="mx-auto mt-2 max-w-lg text-xs leading-5 text-black/40">{recommendationError || recovery?.summary || "Your current budget or preferences filtered out every active product. Try broadening an answer."}</p>
+                {recovery && !recommendationError && (
+                  <div className="mt-6 text-left">
+                    {recovery.suggestions.length > 0 && (
+                      <div className="grid gap-2 md:grid-cols-2">
+                        {recovery.suggestions.map((suggestion) => <div key={suggestion.id} className="rounded-2xl bg-lime/15 p-4"><p className="text-[10px] font-extrabold text-moss">{suggestion.title}</p><p className="mt-1 text-[9px] leading-4 text-black/45">{suggestion.detail}</p></div>)}
+                      </div>
+                    )}
+                    {recovery.blockers.length > 0 && (
+                      <div className="mt-4 rounded-2xl bg-canvas p-4">
+                        <p className="text-[9px] font-extrabold uppercase tracking-wider text-black/35">What blocked the match</p>
+                        <div className="mt-2 flex flex-wrap gap-1.5">
+                          {recovery.blockers.slice(0, 3).map((blocker) => <span key={blocker.reason} className="rounded-full bg-white px-2.5 py-1 text-[9px] font-bold text-black/45">{blocker.reason} · {blocker.count}</span>)}
+                        </div>
+                      </div>
+                    )}
+                    {recovery.closestProducts.length > 0 && (
+                      <div className="mt-4 rounded-2xl border border-black/[0.06] p-4">
+                        <p className="text-[9px] font-extrabold uppercase tracking-wider text-black/35">Closest catalog options</p>
+                        <div className="mt-3 grid gap-2">
+                          {recovery.closestProducts.slice(0, 3).map((product) => <div key={product.productId} className="flex items-center justify-between gap-3 rounded-xl bg-canvas px-3 py-2.5"><span><span className="block text-[10px] font-extrabold">{product.name}</span><span className="mt-0.5 block text-[8px] text-black/35">{product.blockedReason || product.strongestSignals.join(", ") || product.category}</span></span><span className="shrink-0 text-[10px] font-extrabold text-black/45">{formatCurrency(product.price)}</span></div>)}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
 

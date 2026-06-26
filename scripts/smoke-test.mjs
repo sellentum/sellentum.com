@@ -57,6 +57,7 @@ function assertPublishedFinderRuntime() {
   const readiness = readFileSync("lib/quiz-readiness.ts", "utf8");
   const flow = readFileSync("lib/finder-flow.ts", "utf8");
   const trace = readFileSync("lib/recommendation-trace.ts", "utf8");
+  const recovery = readFileSync("lib/recommendation-recovery.ts", "utf8");
   const schema = readFileSync("supabase/schema.sql", "utf8");
   assert(route.includes("runFinderRecommendations"), "Published finder route should use the server-side finder engine");
   assert(route.includes("resolveFinderAnswerPath"), "Published finder route should reconstruct the valid branched answer path from stored option rules");
@@ -67,7 +68,10 @@ function assertPublishedFinderRuntime() {
   assert(route.includes("buildFinderBuyerProfile"), "Published finder POST should build a semantic buyer profile from selected answers");
   assert(route.includes("semanticScoresByProductId"), "Published finder recommendations should receive semantic scores as deterministic ranking signals");
   assert(route.includes("question_path"), "Published finder recommendations should report the validated branched question path");
+  assert(route.includes("recovery"), "Published finder recommendations should return deterministic no-result recovery metadata");
   assert(page.includes("/api/public/finder/"), "Finder page should call the published finder runtime outside demo mode");
+  assert(page.includes("setRecovery"), "Finder page should render deterministic no-result recovery guidance");
+  assert(page.includes("Closest catalog options"), "Finder page should show closest catalog options when exact matches fail");
   assert(page.includes("getNextFinderQuestionIndex"), "Finder page should follow conditional answer routing in the customer experience");
   assert(page.includes("visitedStepIndexes"), "Finder page should keep back navigation aligned to the shopper's actual branch path");
   assert(page.includes("compareFinderRecommendations"), "Finder page should generate deterministic comparison rows for recommended products");
@@ -80,6 +84,8 @@ function assertPublishedFinderRuntime() {
   assert(lab.includes("Recommendation decision trace"), "Recommendation lab should show a deterministic recommendation trace panel");
   assert(trace.includes("buildRecommendationTraceReport"), "Recommendation trace helper should expose a reusable deterministic report builder");
   assert(trace.includes("tuningActions"), "Recommendation trace should include merchant tuning actions");
+  assert(recovery.includes("buildRecommendationRecoveryReport"), "Recommendation recovery helper should expose deterministic no-result recovery");
+  assert(recovery.includes("Above selected budget"), "Recommendation recovery should identify budget blockers");
   assert(readiness.includes("Conditional routing"), "Quiz readiness should validate conditional finder routes");
   assert(flow.includes("resolveFinderAnswerPath"), "Finder flow helper should expose deterministic answer-path resolution");
   assert(flow.includes("defaultFinderSelections"), "Finder flow helper should expose branch-aware default selections for merchant testing");
@@ -343,6 +349,10 @@ async function assertDeterministicLogic() {
   writeFileSync(compiledRecommendationQa, readFileSync(compiledRecommendationQa, "utf8")
     .replace('from "./finder-flow";', 'from "./finder-flow.js";')
     .replace('from "./utils";', 'from "./utils.js";'));
+  const compiledRecommendationRecovery = `${compileDir}/lib/recommendation-recovery.js`;
+  writeFileSync(compiledRecommendationRecovery, readFileSync(compiledRecommendationRecovery, "utf8")
+    .replace('from "./utils";', 'from "./utils.js";')
+    .replace('from "@/lib/utils";', 'from "./utils.js";'));
   const compiledSearchEngine = `${compileDir}/lib/search-engine.js`;
   writeFileSync(compiledSearchEngine, readFileSync(compiledSearchEngine, "utf8").replace('from "./catalog-benefits";', 'from "./catalog-benefits.js";'));
   const compiledExperienceLaunch = `${compileDir}/lib/experience-launch.js`;
@@ -364,6 +374,7 @@ async function assertDeterministicLogic() {
   const quizBlueprint = await import(pathToFileURL(`${compileDir}/lib/quiz-blueprint.js`));
   const quizReadiness = await import(pathToFileURL(`${compileDir}/lib/quiz-readiness.js`));
   const recommendationQa = await import(pathToFileURL(`${compileDir}/lib/recommendation-qa.js`));
+  const recommendationRecovery = await import(pathToFileURL(`${compileDir}/lib/recommendation-recovery.js`));
   const recommendationTrace = await import(pathToFileURL(`${compileDir}/lib/recommendation-trace.js`));
   const ruleCoverage = await import(pathToFileURL(`${compileDir}/lib/rule-coverage.js`));
   const searchEngine = await import(pathToFileURL(`${compileDir}/lib/search-engine.js`));
@@ -565,6 +576,13 @@ async function assertDeterministicLogic() {
   assert(qaReport.scenarios.every((scenario) => scenario.answers.length && scenario.visitedQuestions.length), "Expected recommendation QA scenarios to include answer and question paths");
   const impossibleQa = recommendationQa.buildRecommendationQaReport([demo.demoQuiz], demo.demoProducts.map((product) => ({ ...product, active: false })));
   assert(impossibleQa.blockers.length > 0 && impossibleQa.status === "fail", "Expected recommendation QA to fail when no active products can be recommended");
+  const impossibleAnswers = [
+    { questionId: "q_budget", question: "Budget?", optionId: "o_10", answer: "Under £10", matchType: "budget_max", matchValue: "10", weight: 5 },
+  ];
+  const impossibleAudits = utils.auditProductMatches(demo.demoProducts, impossibleAnswers);
+  const recoveryReport = recommendationRecovery.buildRecommendationRecoveryReport({ products: demo.demoProducts, answers: impossibleAnswers, audits: impossibleAudits, recommendedCount: 0 });
+  assert(recoveryReport.status === "no-results" && recoveryReport.blockers.some((blocker) => blocker.reason === "Above selected budget"), "Expected no-result recovery to identify budget blockers");
+  assert(recoveryReport.suggestions.some((suggestion) => suggestion.id === "relax-budget") && recoveryReport.closestProducts.length, "Expected no-result recovery to suggest widening budget and show closest catalog options");
   const trailCoverage = ruleCoverage.getAnswerOptionCoverage(demo.demoQuiz.questions[0].options[0], demo.demoProducts);
   assert(trailCoverage.status === "matched" && trailCoverage.productNames.includes("Terra Trail Runner"), "Expected tag rule coverage to identify matching active products");
   const budgetCoverage = ruleCoverage.getAnswerOptionCoverage(demo.demoQuiz.questions[2].options[0], demo.demoProducts);

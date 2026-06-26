@@ -120,7 +120,8 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
     });
 
     return NextResponse.json({
-      ...result,
+      recommendations: result.recommendations,
+      recovery: result.recovery,
       answers,
       experience: { id: quiz.id, name: quiz.name, slug: quiz.slug },
       retrieval: { source: semanticSource || "catalog_scan", buyer_profile: buyerProfile, question_path: answerPath.visitedQuestionIds },

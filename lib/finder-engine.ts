@@ -1,8 +1,9 @@
 import "server-only";
 
 import { explainRecommendation, fallbackRecommendationExplanation } from "@/lib/recommendation-explanations";
+import { buildRecommendationRecoveryReport } from "@/lib/recommendation-recovery";
 import type { FinderAnswer, Product, Recommendation, RecommendationOverride } from "@/lib/types";
-import { recommendProducts } from "@/lib/utils";
+import { auditProductMatches } from "@/lib/utils";
 
 export async function runFinderRecommendations({
   products,
@@ -19,7 +20,12 @@ export async function runFinderRecommendations({
   semanticScoresByProductId?: Record<string, number>;
   semanticSource?: "pgvector";
 }) {
-  const recommendations = recommendProducts(products, answers, limit, { overrides, semanticScoresByProductId, semanticSource });
+  const audits = auditProductMatches(products, answers, { overrides, semanticScoresByProductId, semanticSource });
+  const recommendations = audits
+    .filter((match) => match.eligible)
+    .slice(0, limit)
+    .map(({ product, score, matchedReasons }) => ({ product, score, matchedReasons }));
+  const recovery = buildRecommendationRecoveryReport({ products, answers, audits, recommendedCount: recommendations.length });
   const explained = await Promise.all(recommendations.map(async (match): Promise<Recommendation> => {
     try {
       const { explanation } = await explainRecommendation({
@@ -33,5 +39,5 @@ export async function runFinderRecommendations({
     }
   }));
 
-  return { recommendations: explained };
+  return { recommendations: explained, recovery };
 }
