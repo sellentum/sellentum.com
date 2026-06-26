@@ -430,28 +430,36 @@ function assertPreflightReadinessWorkflow() {
   const route = readFileSync("app/api/preflight/route.ts", "utf8");
   const page = readFileSync("app/dashboard/preflight/page.tsx", "utf8");
   const recommendationQa = readFileSync("lib/recommendation-qa.ts", "utf8");
+  const explanationGrounding = readFileSync("lib/explanation-grounding.ts", "utf8");
   const analyticsQuality = readFileSync("lib/analytics-quality.ts", "utf8");
   const launchReport = readFileSync("lib/launch-readiness-report.ts", "utf8");
   assert(route.includes("analyzeQuizReadiness"), "Preflight should reuse finder publish-readiness diagnostics");
   assert(route.includes("analyzeConfiguratorReadiness"), "Preflight should reuse configurator publish-readiness diagnostics");
   assert(route.includes("buildRecommendationQaReport"), "Preflight should run synthetic recommendation QA");
+  assert(route.includes("buildExplanationGroundingReport"), "Preflight should run explanation grounding QA");
   assert(route.includes("buildAnalyticsQualityReport"), "Preflight should run analytics quality QA");
   assert(route.includes("buildLaunchReadinessReport"), "Preflight should build a prioritized launch-readiness report");
   assert(route.includes("launch_report"), "Preflight API should expose the launch-readiness report");
   assert(route.includes("Recommendation reliability"), "Preflight should expose a recommendation reliability section");
+  assert(route.includes("Explanation grounding"), "Preflight should expose an explanation grounding section");
   assert(route.includes("Analytics quality"), "Preflight should expose an analytics quality section");
   assert(route.includes("finder_readiness_blockers"), "Preflight summary should expose finder readiness blockers");
   assert(route.includes("configurator_readiness_blockers"), "Preflight summary should expose configurator readiness blockers");
   assert(route.includes("recommendation_qa_score"), "Preflight summary should expose recommendation QA score");
+  assert(route.includes("explanation_grounding_score"), "Preflight summary should expose explanation grounding score");
   assert(route.includes("analytics_quality_score"), "Preflight summary should expose analytics quality score");
   assert(page.includes("Launch readiness score"), "Preflight page should surface the launch readiness score");
   assert(page.includes("Priority launch plan"), "Preflight page should surface prioritized launch actions");
   assert(page.includes("Readiness blockers"), "Preflight page should show readiness blocker counts");
   assert(page.includes("QA scenarios"), "Preflight page should show recommendation QA scenario counts");
+  assert(page.includes("Explanation QA"), "Preflight page should show explanation grounding summary fields");
   assert(page.includes("Analytics QA"), "Preflight page should show analytics quality summary fields");
+  assert(explanationGrounding.includes("buildExplanationGroundingReport"), "Explanation grounding helper should expose a reusable report builder");
+  assert(explanationGrounding.includes("unsupportedTerms") && explanationGrounding.includes("riskyTerms"), "Explanation grounding helper should detect unsupported and risky explanation terms");
   assert(launchReport.includes("buildLaunchReadinessReport"), "Launch readiness helper should expose a reusable report builder");
   assert(launchReport.includes("nextActions"), "Launch readiness report should include prioritized next actions");
   assert(launchReport.includes("Recommendation reliability"), "Launch readiness report should classify recommendation QA impact");
+  assert(launchReport.includes("explanation-grounding"), "Launch readiness report should score explanation grounding coverage");
   assert(launchReport.includes("analytics-quality"), "Launch readiness report should score analytics quality coverage");
   assert(recommendationQa.includes("buildRecommendationQaReport"), "Recommendation QA helper should expose a reusable report builder");
   assert(recommendationQa.includes("auditProductMatches"), "Recommendation QA should use the deterministic product scorer");
@@ -483,6 +491,10 @@ async function assertDeterministicLogic() {
     .replace('from "./utils";', 'from "./utils.js";'));
   const compiledScenarioCoverage = `${compileDir}/lib/scenario-coverage.js`;
   writeFileSync(compiledScenarioCoverage, readFileSync(compiledScenarioCoverage, "utf8")
+    .replace('from "./finder-flow";', 'from "./finder-flow.js";')
+    .replace('from "./utils";', 'from "./utils.js";'));
+  const compiledExplanationGrounding = `${compileDir}/lib/explanation-grounding.js`;
+  writeFileSync(compiledExplanationGrounding, readFileSync(compiledExplanationGrounding, "utf8")
     .replace('from "./finder-flow";', 'from "./finder-flow.js";')
     .replace('from "./utils";', 'from "./utils.js";'));
   const compiledRecommendationRecovery = `${compileDir}/lib/recommendation-recovery.js`;
@@ -543,6 +555,7 @@ async function assertDeterministicLogic() {
   const quizReadiness = await import(pathToFileURL(`${compileDir}/lib/quiz-readiness.js`));
   const recommendationQa = await import(pathToFileURL(`${compileDir}/lib/recommendation-qa.js`));
   const scenarioCoverage = await import(pathToFileURL(`${compileDir}/lib/scenario-coverage.js`));
+  const explanationGrounding = await import(pathToFileURL(`${compileDir}/lib/explanation-grounding.js`));
   const recommendationRecovery = await import(pathToFileURL(`${compileDir}/lib/recommendation-recovery.js`));
   const configuratorGuidance = await import(pathToFileURL(`${compileDir}/lib/configurator-guidance.js`));
   const recommendationTrace = await import(pathToFileURL(`${compileDir}/lib/recommendation-trace.js`));
@@ -613,6 +626,11 @@ async function assertDeterministicLogic() {
   assert(scenarioCoverageReport.productCoverage.some((product) => product.surfacedInScenarios > 0) && scenarioCoverageReport.actions.length, "Expected scenario coverage to expose product coverage and merchant actions");
   const blockedScenarioCoverage = scenarioCoverage.buildScenarioCoverageReport(undefined, demo.demoProducts);
   assert(blockedScenarioCoverage.status === "blocked" && blockedScenarioCoverage.actions.some((action) => action.id === "create-finder"), "Expected missing finder scenario coverage to guide finder creation");
+  const explanationGroundingReport = explanationGrounding.buildExplanationGroundingReport({ products: demo.demoProducts, quizzes: [demo.demoQuiz], openaiConfigured: false });
+  assert(explanationGroundingReport.summary.auditedRecommendations > 0 && explanationGroundingReport.score > 0, "Expected explanation grounding to audit recommendation copy against product facts");
+  assert(explanationGroundingReport.audits.every((audit) => audit.sampleExplanation && audit.factCount > 0), "Expected explanation grounding audits to include sample copy and fact counts");
+  const blockedExplanationGrounding = explanationGrounding.buildExplanationGroundingReport({ products: demo.demoProducts, quizzes: [] });
+  assert(blockedExplanationGrounding.status === "fail" && blockedExplanationGrounding.actions.some((action) => action.id === "create-explanation-scenarios"), "Expected missing finder explanation grounding to guide scenario creation");
 
   let selected = [];
   selected = utils.updateConfiguratorSelection(demo.demoConfigurator, selected, "config_step_base", "config_opt_terra");

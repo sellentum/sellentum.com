@@ -67,6 +67,7 @@ const sectionWeights: Record<string, number> = {
   catalog: 1.15,
   experiences: 1.25,
   "recommendation-qa": 1.3,
+  "explanation-grounding": 1.2,
   "embed-analytics": 1.1,
   "analytics-quality": 1.2,
 };
@@ -89,6 +90,7 @@ function sectionOwner(section: LaunchReportSection) {
   if (section.id === "catalog") return "Catalog";
   if (section.id === "experiences") return "Experience";
   if (section.id === "recommendation-qa") return "Recommendation QA";
+  if (section.id === "explanation-grounding") return "Content QA";
   if (section.id === "embed-analytics") return "Growth";
   if (section.id === "analytics-quality") return "Analytics";
   return section.label;
@@ -99,6 +101,7 @@ function sectionImpact(section: LaunchReportSection, check: LaunchReportCheck) {
   if (section.id === "catalog") return check.id.includes("semantic") || check.id.includes("enrichment") ? "Search relevance" : "Recommendation quality";
   if (section.id === "experiences") return "Launch coverage";
   if (section.id === "recommendation-qa") return "Recommendation reliability";
+  if (section.id === "explanation-grounding") return "AI trust";
   if (section.id === "analytics-quality") return check.id.includes("product") ? "Attribution confidence" : "Measurement trust";
   if (check.id.includes("event") || check.id.includes("session") || check.id.includes("intent")) return "Measurement";
   return "Conversion";
@@ -106,6 +109,7 @@ function sectionImpact(section: LaunchReportSection, check: LaunchReportCheck) {
 
 function checkEffort(check: LaunchReportCheck) {
   if (["app-url", "openai", "settings", "event-volume", "session-events", "intent-events", "analytics-quality-score", "analytics-contract-coverage"].includes(check.id)) return "Small";
+  if (check.id.includes("explanation-")) return check.id === "explanation-fact-coverage" ? "Medium" : "Small";
   if (check.id.includes("analytics-")) return "Small";
   if (check.id.includes("readiness") || check.id.includes("qa") || check.id.includes("catalog-")) return "Medium";
   if (check.id.includes("supabase") || check.id.includes("semantic-runtime")) return "Medium";
@@ -119,6 +123,7 @@ function checkPriority(section: LaunchReportSection, check: LaunchReportCheck): 
   }
 
   if (section.id === "recommendation-qa") return "high";
+  if (section.id === "explanation-grounding" && check.status === "warn") return check.id === "explanation-source" ? "low" : "medium";
   if (section.id === "environment" && check.id.includes("supabase")) return "high";
   if (section.id === "experiences" && (check.id.includes("readiness") || check.id === "advisor")) return "high";
   if (section.id === "analytics-quality" && check.status === "warn") return "high";
@@ -149,6 +154,10 @@ function actionTitle(check: LaunchReportCheck) {
     "qa-no-results": "Fix no-result shopper paths",
     "qa-thin-results": "Improve recommendation depth",
     "qa-score": "Raise the recommendation QA score",
+    "explanation-scenarios": "Create explanation QA coverage",
+    "explanation-fact-coverage": "Add product facts for grounded copy",
+    "explanation-copy-safety": "Review unsupported explanation copy",
+    "explanation-source": "Approve fallback or enable OpenAI copy",
     settings: "Polish brand and widget settings",
     "widget-script": "Publish an embeddable experience",
     "event-volume": "Run a live end-to-end widget test",
@@ -214,6 +223,8 @@ function strengthCopy(check: LaunchReportCheck) {
     "published-finder": "A published product finder is available for embedding.",
     "finder-readiness": "Published finder structure is ready for shopper traffic.",
     "qa-no-results": "Synthetic finder paths avoid hard no-result dead ends.",
+    "explanation-copy-safety": "Recommendation explanations are grounded to catalog and answer evidence.",
+    "explanation-fact-coverage": "Product facts are strong enough to support launch copy.",
     "widget-script": "The copy-paste widget has at least one launchable target.",
     "settings": "Brand settings are complete enough for a polished storefront widget.",
     "event-volume": "Analytics events are already flowing into Findly.",

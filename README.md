@@ -25,6 +25,7 @@ Findly is a compact guided-selling SaaS product for ecommerce brands. A merchant
 - Synthetic recommendation QA in Launch Preflight to catch no-result and thin-result finder paths before embedding
 - Semantic Search Lab and authenticated search API for testing natural-language product discovery, parsed-term catalog coverage and deterministic tuning guidance over the active catalog
 - OpenAI match explanations with a safe fact-based fallback when no API key is present
+- Explanation grounding QA in Launch Preflight to verify recommendation copy is supported by product facts and selected answer evidence
 - Conversational product advisor combining semantic similarity, deterministic field signals, hard budget constraints and clarification turns for vague requests
 - Published advisor runtime that loads the merchant catalog server-side instead of trusting browser-supplied products
 - Conversational advisor recovery with quick-refinement prompts, budget guidance and closest catalog options when requests are too broad or blocked
@@ -159,6 +160,7 @@ Import the repository into Vercel, add the variables from `.env.example`, and de
 - `lib/search-recovery.ts` — shopper-facing semantic-search recovery guidance, budget adjustments and near-miss explanation
 - `lib/search-explanations.ts` — grounded OpenAI/fallback copy for already-ranked semantic search results
 - `lib/recommendation-explanations.ts` — shared grounded OpenAI/fallback copy for already-ranked finder recommendations
+- `lib/explanation-grounding.ts` — launch-time explanation QA for unsupported claims, fact coverage and fallback/OpenAI copy readiness
 - `lib/widget-snippet.ts` — shared widget snippet generation and install-readiness diagnostics for Settings and Launch Studio
 - `lib/public-runtime-guard.ts` — bounded JSON parsing, public rate-limit responses and analytics metadata sanitization for embeddable runtimes
 - `lib/experience-launch.ts` — multi-experience launch cards for finder, advisor, semantic search and configurator embeds

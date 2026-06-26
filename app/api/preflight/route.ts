@@ -4,6 +4,7 @@ import { buildAnalyticsQualityReport } from "@/lib/analytics-quality";
 import { getWorkspaceIdentity } from "@/lib/api-auth";
 import { analyzeCatalogIntelligence, type CatalogIntelligenceSeverity } from "@/lib/catalog-intelligence";
 import { analyzeConfiguratorReadiness } from "@/lib/configurator-readiness";
+import { buildExplanationGroundingReport } from "@/lib/explanation-grounding";
 import { buildLaunchReadinessReport } from "@/lib/launch-readiness-report";
 import { analyzeQuizReadiness } from "@/lib/quiz-readiness";
 import { buildRecommendationQaReport } from "@/lib/recommendation-qa";
@@ -84,6 +85,7 @@ function buildPreflight({ products, quizzes, configurators, events, settings, mo
   const finderReadiness = quizzes.map((quiz) => ({ quiz, report: analyzeQuizReadiness(quiz, products) }));
   const configuratorReadiness = configurators.map((configurator) => ({ configurator, report: analyzeConfiguratorReadiness(configurator, products) }));
   const recommendationQa = buildRecommendationQaReport(quizzes, products);
+  const explanationGrounding = buildExplanationGroundingReport({ products, quizzes, openaiConfigured: Boolean(process.env.OPENAI_API_KEY) });
   const analyticsQuality = buildAnalyticsQualityReport(events);
   const readyFinders = finderReadiness.filter(({ quiz, report }) => quiz.published && report.canPublish);
   const readyConfigurators = configuratorReadiness.filter(({ configurator, report }) => configurator.published && report.canPublish);
@@ -174,6 +176,49 @@ function buildPreflight({ products, quizzes, configurators, events, settings, mo
           `${recommendationQa.score}% of checked scenarios passed. ${recommendationQa.summary.passingScenarios}/${recommendationQa.summary.scenariosChecked} scenarios are healthy.`,
           "/dashboard/lab",
           "Test logic",
+        ),
+      ],
+    },
+    {
+      id: "explanation-grounding",
+      label: "Explanation grounding",
+      description: "AI and fallback recommendation copy should be constrained to product facts and selected answer evidence.",
+      checks: [
+        check(
+          "explanation-scenarios",
+          "Explanation audit scenarios",
+          "Preflight samples top recommendations from finder paths before checking result-card copy.",
+          explanationGrounding.summary.auditedRecommendations ? "pass" : "fail",
+          explanationGrounding.summary.auditedRecommendations ? `${explanationGrounding.summary.auditedRecommendations} recommendation explanation${explanationGrounding.summary.auditedRecommendations === 1 ? "" : "s"} audited across ${explanationGrounding.summary.scenarios} scenario${explanationGrounding.summary.scenarios === 1 ? "" : "s"}.` : "No recommendation explanations could be audited.",
+          "/dashboard/lab",
+          "Open lab",
+        ),
+        check(
+          "explanation-fact-coverage",
+          "Product fact coverage",
+          "Grounded match copy needs descriptions, features, tags, buyer needs and semantic text.",
+          explanationGrounding.summary.factCoverageRate >= 80 ? "pass" : explanationGrounding.summary.factCoverageRate >= 50 ? "warn" : "fail",
+          `${Math.round(explanationGrounding.summary.factCoverageRate)}% of active products have strong explanation fact coverage.`,
+          "/dashboard/products",
+          "Improve catalog",
+        ),
+        check(
+          "explanation-copy-safety",
+          "Unsupported copy risk",
+          "Result explanations should avoid unsupported claims and certainty language.",
+          explanationGrounding.summary.blockers ? "fail" : explanationGrounding.summary.warnings ? "warn" : explanationGrounding.summary.auditedRecommendations ? "pass" : "fail",
+          explanationGrounding.summary.blockers ? `${explanationGrounding.summary.blockers} explanation audit${explanationGrounding.summary.blockers === 1 ? "" : "s"} failed grounding checks.` : explanationGrounding.summary.warnings ? `${explanationGrounding.summary.warnings} explanation audit${explanationGrounding.summary.warnings === 1 ? "" : "s"} need review.` : explanationGrounding.summary.auditedRecommendations ? "Audited explanation samples are grounded to product facts and answer evidence." : "No explanation samples were available to inspect.",
+          "/dashboard/lab",
+          "Review traces",
+        ),
+        check(
+          "explanation-source",
+          "Explanation source mode",
+          "OpenAI can enrich copy, while deterministic fallback keeps launch safe without an API key.",
+          explanationGrounding.sourceMode === "openai" ? "pass" : "warn",
+          explanationGrounding.sourceMode === "openai" ? "OpenAI explanation generation is available, with deterministic fallback if it fails." : "Using deterministic fallback explanations because OPENAI_API_KEY is not configured.",
+          "/dashboard/preflight",
+          "Review copy",
         ),
       ],
     },
@@ -271,6 +316,10 @@ function buildPreflight({ products, quizzes, configurators, events, settings, mo
       recommendation_qa_scenarios: recommendationQa.summary.scenariosChecked,
       recommendation_qa_blockers: recommendationQa.blockers.length,
       recommendation_qa_warnings: recommendationQa.warnings.length,
+      explanation_grounding_score: explanationGrounding.score,
+      explanation_grounding_audits: explanationGrounding.summary.auditedRecommendations,
+      explanation_grounding_blockers: explanationGrounding.summary.blockers,
+      explanation_grounding_warnings: explanationGrounding.summary.warnings,
       analytics_events: events.length,
       analytics_quality_score: analyticsQuality.score,
       analytics_quality_issues: analyticsQuality.summary.missingRequiredMetadata + analyticsQuality.summary.sequenceIssues + analyticsQuality.summary.productEventsWithoutProduct,

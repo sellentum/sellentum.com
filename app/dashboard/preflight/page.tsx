@@ -87,6 +87,10 @@ type PreflightPayload = {
     recommendation_qa_scenarios: number;
     recommendation_qa_blockers: number;
     recommendation_qa_warnings: number;
+    explanation_grounding_score: number;
+    explanation_grounding_audits: number;
+    explanation_grounding_blockers: number;
+    explanation_grounding_warnings: number;
     analytics_events: number;
     analytics_quality_score: number;
     analytics_quality_issues: number;
@@ -286,6 +290,10 @@ export default function PreflightPage() {
           [payload.summary.recommendation_qa_scenarios, "QA scenarios"],
           [payload.summary.recommendation_qa_blockers, "QA blockers"],
           [payload.summary.recommendation_qa_warnings, "QA warnings"],
+          [`${payload.summary.explanation_grounding_score}%`, "Explanation QA"],
+          [payload.summary.explanation_grounding_audits, "Copy audits"],
+          [payload.summary.explanation_grounding_blockers, "Copy blockers"],
+          [payload.summary.explanation_grounding_warnings, "Copy warnings"],
           [payload.summary.finder_readiness_blockers + payload.summary.configurator_readiness_blockers, "Readiness blockers"],
           [payload.summary.finder_readiness_warnings + payload.summary.configurator_readiness_warnings, "Readiness warnings"],
           [payload.summary.analytics_events, "Analytics events"],
