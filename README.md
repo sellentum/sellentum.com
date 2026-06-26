@@ -36,6 +36,7 @@ Findly is a compact guided-selling SaaS product for ecommerce brands. A merchant
 - Semantic search recovery with missing-term guidance, budget relaxation suggestions and closest catalog near misses for weak or blocked queries
 - Pgvector-backed advisor candidate retrieval for enriched Supabase catalogs, with deterministic ranking as the final selector
 - Visual configurator builder with steps, options, product-linked price deltas, compatibility rules and publish-readiness diagnostics
+- Configurator path QA that simulates valid bundles, product-linked completion paths and incompatible option guardrails before launch
 - Customer finder with welcome, progress, AI explanations, side-by-side result comparison, restart and buy-click tracking
 - Published finder runtime that validates the selected branched answer path, builds a semantic buyer profile and ranks products server-side
 - Customer-facing configurator with live bundle price, compatibility filtering, review and buy-click tracking
@@ -51,7 +52,7 @@ Findly is a compact guided-selling SaaS product for ecommerce brands. A merchant
 - Conversion playbook that turns analytics quality, funnel rates, discovery gaps, catalog health and product demand into prioritized merchant actions
 - Commercial impact reporting that estimates assisted product value, unclicked recommendation value, demand coverage and ROI opportunities from recommendation and buy-click events
 - Brand, colour, widget copy and launcher-position settings
-- Launch preflight checks for catalog readiness, shopper-language coverage, builder readiness diagnostics, synthetic recommendation QA, AI/env keys, published experiences, widget setup, analytics coverage and telemetry quality
+- Launch preflight checks for catalog readiness, shopper-language coverage, builder readiness diagnostics, configurator path QA, synthetic recommendation QA, AI/env keys, published experiences, widget setup, analytics coverage and telemetry quality
 - Prioritized launch-readiness report that turns preflight checks into a scored production plan with owners, evidence, effort and next actions
 - Supabase schema, indexes, triggers and row-level security
 - Fully interactive local demo mode when credentials are absent
@@ -172,6 +173,7 @@ Import the repository into Vercel, add the variables from `.env.example`, and de
 - `lib/rule-coverage.ts` — deterministic answer-rule coverage helper used by the finder builder and readiness checks
 - `lib/quiz-readiness.ts` — publish-readiness diagnostics for finder structure, catalog mapping and rule quality
 - `lib/configurator-readiness.ts` — publish-readiness diagnostics for configurator structure, linked products, pricing and compatibility rules
+- `lib/configurator-qa.ts` — deterministic configurator path QA for required-step completion, product-linked bundles and incompatibility guardrails
 - `lib/configurator-guidance.ts` — deterministic shopper-facing compatibility explanations and safe alternatives for configurator choices
 - `lib/utils.ts` — deterministic matching, recommendation comparison, configurator compatibility and shared formatting
 - `app/dashboard/launch` — self-serve launch workflow for enrichment, quiz generation, publishing and widget copy

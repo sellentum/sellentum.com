@@ -3,6 +3,7 @@ import { demoConfigurator, demoEvents, demoProducts, demoQuiz, demoSettings } fr
 import { buildAnalyticsQualityReport } from "@/lib/analytics-quality";
 import { getWorkspaceIdentity } from "@/lib/api-auth";
 import { analyzeCatalogIntelligence, type CatalogIntelligenceSeverity } from "@/lib/catalog-intelligence";
+import { buildConfiguratorQaReport } from "@/lib/configurator-qa";
 import { analyzeConfiguratorReadiness } from "@/lib/configurator-readiness";
 import { buildExplanationGroundingReport } from "@/lib/explanation-grounding";
 import { buildLaunchReadinessReport } from "@/lib/launch-readiness-report";
@@ -86,6 +87,7 @@ function buildPreflight({ products, quizzes, configurators, events, settings, mo
   const shopperLanguage = buildShopperLanguagePlan({ products, quizzes, events });
   const finderReadiness = quizzes.map((quiz) => ({ quiz, report: analyzeQuizReadiness(quiz, products) }));
   const configuratorReadiness = configurators.map((configurator) => ({ configurator, report: analyzeConfiguratorReadiness(configurator, products) }));
+  const configuratorQa = buildConfiguratorQaReport(configurators, products);
   const recommendationQa = buildRecommendationQaReport(quizzes, products);
   const explanationGrounding = buildExplanationGroundingReport({ products, quizzes, openaiConfigured: Boolean(process.env.OPENAI_API_KEY) });
   const analyticsQuality = buildAnalyticsQualityReport(events);
@@ -179,6 +181,58 @@ function buildPreflight({ products, quizzes, configurators, events, settings, mo
         check("advisor", "Conversational advisor", "The advisor reuses a launch-ready published finder and active catalog as its public entrypoint.", readyFinders.length && activeProducts.length >= 2 ? "pass" : "warn", readyFinders.length && activeProducts.length >= 2 ? "Advisor can run against the active catalog." : "Publish a readiness-checked finder and keep at least two active products for advisor mode.", "/dashboard/settings", "Copy advisor embed"),
         check("configurator", "Visual configurator", "Compatibility workflows need a published configurator with steps and options.", readyConfigurators.length ? "pass" : publishedConfigurators.length ? "warn" : "warn", readyConfigurators.length ? `${readyConfigurators.length} configurator${readyConfigurators.length === 1 ? "" : "s"} ready.` : "No ready configurator yet; optional for the MVP but useful for complex products.", "/dashboard/configurators", "Build configurator"),
         check("configurator-readiness", "Configurator readiness diagnostics", "Published configurators should pass linked-product, pricing and compatibility checks.", blockedPublishedConfigurators.length ? "fail" : configuratorWarnings.length ? "warn" : readyConfigurators.length ? "pass" : "warn", blockedPublishedConfigurators.length ? `${blockedPublishedConfigurators.length} published configurator${blockedPublishedConfigurators.length === 1 ? "" : "s"} have blockers.` : configuratorWarnings.length ? `${configuratorWarnings.length} published configurator${configuratorWarnings.length === 1 ? "" : "s"} have warnings.` : readyConfigurators.length ? "Published configurator checks pass." : "No launch-ready configurator is published yet.", "/dashboard/configurators", "Review readiness"),
+      ],
+    },
+    {
+      id: "configurator-qa",
+      label: "Configurator path QA",
+      description: "Published visual configurators should complete valid bundles and block incompatible combinations.",
+      checks: [
+        check(
+          "configurator-qa-scenarios",
+          "Configurator QA scenarios",
+          "Preflight simulates default and alternate configurator paths plus explicit compatibility guardrails.",
+          configuratorQa.summary.scenariosChecked ? "pass" : "warn",
+          configuratorQa.summary.scenariosChecked ? `${configuratorQa.summary.scenariosChecked} configurator scenario${configuratorQa.summary.scenariosChecked === 1 ? "" : "s"} checked across ${configuratorQa.summary.configuratorsChecked} configurator${configuratorQa.summary.configuratorsChecked === 1 ? "" : "s"}.` : "No configurator scenarios could be checked yet.",
+          "/dashboard/configurators",
+          "Open configurators",
+        ),
+        check(
+          "configurator-completion-paths",
+          "Completion paths",
+          "Every simulated valid path should complete required steps and return a valid server-side bundle.",
+          configuratorQa.summary.invalidCompletionScenarios ? "fail" : configuratorQa.summary.completionScenarios ? "pass" : "warn",
+          configuratorQa.summary.invalidCompletionScenarios ? `${configuratorQa.summary.invalidCompletionScenarios} completion path${configuratorQa.summary.invalidCompletionScenarios === 1 ? "" : "s"} failed validation.` : configuratorQa.summary.completionScenarios ? `${configuratorQa.summary.completionScenarios} completion path${configuratorQa.summary.completionScenarios === 1 ? "" : "s"} can complete required steps.` : "No completion paths were available to validate.",
+          "/dashboard/configurators",
+          "Fix paths",
+        ),
+        check(
+          "configurator-linked-products",
+          "Purchasable bundle links",
+          "Completed bundles should include active linked products so shoppers can buy the configured result.",
+          configuratorQa.summary.productLinkedScenarioRate >= 80 ? "pass" : configuratorQa.summary.productLinkedScenarioRate > 0 ? "warn" : configuratorQa.summary.completionScenarios ? "fail" : "warn",
+          `${configuratorQa.summary.productLinkedScenarioRate}% of completion paths include active linked products. Average bundle value: ${configuratorQa.summary.averageBundleValue}.`,
+          "/dashboard/configurators",
+          "Link products",
+        ),
+        check(
+          "configurator-compatibility-guardrails",
+          "Compatibility guardrails",
+          "Known incompatible option pairs should be rejected by deterministic validation before checkout.",
+          configuratorQa.summary.failedGuardrails ? "fail" : configuratorQa.summary.compatibilityGuardrails ? "pass" : readyConfigurators.length ? "warn" : "warn",
+          configuratorQa.summary.failedGuardrails ? `${configuratorQa.summary.failedGuardrails} compatibility guardrail${configuratorQa.summary.failedGuardrails === 1 ? "" : "s"} failed.` : configuratorQa.summary.compatibilityGuardrails ? `${configuratorQa.summary.compatibilityGuardrails} incompatibility guardrail${configuratorQa.summary.compatibilityGuardrails === 1 ? "" : "s"} verified.` : "No cross-step incompatibility pairs were available to test.",
+          "/dashboard/configurators",
+          "Review rules",
+        ),
+        check(
+          "configurator-qa-score",
+          "Configurator QA score",
+          "Summarizes path completion, product linkage and compatibility rejection.",
+          configuratorQa.score >= 85 ? "pass" : configuratorQa.score >= 60 ? "warn" : configuratorQa.summary.scenariosChecked ? "fail" : "warn",
+          `${configuratorQa.score}% QA score · ${configuratorQa.summary.passingScenarios}/${configuratorQa.summary.scenariosChecked} scenarios passed.`,
+          "/dashboard/configurators",
+          "Review QA",
+        ),
       ],
     },
     {
@@ -363,6 +417,12 @@ function buildPreflight({ products, quizzes, configurators, events, settings, mo
       finder_readiness_warnings: finderWarnings.length,
       configurator_readiness_blockers: blockedPublishedConfigurators.length,
       configurator_readiness_warnings: configuratorWarnings.length,
+      configurator_qa_score: configuratorQa.score,
+      configurator_qa_scenarios: configuratorQa.summary.scenariosChecked,
+      configurator_qa_blockers: configuratorQa.blockers.length,
+      configurator_qa_warnings: configuratorQa.warnings.length + (!configuratorQa.summary.compatibilityGuardrails && configuratorQa.summary.completionScenarios > 1 ? 1 : 0),
+      configurator_qa_guardrails: configuratorQa.summary.compatibilityGuardrails,
+      configurator_qa_product_link_rate: configuratorQa.summary.productLinkedScenarioRate,
       recommendation_qa_score: recommendationQa.score,
       recommendation_qa_scenarios: recommendationQa.summary.scenariosChecked,
       recommendation_qa_blockers: recommendationQa.blockers.length,

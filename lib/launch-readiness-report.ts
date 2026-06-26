@@ -67,6 +67,7 @@ const sectionWeights: Record<string, number> = {
   catalog: 1.15,
   "shopper-language": 1.15,
   experiences: 1.25,
+  "configurator-qa": 1.15,
   "recommendation-qa": 1.3,
   "explanation-grounding": 1.2,
   "embed-analytics": 1.1,
@@ -91,6 +92,7 @@ function sectionOwner(section: LaunchReportSection) {
   if (section.id === "catalog") return "Catalog";
   if (section.id === "shopper-language") return "Catalog";
   if (section.id === "experiences") return "Experience";
+  if (section.id === "configurator-qa") return "Configurator QA";
   if (section.id === "recommendation-qa") return "Recommendation QA";
   if (section.id === "explanation-grounding") return "Content QA";
   if (section.id === "embed-analytics") return "Growth";
@@ -103,6 +105,7 @@ function sectionImpact(section: LaunchReportSection, check: LaunchReportCheck) {
   if (section.id === "catalog") return check.id.includes("semantic") || check.id.includes("enrichment") ? "Search relevance" : "Recommendation quality";
   if (section.id === "shopper-language") return check.id.includes("observed") ? "Shopper relevance" : "Discovery relevance";
   if (section.id === "experiences") return "Launch coverage";
+  if (section.id === "configurator-qa") return check.id.includes("compatibility") ? "Compatibility safety" : "Configurator reliability";
   if (section.id === "recommendation-qa") return "Recommendation reliability";
   if (section.id === "explanation-grounding") return "AI trust";
   if (section.id === "analytics-quality") return check.id.includes("product") ? "Attribution confidence" : "Measurement trust";
@@ -113,6 +116,7 @@ function sectionImpact(section: LaunchReportSection, check: LaunchReportCheck) {
 function checkEffort(check: LaunchReportCheck) {
   if (["app-url", "openai", "settings", "event-volume", "session-events", "intent-events", "analytics-quality-score", "analytics-contract-coverage"].includes(check.id)) return "Small";
   if (check.id.includes("language") || check.id.includes("synonym")) return check.id === "semantic-synonyms" ? "Small" : "Medium";
+  if (check.id.includes("configurator-qa") || check.id.includes("configurator-completion") || check.id.includes("configurator-linked") || check.id.includes("configurator-compatibility")) return "Medium";
   if (check.id.includes("explanation-")) return check.id === "explanation-fact-coverage" ? "Medium" : "Small";
   if (check.id.includes("analytics-")) return "Small";
   if (check.id.includes("readiness") || check.id.includes("qa") || check.id.includes("catalog-")) return "Medium";
@@ -127,6 +131,7 @@ function checkPriority(section: LaunchReportSection, check: LaunchReportCheck): 
   }
 
   if (section.id === "recommendation-qa") return "high";
+  if (section.id === "configurator-qa" && check.status === "warn") return check.id === "configurator-compatibility-guardrails" ? "medium" : "high";
   if (section.id === "shopper-language" && check.status === "warn") return check.id === "semantic-synonyms" ? "low" : "medium";
   if (section.id === "explanation-grounding" && check.status === "warn") return check.id === "explanation-source" ? "low" : "medium";
   if (section.id === "environment" && check.id.includes("supabase")) return "high";
@@ -159,6 +164,11 @@ function actionTitle(check: LaunchReportCheck) {
     advisor: "Make the conversational advisor launchable",
     configurator: "Publish a configurator when compatibility matters",
     "configurator-readiness": "Fix configurator readiness issues",
+    "configurator-qa-scenarios": "Create configurator path QA coverage",
+    "configurator-completion-paths": "Fix invalid configurator paths",
+    "configurator-linked-products": "Link products to completed bundles",
+    "configurator-compatibility-guardrails": "Verify configurator compatibility guardrails",
+    "configurator-qa-score": "Raise the Configurator QA score",
     "qa-scenarios": "Create testable shopper paths",
     "qa-no-results": "Fix no-result shopper paths",
     "qa-thin-results": "Improve recommendation depth",
@@ -250,6 +260,11 @@ function strengthCopy(check: LaunchReportCheck) {
     "observed-shopper-language": "Observed search and advisor language is covered by product facts.",
     "product-language-backlog": "Active products carry enough buyer needs and semantic copy.",
     "semantic-synonyms": "Synonym opportunities are available for merchant review.",
+    "configurator-qa-scenarios": "Configurator path QA scenarios are available.",
+    "configurator-completion-paths": "Simulated configurator paths complete required steps.",
+    "configurator-linked-products": "Completed configurator bundles include active linked products.",
+    "configurator-compatibility-guardrails": "Incompatible configurator choices are rejected.",
+    "configurator-qa-score": "Configurator QA is strong enough for launch testing.",
   };
 
   return strengths[check.id] || `${check.label} is ready.`;

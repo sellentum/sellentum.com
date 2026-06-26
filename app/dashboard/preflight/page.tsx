@@ -89,6 +89,12 @@ type PreflightPayload = {
     finder_readiness_warnings: number;
     configurator_readiness_blockers: number;
     configurator_readiness_warnings: number;
+    configurator_qa_score: number;
+    configurator_qa_scenarios: number;
+    configurator_qa_blockers: number;
+    configurator_qa_warnings: number;
+    configurator_qa_guardrails: number;
+    configurator_qa_product_link_rate: number;
     recommendation_qa_score: number;
     recommendation_qa_scenarios: number;
     recommendation_qa_blockers: number;
@@ -298,6 +304,12 @@ export default function PreflightPage() {
           [payload.summary.shopper_language_products_needing_copy, "Copy backlog"],
           [payload.summary.ready_finders, "Ready finders"],
           [payload.summary.ready_configurators, "Ready configurators"],
+          [`${payload.summary.configurator_qa_score}%`, "Configurator QA"],
+          [payload.summary.configurator_qa_scenarios, "Config scenarios"],
+          [payload.summary.configurator_qa_blockers, "Config blockers"],
+          [payload.summary.configurator_qa_warnings, "Config warnings"],
+          [payload.summary.configurator_qa_guardrails, "Config rules"],
+          [`${payload.summary.configurator_qa_product_link_rate}%`, "Config links"],
           [`${payload.summary.recommendation_qa_score}%`, "QA score"],
           [payload.summary.recommendation_qa_scenarios, "QA scenarios"],
           [payload.summary.recommendation_qa_blockers, "QA blockers"],

@@ -427,32 +427,41 @@ function assertQuizReadinessWorkflow() {
 function assertConfiguratorReadinessWorkflow() {
   const page = readFileSync("app/dashboard/configurators/page.tsx", "utf8");
   const readiness = readFileSync("lib/configurator-readiness.ts", "utf8");
+  const qa = readFileSync("lib/configurator-qa.ts", "utf8");
   assert(page.includes("analyzeConfiguratorReadiness"), "Configurator builder should run publish-readiness diagnostics");
+  assert(page.includes("buildConfiguratorQaReport"), "Configurator builder should run deterministic path QA");
   assert(page.includes("Publish readiness"), "Configurator builder should surface publish-readiness feedback");
+  assert(page.includes("Path QA"), "Configurator builder should surface path QA feedback");
   assert(page.includes("!readiness.canPublish"), "Configurator builder should block publishing when readiness has blockers");
   assert(readiness.includes("available-linked-products"), "Configurator readiness helper should validate linked product availability");
   assert(readiness.includes("compatibility"), "Configurator readiness helper should validate compatibility references");
+  assert(qa.includes("buildConfiguratorQaReport"), "Configurator QA helper should expose a reusable report builder");
+  assert(qa.includes("compatibilityGuardrails") && qa.includes("productLinkedScenarioRate"), "Configurator QA should track compatibility guardrails and product-link coverage");
 }
 
 function assertPreflightReadinessWorkflow() {
   const route = readFileSync("app/api/preflight/route.ts", "utf8");
   const page = readFileSync("app/dashboard/preflight/page.tsx", "utf8");
   const recommendationQa = readFileSync("lib/recommendation-qa.ts", "utf8");
+  const configuratorQa = readFileSync("lib/configurator-qa.ts", "utf8");
   const explanationGrounding = readFileSync("lib/explanation-grounding.ts", "utf8");
   const analyticsQuality = readFileSync("lib/analytics-quality.ts", "utf8");
   const launchReport = readFileSync("lib/launch-readiness-report.ts", "utf8");
   assert(route.includes("analyzeQuizReadiness"), "Preflight should reuse finder publish-readiness diagnostics");
   assert(route.includes("analyzeConfiguratorReadiness"), "Preflight should reuse configurator publish-readiness diagnostics");
   assert(route.includes("buildRecommendationQaReport"), "Preflight should run synthetic recommendation QA");
+  assert(route.includes("buildConfiguratorQaReport"), "Preflight should run configurator path QA");
   assert(route.includes("buildExplanationGroundingReport"), "Preflight should run explanation grounding QA");
   assert(route.includes("buildAnalyticsQualityReport"), "Preflight should run analytics quality QA");
   assert(route.includes("buildLaunchReadinessReport"), "Preflight should build a prioritized launch-readiness report");
   assert(route.includes("launch_report"), "Preflight API should expose the launch-readiness report");
   assert(route.includes("Recommendation reliability"), "Preflight should expose a recommendation reliability section");
+  assert(route.includes("Configurator path QA"), "Preflight should expose a configurator path QA section");
   assert(route.includes("Explanation grounding"), "Preflight should expose an explanation grounding section");
   assert(route.includes("Analytics quality"), "Preflight should expose an analytics quality section");
   assert(route.includes("finder_readiness_blockers"), "Preflight summary should expose finder readiness blockers");
   assert(route.includes("configurator_readiness_blockers"), "Preflight summary should expose configurator readiness blockers");
+  assert(route.includes("configurator_qa_score"), "Preflight summary should expose configurator QA score");
   assert(route.includes("recommendation_qa_score"), "Preflight summary should expose recommendation QA score");
   assert(route.includes("explanation_grounding_score"), "Preflight summary should expose explanation grounding score");
   assert(route.includes("analytics_quality_score"), "Preflight summary should expose analytics quality score");
@@ -460,6 +469,7 @@ function assertPreflightReadinessWorkflow() {
   assert(page.includes("Priority launch plan"), "Preflight page should surface prioritized launch actions");
   assert(page.includes("Readiness blockers"), "Preflight page should show readiness blocker counts");
   assert(page.includes("QA scenarios"), "Preflight page should show recommendation QA scenario counts");
+  assert(page.includes("Configurator QA"), "Preflight page should show configurator QA summary fields");
   assert(page.includes("Explanation QA"), "Preflight page should show explanation grounding summary fields");
   assert(page.includes("Analytics QA"), "Preflight page should show analytics quality summary fields");
   assert(explanationGrounding.includes("buildExplanationGroundingReport"), "Explanation grounding helper should expose a reusable report builder");
@@ -467,10 +477,12 @@ function assertPreflightReadinessWorkflow() {
   assert(launchReport.includes("buildLaunchReadinessReport"), "Launch readiness helper should expose a reusable report builder");
   assert(launchReport.includes("nextActions"), "Launch readiness report should include prioritized next actions");
   assert(launchReport.includes("Recommendation reliability"), "Launch readiness report should classify recommendation QA impact");
+  assert(launchReport.includes("configurator-qa"), "Launch readiness report should score configurator QA coverage");
   assert(launchReport.includes("explanation-grounding"), "Launch readiness report should score explanation grounding coverage");
   assert(launchReport.includes("analytics-quality"), "Launch readiness report should score analytics quality coverage");
   assert(recommendationQa.includes("buildRecommendationQaReport"), "Recommendation QA helper should expose a reusable report builder");
   assert(recommendationQa.includes("auditProductMatches"), "Recommendation QA should use the deterministic product scorer");
+  assert(configuratorQa.includes("buildConfiguratorQaReport"), "Configurator QA helper should expose a reusable report builder");
   assert(analyticsQuality.includes("buildAnalyticsQualityReport"), "Analytics quality helper should expose a reusable report builder");
 }
 
@@ -512,6 +524,9 @@ async function assertDeterministicLogic() {
   const compiledConfiguratorGuidance = `${compileDir}/lib/configurator-guidance.js`;
   writeFileSync(compiledConfiguratorGuidance, readFileSync(compiledConfiguratorGuidance, "utf8")
     .replace('from "./utils";', 'from "./utils.js";')
+    .replace('from "@/lib/utils";', 'from "./utils.js";'));
+  const compiledConfiguratorQa = `${compileDir}/lib/configurator-qa.js`;
+  writeFileSync(compiledConfiguratorQa, readFileSync(compiledConfiguratorQa, "utf8")
     .replace('from "@/lib/utils";', 'from "./utils.js";'));
   const compiledSearchEngine = `${compileDir}/lib/search-engine.js`;
   writeFileSync(compiledSearchEngine, readFileSync(compiledSearchEngine, "utf8").replace('from "./catalog-benefits";', 'from "./catalog-benefits.js";'));
@@ -571,6 +586,7 @@ async function assertDeterministicLogic() {
   const explanationGrounding = await import(pathToFileURL(`${compileDir}/lib/explanation-grounding.js`));
   const recommendationRecovery = await import(pathToFileURL(`${compileDir}/lib/recommendation-recovery.js`));
   const configuratorGuidance = await import(pathToFileURL(`${compileDir}/lib/configurator-guidance.js`));
+  const configuratorQa = await import(pathToFileURL(`${compileDir}/lib/configurator-qa.js`));
   const recommendationTrace = await import(pathToFileURL(`${compileDir}/lib/recommendation-trace.js`));
   const ruleCoverage = await import(pathToFileURL(`${compileDir}/lib/rule-coverage.js`));
   const searchEngine = await import(pathToFileURL(`${compileDir}/lib/search-engine.js`));
@@ -660,6 +676,12 @@ async function assertDeterministicLogic() {
   assert(cloudGuidance?.blocked && cloudGuidance.explanation.includes("Wet trails & mud"), "Expected configurator guidance to explain the selected compatibility conflict");
   const selectionGuidance = configuratorGuidance.buildConfiguratorSelectionGuidance(demo.demoConfigurator, selected);
   assert(selectionGuidance.blockedOptions.length > 0 && selectionGuidance.summary.includes("blocked"), "Expected configurator selection guidance to summarize blocked options");
+  const configuratorQaReport = configuratorQa.buildConfiguratorQaReport([demo.demoConfigurator], demo.demoProducts);
+  assert(configuratorQaReport.summary.completionScenarios > 0 && configuratorQaReport.summary.productLinkedScenarioRate > 0, "Expected configurator QA to simulate completed, product-linked bundles");
+  assert(configuratorQaReport.summary.compatibilityGuardrails > 0 && configuratorQaReport.summary.failedGuardrails === 0, "Expected configurator QA to verify incompatible option guardrails");
+  assert(configuratorQaReport.actions.length || configuratorQaReport.score > 0, "Expected configurator QA to produce a score or remediation actions");
+  const brokenConfiguratorQa = configuratorQa.buildConfiguratorQaReport([{ ...demo.demoConfigurator, steps: [{ ...demo.demoConfigurator.steps[0], options: [] }] }], demo.demoProducts);
+  assert(brokenConfiguratorQa.status === "fail" && brokenConfiguratorQa.actions.some((action) => action.id === "fix-configurator-completion" || action.id === "create-configurator-qa"), "Expected broken configurator QA to produce launch-blocking actions");
 
   const eventTypes = [
     { quiz_id: "quiz_footwear", metadata: { experience_type: "assistant" } },

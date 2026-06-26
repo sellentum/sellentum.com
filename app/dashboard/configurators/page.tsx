@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { AlertTriangle, ArrowLeft, Check, ChevronDown, ExternalLink, GripVertical, LoaderCircle, PackagePlus, Plus, Save, Settings2, Sparkles, Trash2, X } from "lucide-react";
 import { LoadingState } from "@/components/loading-state";
 import { useStore } from "@/lib/store";
+import { buildConfiguratorQaReport } from "@/lib/configurator-qa";
 import { analyzeConfiguratorReadiness } from "@/lib/configurator-readiness";
 import type { Configurator, ConfiguratorOption, ConfiguratorStep } from "@/lib/types";
 import { describeConfiguratorSelection, flattenConfiguratorOptions, formatCurrency, getConfiguratorTotal, slugify, uid } from "@/lib/utils";
@@ -36,6 +37,7 @@ function ConfiguratorEditor({ selected, onBack }: { selected: Configurator; onBa
   const previewSummary = describeConfiguratorSelection(draft, previewSelectedIds);
   const previewTotal = getConfiguratorTotal(draft, previewSelectedIds);
   const readiness = useMemo(() => analyzeConfiguratorReadiness(draft, products), [draft, products]);
+  const pathQa = useMemo(() => buildConfiguratorQaReport([draft], products), [draft, products]);
 
   function updateStep(stepId: string, update: Partial<ConfiguratorStep>) {
     setDraft((current) => ({ ...current, steps: current.steps.map((step) => step.id === stepId ? { ...step, ...update } : step) }));
@@ -253,6 +255,25 @@ function ConfiguratorEditor({ selected, onBack }: { selected: Configurator; onBa
               </div>)}
             </div>
           </div>
+          <div className="mt-5 rounded-xl border border-black/[0.07] p-3">
+            <div className="flex items-center justify-between gap-3">
+              <p className="flex items-center gap-2 text-[10px] font-extrabold"><Check size={13} className={pathQa.status === "fail" ? "text-red-600" : pathQa.status === "warn" ? "text-amber-600" : "text-moss"} /> Path QA</p>
+              <span className={`rounded-full px-2 py-1 text-[8px] font-extrabold ${pathQa.status === "fail" ? "bg-red-50 text-red-700" : pathQa.status === "warn" ? "bg-amber-50 text-amber-700" : "bg-lime/35 text-moss"}`}>{pathQa.score}%</span>
+            </div>
+            <p className="mt-1.5 text-[9px] leading-4 text-black/40">{pathQa.headline}</p>
+            <div className="mt-3 grid grid-cols-3 gap-1.5 text-center">
+              <div className="rounded-lg bg-canvas px-2 py-2"><p className="text-sm font-extrabold">{pathQa.summary.completionScenarios}</p><p className="text-[7px] font-bold text-black/30">Paths</p></div>
+              <div className="rounded-lg bg-canvas px-2 py-2"><p className="text-sm font-extrabold">{pathQa.summary.compatibilityGuardrails}</p><p className="text-[7px] font-bold text-black/30">Rules</p></div>
+              <div className="rounded-lg bg-canvas px-2 py-2"><p className="text-sm font-extrabold">{pathQa.summary.productLinkedScenarioRate}%</p><p className="text-[7px] font-bold text-black/30">Linked</p></div>
+            </div>
+            <div className="mt-3 space-y-1.5">
+              {pathQa.scenarios.slice(0, 3).map((scenario) => <div key={scenario.id} className={`rounded-lg px-2.5 py-2 ${scenario.status === "fail" ? "bg-red-50" : scenario.status === "warn" ? "bg-amber-50" : "bg-canvas"}`}>
+                <p className="text-[9px] font-extrabold">{scenario.label}</p>
+                <p className="mt-0.5 text-[8px] font-bold leading-3 text-black/35">{scenario.detail}</p>
+              </div>)}
+              {!pathQa.scenarios.length && <p className="rounded-lg bg-canvas px-2.5 py-2 text-[8px] font-bold leading-3 text-black/35">Add options before path QA can simulate shopper bundles.</p>}
+            </div>
+          </div>
           <div className="mt-5 rounded-xl border border-black/[0.07] p-3"><p className="flex items-center gap-2 text-[10px] font-extrabold"><Settings2 size={13} className="text-moss" /> Builder tip</p><p className="mt-1.5 text-[9px] leading-4 text-black/40">Use linked products for the main purchasable items. Use unlinked options for preferences, materials, service plans or add-ons.</p></div>
         </aside>
       </div>
@@ -311,6 +332,7 @@ export default function ConfiguratorsPage() {
             const views = events.filter((event) => event.quiz_id === configurator.id && event.event_type === "widget_view").length;
             const completed = events.filter((event) => event.quiz_id === configurator.id && event.event_type === "quiz_complete").length;
             const options = flattenConfiguratorOptions(configurator).length;
+            const qa = buildConfiguratorQaReport([configurator], products);
             return (
               <article key={configurator.id} className="group overflow-hidden rounded-2xl border border-black/[0.07] bg-white">
                 <button onClick={() => setSelectedId(configurator.id)} className="relative block h-48 w-full overflow-hidden bg-ink p-5 text-left text-white">
@@ -324,10 +346,11 @@ export default function ConfiguratorsPage() {
                 <div className="p-5">
                   <h3 className="truncate text-sm font-extrabold">{configurator.name}</h3>
                   <p className="mt-1 text-[10px] text-black/35">{configurator.steps.length} steps · {options} options</p>
-                  <div className="mt-5 grid grid-cols-3 divide-x divide-black/[0.07] rounded-xl bg-canvas py-3 text-center">
+                  <div className="mt-5 grid grid-cols-4 divide-x divide-black/[0.07] rounded-xl bg-canvas py-3 text-center">
                     <div><p className="text-sm font-extrabold">{views}</p><p className="mt-0.5 text-[8px] font-bold text-black/30">Views</p></div>
                     <div><p className="text-sm font-extrabold">{completed}</p><p className="mt-0.5 text-[8px] font-bold text-black/30">Complete</p></div>
                     <div><p className="text-sm font-extrabold">{views ? Math.round(completed / views * 100) : 0}%</p><p className="mt-0.5 text-[8px] font-bold text-black/30">Rate</p></div>
+                    <div><p className="text-sm font-extrabold">{qa.score}%</p><p className="mt-0.5 text-[8px] font-bold text-black/30">QA</p></div>
                   </div>
                   <div className="mt-4 flex gap-2"><button onClick={() => setSelectedId(configurator.id)} className="btn-secondary flex-1 !px-3 !py-2 text-xs">Edit configurator</button>{configurator.published && <Link href={`/configurator/${configurator.id}`} target="_blank" className="grid h-9 w-9 place-items-center rounded-full border border-black/10"><ExternalLink size={13} /></Link>}</div>
                 </div>
