@@ -1,6 +1,7 @@
 import "server-only";
 
 import OpenAI from "openai";
+import { buildAdvisorRecoveryReport, type AdvisorRecoveryReport } from "@/lib/advisor-recovery";
 import { expandBenefitIntentTokens } from "./catalog-benefits";
 import type { ConversationalMatch, Product } from "@/lib/types";
 
@@ -11,6 +12,7 @@ export type AdvisorResult = {
   source: "hybrid" | "pgvector" | "rules";
   intent: { maxBudget: number | null; terms: string[] };
   clarifyingOptions?: string[];
+  recovery?: AdvisorRecoveryReport;
   matches: ConversationalMatch[];
 };
 
@@ -97,24 +99,29 @@ export async function runAdvisorSearch({ query, products, history = [], semantic
   const eligible = products.filter((product) => product.active && (maxBudget === null || product.price <= maxBudget));
 
   if (!eligible.length) {
+    const intent = { maxBudget, terms: queryTokens };
+    const matches: ConversationalMatch[] = [];
     return {
       assistantMessage: `I couldn’t find an active product inside${maxBudget ? ` your £${maxBudget} budget` : " those requirements"}. Try broadening one detail.`,
       status: "recommendations",
       source: "rules",
-      intent: { maxBudget, terms: queryTokens },
-      matches: [],
+      intent,
+      recovery: buildAdvisorRecoveryReport({ query: intentText, products, intent, matches, status: "recommendations" }),
+      matches,
     };
   }
 
   if (shouldClarify(query, queryTokens, maxBudget, history)) {
     const options = clarifyingOptions(eligible);
     const optionCopy = options.length ? ` You can answer with one of these: ${options.slice(0, 3).join(", ")}.` : "";
+    const intent = { maxBudget, terms: queryTokens };
     return {
       assistantMessage: `To narrow this down, what matters most: the use case, a must-have feature, or your comfortable budget?${optionCopy}`,
       status: "clarifying",
       source: "rules",
-      intent: { maxBudget, terms: queryTokens },
+      intent,
       clarifyingOptions: options,
+      recovery: buildAdvisorRecoveryReport({ query: intentText, products, intent, matches: [], status: "clarifying", clarifyingOptions: options }),
       matches: [],
     };
   }
@@ -168,11 +175,15 @@ export async function runAdvisorSearch({ query, products, history = [], semantic
     if (Array.isArray(generated.explanations)) explanations = ranked.map((match, index) => generated.explanations.find((item: { id?: string; text?: string }) => item.id === match.product.id)?.text || explanations[index]);
   }
 
+  const matches = ranked.map((match, index) => ({ product: match.product, score: Number(match.score.toFixed(4)), matchedSignals: match.matchedSignals, explanation: explanations[index] }));
+  const intent = { maxBudget, terms: queryTokens };
+
   return {
     assistantMessage,
     status: "recommendations",
     source,
-    intent: { maxBudget, terms: queryTokens },
-    matches: ranked.map((match, index) => ({ product: match.product, score: Number(match.score.toFixed(4)), matchedSignals: match.matchedSignals, explanation: explanations[index] })),
+    intent,
+    recovery: buildAdvisorRecoveryReport({ query: intentText, products, intent, matches, status: "recommendations" }),
+    matches,
   };
 }

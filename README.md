@@ -24,6 +24,7 @@ Findly is a compact guided-selling SaaS product for ecommerce brands. A merchant
 - OpenAI match explanations with a safe fact-based fallback when no API key is present
 - Conversational product advisor combining semantic similarity, deterministic field signals, hard budget constraints and clarification turns for vague requests
 - Published advisor runtime that loads the merchant catalog server-side instead of trusting browser-supplied products
+- Conversational advisor recovery with quick-refinement prompts, budget guidance and closest catalog options when requests are too broad or blocked
 - Customer-facing semantic search experience for natural-language product discovery over a published catalog context
 - Benefit-aware semantic search and advisor token expansion so shopper outcome language maps back to concrete catalog terms
 - Grounded AI/fallback explanations for semantic search results after deterministic ranking
@@ -164,6 +165,7 @@ Import the repository into Vercel, add the variables from `.env.example`, and de
 - `app/api/quizzes/generate` — authenticated guided-selling flow generation
 - `app/api/assistant` — rate-limited hybrid conversational discovery with deterministic clarification when shopper intent is vague
 - `app/api/public/assistant/[id]` — published advisor runtime that validates the experience and loads active products server-side
+- `lib/advisor-recovery.ts` — deterministic conversational recovery guidance for broad, weak or budget-blocked advisor requests
 - `lib/semantic-candidates.ts` — pgvector candidate retrieval through the Supabase `match_products` RPC
 - `app/api/public/finder/[id]` — published finder runtime for server-side deterministic recommendations
 - `app/search/[id]` and `app/api/public/search/[id]` — customer-facing semantic search page and published search runtime

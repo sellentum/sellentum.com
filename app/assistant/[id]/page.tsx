@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowRight, ExternalLink, LoaderCircle, MessageCircle, Send, ShieldCheck, Sparkles } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { getSessionMetadata } from "@/lib/session";
+import type { AdvisorRecoveryReport } from "@/lib/advisor-recovery";
 import { buildPublicExperienceCopy, normalizeWidgetSettings } from "@/lib/public-experience";
 import type { ConversationalMatch, Product, Quiz, WidgetSettings } from "@/lib/types";
 import { formatCurrency } from "@/lib/utils";
@@ -29,6 +30,7 @@ export default function AssistantPage({ params }: { params: Promise<{ id: string
   const [error, setError] = useState("");
   const [lastIntent, setLastIntent] = useState<LastIntent | null>(null);
   const [clarifyingOptions, setClarifyingOptions] = useState<string[]>([]);
+  const [recovery, setRecovery] = useState<AdvisorRecoveryReport | null>(null);
   const started = useRef(false);
   const viewed = useRef(false);
 
@@ -69,7 +71,7 @@ export default function AssistantPage({ params }: { params: Promise<{ id: string
     const clean = value.trim();
     if (!clean || !data || searching) return;
     const nextMessages: Message[] = [...messages, { role: "user", content: clean }];
-    setMessages(nextMessages); setQuery(""); setSearching(true); setError(""); setClarifyingOptions([]);
+    setMessages(nextMessages); setQuery(""); setSearching(true); setError(""); setClarifyingOptions([]); setRecovery(null);
     if (!started.current) { started.current = true; track("quiz_start", undefined, { query: clean }); }
     try {
       const response = await fetch(store.mode === "demo" ? "/api/assistant" : `/api/public/assistant/${encodeURIComponent(data.quiz.slug || data.quiz.id)}`, {
@@ -85,11 +87,13 @@ export default function AssistantPage({ params }: { params: Promise<{ id: string
       setMessages([...nextMessages, { role: "assistant", content: payload.assistantMessage }]);
       setMatches(resultMatches);
       setLastIntent(intent);
+      const nextRecovery = payload.recovery as AdvisorRecoveryReport | undefined;
+      setRecovery(nextRecovery || null);
       if (status === "clarifying") {
         setClarifyingOptions((payload.clarifyingOptions || []) as string[]);
         return;
       }
-      await track("quiz_complete", undefined, { query: intent.query, source: intent.source, terms: intent.terms, max_budget: intent.maxBudget, result_count: intent.resultCount, advisor_status: status });
+      await track("quiz_complete", undefined, { query: intent.query, source: intent.source, terms: intent.terms, max_budget: intent.maxBudget, result_count: intent.resultCount, advisor_status: status, recovery_status: nextRecovery?.status, recovery_primary_action: nextRecovery?.primaryAction });
       for (const [index, match] of resultMatches.entries()) await track("product_recommended", match.product.id, { query: intent.query, source: intent.source, terms: intent.terms, max_budget: intent.maxBudget, rank: index + 1, score: match.score, matched_signals: match.matchedSignals, product_name: match.product.name });
     } catch (err) { setError(err instanceof Error ? err.message : "The advisor could not complete that search."); setMessages([...nextMessages, { role: "assistant", content: "I hit a snag while comparing the catalog. Please try phrasing that another way." }]); }
     finally { setSearching(false); }
@@ -108,6 +112,32 @@ export default function AssistantPage({ params }: { params: Promise<{ id: string
       </section>
 
       <section className="bg-[#f7f8f4] p-6 lg:p-9"><div className="flex items-end justify-between"><div><p className="eyebrow text-moss">Recommended for you</p><h2 className="mt-2 text-3xl font-extrabold tracking-[-.05em]">{matches.length ? `${matches.length} strongest matches` : "Your matches will appear here"}</h2></div>{matches.length > 0 && <span className="rounded-full bg-lime px-3 py-1.5 text-[9px] font-extrabold">Ranked live</span>}</div>
+        {recovery && recovery.status !== "healthy" && <section className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-[10px] font-extrabold uppercase tracking-wider text-amber-700">{recovery.status === "no-results" ? "No exact eligible match" : recovery.status === "clarify" ? "One more detail helps" : "Refine this request"}</p>
+              <h3 className="mt-1 text-sm font-extrabold">{recovery.primaryAction}</h3>
+              <p className="mt-1 text-[10px] leading-4 text-black/45">{recovery.summary}</p>
+            </div>
+            {recovery.suggestions[0]?.prompt && <button onClick={() => ask(recovery.suggestions[0]!.prompt)} className="shrink-0 rounded-full bg-ink px-3 py-2 text-[9px] font-extrabold text-white">Try fix</button>}
+          </div>
+          {recovery.suggestions.length ? <div className="mt-3 grid gap-2 xl:grid-cols-2">
+            {recovery.suggestions.slice(0, 4).map((suggestion) => <button key={suggestion.id} onClick={() => suggestion.prompt && ask(suggestion.prompt)} className="rounded-xl bg-white px-3 py-2 text-left">
+              <p className="text-[10px] font-extrabold">{suggestion.title}</p>
+              <p className="mt-1 text-[9px] leading-4 text-black/40">{suggestion.detail}</p>
+            </button>)}
+          </div> : null}
+          {recovery.nearMisses.length ? <div className="mt-3 rounded-xl bg-white p-3">
+            <p className="text-[10px] font-extrabold text-black/55">Closest catalog options</p>
+            <div className="mt-2 grid gap-2 xl:grid-cols-3">
+              {recovery.nearMisses.map((item) => <div key={item.productId} className="rounded-xl border border-black/[0.06] p-2">
+                <p className="truncate text-[10px] font-extrabold">{item.productName}</p>
+                <p className="mt-1 text-[8px] font-bold text-black/35">{item.category} · {formatCurrency(item.price)}</p>
+                <p className="mt-1 line-clamp-2 text-[8px] leading-3 text-black/35">{item.reason}</p>
+              </div>)}
+            </div>
+          </div> : null}
+        </section>}
         {matches.length ? <div className="mt-7 grid gap-4 xl:grid-cols-3">{matches.map((match, index) => <article key={match.product.id} className={`relative overflow-hidden rounded-2xl border bg-white ${index === 0 ? "border-ink shadow-xl" : "border-black/10"}`}>{index === 0 && <span className="absolute left-3 top-3 z-10 rounded-full bg-lime px-2.5 py-1 text-[8px] font-extrabold uppercase tracking-wider">Best match</span>}<div className="h-44 overflow-hidden bg-[#eceee9]">{match.product.image_url ? <img src={match.product.image_url} alt={match.product.name} className="h-full w-full object-cover" /> : <div className="grid h-full place-items-center"><Sparkles className="text-black/15" /></div>}</div><div className="p-4"><p className="text-[8px] font-extrabold uppercase tracking-wider text-moss">{match.product.category}</p><h3 className="mt-2 text-sm font-extrabold leading-tight">{match.product.name}</h3><p className="mt-1 text-xs font-extrabold">{formatCurrency(match.product.price)}</p><div className="mt-4 min-h-[92px] rounded-xl bg-[#f2f4ef] p-3"><p className="flex items-center gap-1.5 text-[8px] font-extrabold text-moss"><Sparkles size={9} /> Why it fits</p><p className="mt-1.5 text-[9px] leading-4 text-black/50">{match.explanation}</p></div><a href={match.product.product_url || "#"} onClick={() => track("buy_click", match.product.id, { query: lastIntent?.query, source: lastIntent?.source, terms: lastIntent?.terms, max_budget: lastIntent?.maxBudget, rank: index + 1, score: match.score, matched_signals: match.matchedSignals, product_name: match.product.name })} target="_blank" rel="noreferrer" className="mt-4 flex w-full items-center justify-center gap-2 rounded-full py-3 text-[10px] font-extrabold text-white" style={{ background: accent }}>View product <ExternalLink size={11} /></a></div></article>)}</div> : <div className="mt-7 grid min-h-[520px] place-items-center rounded-[24px] border-2 border-dashed border-black/[0.07] bg-white/50 p-8 text-center"><div><span className="mx-auto grid h-16 w-16 place-items-center rounded-[22px] bg-lime/45 text-moss"><Sparkles size={24} /></span><h3 className="mt-5 text-lg font-extrabold">Ask naturally. Match reliably.</h3><p className="mx-auto mt-2 max-w-sm text-xs leading-5 text-black/40">Try a goal, use case, preferred feature or maximum budget. Findly combines semantic similarity with catalog rules and stable ranking.</p><button onClick={() => ask(suggestions[0])} className="mt-5 inline-flex items-center gap-2 text-xs font-extrabold text-moss">Run an example <ArrowRight size={13} /></button></div></div>}
       </section>
     </div>

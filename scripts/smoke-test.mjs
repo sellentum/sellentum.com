@@ -34,6 +34,7 @@ async function assertWidgetScript() {
 function assertPublishedAdvisorRuntime() {
   const route = readFileSync("app/api/public/assistant/[id]/route.ts", "utf8");
   const engine = readFileSync("lib/assistant-engine.ts", "utf8");
+  const recovery = readFileSync("lib/advisor-recovery.ts", "utf8");
   const candidates = readFileSync("lib/semantic-candidates.ts", "utf8");
   const page = readFileSync("app/assistant/[id]/page.tsx", "utf8");
   assert(route.includes("runAdvisorSearch"), "Published advisor route should use the shared advisor engine");
@@ -47,6 +48,11 @@ function assertPublishedAdvisorRuntime() {
   assert(engine.includes("buildAdvisorIntentText"), "Advisor engine should combine prior shopper messages with the latest clarification");
   assert(page.includes("clarifyingOptions"), "Assistant page should render clarifying quick replies");
   assert(page.includes("advisor_status"), "Assistant analytics should distinguish completed recommendation searches from clarification turns");
+  assert(engine.includes("buildAdvisorRecoveryReport"), "Advisor engine should attach deterministic recovery metadata");
+  assert(recovery.includes("buildAdvisorRecoveryReport"), "Advisor recovery helper should expose a reusable recovery builder");
+  assert(recovery.includes("relax-budget"), "Advisor recovery should suggest budget relaxation when constraints block products");
+  assert(page.includes("recovery_status"), "Assistant analytics should record advisor recovery status");
+  assert(page.includes("Closest catalog options"), "Assistant page should show near-miss products when matching is weak or blocked");
 }
 
 function assertPublishedFinderRuntime() {
@@ -434,6 +440,7 @@ async function assertDeterministicLogic() {
   const experienceLaunch = await import(pathToFileURL(`${compileDir}/lib/experience-launch.js`));
   const launchPacket = await import(pathToFileURL(`${compileDir}/lib/launch-packet.js`));
   const launchReadinessReport = await import(pathToFileURL(`${compileDir}/lib/launch-readiness-report.js`));
+  const advisorRecovery = await import(pathToFileURL(`${compileDir}/lib/advisor-recovery.js`));
   const discoveryGaps = await import(pathToFileURL(`${compileDir}/lib/discovery-gaps.js`));
   const dashboardCommandCenter = await import(pathToFileURL(`${compileDir}/lib/dashboard-command-center.js`));
   const configuratorReadiness = await import(pathToFileURL(`${compileDir}/lib/configurator-readiness.js`));
@@ -546,6 +553,15 @@ async function assertDeterministicLogic() {
   assert(gapReport.termGaps.some((gap) => gap.term === "orthopedic" && gap.coverage === "missing"), "Expected discovery gap report to identify missing shopper language");
   assert(gapReport.summary.lowConfidenceRecommendations === 1 && gapReport.productGaps.some((gap) => gap.productName === "Cloud Rest Walker"), "Expected discovery gap report to flag low-confidence and stalled product gaps");
   assert(gapReport.actions[0]?.id === "fix-no-result-paths", "Expected discovery gap report to prioritize no-result fixes first");
+  const advisorRecoveryReport = advisorRecovery.buildAdvisorRecoveryReport({
+    query: "trail shoes under £10",
+    products: demo.demoProducts,
+    intent: { maxBudget: 10, terms: ["trail"] },
+    matches: [],
+    status: "recommendations",
+  });
+  assert(advisorRecoveryReport.status === "no-results" && advisorRecoveryReport.budgetBlocked, "Expected advisor recovery to flag no-result budget blockers");
+  assert(advisorRecoveryReport.suggestions.some((suggestion) => suggestion.id === "relax-budget") && advisorRecoveryReport.nearMisses.length, "Expected advisor recovery to suggest budget relaxation and near misses");
   const commandCenter = dashboardCommandCenter.buildDashboardCommandCenter({ products: demo.demoProducts, quizzes: [demo.demoQuiz], configurators: [demo.demoConfigurator], events: demo.demoEvents, settings: demo.demoSettings });
   assert(commandCenter.snapshot.widget_view > 0 && commandCenter.performance.length === 14, "Expected dashboard command center to build real 14-day analytics");
   assert(commandCenter.launchScore > 0 && commandCenter.catalogScore >= 80 && commandCenter.summary.readyFinders === 1, "Expected dashboard command center to summarize launch readiness");
