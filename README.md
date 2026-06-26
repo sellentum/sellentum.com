@@ -10,6 +10,7 @@ Findly is a compact guided-selling SaaS product for ecommerce brands. A merchant
 - AI catalog enrichment with normalized attributes, buyer needs, semantic search text and optional OpenAI embeddings
 - Catalog intelligence scoring for enrichment coverage, semantic-search readiness, matching signals, product media and commerce links
 - Ontology map for inspecting category clusters, buyer needs, tags, features, thin signals and AI-ready quiz question ideas
+- AI quiz blueprint review in Launch Studio so merchants can inspect planned questions, catalog coverage and generation risks before publishing
 - Launch Studio workflow that enriches a catalog, generates a finder, publishes it, prepares the embed snippet and copies a developer launch packet from one screen
 - Ontology-guided finder generation that uses category clusters, repeated buyer needs and product features before falling back to OpenAI copy
 - Visual finder builder with questions, answer options, optional conditional branching, weights, tag/category/feature/budget rules, per-answer catalog coverage and publish-readiness diagnostics
@@ -121,6 +122,7 @@ Import the repository into Vercel, add the variables from `.env.example`, and de
 - `lib/catalog-intelligence.ts` — catalog health scoring for enrichment coverage, matching signals, semantic text, media and commerce links
 - `lib/catalog-ontology.ts` — category, buyer-need, tag and feature clustering for ontology mapping and question ideas
 - `lib/quiz-generation.ts` — ontology-guided quiz generation fallback and OpenAI grounding summary
+- `lib/quiz-blueprint.ts` — launch-ready preview of generated finder questions, option coverage and catalog risks
 - `lib/finder-flow.ts` — deterministic conditional question routing and server-side answer-path validation
 - `lib/catalog-import.ts` — flexible CSV header mapping, row validation and import previews
 - `lib/search-engine.ts` — deterministic semantic search ranking, intent parsing, parsed-term catalog coverage and budget eligibility checks

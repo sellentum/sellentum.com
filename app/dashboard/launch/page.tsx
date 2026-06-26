@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowRight, BookOpenCheck, Boxes, Check, Clipboard, Code2, ExternalLink, FileText, Gauge, LoaderCircle, Rocket, ShieldCheck, Sparkles, Wand2 } from "lucide-react";
+import { AlertTriangle, ArrowRight, BookOpenCheck, Boxes, BrainCircuit, Check, Clipboard, Code2, ExternalLink, FileText, Gauge, LoaderCircle, Rocket, ShieldCheck, Sparkles, Wand2 } from "lucide-react";
 import { LoadingState } from "@/components/loading-state";
 import { useStore } from "@/lib/store";
 import { buildLaunchPacket } from "@/lib/launch-packet";
+import { buildQuizBlueprint } from "@/lib/quiz-blueprint";
 import type { GeneratedQuizSuggestion, Product, ProductInput } from "@/lib/types";
 import { slugify, uid } from "@/lib/utils";
 import { buildWidgetInstallReport, buildWidgetSnippet } from "@/lib/widget-snippet";
@@ -66,6 +67,8 @@ export default function LaunchStudioPage() {
   const hasLaunchableCatalog = activeProducts.length >= 2;
   const hasLaunchableFinder = Boolean(liveFinder && liveFinder.questions.length > 0);
   const launchScore = [hasLaunchableCatalog, enrichedPercent >= 60, hasLaunchableFinder].filter(Boolean).length;
+  const quizBlueprint = useMemo(() => buildQuizBlueprint(activeProducts), [activeProducts]);
+  const blueprintStatusLabel = quizBlueprint.status === "ready" ? "Ready" : quizBlueprint.status === "needs-review" ? "Review" : "Blocked";
   const snippet = buildWidgetSnippet({
     origin,
     experience: "finder",
@@ -219,7 +222,7 @@ export default function LaunchStudioPage() {
             <p className="mt-6 max-w-2xl text-sm leading-6 text-white/50">Enrich the product data, generate buyer-friendly questions, publish the finder, then copy the storefront widget. Same engine, fewer tabs.</p>
             <div className="mt-8 flex flex-wrap gap-3">
               <button onClick={enrichCatalog} disabled={!products.length || busy !== null} className="inline-flex items-center gap-2 rounded-full bg-lime px-5 py-3 text-xs font-extrabold text-ink disabled:opacity-50">{busy === "enrich" ? <LoaderCircle size={14} className="animate-spin" /> : <Wand2 size={14} />} Enrich catalog</button>
-              <button onClick={generateAndPublishFinder} disabled={!hasLaunchableCatalog || busy !== null} className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-5 py-3 text-xs font-extrabold text-white hover:bg-white/15 disabled:opacity-50">{busy === "generate" ? <LoaderCircle size={14} className="animate-spin" /> : <Rocket size={14} />} Generate & publish finder</button>
+              <button onClick={generateAndPublishFinder} disabled={!quizBlueprint.canGenerate || busy !== null} className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-5 py-3 text-xs font-extrabold text-white hover:bg-white/15 disabled:opacity-50">{busy === "generate" ? <LoaderCircle size={14} className="animate-spin" /> : <Rocket size={14} />} Generate & publish finder</button>
             </div>
             {error && <p className="mt-5 rounded-2xl bg-red-500/15 p-3 text-xs font-bold text-red-100">{error}</p>}
             {notice && <p className="mt-5 rounded-2xl bg-lime/15 p-3 text-xs font-bold text-lime">{notice}</p>}
@@ -268,6 +271,43 @@ export default function LaunchStudioPage() {
                 </div>
               </article>;
             })}
+          </div>
+
+          <div className="mt-6 rounded-[24px] border border-black/[0.07] bg-ink p-5 text-white">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="flex items-center gap-2 text-xs font-extrabold"><BrainCircuit size={14} className="text-lime" /> AI quiz blueprint</p>
+                <p className="mt-1.5 text-[10px] leading-4 text-white/45">Preview the ontology-derived question plan before one-click generation publishes it.</p>
+              </div>
+              <span className={`rounded-full px-3 py-1.5 text-[8px] font-extrabold uppercase ${quizBlueprint.status === "ready" ? "bg-lime text-ink" : quizBlueprint.status === "needs-review" ? "bg-amber-300/20 text-amber-100" : "bg-red-400/15 text-red-100"}`}>{blueprintStatusLabel} · {quizBlueprint.score}%</span>
+            </div>
+            <div className="mt-4 grid grid-cols-3 gap-2 text-center">
+              <div className="rounded-2xl bg-white/[.07] p-3"><p className="text-lg font-extrabold">{quizBlueprint.questions.length}</p><p className="mt-1 text-[8px] font-bold text-white/35">Questions</p></div>
+              <div className="rounded-2xl bg-white/[.07] p-3"><p className="text-lg font-extrabold">{quizBlueprint.topSignals.length}</p><p className="mt-1 text-[8px] font-bold text-white/35">Signals</p></div>
+              <div className="rounded-2xl bg-white/[.07] p-3"><p className="text-lg font-extrabold capitalize">{quizBlueprint.source}</p><p className="mt-1 text-[8px] font-bold text-white/35">Source</p></div>
+            </div>
+            <div className="mt-4 space-y-3">
+              {quizBlueprint.questions.slice(0, 3).map((question, index) => <article key={question.title} className="rounded-2xl bg-white/[.07] p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-[9px] font-extrabold uppercase tracking-wider text-lime">Question {index + 1}</p>
+                    <h3 className="mt-1 text-xs font-extrabold">{question.title}</h3>
+                    <p className="mt-1 text-[9px] leading-4 text-white/40">{question.coverageSummary}</p>
+                  </div>
+                  <span className="rounded-full bg-white/10 px-2 py-1 text-[8px] font-extrabold text-white/35">{question.options.length} answers</span>
+                </div>
+                <div className="mt-3 flex flex-wrap gap-1.5">
+                  {question.options.slice(0, 5).map((option) => {
+                    const tone = option.status === "matched" ? "bg-lime/15 text-lime" : option.status === "preference" ? "bg-blue-400/15 text-blue-100" : "bg-red-400/15 text-red-100";
+                    return <span key={`${question.title}-${option.label}`} className={`rounded-full px-2.5 py-1 text-[8px] font-extrabold ${tone}`}>{option.label} · {option.status === "preference" ? "preference" : `${option.productCount} SKUs`}</span>;
+                  })}
+                </div>
+              </article>)}
+            </div>
+            <div className="mt-4 space-y-2">
+              {quizBlueprint.risks.slice(0, 2).map((risk) => <p key={risk} className="flex items-start gap-2 rounded-2xl bg-amber-300/10 p-3 text-[9px] font-bold leading-4 text-amber-100"><AlertTriangle size={12} className="mt-0.5 shrink-0" />{risk}</p>)}
+              {!quizBlueprint.risks.length && <p className="rounded-2xl bg-lime/10 p-3 text-[9px] font-bold leading-4 text-lime">Blueprint looks strong: enough catalog structure exists for a useful generated finder.</p>}
+            </div>
           </div>
         </section>
 
