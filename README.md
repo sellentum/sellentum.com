@@ -47,6 +47,7 @@ Findly is a compact guided-selling SaaS product for ecommerce brands. A merchant
 - Copyable JavaScript widget that opens a finder, advisor, semantic search or configurator in a lazy-loaded modal iframe or direct inline iframe, with install QA checks and launch handoff packets for generated snippets
 - Public runtime guardrails with bounded JSON bodies, shared rate-limit responses and sanitized analytics metadata for embedded finder, advisor, search, configurator and event APIs
 - Analytics for sessions, journey replay, real period-over-period trends, funnel diagnosis, views, starts, completions, recommendations, buy clicks, selected answers, search/advisor themes, matched intent signals, product demand and zero-party opportunity suggestions
+- Widget attribution analytics for source, medium, campaign, placement, page URL, page title and referrer so merchants can compare storefront launches and campaigns
 - Analytics QA that validates event-contract coverage, session linkage, required metadata, event sequence and product attribution before launch decisions
 - Discovery gap analytics that detect no-result paths, thin recommendation sets, missing shopper language, low-confidence matches and stalled surfaced products
 - Real dashboard command center with period trends, live performance bars, launch score, command queue, milestones and experience mix built from actual workspace data
@@ -123,11 +124,16 @@ Publish a finder or configurator, then copy the generated snippet from **Brand &
   data-label="Find my match"
   data-position="right"
   data-height="780px"
+  data-medium="embed"
+  data-campaign="findly-launch"
+  data-placement="pdp-bottom"
   async
 ></script>
 ```
 
 Set `data-experience` to `finder`, `assistant`, `search`, or `configurator`. Search uses a published finder ID as the catalog context. Set `data-mode` to `modal` for a floating launcher that lazy-loads the iframe only when opened, or `inline` to embed the iframe directly where the script is placed. The widget has no framework dependency and can be used on any HTML storefront.
+
+For attribution, the widget automatically passes the storefront page URL, page title, referrer, launcher position and inferred host source into the iframe. Add optional labels such as `data-source`, `data-medium`, `data-campaign`, `data-placement`, `data-content`, or `data-term` when you want Analytics to compare specific launches.
 
 The public runtime normalizes the saved widget settings before rendering, so brand name, primary colour, widget title, welcome message and button copy are shared across all embedded experiences with safe defaults if a setting is missing.
 
@@ -141,6 +147,7 @@ Import the repository into Vercel, add the variables from `.env.example`, and de
 - `components/` — reusable navigation, shell, modal and state components
 - `lib/store.tsx` — demo/Supabase data adapter
 - `lib/analytics.ts` — session-aware analytics snapshots, period trends and funnel diagnostics
+- `lib/attribution.ts` — widget/source attribution metadata capture and campaign/placement performance reporting
 - `lib/analytics-quality.ts` — event-contract QA for required metadata, session linkage, event ordering and product attribution
 - `lib/commercial-impact.ts` — deterministic assisted-revenue and ROI-opportunity reporting from product recommendation and buy-click events
 - `lib/conversion-playbook.ts` — deterministic merchant optimization actions from funnel, catalog, QA and zero-party intent signals

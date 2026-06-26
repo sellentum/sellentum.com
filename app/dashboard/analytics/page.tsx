@@ -1,12 +1,13 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { AlertTriangle, ArrowDownRight, ArrowUpRight, Check, ChevronDown, CircleDollarSign, Clock3, Eye, GitBranch, ListChecks, MessageCircle, MousePointerClick, PackagePlus, Radar, Search, ShieldAlert, Sparkles, Tags, Trophy, UsersRound, Wrench } from "lucide-react";
+import { AlertTriangle, ArrowDownRight, ArrowUpRight, Check, ChevronDown, CircleDollarSign, Clock3, Eye, GitBranch, Globe2, ListChecks, MapPin, Megaphone, MessageCircle, MousePointerClick, PackagePlus, Radar, Search, ShieldAlert, Sparkles, Tags, Trophy, UsersRound, Wrench } from "lucide-react";
 import { LoadingState } from "@/components/loading-state";
 import { useStore } from "@/lib/store";
 import type { ExperienceType } from "@/lib/types";
 import { buildAnalyticsQualityReport, type AnalyticsQualityCheckStatus, type AnalyticsQualityStatus } from "@/lib/analytics-quality";
 import { buildAnalyticsSnapshot, buildAnalyticsTrends, buildFunnelDiagnosis, countAnalyticsEvents, getAnalyticsPeriods, stageRate } from "@/lib/analytics";
+import { buildAttributionReport, type AttributionActionSeverity } from "@/lib/attribution";
 import { buildCommercialImpactReport, type CommercialImpactPriority, type CommercialImpactStatus } from "@/lib/commercial-impact";
 import { buildDiscoveryGapReport, type DiscoveryGapSeverity } from "@/lib/discovery-gaps";
 import { buildZeroPartyInsights } from "@/lib/insights";
@@ -64,6 +65,13 @@ const commercialPriorityTone: Record<CommercialImpactPriority, string> = {
   low: "bg-lime/35 text-moss",
 };
 
+const attributionActionTone: Record<AttributionActionSeverity, string> = {
+  critical: "border-red-200 bg-red-50 text-red-700",
+  watch: "border-amber-200 bg-amber-50 text-amber-800",
+  info: "border-black/[0.06] bg-[#f7f8f4] text-black/60",
+  win: "border-lime/60 bg-lime/20 text-moss",
+};
+
 function formatDuration(seconds: number) {
   if (seconds < 60) return `${seconds}s`;
   return `${Math.floor(seconds / 60)}m ${seconds % 60}s`;
@@ -111,6 +119,7 @@ export default function AnalyticsPage() {
   const zeroPartyInsights = useMemo(() => buildZeroPartyInsights(filteredEvents, products), [filteredEvents, products]);
   const journeyReport = useMemo(() => buildShopperJourneyReport(filteredEvents, products), [filteredEvents, products]);
   const analyticsQuality = useMemo(() => buildAnalyticsQualityReport(filteredEvents), [filteredEvents]);
+  const attributionReport = useMemo(() => buildAttributionReport(filteredEvents), [filteredEvents]);
   const commercialImpact = useMemo(() => buildCommercialImpactReport(filteredEvents, products), [filteredEvents, products]);
 
   const byDay = useMemo(() => Array.from({ length: rangeDays }, (_, reverseIndex) => {
@@ -194,6 +203,79 @@ export default function AnalyticsPage() {
           );
         })}
       </div>
+
+      <section className="mt-5 grid gap-5 xl:grid-cols-[.72fr_1.28fr]">
+        <div className="rounded-2xl border border-black/[0.07] bg-white p-5 sm:p-7">
+          <div className="flex items-center justify-between">
+            <div><h2 className="text-sm font-extrabold">Attribution command board</h2><p className="mt-1 text-[10px] text-black/35">Which storefront sources, pages and campaigns drive {activeExperienceLabel.toLowerCase()}</p></div>
+            <span className={`rounded-full px-3 py-1.5 text-[9px] font-extrabold uppercase ${attributionReport.status === "actionable" ? "bg-lime/35 text-moss" : attributionReport.status === "needs-labels" ? "bg-amber-50 text-amber-700" : "bg-black/5 text-black/35"}`}>{attributionReport.status.replace("-", " ")}</span>
+          </div>
+          <div className="mt-5 grid grid-cols-4 gap-2">
+            {[
+              ["Attributed", `${attributionReport.summary.attributionRate}%`, Globe2],
+              ["Sources", attributionReport.summary.sources, Megaphone],
+              ["Placements", attributionReport.summary.placements, MapPin],
+              ["Best CVR", `${Math.round(attributionReport.summary.bestConversionRate)}%`, Trophy],
+            ].map(([label, value, Icon]) => {
+              const MetricIcon = Icon as typeof Globe2;
+              return <div key={String(label)} className="rounded-2xl bg-[#f7f8f4] p-3"><MetricIcon size={14} className="text-moss" /><p className="mt-3 text-lg font-extrabold">{String(value)}</p><p className="mt-1 text-[8px] font-bold text-black/30">{String(label)}</p></div>;
+            })}
+          </div>
+          <div className="mt-5 space-y-3">
+            {attributionReport.channels.slice(0, 4).map((channel) => (
+              <article key={channel.id} className="rounded-2xl border border-black/[0.06] bg-[#f7f8f4] p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0"><h3 className="truncate text-xs font-extrabold">{channel.label}</h3><p className="mt-1 truncate text-[9px] font-bold text-black/35">{channel.medium} · {channel.pageTitle || channel.pageUrl}</p></div>
+                  <span className="rounded-full bg-white px-2.5 py-1 text-[8px] font-extrabold text-moss">{channel.score}</span>
+                </div>
+                <div className="mt-3 grid grid-cols-4 gap-1.5 text-center">
+                  {[
+                    ["Views", channel.views],
+                    ["Starts", channel.starts],
+                    ["Done", channel.completions],
+                    ["Clicks", channel.clicks],
+                  ].map(([label, value]) => <span key={String(label)} className="rounded-xl bg-white p-2"><b className="block text-xs">{String(value)}</b><i className="not-italic text-[8px] text-black/35">{String(label)}</i></span>)}
+                </div>
+                <p className="mt-3 text-[10px] font-bold leading-4 text-moss">{channel.recommendation}</p>
+              </article>
+            ))}
+            {!attributionReport.channels.length && <div className="rounded-2xl border border-dashed border-black/10 p-8 text-center"><p className="text-xs font-extrabold">No attributed sessions yet</p><p className="mt-1 text-[10px] leading-4 text-black/35">Install the latest widget snippet to capture source, campaign, placement and page URL automatically.</p></div>}
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-black/[0.07] bg-ink p-6 text-white">
+          <div className="flex items-center justify-between gap-4">
+            <span className="grid h-11 w-11 place-items-center rounded-xl bg-lime text-ink"><Megaphone size={20} /></span>
+            <span className="rounded-full bg-white/10 px-3 py-1.5 text-[9px] font-extrabold uppercase tracking-wider text-white/55">{attributionReport.summary.bestSource}</span>
+          </div>
+          <h2 className="display mt-6 text-3xl">Campaign intelligence</h2>
+          <p className="mt-2 text-xs leading-5 text-white/45">Findly now records UTM-style widget labels plus page URL/referrer context with every public journey event.</p>
+          <div className="mt-6 grid gap-3 xl:grid-cols-[1fr_.9fr]">
+            <div className="space-y-2">
+              {attributionReport.actions.slice(0, 3).map((item) => (
+                <div key={item.id} className={`rounded-2xl border p-4 ${attributionActionTone[item.severity]}`}>
+                  <div className="flex items-start justify-between gap-3"><p className="text-xs font-extrabold text-ink">{item.title}</p><span className="rounded-full bg-white/70 px-2 py-1 text-[8px] font-extrabold uppercase">{item.severity}</span></div>
+                  <p className="mt-2 text-[10px] leading-4 text-black/45">{item.detail}</p>
+                  <p className="mt-2 rounded-xl bg-white/75 px-3 py-2 text-[10px] font-bold leading-4 text-black/55">{item.evidence}</p>
+                  <p className="mt-2 text-[10px] font-bold leading-4 text-moss">{item.recommendation}</p>
+                </div>
+              ))}
+            </div>
+            <div className="rounded-2xl bg-white/[.07] p-4">
+              <h3 className="text-xs font-extrabold">Campaign / placement mix</h3>
+              <div className="mt-4 space-y-2">
+                {[...attributionReport.campaigns.slice(0, 3), ...attributionReport.placements.slice(0, 2)].slice(0, 5).map((channel) => (
+                  <div key={channel.id} className="rounded-xl bg-white/[.07] px-3 py-2">
+                    <div className="flex items-center justify-between gap-3"><p className="truncate text-[10px] font-extrabold">{channel.label}</p><span className="rounded-full bg-lime px-2 py-0.5 text-[8px] font-extrabold text-moss">{Math.round(channel.clickThroughRate)}%</span></div>
+                    <p className="mt-1 text-[8px] font-bold text-white/35">{channel.views} views · {channel.completions} done · {channel.clicks} clicks</p>
+                  </div>
+                ))}
+                {!attributionReport.campaigns.length && <p className="rounded-xl bg-white/[.07] px-3 py-5 text-center text-[10px] leading-4 text-white/35">Campaign labels will appear after widget traffic arrives.</p>}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <section className="mt-5 grid gap-5 xl:grid-cols-[.72fr_1.28fr]">
         <div className="rounded-2xl border border-black/[0.07] bg-ink p-6 text-white">

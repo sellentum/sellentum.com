@@ -349,6 +349,26 @@ const demoConfiguratorMetadata = {
   progress: 100,
 };
 
+function demoAttribution(index: number) {
+  const sources = ["storefront", "spring-email", "paid-social"];
+  const campaigns = ["trail-guide", "city-comfort", "speed-edit"];
+  const placements = ["pdp-bottom", "category-hero", "homepage-advisor"];
+  const source = sources[index % sources.length];
+  const campaign = campaigns[Math.floor(index / 6) % campaigns.length];
+  const placement = placements[Math.floor(index / 3) % placements.length];
+  return {
+    findly_source: source,
+    findly_medium: source === "storefront" ? "embed" : source === "spring-email" ? "email" : "paid-social",
+    findly_campaign: campaign,
+    findly_placement: placement,
+    findly_page_url: `https://store.example/${placement === "pdp-bottom" ? "products/terra-trail" : placement === "category-hero" ? "collections/running" : ""}`,
+    findly_page_title: placement === "pdp-bottom" ? "Terra Trail Runner" : placement === "category-hero" ? "Running collection" : "Homepage",
+    findly_referrer: source === "storefront" ? "https://store.example/" : `https://${source}.example/findly`,
+    findly_embed_mode: placement === "homepage-advisor" ? "modal" : "inline",
+    findly_widget_experience: placement === "homepage-advisor" ? "assistant" : "finder",
+  };
+}
+
 const demoGapDate = new Date();
 demoGapDate.setDate(demoGapDate.getDate() - 1);
 
@@ -363,7 +383,7 @@ export const demoEvents: AnalyticsEvent[] = [
     const isConfigurator = index % 7 === 0;
     const isAssistant = !isConfigurator && index % 11 === 0;
     const isSearch = !isConfigurator && !isAssistant && index % 13 === 0;
-    const sessionMetadata = { session_id: `demo_session_${Math.floor(index / 6)}`, session_started_at: date.toISOString() };
+    const sessionMetadata = { session_id: `demo_session_${Math.floor(index / 6)}`, session_started_at: date.toISOString(), ...demoAttribution(index) };
     const contractMetadata = {
       ...(eventType === "quiz_complete" ? { result_count: 3, recovery_status: "healthy" } : {}),
       ...(eventType === "product_recommended" ? { rank: index % 3 + 1, score: 4 + index % 5, confidence: "high" } : {}),
@@ -396,6 +416,7 @@ export const demoEvents: AnalyticsEvent[] = [
       experience_name: demoQuiz.name,
       session_id: "demo_gap_search",
       session_started_at: demoGapDate.toISOString(),
+      ...demoAttribution(85),
       search_action: "search_submit",
       query: "orthopedic office shoe under £90",
       terms: ["orthopedic", "office"],
@@ -415,6 +436,7 @@ export const demoEvents: AnalyticsEvent[] = [
       experience_name: demoQuiz.name,
       session_id: "demo_gap_finder",
       session_started_at: demoGapDate.toISOString(),
+      ...demoAttribution(86),
       answers: [
         { question: "Where will you wear them most?", answer: "Office comfort" },
         { question: "What’s your comfortable budget?", answer: "Under £50" },

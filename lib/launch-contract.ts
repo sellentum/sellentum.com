@@ -94,19 +94,23 @@ export function buildLaunchContract({
       { name: "data-label", value: config.label, purpose: "Launcher CTA copy." },
       { name: "data-position", value: config.position, purpose: "Modal launcher side on the storefront." },
       { name: "data-height", value: config.height || "780px", purpose: "Inline iframe/modal frame height." },
+      { name: "data-source", value: config.source || "auto storefront host", purpose: "Optional analytics source label; otherwise inferred from the storefront domain." },
+      { name: "data-medium", value: config.medium || "embed", purpose: "Optional analytics medium label for campaign/source reporting." },
+      { name: "data-campaign", value: config.campaign || "optional", purpose: "Optional analytics campaign label for launch attribution." },
+      { name: "data-placement", value: config.placement || "optional", purpose: "Optional analytics placement label such as pdp-bottom or category-hero." },
     ],
     events: [
       {
         event: "widget_view",
         purpose: "Proves the script/frame loaded on the storefront.",
         requiredMetadata: ["experience_type", "experience_id", "session_id"],
-        optionalMetadata: ["catalog_active_products"],
+        optionalMetadata: ["catalog_active_products", "findly_source", "findly_campaign", "findly_placement", "findly_page_url"],
       },
       {
         event: "quiz_start",
         purpose: "Captures shopper start/search/first interaction.",
         requiredMetadata: ["experience_type", "experience_id", "session_id"],
-        optionalMetadata: ["query", "answers", "terms", "selected_options", "recovery_status"],
+        optionalMetadata: ["query", "answers", "terms", "selected_options", "recovery_status", "findly_source", "findly_campaign", "findly_placement"],
       },
       {
         event: "quiz_complete",

@@ -107,6 +107,10 @@ type PreflightPayload = {
     analytics_quality_score: number;
     analytics_quality_issues: number;
     analytics_missing_event_types: number;
+    attribution_events: number;
+    attribution_rate: number;
+    attribution_sources: number;
+    attribution_placements: number;
     sessions: number;
     session_events: number;
     intent_events: number;
@@ -324,6 +328,9 @@ export default function PreflightPage() {
           [`${payload.summary.analytics_quality_score}%`, "Analytics QA"],
           [payload.summary.analytics_quality_issues, "Telemetry issues"],
           [payload.summary.analytics_missing_event_types, "Missing event types"],
+          [`${payload.summary.attribution_rate}%`, "Attribution rate"],
+          [payload.summary.attribution_sources, "Traffic sources"],
+          [payload.summary.attribution_placements, "Widget placements"],
           [payload.summary.sessions, "Sessions"],
           [payload.summary.intent_events, "Intent events"],
           [totals.checks, "Checks run"],

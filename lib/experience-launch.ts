@@ -89,6 +89,9 @@ function buildCard(input: LaunchExperienceInput, experience: WidgetEmbedExperien
     color: input.settings.primary_color,
     label,
     position,
+    medium: "embed",
+    campaign: "findly-launch",
+    placement: `${experience}-launcher`,
   });
   const installReport = buildWidgetInstallReport({
     origin,
@@ -98,6 +101,9 @@ function buildCard(input: LaunchExperienceInput, experience: WidgetEmbedExperien
     color: input.settings.primary_color,
     label,
     position,
+    medium: "embed",
+    campaign: "findly-launch",
+    placement: `${experience}-launcher`,
   });
 
   return {

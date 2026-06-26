@@ -84,7 +84,7 @@ export function buildStorefrontQaRunbook({
         checks: [
           "Paste the snippet before the closing </body> tag or into the test page section.",
           `Confirm ${scriptUrl} returns JavaScript with a 200 response.`,
-          "Check the widget data attributes against the launch contract, especially data-experience and data-id.",
+          "Check the widget data attributes against the launch contract, especially data-experience, data-id and analytics labels such as data-campaign/data-placement.",
         ],
       },
       {

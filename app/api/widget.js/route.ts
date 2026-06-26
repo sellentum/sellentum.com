@@ -15,6 +15,26 @@ export async function GET(request: Request) {
   var height=script.getAttribute('data-height')||'780px';
   var z='2147483000';
   var src='${origin}/'+path+'/'+encodeURIComponent(id)+'?embed=1';
+  var attribution=new URLSearchParams();
+  function addAttribution(key,value){if(value){attribution.set(key,String(value).slice(0,500))}}
+  addAttribution('findly_source',script.getAttribute('data-source')||script.getAttribute('data-utm-source')||window.location.hostname||'storefront');
+  addAttribution('findly_medium',script.getAttribute('data-medium')||script.getAttribute('data-utm-medium')||'embed');
+  addAttribution('findly_campaign',script.getAttribute('data-campaign')||script.getAttribute('data-utm-campaign'));
+  addAttribution('findly_content',script.getAttribute('data-content')||script.getAttribute('data-utm-content'));
+  addAttribution('findly_term',script.getAttribute('data-term')||script.getAttribute('data-utm-term'));
+  addAttribution('findly_placement',script.getAttribute('data-placement')||position);
+  addAttribution('findly_embed_mode',mode);
+  addAttribution('findly_widget_experience',experience);
+  addAttribution('findly_launcher_position',position);
+  addAttribution('findly_page_url',window.location.href.split('#')[0]);
+  addAttribution('findly_page_title',document.title);
+  addAttribution('findly_referrer',document.referrer);
+  if(script.getAttribute('data-utm-source'))addAttribution('utm_source',script.getAttribute('data-utm-source'));
+  if(script.getAttribute('data-utm-medium'))addAttribution('utm_medium',script.getAttribute('data-utm-medium'));
+  if(script.getAttribute('data-utm-campaign'))addAttribution('utm_campaign',script.getAttribute('data-utm-campaign'));
+  if(script.getAttribute('data-utm-content'))addAttribution('utm_content',script.getAttribute('data-utm-content'));
+  if(script.getAttribute('data-utm-term'))addAttribution('utm_term',script.getAttribute('data-utm-term'));
+  var attributionQuery=attribution.toString(); if(attributionQuery){src+='&'+attributionQuery}
   function makeFrame(){
     var frame=document.createElement('iframe');
     frame.title='Findly '+path;

@@ -11,6 +11,12 @@ export type WidgetSnippetConfig = {
   label: string;
   position: WidgetLauncherPosition;
   height?: string;
+  source?: string;
+  medium?: string;
+  campaign?: string;
+  placement?: string;
+  content?: string;
+  term?: string;
 };
 
 export type WidgetInstallCheck = {
@@ -54,6 +60,15 @@ function check(id: string, label: string, detail: string, severity: WidgetInstal
   return { id, label, detail, severity };
 }
 
+function cleanAttribute(value?: string) {
+  return (value || "").trim().replace(/"/g, "&quot;").slice(0, 160);
+}
+
+function optionalAttribute(name: string, value?: string) {
+  const cleaned = cleanAttribute(value);
+  return cleaned ? `\n  ${name}="${cleaned}"` : "";
+}
+
 export function buildWidgetSnippet(config: WidgetSnippetConfig) {
   const origin = cleanOrigin(config.origin);
   const id = config.id || widgetPlaceholderForExperience(config.experience);
@@ -67,6 +82,7 @@ export function buildWidgetSnippet(config: WidgetSnippetConfig) {
   data-label="${config.label}"
   data-position="${config.position}"
   data-height="${height}"
+  data-medium="${cleanAttribute(config.medium || "embed")}"${optionalAttribute("data-source", config.source)}${optionalAttribute("data-campaign", config.campaign)}${optionalAttribute("data-placement", config.placement)}${optionalAttribute("data-content", config.content)}${optionalAttribute("data-term", config.term)}
   async
 ></script>`;
 }
@@ -98,6 +114,9 @@ export function buildWidgetInstallReport(config: WidgetSnippetConfig): WidgetIns
     config.label.trim()
       ? check("label", "Launcher label", `Button label: “${config.label.trim()}”.`, "pass")
       : check("label", "Launcher label", "Add clear launcher copy before installing.", "warning"),
+    config.campaign || config.placement || config.source
+      ? check("attribution", "Analytics attribution", `Traffic will be labelled${config.campaign ? ` as ${config.campaign}` : ""}${config.placement ? ` on ${config.placement}` : ""}.`, "pass")
+      : check("attribution", "Analytics attribution", "No campaign labels set; Findly will infer page URL/source from the storefront.", "warning"),
   ];
 
   return { canInstall: checks.every((item) => item.severity !== "blocker"), targetPath, checks };

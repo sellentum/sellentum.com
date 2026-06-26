@@ -97,6 +97,9 @@ export default function LaunchStudioPage() {
     color: settings.primary_color,
     label: selectedLaunchExperience.launcherLabel,
     position: settings.launcher_position === "bottom-left" ? "left" : "right",
+    medium: "embed",
+    campaign: "findly-launch",
+    placement: `${selectedLaunchExperience.experience}-launcher`,
   };
   const launchContract = buildLaunchContract({
     config: contractConfig,

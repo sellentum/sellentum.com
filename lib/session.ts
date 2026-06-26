@@ -1,3 +1,5 @@
+import { getAttributionMetadata } from "./attribution";
+
 const SESSION_KEY = "findly_anonymous_session";
 
 type StoredSession = {
@@ -33,5 +35,6 @@ export function getSessionMetadata() {
   return {
     session_id: session.id,
     session_started_at: session.startedAt,
+    ...getAttributionMetadata(),
   };
 }

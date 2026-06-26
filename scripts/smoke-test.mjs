@@ -25,7 +25,7 @@ async function assertPage(pathname, expectedText, status = 200) {
 async function assertWidgetScript() {
   const { response, text } = await get("/api/widget.js");
   assert(response.status === 200, `/api/widget.js returned ${response.status}`);
-  for (const token of ["data-experience", "data-mode", "data-id", "assistant", "configurator", "finder", "search", "inline", "ensureFrame"]) {
+  for (const token of ["data-experience", "data-mode", "data-id", "assistant", "configurator", "finder", "search", "inline", "ensureFrame", "findly_source", "findly_campaign", "findly_page_url"]) {
     assert(text.includes(token), `/api/widget.js missing ${token}`);
   }
   assert(text.indexOf("function open(){ensureFrame()") > text.indexOf("function ensureFrame()"), "Modal widget should lazy-load the iframe only when opened");
@@ -159,6 +159,7 @@ function assertSessionAnalytics() {
   const analytics = readFileSync("app/dashboard/analytics/page.tsx", "utf8");
   const analyticsHelpers = readFileSync("lib/analytics.ts", "utf8");
   const analyticsQuality = readFileSync("lib/analytics-quality.ts", "utf8");
+  const attribution = readFileSync("lib/attribution.ts", "utf8");
   const insights = readFileSync("lib/insights.ts", "utf8");
   const journeys = readFileSync("lib/journey-insights.ts", "utf8");
   const discoveryGaps = readFileSync("lib/discovery-gaps.ts", "utf8");
@@ -166,6 +167,7 @@ function assertSessionAnalytics() {
     assert(readFileSync(file, "utf8").includes("getSessionMetadata"), `${file} should attach anonymous session metadata to analytics events`);
   }
   assert(session.includes("findly_anonymous_session"), "Session helper should persist anonymous shopper sessions");
+  assert(session.includes("getAttributionMetadata"), "Session helper should attach widget attribution metadata to every public event");
   assert(analytics.includes("buildAnalyticsSnapshot"), "Analytics dashboard should group events into session-aware snapshots");
   assert(analyticsHelpers.includes("buildAnalyticsTrends"), "Analytics helpers should calculate real period-over-period trends");
   assert(analytics.includes("funnelDiagnosis"), "Analytics dashboard should surface a deterministic funnel diagnosis");
@@ -179,6 +181,10 @@ function assertSessionAnalytics() {
   assert(analytics.includes("buildAnalyticsQualityReport"), "Analytics dashboard should use shared analytics quality QA");
   assert(analytics.includes("Analytics QA"), "Analytics dashboard should expose an analytics QA panel");
   assert(analytics.includes("Event-contract health"), "Analytics dashboard should expose event-contract health checks");
+  assert(analytics.includes("buildAttributionReport"), "Analytics dashboard should use shared attribution reporting");
+  assert(analytics.includes("Attribution command board"), "Analytics dashboard should expose source/campaign attribution");
+  assert(attribution.includes("buildAttributionReport"), "Attribution helper should expose a reusable report builder");
+  assert(attribution.includes("findly_page_url") && attribution.includes("findly_placement"), "Attribution helper should track storefront page and placement labels");
   assert(analyticsQuality.includes("buildAnalyticsQualityReport"), "Analytics quality helper should expose a reusable report builder");
   assert(analyticsQuality.includes("requiredEventFields"), "Analytics quality helper should validate required event metadata");
   assert(analyticsQuality.includes("sessionSequenceIssues"), "Analytics quality helper should validate event sequence integrity");
@@ -268,8 +274,10 @@ function assertLaunchStudioWorkflow() {
   assert(settings.includes("Embed mode"), "Settings should let merchants choose modal or inline embed mode");
   assert(settings.includes("buildWidgetSnippet"), "Settings should use the shared widget snippet helper");
   assert(settings.includes("buildWidgetInstallReport"), "Settings should expose widget install readiness diagnostics");
+  assert(settings.includes("Analytics labels"), "Settings should let merchants label widget source, campaign and placement analytics");
   assert(widgetSnippet.includes("data-mode=\"${config.mode}\""), "Widget snippet helper should include the selected embed mode");
   assert(widgetSnippet.includes("data-experience=\"${config.experience}\""), "Widget snippet helper should include the selected experience type");
+  assert(widgetSnippet.includes("data-campaign") && widgetSnippet.includes("data-placement"), "Widget snippet helper should include optional attribution attributes");
   assert(widgetSnippet.includes("buildWidgetInstallReport"), "Widget snippet helper should expose install QA reporting");
   assert(launchPacket.includes("buildLaunchPacket"), "Launch packet helper should expose reusable handoff generation");
   assert(launchPacket.includes("sourceLabel"), "Launch packet should support non-finder experience labels");
@@ -455,6 +463,7 @@ function assertPreflightReadinessWorkflow() {
   const configuratorQa = readFileSync("lib/configurator-qa.ts", "utf8");
   const explanationGrounding = readFileSync("lib/explanation-grounding.ts", "utf8");
   const analyticsQuality = readFileSync("lib/analytics-quality.ts", "utf8");
+  const attribution = readFileSync("lib/attribution.ts", "utf8");
   const launchReport = readFileSync("lib/launch-readiness-report.ts", "utf8");
   assert(route.includes("analyzeQuizReadiness"), "Preflight should reuse finder publish-readiness diagnostics");
   assert(route.includes("analyzeConfiguratorReadiness"), "Preflight should reuse configurator publish-readiness diagnostics");
@@ -462,12 +471,16 @@ function assertPreflightReadinessWorkflow() {
   assert(route.includes("buildConfiguratorQaReport"), "Preflight should run configurator path QA");
   assert(route.includes("buildExplanationGroundingReport"), "Preflight should run explanation grounding QA");
   assert(route.includes("buildAnalyticsQualityReport"), "Preflight should run analytics quality QA");
+  assert(route.includes("buildAttributionReport"), "Preflight should run widget attribution QA");
   assert(route.includes("buildLaunchReadinessReport"), "Preflight should build a prioritized launch-readiness report");
   assert(route.includes("launch_report"), "Preflight API should expose the launch-readiness report");
   assert(route.includes("Recommendation reliability"), "Preflight should expose a recommendation reliability section");
   assert(route.includes("Configurator path QA"), "Preflight should expose a configurator path QA section");
   assert(route.includes("Explanation grounding"), "Preflight should expose an explanation grounding section");
   assert(route.includes("Analytics quality"), "Preflight should expose an analytics quality section");
+  assert(route.includes("Source attribution"), "Preflight should expose source attribution telemetry checks");
+  assert(page.includes("attribution_rate"), "Preflight page should show attribution summary fields");
+  assert(attribution.includes("buildAttributionReport"), "Attribution helper should expose a reusable report builder");
   assert(route.includes("finder_readiness_blockers"), "Preflight summary should expose finder readiness blockers");
   assert(route.includes("configurator_readiness_blockers"), "Preflight summary should expose configurator readiness blockers");
   assert(route.includes("configurator_qa_score"), "Preflight summary should expose configurator QA score");
@@ -514,6 +527,9 @@ async function assertDeterministicLogic() {
   writeFileSync(compiledAnalyticsQuality, readFileSync(compiledAnalyticsQuality, "utf8")
     .replace('from "./analytics";', 'from "./analytics.js";')
     .replace('from "./utils";', 'from "./utils.js";'));
+  const compiledAttribution = `${compileDir}/lib/attribution.js`;
+  writeFileSync(compiledAttribution, readFileSync(compiledAttribution, "utf8")
+    .replace('from "./analytics";', 'from "./analytics.js";'));
   const compiledRecommendationQa = `${compileDir}/lib/recommendation-qa.js`;
   writeFileSync(compiledRecommendationQa, readFileSync(compiledRecommendationQa, "utf8")
     .replace('from "./finder-flow";', 'from "./finder-flow.js";')
@@ -583,6 +599,7 @@ async function assertDeterministicLogic() {
   const utils = await import(pathToFileURL(`${compileDir}/lib/utils.js`));
   const analytics = await import(pathToFileURL(`${compileDir}/lib/analytics.js`));
   const analyticsQuality = await import(pathToFileURL(`${compileDir}/lib/analytics-quality.js`));
+  const attribution = await import(pathToFileURL(`${compileDir}/lib/attribution.js`));
   const journeyInsights = await import(pathToFileURL(`${compileDir}/lib/journey-insights.js`));
   const finderFlow = await import(pathToFileURL(`${compileDir}/lib/finder-flow.js`));
   const insights = await import(pathToFileURL(`${compileDir}/lib/insights.js`));
@@ -713,6 +730,7 @@ async function assertDeterministicLogic() {
   assert(demo.demoEvents.some((event) => event.metadata?.experience_type === "search" && typeof event.metadata.query === "string"), "Expected seeded search analytics to include shopper query metadata");
   assert(demo.demoEvents.some((event) => Array.isArray(event.metadata?.selected_option_names) && event.metadata.selected_option_names.length), "Expected seeded configurator analytics to include selected option names");
   assert(demo.demoEvents.some((event) => typeof event.metadata?.session_id === "string"), "Expected seeded analytics to include anonymous session metadata");
+  assert(demo.demoEvents.some((event) => typeof event.metadata?.findly_source === "string" && typeof event.metadata?.findly_page_url === "string"), "Expected seeded analytics to include storefront attribution metadata");
   assert(demo.demoEvents.some((event) => event.event_type === "product_recommended" && typeof event.metadata?.rank === "number"), "Expected seeded recommendation analytics to include rank metadata");
   assert(demo.demoEvents.some((event) => event.event_type === "quiz_complete" && typeof event.metadata?.result_count === "number"), "Expected seeded completion analytics to include result count metadata");
 
@@ -745,6 +763,16 @@ async function assertDeterministicLogic() {
   assert(journeyReport.summary.sessions === 2 && journeyReport.summary.completed === 1, "Expected journey report to group events into anonymous sessions");
   assert(journeyReport.summary.abandonedAfterStart === 0 && journeyReport.dropoffs.some((item) => item.stage === "completed"), "Expected journey report to expose deterministic drop-off stages");
   assert(journeyReport.journeys[0].steps.some((step) => step.label.includes("Completed")), "Expected journey report to preserve shopper path steps");
+  const attributionReport = attribution.buildAttributionReport([
+    { id: "attr1", user_id: "demo-user", quiz_id: "quiz_footwear", event_type: "widget_view", metadata: { session_id: "attr-a", experience_type: "finder", experience_id: "quiz_footwear", findly_source: "homepage", findly_campaign: "spring-guide", findly_placement: "hero", findly_page_url: "https://store.example/" }, created_at: "2026-06-25T10:00:00Z" },
+    { id: "attr2", user_id: "demo-user", quiz_id: "quiz_footwear", event_type: "quiz_start", metadata: { session_id: "attr-a", experience_type: "finder", experience_id: "quiz_footwear", findly_source: "homepage", findly_campaign: "spring-guide", findly_placement: "hero", findly_page_url: "https://store.example/" }, created_at: "2026-06-25T10:01:00Z" },
+    { id: "attr3", user_id: "demo-user", quiz_id: "quiz_footwear", event_type: "quiz_complete", metadata: { session_id: "attr-a", experience_type: "finder", experience_id: "quiz_footwear", result_count: 1, findly_source: "homepage", findly_campaign: "spring-guide", findly_placement: "hero", findly_page_url: "https://store.example/" }, created_at: "2026-06-25T10:02:00Z" },
+    { id: "attr4", user_id: "demo-user", quiz_id: "quiz_footwear", product_id: "prod_trail", event_type: "buy_click", metadata: { session_id: "attr-a", experience_type: "finder", experience_id: "quiz_footwear", product_name: "Terra Trail Runner", findly_source: "homepage", findly_campaign: "spring-guide", findly_placement: "hero", findly_page_url: "https://store.example/" }, created_at: "2026-06-25T10:03:00Z" },
+    { id: "attr5", user_id: "demo-user", quiz_id: "quiz_footwear", event_type: "widget_view", metadata: { session_id: "attr-b", experience_type: "finder", experience_id: "quiz_footwear" }, created_at: "2026-06-25T10:04:00Z" },
+    { id: "attr6", user_id: "demo-user", quiz_id: "quiz_footwear", event_type: "quiz_start", metadata: { session_id: "attr-b", experience_type: "finder", experience_id: "quiz_footwear" }, created_at: "2026-06-25T10:05:00Z" },
+  ]);
+  assert(attributionReport.summary.attributionRate === 67 && attributionReport.channels[0]?.source === "homepage", "Expected attribution report to score labelled widget traffic by source");
+  assert(attributionReport.actions.some((item) => item.id === "label-widget-traffic") && attributionReport.actions.some((item) => item.id === "scale-winning-source"), "Expected attribution report to recommend labels and winning-source scale-up");
   const zeroPartyEvents = [
     { id: "z1", user_id: "demo-user", quiz_id: "quiz_footwear", event_type: "quiz_complete", metadata: { session_id: "z1", experience_type: "finder", answers: [{ question: "Where?", answer: "Trails & outdoors" }], matched_reasons: ["trail"], product_name: "Terra Trail Runner" }, created_at: "2026-06-25T10:03:00Z" },
     { id: "z2", user_id: "demo-user", quiz_id: "quiz_footwear", product_id: "prod_trail", event_type: "product_recommended", metadata: { session_id: "z1", experience_type: "finder", product_name: "Terra Trail Runner", matched_reasons: ["trail"] }, created_at: "2026-06-25T10:04:00Z" },
@@ -860,8 +888,8 @@ async function assertDeterministicLogic() {
   const publicCopy = publicExperience.buildPublicExperienceCopy("assistant", normalizedSettings);
   assert(publicCopy.brandName === "Acme Labs" && publicCopy.title === "Find the right setup" && publicCopy.assistantGreeting === "Tell us what matters most.", "Expected public experience copy to reuse merchant widget settings");
 
-  const generatedWidgetSnippet = widgetSnippet.buildWidgetSnippet({ origin: "https://findly.example", experience: "search", mode: "inline", id: "quiz_footwear", color: "#22352a", label: "Search products", position: "right" });
-  assert(generatedWidgetSnippet.includes('data-experience="search"') && generatedWidgetSnippet.includes('data-mode="inline"') && generatedWidgetSnippet.includes('data-id="quiz_footwear"'), "Expected widget helper to generate a complete search embed snippet");
+  const generatedWidgetSnippet = widgetSnippet.buildWidgetSnippet({ origin: "https://findly.example", experience: "search", mode: "inline", id: "quiz_footwear", color: "#22352a", label: "Search products", position: "right", campaign: "spring-guide", placement: "category-hero" });
+  assert(generatedWidgetSnippet.includes('data-experience="search"') && generatedWidgetSnippet.includes('data-mode="inline"') && generatedWidgetSnippet.includes('data-id="quiz_footwear"') && generatedWidgetSnippet.includes('data-campaign="spring-guide"') && generatedWidgetSnippet.includes('data-placement="category-hero"'), "Expected widget helper to generate a complete attributed search embed snippet");
   const blockedInstallReport = widgetSnippet.buildWidgetInstallReport({ origin: "http://store.example", experience: "finder", mode: "modal", color: "#22352a", label: "Find my match", position: "right" });
   assert(!blockedInstallReport.canInstall && blockedInstallReport.checks.some((item) => item.id === "id" && item.severity === "blocker"), "Expected widget install report to block placeholder/missing experience IDs");
   const readyInstallReport = widgetSnippet.buildWidgetInstallReport({ origin: "https://findly.example", experience: "finder", mode: "modal", id: "quiz_footwear", color: "#22352a", label: "Find my match", position: "right" });

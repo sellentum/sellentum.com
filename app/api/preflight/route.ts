@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { demoConfigurator, demoEvents, demoProducts, demoQuiz, demoSettings } from "@/lib/demo-data";
 import { buildAnalyticsQualityReport } from "@/lib/analytics-quality";
+import { buildAttributionReport } from "@/lib/attribution";
 import { getWorkspaceIdentity } from "@/lib/api-auth";
 import { analyzeCatalogIntelligence, type CatalogIntelligenceSeverity } from "@/lib/catalog-intelligence";
 import { buildConfiguratorQaReport } from "@/lib/configurator-qa";
@@ -73,6 +74,14 @@ function hasSessionMetadata(event: AnalyticsEvent) {
   return typeof event.metadata?.session_id === "string" && event.metadata.session_id.length > 0;
 }
 
+function hasAttributionMetadata(event: AnalyticsEvent) {
+  const metadata = event.metadata || {};
+  return typeof metadata.findly_source === "string"
+    || typeof metadata.utm_source === "string"
+    || typeof metadata.findly_page_url === "string"
+    || typeof metadata.findly_placement === "string";
+}
+
 function buildPreflight({ products, quizzes, configurators, events, settings, mode, origin }: {
   products: Product[];
   quizzes: Quiz[];
@@ -91,6 +100,7 @@ function buildPreflight({ products, quizzes, configurators, events, settings, mo
   const recommendationQa = buildRecommendationQaReport(quizzes, products);
   const explanationGrounding = buildExplanationGroundingReport({ products, quizzes, openaiConfigured: Boolean(process.env.OPENAI_API_KEY) });
   const analyticsQuality = buildAnalyticsQualityReport(events);
+  const attribution = buildAttributionReport(events);
   const readyFinders = finderReadiness.filter(({ quiz, report }) => quiz.published && report.canPublish);
   const readyConfigurators = configuratorReadiness.filter(({ configurator, report }) => configurator.published && report.canPublish);
   const publishedFinders = quizzes.filter((quiz) => quiz.published);
@@ -104,6 +114,7 @@ function buildPreflight({ products, quizzes, configurators, events, settings, mo
   const recommendations = events.filter((event) => event.event_type === "product_recommended").length;
   const intentEvents = events.filter(hasIntentMetadata).length;
   const sessionEvents = events.filter(hasSessionMetadata).length;
+  const attributionEvents = events.filter(hasAttributionMetadata).length;
   const sessions = new Set(events.filter(hasSessionMetadata).map((event) => event.metadata!.session_id as string)).size;
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || origin;
 
@@ -331,6 +342,7 @@ function buildPreflight({ products, quizzes, configurators, events, settings, mo
         check("event-volume", "Analytics events", "Views, starts, completions, recommendations and clicks prove the loop is measurable.", events.length ? "pass" : "warn", `${events.length} event${events.length === 1 ? "" : "s"} captured · ${widgetViews} views · ${completions} completions · ${recommendations} recommendations.`, "/dashboard/analytics", "Open analytics"),
         check("session-events", "Session tracking", "Anonymous session IDs let analytics group events into shopper journeys.", sessionEvents ? "pass" : "warn", sessionEvents ? `${sessionEvents} event${sessionEvents === 1 ? "" : "s"} grouped into ${sessions} session${sessions === 1 ? "" : "s"}.` : "No session metadata captured yet; run a fresh widget journey.", "/dashboard/analytics", "Review sessions"),
         check("intent-events", "Intent metadata", "Selected answers, advisor queries and configurator choices power zero-party insights.", intentEvents ? "pass" : "warn", intentEvents ? `${intentEvents} event${intentEvents === 1 ? "" : "s"} include shopper-intent metadata.` : "No answer/query/selection metadata captured yet.", "/dashboard/analytics", "Review intent"),
+        check("source-attribution", "Source attribution", "Widget events should include source, campaign, placement or storefront page context for launch comparisons.", attribution.summary.attributionRate >= 70 ? "pass" : attribution.summary.events ? "warn" : "warn", attribution.summary.events ? `${attribution.summary.attributionRate}% attributed · ${attribution.summary.sources} source${attribution.summary.sources === 1 ? "" : "s"} · ${attribution.summary.placements} placement${attribution.summary.placements === 1 ? "" : "s"}.` : "No widget attribution metadata captured yet; install the latest snippet.", "/dashboard/analytics", "Review attribution"),
       ],
     },
     {
@@ -435,6 +447,10 @@ function buildPreflight({ products, quizzes, configurators, events, settings, mo
       analytics_quality_score: analyticsQuality.score,
       analytics_quality_issues: analyticsQuality.summary.missingRequiredMetadata + analyticsQuality.summary.sequenceIssues + analyticsQuality.summary.productEventsWithoutProduct,
       analytics_missing_event_types: analyticsQuality.missingEventTypes.length,
+      attribution_events: attributionEvents,
+      attribution_rate: attribution.summary.attributionRate,
+      attribution_sources: attribution.summary.sources,
+      attribution_placements: attribution.summary.placements,
       sessions,
       session_events: sessionEvents,
       intent_events: intentEvents,
