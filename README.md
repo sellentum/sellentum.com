@@ -18,6 +18,7 @@ Findly is a compact guided-selling SaaS product for ecommerce brands. A merchant
 - One-click product finder generation from the current catalog
 - Deterministic top-three recommendation engine with budget eligibility filtering, buyer-profile intent scoring and merchant overrides
 - Branch-aware recommendation lab for testing shopper answer paths and inspecting score breakdowns before publishing
+- Synthetic recommendation QA in Launch Preflight to catch no-result and thin-result finder paths before embedding
 - Semantic Search Lab and authenticated search API for testing natural-language product discovery, parsed-term catalog coverage and deterministic tuning guidance over the active catalog
 - OpenAI match explanations with a safe fact-based fallback when no API key is present
 - Conversational product advisor combining semantic similarity, deterministic field signals, hard budget constraints and clarification turns for vague requests
@@ -33,7 +34,7 @@ Findly is a compact guided-selling SaaS product for ecommerce brands. A merchant
 - Copyable JavaScript widget that opens a finder, advisor, semantic search or configurator in a lazy-loaded modal iframe or direct inline iframe, with install QA checks and launch handoff packets for generated snippets
 - Analytics for sessions, journey replay, real period-over-period trends, funnel diagnosis, views, starts, completions, recommendations, buy clicks, selected answers, search/advisor themes, matched intent signals, product demand and zero-party opportunity suggestions
 - Brand, colour, widget copy and launcher-position settings
-- Launch preflight checks for catalog readiness, builder readiness diagnostics, AI/env keys, published experiences, widget setup and analytics coverage
+- Launch preflight checks for catalog readiness, builder readiness diagnostics, synthetic recommendation QA, AI/env keys, published experiences, widget setup and analytics coverage
 - Supabase schema, indexes, triggers and row-level security
 - Fully interactive local demo mode when credentials are absent
 
@@ -126,6 +127,7 @@ Import the repository into Vercel, add the variables from `.env.example`, and de
 - `lib/quiz-generation.ts` — ontology-guided quiz generation fallback and OpenAI grounding summary
 - `lib/quiz-blueprint.ts` — launch-ready preview of generated finder questions, option coverage and catalog risks
 - `lib/finder-flow.ts` — deterministic conditional question routing and server-side answer-path validation
+- `lib/recommendation-qa.ts` — synthetic finder-path recommendation QA for no-result and thin-result launch risks
 - `lib/catalog-import.ts` — flexible CSV header mapping, row validation and import previews
 - `lib/search-engine.ts` — deterministic semantic search ranking, intent parsing, parsed-term catalog coverage and budget eligibility checks
 - `lib/search-tuning.ts` — merchant-facing search tuning guidance from term coverage, weak confidence and budget blockers

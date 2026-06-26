@@ -253,11 +253,18 @@ function assertConfiguratorReadinessWorkflow() {
 function assertPreflightReadinessWorkflow() {
   const route = readFileSync("app/api/preflight/route.ts", "utf8");
   const page = readFileSync("app/dashboard/preflight/page.tsx", "utf8");
+  const recommendationQa = readFileSync("lib/recommendation-qa.ts", "utf8");
   assert(route.includes("analyzeQuizReadiness"), "Preflight should reuse finder publish-readiness diagnostics");
   assert(route.includes("analyzeConfiguratorReadiness"), "Preflight should reuse configurator publish-readiness diagnostics");
+  assert(route.includes("buildRecommendationQaReport"), "Preflight should run synthetic recommendation QA");
+  assert(route.includes("Recommendation reliability"), "Preflight should expose a recommendation reliability section");
   assert(route.includes("finder_readiness_blockers"), "Preflight summary should expose finder readiness blockers");
   assert(route.includes("configurator_readiness_blockers"), "Preflight summary should expose configurator readiness blockers");
+  assert(route.includes("recommendation_qa_score"), "Preflight summary should expose recommendation QA score");
   assert(page.includes("Readiness blockers"), "Preflight page should show readiness blocker counts");
+  assert(page.includes("QA scenarios"), "Preflight page should show recommendation QA scenario counts");
+  assert(recommendationQa.includes("buildRecommendationQaReport"), "Recommendation QA helper should expose a reusable report builder");
+  assert(recommendationQa.includes("auditProductMatches"), "Recommendation QA should use the deterministic product scorer");
 }
 
 async function assertDeterministicLogic() {
@@ -275,6 +282,10 @@ async function assertDeterministicLogic() {
   writeFileSync(compiledJourneyInsights, readFileSync(compiledJourneyInsights, "utf8")
     .replace('from "./analytics";', 'from "./analytics.js";')
     .replace('from "./utils";', 'from "./utils.js";'));
+  const compiledRecommendationQa = `${compileDir}/lib/recommendation-qa.js`;
+  writeFileSync(compiledRecommendationQa, readFileSync(compiledRecommendationQa, "utf8")
+    .replace('from "./finder-flow";', 'from "./finder-flow.js";')
+    .replace('from "./utils";', 'from "./utils.js";'));
 
   const demo = await import(pathToFileURL(`${compileDir}/lib/demo-data.js`));
   const utils = await import(pathToFileURL(`${compileDir}/lib/utils.js`));
@@ -289,6 +300,7 @@ async function assertDeterministicLogic() {
   const quizGeneration = await import(pathToFileURL(`${compileDir}/lib/quiz-generation.js`));
   const quizBlueprint = await import(pathToFileURL(`${compileDir}/lib/quiz-blueprint.js`));
   const quizReadiness = await import(pathToFileURL(`${compileDir}/lib/quiz-readiness.js`));
+  const recommendationQa = await import(pathToFileURL(`${compileDir}/lib/recommendation-qa.js`));
   const ruleCoverage = await import(pathToFileURL(`${compileDir}/lib/rule-coverage.js`));
   const searchEngine = await import(pathToFileURL(`${compileDir}/lib/search-engine.js`));
   const searchTuning = await import(pathToFileURL(`${compileDir}/lib/search-tuning.js`));
@@ -465,6 +477,11 @@ async function assertDeterministicLogic() {
 
   const readyQuiz = quizReadiness.analyzeQuizReadiness(demo.demoQuiz, demo.demoProducts);
   assert(readyQuiz.canPublish && readyQuiz.score >= 80, "Expected seeded demo finder to pass publish-readiness checks");
+  const qaReport = recommendationQa.buildRecommendationQaReport([demo.demoQuiz], demo.demoProducts);
+  assert(qaReport.summary.scenariosChecked >= 2 && qaReport.summary.thinResultScenarios >= 1, "Expected recommendation QA to check multiple seeded finder paths and flag thin result sets");
+  assert(qaReport.scenarios.every((scenario) => scenario.answers.length && scenario.visitedQuestions.length), "Expected recommendation QA scenarios to include answer and question paths");
+  const impossibleQa = recommendationQa.buildRecommendationQaReport([demo.demoQuiz], demo.demoProducts.map((product) => ({ ...product, active: false })));
+  assert(impossibleQa.blockers.length > 0 && impossibleQa.status === "fail", "Expected recommendation QA to fail when no active products can be recommended");
   const trailCoverage = ruleCoverage.getAnswerOptionCoverage(demo.demoQuiz.questions[0].options[0], demo.demoProducts);
   assert(trailCoverage.status === "matched" && trailCoverage.productNames.includes("Terra Trail Runner"), "Expected tag rule coverage to identify matching active products");
   const budgetCoverage = ruleCoverage.getAnswerOptionCoverage(demo.demoQuiz.questions[2].options[0], demo.demoProducts);

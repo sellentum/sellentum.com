@@ -4,6 +4,7 @@ import { getWorkspaceIdentity } from "@/lib/api-auth";
 import { analyzeCatalogIntelligence, type CatalogIntelligenceSeverity } from "@/lib/catalog-intelligence";
 import { analyzeConfiguratorReadiness } from "@/lib/configurator-readiness";
 import { analyzeQuizReadiness } from "@/lib/quiz-readiness";
+import { buildRecommendationQaReport } from "@/lib/recommendation-qa";
 import type { AnalyticsEvent, Configurator, Product, Quiz, WidgetSettings } from "@/lib/types";
 
 type CheckStatus = "pass" | "warn" | "fail";
@@ -80,6 +81,7 @@ function buildPreflight({ products, quizzes, configurators, events, settings, mo
   const catalogIntelligence = analyzeCatalogIntelligence(products);
   const finderReadiness = quizzes.map((quiz) => ({ quiz, report: analyzeQuizReadiness(quiz, products) }));
   const configuratorReadiness = configurators.map((configurator) => ({ configurator, report: analyzeConfiguratorReadiness(configurator, products) }));
+  const recommendationQa = buildRecommendationQaReport(quizzes, products);
   const readyFinders = finderReadiness.filter(({ quiz, report }) => quiz.published && report.canPublish);
   const readyConfigurators = configuratorReadiness.filter(({ configurator, report }) => configurator.published && report.canPublish);
   const publishedFinders = quizzes.filter((quiz) => quiz.published);
@@ -130,6 +132,49 @@ function buildPreflight({ products, quizzes, configurators, events, settings, mo
       ],
     },
     {
+      id: "recommendation-qa",
+      label: "Recommendation reliability",
+      description: "Synthetic shopper paths should return stable, deterministic product recommendations before launch.",
+      checks: [
+        check(
+          "qa-scenarios",
+          "Synthetic shopper scenarios",
+          "Preflight simulates default and alternate starting paths through published finders.",
+          recommendationQa.summary.scenariosChecked ? "pass" : "fail",
+          recommendationQa.summary.scenariosChecked ? `${recommendationQa.summary.scenariosChecked} scenario${recommendationQa.summary.scenariosChecked === 1 ? "" : "s"} checked across ${recommendationQa.summary.quizzesChecked} finder${recommendationQa.summary.quizzesChecked === 1 ? "" : "s"}.` : "No finder scenarios could be checked.",
+          "/dashboard/lab",
+          "Open lab",
+        ),
+        check(
+          "qa-no-results",
+          "No-result paths",
+          "Every checked path should produce at least one eligible product.",
+          recommendationQa.blockers.length ? "fail" : "pass",
+          recommendationQa.blockers.length ? `${recommendationQa.blockers.length} scenario${recommendationQa.blockers.length === 1 ? "" : "s"} returned no eligible products. First issue: ${recommendationQa.blockers[0]?.quizName} · ${recommendationQa.blockers[0]?.label}.` : "All checked paths return at least one eligible recommendation.",
+          "/dashboard/lab",
+          "Debug paths",
+        ),
+        check(
+          "qa-thin-results",
+          "Recommendation depth",
+          "Healthy paths should usually have up to three eligible alternatives for comparison.",
+          recommendationQa.warnings.length ? "warn" : recommendationQa.summary.scenariosChecked ? "pass" : "fail",
+          recommendationQa.warnings.length ? `${recommendationQa.warnings.length} scenario${recommendationQa.warnings.length === 1 ? "" : "s"} had a thin recommendation set.` : recommendationQa.summary.scenariosChecked ? "Checked paths have enough eligible products for confident top-three recommendations." : "No recommendation depth could be checked.",
+          "/dashboard/lab",
+          "Review scoring",
+        ),
+        check(
+          "qa-score",
+          "Recommendation QA score",
+          "Summarizes whether synthetic paths produce launch-safe results.",
+          recommendationQa.score >= 80 ? "pass" : recommendationQa.score >= 50 ? "warn" : "fail",
+          `${recommendationQa.score}% of checked scenarios passed. ${recommendationQa.summary.passingScenarios}/${recommendationQa.summary.scenariosChecked} scenarios are healthy.`,
+          "/dashboard/lab",
+          "Test logic",
+        ),
+      ],
+    },
+    {
       id: "embed-analytics",
       label: "Embed and measurement",
       description: "The installed widget should be brand-safe and measurable.",
@@ -166,6 +211,10 @@ function buildPreflight({ products, quizzes, configurators, events, settings, mo
       finder_readiness_warnings: finderWarnings.length,
       configurator_readiness_blockers: blockedPublishedConfigurators.length,
       configurator_readiness_warnings: configuratorWarnings.length,
+      recommendation_qa_score: recommendationQa.score,
+      recommendation_qa_scenarios: recommendationQa.summary.scenariosChecked,
+      recommendation_qa_blockers: recommendationQa.blockers.length,
+      recommendation_qa_warnings: recommendationQa.warnings.length,
       analytics_events: events.length,
       sessions,
       session_events: sessionEvents,

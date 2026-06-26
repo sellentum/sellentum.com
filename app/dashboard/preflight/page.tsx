@@ -43,6 +43,10 @@ type PreflightPayload = {
     finder_readiness_warnings: number;
     configurator_readiness_blockers: number;
     configurator_readiness_warnings: number;
+    recommendation_qa_score: number;
+    recommendation_qa_scenarios: number;
+    recommendation_qa_blockers: number;
+    recommendation_qa_warnings: number;
     analytics_events: number;
     sessions: number;
     session_events: number;
@@ -153,6 +157,10 @@ export default function PreflightPage() {
           [payload.summary.catalog_intelligence_warnings, "Catalog warnings"],
           [payload.summary.ready_finders, "Ready finders"],
           [payload.summary.ready_configurators, "Ready configurators"],
+          [`${payload.summary.recommendation_qa_score}%`, "QA score"],
+          [payload.summary.recommendation_qa_scenarios, "QA scenarios"],
+          [payload.summary.recommendation_qa_blockers, "QA blockers"],
+          [payload.summary.recommendation_qa_warnings, "QA warnings"],
           [payload.summary.finder_readiness_blockers + payload.summary.configurator_readiness_blockers, "Readiness blockers"],
           [payload.summary.finder_readiness_warnings + payload.summary.configurator_readiness_warnings, "Readiness warnings"],
           [payload.summary.analytics_events, "Analytics events"],
