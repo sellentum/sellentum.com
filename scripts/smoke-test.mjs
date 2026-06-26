@@ -115,6 +115,7 @@ function assertLaunchStudioWorkflow() {
   const generator = readFileSync("app/api/quizzes/generate/route.ts", "utf8");
   const quizGeneration = readFileSync("lib/quiz-generation.ts", "utf8");
   const settings = readFileSync("app/dashboard/settings/page.tsx", "utf8");
+  const widgetSnippet = readFileSync("lib/widget-snippet.ts", "utf8");
   const shell = readFileSync("components/dashboard-shell.tsx", "utf8");
   const overview = readFileSync("app/dashboard/page.tsx", "utf8");
   assert(page.includes("/api/catalog/enrich"), "Launch Studio should call catalog enrichment");
@@ -124,10 +125,14 @@ function assertLaunchStudioWorkflow() {
   assert(generator.includes("buildOntologyQuizSuggestion"), "Quiz generation route should use ontology-guided deterministic fallback");
   assert(quizGeneration.includes("buildCatalogOntology"), "Quiz generation helper should derive questions from the catalog ontology");
   assert(page.includes("quiz.published = true"), "Launch Studio should publish the generated finder");
-  assert(page.includes("data-experience=\"finder\""), "Launch Studio should produce a finder widget snippet");
-  assert(page.includes("data-mode=\"modal\""), "Launch Studio should produce a lazy modal widget snippet");
+  assert(page.includes("buildWidgetSnippet"), "Launch Studio should use the shared widget snippet helper");
+  assert(page.includes("Embed QA checklist"), "Launch Studio should expose widget install QA checks");
   assert(settings.includes("Embed mode"), "Settings should let merchants choose modal or inline embed mode");
-  assert(settings.includes("data-mode=\"${embedMode}\""), "Settings widget snippet should include the selected embed mode");
+  assert(settings.includes("buildWidgetSnippet"), "Settings should use the shared widget snippet helper");
+  assert(settings.includes("buildWidgetInstallReport"), "Settings should expose widget install readiness diagnostics");
+  assert(widgetSnippet.includes("data-mode=\"${config.mode}\""), "Widget snippet helper should include the selected embed mode");
+  assert(widgetSnippet.includes("data-experience=\"${config.experience}\""), "Widget snippet helper should include the selected experience type");
+  assert(widgetSnippet.includes("buildWidgetInstallReport"), "Widget snippet helper should expose install QA reporting");
   assert(page.includes("/dashboard/preflight"), "Launch Studio should link to production preflight");
   assert(shell.includes("/dashboard/launch"), "Dashboard navigation should expose Launch Studio");
   assert(overview.includes("/dashboard/launch"), "Dashboard overview should route quick-start work through Launch Studio");
@@ -163,7 +168,7 @@ function assertSemanticSearchWorkflow() {
   assert(publicPage.includes("explanation_source"), "Public search analytics should record explanation source");
   assert(publicPage.includes("report.intent.coverage"), "Public search should render term coverage chips from the shared search report");
   assert(settings.includes("<option value=\"search\">Semantic search</option>"), "Settings should expose semantic search as an embeddable experience");
-  assert(settings.includes("data-experience=\"${embedType}\""), "Settings snippet should support search through the generic experience field");
+  assert(settings.includes("WidgetEmbedExperience"), "Settings snippet should support search through the generic experience field");
   assert(eventsRoute.includes("requestedType === \"search\""), "Analytics route should preserve search experience metadata");
   assert(utils.includes("value === \"search\""), "Experience type inference should recognise search events");
   assert(shell.includes("/dashboard/search"), "Dashboard navigation should expose Search Lab");
@@ -255,6 +260,7 @@ async function assertDeterministicLogic() {
   const ruleCoverage = await import(pathToFileURL(`${compileDir}/lib/rule-coverage.js`));
   const searchEngine = await import(pathToFileURL(`${compileDir}/lib/search-engine.js`));
   const searchTuning = await import(pathToFileURL(`${compileDir}/lib/search-tuning.js`));
+  const widgetSnippet = await import(pathToFileURL(`${compileDir}/lib/widget-snippet.js`));
   const configuratorReadiness = await import(pathToFileURL(`${compileDir}/lib/configurator-readiness.js`));
 
   const answers = [
@@ -389,6 +395,13 @@ async function assertDeterministicLogic() {
   assert(tuningReport.score < 80 && tuningReport.opportunities.some((item) => item.severity === "critical"), "Expected search tuning to produce critical guidance for missing terms");
   const healthyTuningReport = searchTuning.buildSearchTuningReport(trailSearch);
   assert(healthyTuningReport.counts.covered > 0 && healthyTuningReport.opportunities.length, "Expected search tuning to summarize healthy catalog-backed terms");
+
+  const generatedWidgetSnippet = widgetSnippet.buildWidgetSnippet({ origin: "https://findly.example", experience: "search", mode: "inline", id: "quiz_footwear", color: "#22352a", label: "Search products", position: "right" });
+  assert(generatedWidgetSnippet.includes('data-experience="search"') && generatedWidgetSnippet.includes('data-mode="inline"') && generatedWidgetSnippet.includes('data-id="quiz_footwear"'), "Expected widget helper to generate a complete search embed snippet");
+  const blockedInstallReport = widgetSnippet.buildWidgetInstallReport({ origin: "http://store.example", experience: "finder", mode: "modal", color: "#22352a", label: "Find my match", position: "right" });
+  assert(!blockedInstallReport.canInstall && blockedInstallReport.checks.some((item) => item.id === "id" && item.severity === "blocker"), "Expected widget install report to block placeholder/missing experience IDs");
+  const readyInstallReport = widgetSnippet.buildWidgetInstallReport({ origin: "https://findly.example", experience: "finder", mode: "modal", id: "quiz_footwear", color: "#22352a", label: "Find my match", position: "right" });
+  assert(readyInstallReport.canInstall && readyInstallReport.targetPath === "/finder/quiz_footwear", "Expected widget install report to pass for a complete finder embed");
 
   const readyQuiz = quizReadiness.analyzeQuizReadiness(demo.demoQuiz, demo.demoProducts);
   assert(readyQuiz.canPublish && readyQuiz.score >= 80, "Expected seeded demo finder to pass publish-readiness checks");

@@ -7,6 +7,7 @@ import { LoadingState } from "@/components/loading-state";
 import { useStore } from "@/lib/store";
 import type { GeneratedQuizSuggestion, Product, ProductInput } from "@/lib/types";
 import { slugify, uid } from "@/lib/utils";
+import { buildWidgetInstallReport, buildWidgetSnippet } from "@/lib/widget-snippet";
 
 type BusyAction = "enrich" | "generate" | "copy" | null;
 
@@ -62,7 +63,24 @@ export default function LaunchStudioPage() {
   const hasLaunchableCatalog = activeProducts.length >= 2;
   const hasLaunchableFinder = Boolean(liveFinder && liveFinder.questions.length > 0);
   const launchScore = [hasLaunchableCatalog, enrichedPercent >= 60, hasLaunchableFinder].filter(Boolean).length;
-  const snippet = `<script\n  src="${origin}/api/widget.js"\n  data-experience="finder"\n  data-mode="modal"\n  data-id="${finderForSnippet?.id || "YOUR_FINDER_ID"}"\n  data-color="${settings.primary_color}"\n  data-label="${settings.button_text}"\n  data-position="${settings.launcher_position === "bottom-left" ? "left" : "right"}"\n  data-height="780px"\n  async\n></script>`;
+  const snippet = buildWidgetSnippet({
+    origin,
+    experience: "finder",
+    mode: "modal",
+    id: finderForSnippet?.id || "YOUR_FINDER_ID",
+    color: settings.primary_color,
+    label: settings.button_text,
+    position: settings.launcher_position === "bottom-left" ? "left" : "right",
+  });
+  const installReport = buildWidgetInstallReport({
+    origin,
+    experience: "finder",
+    mode: "modal",
+    id: finderForSnippet?.id,
+    color: settings.primary_color,
+    label: settings.button_text,
+    position: settings.launcher_position === "bottom-left" ? "left" : "right",
+  });
 
   async function enrichCatalog() {
     if (!products.length) return;
@@ -232,6 +250,18 @@ export default function LaunchStudioPage() {
             <button onClick={copySnippet} disabled={!finderForSnippet || busy !== null} className="btn-secondary !px-3 !py-2 text-xs">{busy === "copy" ? <LoaderCircle size={13} className="animate-spin" /> : copied ? <Check size={13} /> : <Clipboard size={13} />}{copied ? "Copied" : "Copy"}</button>
           </div>
           <pre className="min-h-[220px] overflow-x-auto bg-ink p-5 text-[10px] leading-5 text-lime/80"><code>{snippet}</code></pre>
+          <div className="border-t border-black/[0.06] bg-[#f8f8f4] p-5">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-xs font-extrabold">Embed QA checklist</p>
+              <span className={`rounded-full px-2.5 py-1 text-[8px] font-extrabold uppercase ${installReport.canInstall ? "bg-lime/35 text-moss" : "bg-amber-50 text-amber-700"}`}>{installReport.canInstall ? "Ready" : "Needs attention"}</span>
+            </div>
+            <div className="mt-3 grid gap-2 sm:grid-cols-2">
+              {installReport.checks.slice(0, 4).map((item) => <div key={item.id} className={`rounded-xl px-3 py-2 ${item.severity === "pass" ? "bg-lime/20" : item.severity === "warning" ? "bg-amber-50" : "bg-red-50"}`}>
+                <p className="text-[9px] font-extrabold">{item.label}</p>
+                <p className="mt-0.5 text-[8px] font-bold leading-3 text-black/35">{item.detail}</p>
+              </div>)}
+            </div>
+          </div>
           <div className="grid gap-3 p-5 sm:grid-cols-3">
             {finderForSnippet && <Link href={`/finder/${finderForSnippet.slug || finderForSnippet.id}`} target="_blank" className="btn-primary justify-center !px-3 !py-2.5 text-xs"><ExternalLink size={13} /> Preview finder</Link>}
             <Link href="/dashboard/lab" className="btn-secondary justify-center !px-3 !py-2.5 text-xs"><ShieldCheck size={13} /> Test logic</Link>
