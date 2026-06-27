@@ -72,6 +72,7 @@ Findly is a compact guided-selling SaaS product for ecommerce brands. A merchant
 - Conversion playbook that turns analytics quality, funnel rates, discovery gaps, catalog health and product demand into prioritized merchant actions
 - Experiment planner that turns funnel, channel, attribution and discovery signals into controlled post-launch tests with metrics, guardrails, success criteria and rollback plans
 - Commercial impact reporting that estimates assisted product value, unclicked recommendation value, demand coverage and ROI opportunities from recommendation and buy-click events
+- Returns & Fit Intelligence that detects wrong-fit risk from catalog gaps, thin/no-result journeys, stalled recommendations, compatibility guardrails and missing pre-purchase questions
 - Brand, colour, widget copy and launcher-position settings
 - Launch preflight checks for catalog readiness, shopper-language coverage, builder readiness diagnostics, configurator path QA, synthetic recommendation QA, AI/env keys, published experiences, widget setup, analytics coverage and telemetry quality
 - Prioritized launch-readiness report that turns preflight checks into a scored production plan with owners, evidence, effort and next actions
@@ -169,6 +170,7 @@ Import the repository into Vercel, add the variables from `.env.example`, and de
 - `lib/attribution.ts` — widget/source attribution metadata capture and campaign/placement performance reporting
 - `lib/analytics-quality.ts` — event-contract QA for required metadata, session linkage, event ordering and product attribution
 - `lib/commercial-impact.ts` — deterministic assisted-revenue and ROI-opportunity reporting from product recommendation and buy-click events
+- `lib/returns-intelligence.ts` and `app/dashboard/returns` — return-prevention intelligence from fit-language gaps, product friction, compatibility rules, question guardrails and support-safe scripts
 - `lib/conversion-playbook.ts` — deterministic merchant optimization actions from funnel, catalog, QA and zero-party intent signals
 - `lib/experiments.ts` and `app/dashboard/experiments` — deterministic post-launch experiment planner for launcher copy, journey friction, result trust, semantic search, configurator and attribution tests
 - `lib/dashboard-command-center.ts` — overview-page command center combining analytics, catalog intelligence, readiness, recommendation QA and discovery gaps

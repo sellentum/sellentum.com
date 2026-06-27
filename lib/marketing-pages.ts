@@ -109,6 +109,16 @@ export const platformPages = [
     demoHref: "/dashboard/personas",
     demoLabel: "Open Persona Studio",
   },
+  {
+    slug: "returns-fit-intelligence",
+    eyebrow: "Returns & fit intelligence",
+    title: "Prevent wrong-fit purchases before they become returns.",
+    description: "Findly reads catalog completeness, finder guardrails, compatibility rules, no-result paths, thin recommendations and stalled product clicks to show where shoppers need stronger fit guidance before checkout.",
+    points: ["Product return-risk proxy", "Fit and compatibility friction signals", "Pre-purchase question guardrails", "Support-safe prevention scripts"],
+    proof: ["Risk scoring comes from catalog and journey evidence, not guesses", "Merchants get concrete product, finder and configurator fixes", "The MVP does not need enterprise return-feed integrations to prevent obvious wrong-fit paths"],
+    demoHref: "/dashboard/returns",
+    demoLabel: "Open Returns & Fit",
+  },
 ] as const;
 
 export const platformPageMap = new Map<string, (typeof platformPages)[number]>(platformPages.map((page) => [page.slug, page]));

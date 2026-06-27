@@ -660,6 +660,29 @@ function assertCommercialImpactWorkflow() {
   assert(commercialImpact.includes("demandCoverageRate"), "Commercial impact helper should calculate catalog demand coverage");
 }
 
+function assertReturnsIntelligenceWorkflow() {
+  const page = readFileSync("app/dashboard/returns/page.tsx", "utf8");
+  const helper = readFileSync("lib/returns-intelligence.ts", "utf8");
+  const shell = readFileSync("components/dashboard-shell.tsx", "utf8");
+  const overview = readFileSync("app/dashboard/page.tsx", "utf8");
+  const readme = readFileSync("README.md", "utf8");
+  const marketing = readFileSync("lib/marketing-pages.ts", "utf8");
+  assert(helper.includes("buildReturnsIntelligenceReport"), "Returns Intelligence helper should expose a reusable report builder");
+  assert(helper.includes("buildDiscoveryGapReport"), "Returns Intelligence should reuse discovery-gap evidence");
+  assert(helper.includes("buildCommercialImpactReport"), "Returns Intelligence should reuse commercial click-through evidence");
+  assert(helper.includes("buildConfiguratorQaReport"), "Returns Intelligence should reuse configurator compatibility QA");
+  assert(helper.includes("Findly Returns & Fit Intelligence packet"), "Returns Intelligence should generate a copyable packet");
+  assert(page.includes("Returns & Fit Intelligence"), "Returns dashboard should expose the dashboard title");
+  assert(page.includes("Product return-risk map"), "Returns dashboard should show product risk mapping");
+  assert(page.includes("Pre-purchase question guardrails"), "Returns dashboard should show question guardrails");
+  assert(page.includes("Support-safe scripts"), "Returns dashboard should show support-safe scripts");
+  assert(page.includes("Copy fit packet"), "Returns dashboard should let merchants copy the packet");
+  assert(shell.includes("/dashboard/returns"), "Dashboard navigation should expose Returns & Fit");
+  assert(overview.includes("/dashboard/returns"), "Dashboard overview should expose Returns & Fit");
+  assert(readme.includes("Returns & Fit Intelligence"), "README should document Returns & Fit Intelligence");
+  assert(marketing.includes("returns-fit-intelligence"), "Platform marketing pages should include Returns & Fit Intelligence");
+}
+
 function assertSemanticSearchWorkflow() {
   const route = readFileSync("app/api/search/route.ts", "utf8");
   const publicRoute = readFileSync("app/api/public/search/[id]/route.ts", "utf8");
@@ -1038,6 +1061,14 @@ async function assertDeterministicLogic() {
   const compiledCommercialImpact = `${compileDir}/lib/commercial-impact.js`;
   writeFileSync(compiledCommercialImpact, readFileSync(compiledCommercialImpact, "utf8")
     .replace('from "./analytics";', 'from "./analytics.js";'));
+  const compiledReturnsIntelligence = `${compileDir}/lib/returns-intelligence.js`;
+  writeFileSync(compiledReturnsIntelligence, readFileSync(compiledReturnsIntelligence, "utf8")
+    .replace('from "./analytics";', 'from "./analytics.js";')
+    .replace('from "./commercial-impact";', 'from "./commercial-impact.js";')
+    .replace('from "./configurator-qa";', 'from "./configurator-qa.js";')
+    .replace('from "./discovery-gaps";', 'from "./discovery-gaps.js";')
+    .replace('from "./insights";', 'from "./insights.js";')
+    .replace('from "@/lib/utils";', 'from "./utils.js";'));
   const compiledPersonaStudio = `${compileDir}/lib/persona-studio.js`;
   writeFileSync(compiledPersonaStudio, readFileSync(compiledPersonaStudio, "utf8")
     .replace('from "./insights";', 'from "./insights.js";')
@@ -1144,6 +1175,7 @@ async function assertDeterministicLogic() {
   const configuratorReadiness = await import(pathToFileURL(`${compileDir}/lib/configurator-readiness.js`));
   const conversionPlaybook = await import(pathToFileURL(`${compileDir}/lib/conversion-playbook.js`));
   const commercialImpact = await import(pathToFileURL(`${compileDir}/lib/commercial-impact.js`));
+  const returnsIntelligence = await import(pathToFileURL(`${compileDir}/lib/returns-intelligence.js`));
   const personaStudio = await import(pathToFileURL(`${compileDir}/lib/persona-studio.js`));
   const merchandisingStudio = await import(pathToFileURL(`${compileDir}/lib/merchandising-studio.js`));
   const catalogPipeline = await import(pathToFileURL(`${compileDir}/lib/catalog-pipeline.js`));
@@ -1363,6 +1395,12 @@ async function assertDeterministicLogic() {
   assert(impactReport.topProducts.length && impactReport.actions.length && impactReport.confidence.includes("not checkout-order attribution"), "Expected commercial impact report to expose product paths, actions and confidence boundaries");
   const emptyImpactReport = commercialImpact.buildCommercialImpactReport([], demo.demoProducts);
   assert(emptyImpactReport.status === "empty" && emptyImpactReport.actions.some((action) => action.id === "capture-first-impact-session"), "Expected empty commercial impact report to guide first revenue proof actions");
+  const returnsReport = returnsIntelligence.buildReturnsIntelligenceReport({ products: demo.demoProducts, quizzes: [demo.demoQuiz], configurators: [demo.demoConfigurator], events: demo.demoEvents });
+  assert(returnsReport.products.length === demo.demoProducts.length && returnsReport.summary.activeProducts === demo.demoProducts.length, "Expected Returns Intelligence to score active products");
+  assert(returnsReport.frictionSignals.some((signal) => signal.id === "compatibility-guardrails" || signal.id === "missing-fit-language"), "Expected Returns Intelligence to expose fit or compatibility friction signals");
+  assert(returnsReport.questionGaps.length && returnsReport.scripts.length && returnsReport.packet.includes("Findly Returns & Fit Intelligence packet"), "Expected Returns Intelligence to generate question guardrails, scripts and a copyable packet");
+  const emptyReturnsReport = returnsIntelligence.buildReturnsIntelligenceReport({ products: [], quizzes: [], configurators: [], events: [] });
+  assert(emptyReturnsReport.status === "empty" && emptyReturnsReport.actions.some((action) => action.id === "import-catalog"), "Expected empty Returns Intelligence report to guide catalog import");
 
   const importPreview = catalogImport.normalizeCatalogImportRows([
     { title: "Trail Shoe", "sale price": "£1,299.50", collection: "Footwear", attributes: "Grip|Waterproof", keywords: "trail,wet", benefits: "wet-weather protection|outdoor confidence", "semantic text": "Rain-ready trail grip for weekend hikes", link: "store.example/trail" },
@@ -1728,6 +1766,7 @@ async function main() {
   await assertPage("/platform/merchandising-controls", "Tune recommendation pressure");
   await assertPage("/platform/shopper-personas", "Turn zero-party signals");
   await assertPage("/platform/widget-studio", "Launch every guided experience");
+  await assertPage("/platform/returns-fit-intelligence", "Prevent wrong-fit purchases");
   await assertPage("/industries", "Industries");
   await assertPage("/resources", "Demo the product discovery loop");
   await assertPage("/finder/quiz_footwear", "Preparing your product guide");
@@ -1762,6 +1801,7 @@ async function main() {
   assertWorkspaceSnapshotWorkflow();
   assertExperimentPlannerWorkflow();
   assertCommercialImpactWorkflow();
+  assertReturnsIntelligenceWorkflow();
   assertSemanticSearchWorkflow();
   assertAdvisorStudioWorkflow();
   assertAttributeStudioWorkflow();
