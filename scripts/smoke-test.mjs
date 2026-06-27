@@ -218,6 +218,28 @@ function assertPersonaStudioWorkflow() {
   assert(marketing.includes("shopper-personas"), "Platform marketing pages should include shopper personas");
 }
 
+function assertMerchandisingStudioWorkflow() {
+  const page = readFileSync("app/dashboard/merchandising/page.tsx", "utf8");
+  const helper = readFileSync("lib/merchandising-studio.ts", "utf8");
+  const shell = readFileSync("components/dashboard-shell.tsx", "utf8");
+  const overview = readFileSync("app/dashboard/page.tsx", "utf8");
+  const readme = readFileSync("README.md", "utf8");
+  const marketing = readFileSync("lib/marketing-pages.ts", "utf8");
+  assert(helper.includes("buildMerchandisingStudioReport"), "Merchandising Studio helper should expose a reusable report builder");
+  assert(helper.includes("buildZeroPartyInsights"), "Merchandising Studio should use zero-party product demand evidence");
+  assert(helper.includes("recommendation_overrides"), "Merchandising Studio should inspect finder override controls");
+  assert(helper.includes("Findly merchandising packet"), "Merchandising Studio should generate a copyable packet");
+  assert(page.includes("Merchandising Studio"), "Merchandising Studio page should expose the dashboard title");
+  assert(page.includes("Current controls"), "Merchandising Studio page should show current controls");
+  assert(page.includes("Product demand lanes"), "Merchandising Studio page should show product demand lanes");
+  assert(page.includes("Opportunity queue"), "Merchandising Studio page should show deterministic opportunities");
+  assert(page.includes("Copy merchandising packet"), "Merchandising Studio page should let merchants copy the packet");
+  assert(shell.includes("/dashboard/merchandising"), "Dashboard navigation should expose Merchandising Studio");
+  assert(overview.includes("/dashboard/merchandising"), "Dashboard overview should expose Merchandising Studio");
+  assert(readme.includes("Merchandising Studio"), "README should document Merchandising Studio");
+  assert(marketing.includes("merchandising-controls"), "Platform marketing pages should include merchandising controls");
+}
+
 function assertPublicRuntimeGuardrails() {
   const guard = readFileSync("lib/public-runtime-guard.ts", "utf8");
   const rateLimit = readFileSync("lib/rate-limit.ts", "utf8");
@@ -971,6 +993,9 @@ async function assertDeterministicLogic() {
     .replace('from "./insights";', 'from "./insights.js";')
     .replace('from "./journey-insights";', 'from "./journey-insights.js";')
     .replace('from "./utils";', 'from "./utils.js";'));
+  const compiledMerchandisingStudio = `${compileDir}/lib/merchandising-studio.js`;
+  writeFileSync(compiledMerchandisingStudio, readFileSync(compiledMerchandisingStudio, "utf8")
+    .replace('from "./insights";', 'from "./insights.js";'));
   const compiledStarterKits = `${compileDir}/lib/starter-kits.js`;
   writeFileSync(compiledStarterKits, readFileSync(compiledStarterKits, "utf8")
     .replace('from "@/lib/utils";', 'from "./utils.js";'));
@@ -1065,6 +1090,7 @@ async function assertDeterministicLogic() {
   const conversionPlaybook = await import(pathToFileURL(`${compileDir}/lib/conversion-playbook.js`));
   const commercialImpact = await import(pathToFileURL(`${compileDir}/lib/commercial-impact.js`));
   const personaStudio = await import(pathToFileURL(`${compileDir}/lib/persona-studio.js`));
+  const merchandisingStudio = await import(pathToFileURL(`${compileDir}/lib/merchandising-studio.js`));
   const starterKitHelpers = await import(pathToFileURL(`${compileDir}/lib/starter-kits.js`));
   const decisionGraph = await import(pathToFileURL(`${compileDir}/lib/decision-graph.js`));
   const launchChannels = await import(pathToFileURL(`${compileDir}/lib/launch-channels.js`));
@@ -1116,6 +1142,16 @@ async function assertDeterministicLogic() {
   assert(excluded.every((match) => match.product.id !== "prod_trail"), "Expected an excluded product to be removed from recommendations");
   const overrideAudit = utils.auditProductMatches(demo.demoProducts, answers, [{ id: "override_boost_cloud", product_id: "prod_cloud", action: "boost", weight: 10, note: "Comfort campaign" }]);
   assert(overrideAudit.some((audit) => audit.product.id === "prod_cloud" && audit.signals.some((signal) => signal.note.includes("Comfort campaign"))), "Expected override audits to expose merchandising signals");
+  const merchandisingReport = merchandisingStudio.buildMerchandisingStudioReport({ products: demo.demoProducts, quizzes: [demo.demoQuiz], events: demo.demoEvents });
+  assert(merchandisingReport.controls.some((control) => control.action === "boost" && control.productName === "Terra Trail Runner"), "Expected Merchandising Studio to inventory finder boost controls");
+  assert(merchandisingReport.lanes.some((lane) => lane.recommended > 0 || lane.clicks > 0), "Expected Merchandising Studio to connect product demand lanes to analytics");
+  assert(merchandisingReport.packet.includes("Findly merchandising packet") && merchandisingReport.guardrails.some((guardrail) => guardrail.label === "Hard filters still win"), "Expected Merchandising Studio to generate a packet and deterministic guardrails");
+  const staleMerchandisingReport = merchandisingStudio.buildMerchandisingStudioReport({
+    products: demo.demoProducts,
+    quizzes: [{ ...demo.demoQuiz, recommendation_overrides: [{ id: "override_missing", product_id: "missing-product", action: "pin", weight: 5, note: "Old launch" }] }],
+    events: [],
+  });
+  assert(staleMerchandisingReport.status === "needs-attention" && staleMerchandisingReport.opportunities.some((item) => item.id === "repair-stale-controls"), "Expected Merchandising Studio to flag stale override controls");
   const traceReport = recommendationTrace.buildRecommendationTraceReport({ quiz: demo.demoQuiz, products: demo.demoProducts, answers, audits });
   assert(traceReport.topProduct?.productId === "prod_trail" && traceReport.summary.includes("Terra Trail Runner"), "Expected recommendation trace to explain the deterministic winning product");
   assert(traceReport.products.some((product) => product.status === "blocked") && traceReport.tuningActions.length, "Expected recommendation trace to include blocked products and tuning actions");
@@ -1622,6 +1658,7 @@ async function main() {
   await assertPage("/", "Turn product choice");
   await assertPage("/platform", "Findly platform");
   await assertPage("/platform/configurators", "Visual configurators");
+  await assertPage("/platform/merchandising-controls", "Tune recommendation pressure");
   await assertPage("/platform/shopper-personas", "Turn zero-party signals");
   await assertPage("/industries", "Industries");
   await assertPage("/resources", "Demo the product discovery loop");
@@ -1638,6 +1675,7 @@ async function main() {
   assertExplanationRuntimeSafety();
   assertSessionAnalytics();
   assertPersonaStudioWorkflow();
+  assertMerchandisingStudioWorkflow();
   assertPublicRuntimeGuardrails();
   assertLaunchStudioWorkflow();
   assertDashboardCommandCenterWorkflow();

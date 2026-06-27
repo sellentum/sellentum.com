@@ -35,6 +35,7 @@ Findly is a compact guided-selling SaaS product for ecommerce brands. A merchant
 - Deterministic top-three recommendation engine with budget eligibility filtering, buyer-profile intent scoring and merchant overrides
 - Branch-aware recommendation lab for testing shopper answer paths, inspecting score breakdowns and copying a deterministic decision trace before publishing
 - Scenario coverage suite in the recommendation lab that sweeps likely finder paths, branch routing, answer coverage, product coverage and blocked/thin recommendation risks before launch
+- Merchandising Studio that audits finder pins, boosts and exclusions against product demand, stale controls, stalled products and invisible SKUs before merchants tune live ranking
 - Deterministic no-result recovery that explains blocked finder paths and suggests safer next-step adjustments instead of dead-ending shoppers
 - Synthetic recommendation QA in Launch Preflight to catch no-result and thin-result finder paths before embedding
 - Semantic Search Lab and authenticated search API for testing natural-language product discovery, parsed-term catalog coverage and deterministic tuning guidance over the active catalog
@@ -188,6 +189,7 @@ Import the repository into Vercel, add the variables from `.env.example`, and de
 - `lib/flow-studio.ts` and `app/dashboard/flow-studio` — visual finder flow canvas, answer route map, route QA and copyable flow packet
 - `lib/recommendation-qa.ts` — synthetic finder-path recommendation QA for no-result and thin-result launch risks
 - `lib/scenario-coverage.ts` — bounded branch-aware finder scenario QA with answer, route and product coverage scoring
+- `lib/merchandising-studio.ts` and `app/dashboard/merchandising` — deterministic merchandising control center for pins, boosts, exclusions, product demand lanes and copyable override packets
 - `lib/recommendation-recovery.ts` — deterministic shopper-facing recovery guidance for no-result and thin-result finder paths
 - `lib/catalog-import.ts` — flexible CSV header mapping, row validation and import previews
 - `lib/search-engine.ts` — deterministic benefit-aware semantic search ranking, intent parsing, parsed-term catalog coverage and budget eligibility checks

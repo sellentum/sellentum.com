@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Archive, BarChart3, BookOpenCheck, Bot, Boxes, BrainCircuit, ChevronDown, ClipboardCheck, ExternalLink, FlaskConical, GalleryVerticalEnd, GitBranch, GitPullRequestArrow, Globe2, Handshake, HelpCircle, Layers3, LayoutDashboard, LayoutTemplate, LogOut, Megaphone, Menu, MessageCircle, Network, PackagePlus, RadioTower, Rocket, Search, Settings, ShieldCheck, Sparkles, Target, UsersRound, X } from "lucide-react";
+import { Archive, BarChart3, BookOpenCheck, Bot, Boxes, BrainCircuit, ChevronDown, ClipboardCheck, ExternalLink, FlaskConical, GalleryVerticalEnd, GitBranch, GitPullRequestArrow, Globe2, Handshake, HelpCircle, Layers3, LayoutDashboard, LayoutTemplate, LogOut, Megaphone, Menu, MessageCircle, Network, PackagePlus, RadioTower, Rocket, Search, Settings, ShieldCheck, SlidersHorizontal, Sparkles, Target, UsersRound, X } from "lucide-react";
 import { useState } from "react";
 import { Logo } from "@/components/logo";
 import { createClient } from "@/lib/supabase/client";
@@ -31,6 +31,7 @@ const nav = [
   { href: "/dashboard/quizzes", label: "Product finders", icon: BookOpenCheck },
   { href: "/dashboard/configurators", label: "Configurators", icon: PackagePlus },
   { href: "/dashboard/lab", label: "Recommendation lab", icon: FlaskConical },
+  { href: "/dashboard/merchandising", label: "Merchandising", icon: SlidersHorizontal },
   { href: "/dashboard/advisor", label: "Advisor Studio", icon: Bot },
   { href: "/dashboard/search", label: "Search lab", icon: Search },
   { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },

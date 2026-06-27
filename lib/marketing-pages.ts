@@ -70,6 +70,16 @@ export const platformPages = [
     demoLabel: "View analytics",
   },
   {
+    slug: "merchandising-controls",
+    eyebrow: "Merchandising controls",
+    title: "Tune recommendation pressure without giving up determinism.",
+    description: "Audit pins, boosts and exclusions against product demand, stale catalog references, stalled products and invisible SKUs before changing a live finder.",
+    points: ["Pin, boost and exclude audit", "Product demand lanes", "Stale-control detection", "Copyable merchandising packet"],
+    proof: ["Hard filters still run before ranking controls", "AI explanations do not choose products", "Winners and stalled products are separated before merchants add pressure"],
+    demoHref: "/dashboard/merchandising",
+    demoLabel: "Open Merchandising Studio",
+  },
+  {
     slug: "shopper-personas",
     eyebrow: "Shopper personas",
     title: "Turn zero-party signals into launchable buyer segments.",
