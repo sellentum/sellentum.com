@@ -9,6 +9,7 @@ Findly is a compact guided-selling SaaS product for ecommerce brands. A merchant
 - Product catalog CRUD plus CSV upload with flexible header aliases, row-level validation and import preview (`name`, `price`, and `category` are required; buyer needs/search text are optional discovery fields)
 - AI catalog enrichment with normalized attributes, buyer needs, semantic search text and optional OpenAI embeddings
 - Catalog Pipeline Center that governs import contracts, enrichment coverage, semantic readiness, downstream consumers, field coverage and copyable catalog handoff packets
+- Availability Guard Center that proves active products, Buy Now URLs, imagery and runtime references are safe before recommendations reach shoppers
 - Catalog intelligence scoring for enrichment coverage, semantic-search readiness, matching signals, product media and commerce links
 - Attribute Studio for normalizing messy specs, aliases, materials, price bands and shopper-benefit language before they power discovery
 - Ontology map for inspecting category clusters, buyer needs, tags, features, spec-to-benefit translations, thin signals and AI-ready quiz question ideas
@@ -185,6 +186,7 @@ Import the repository into Vercel, add the variables from `.env.example`, and de
 - `lib/persona-studio.ts` and `app/dashboard/personas` — shopper persona segmentation from zero-party signals, product affinities, source coverage and copyable activation packets
 - `lib/discovery-gaps.ts` — deterministic analytics intelligence for no-result paths, missing terms, thin results and stalled product recommendations
 - `lib/catalog-pipeline.ts` and `app/dashboard/catalog-pipeline` — ingestion, enrichment, semantic-readiness and downstream-consumer control center for the product truth layer
+- `lib/availability-guard.ts` and `app/dashboard/availability` — availability guardrails for active products, Buy Now URLs, stale runtime references, inactive demand and recommendation safety
 - `lib/catalog-benefits.ts` — deterministic spec-to-benefit translation for shopper-friendly ontology insights and question ideas
 - `lib/catalog-intelligence.ts` — catalog health scoring for enrichment coverage, matching signals, semantic text, media and commerce links
 - `lib/attribute-studio.ts` and `app/dashboard/attributes` — catalog normalization workbench for canonical attributes, raw aliases, spec cleanup tasks and copyable attribute packets

@@ -20,6 +20,16 @@ export const platformPages = [
     demoLabel: "Open pipeline",
   },
   {
+    slug: "availability-guard",
+    eyebrow: "Availability Guard",
+    title: "Keep unavailable products out of every recommendation path.",
+    description: "Findly checks active product state, Buy Now URLs, imagery, merchandising overrides, configurator product links and analytics references before products reach shoppers.",
+    points: ["Active catalog guardrails", "Buy Now URL coverage", "Stale runtime references", "Copyable availability packet"],
+    proof: ["AI explanations only run after deterministic product eligibility", "Inactive products are excluded from public runtimes", "Merchants can repair stale launch references before campaigns scale"],
+    demoHref: "/dashboard/availability",
+    demoLabel: "Open Availability Guard",
+  },
+  {
     slug: "guided-selling",
     eyebrow: "Guided selling",
     title: "Turn your best salesperson’s questions into a digital product finder.",

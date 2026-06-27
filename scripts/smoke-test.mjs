@@ -936,6 +936,28 @@ function assertCatalogPipelineWorkflow() {
   assert(marketing.includes("catalog-pipeline"), "Platform marketing pages should include Catalog Pipeline");
 }
 
+function assertAvailabilityGuardWorkflow() {
+  const page = readFileSync("app/dashboard/availability/page.tsx", "utf8");
+  const helper = readFileSync("lib/availability-guard.ts", "utf8");
+  const shell = readFileSync("components/dashboard-shell.tsx", "utf8");
+  const overview = readFileSync("app/dashboard/page.tsx", "utf8");
+  const readme = readFileSync("README.md", "utf8");
+  const marketing = readFileSync("lib/marketing-pages.ts", "utf8");
+  assert(helper.includes("buildAvailabilityGuardReport"), "Availability Guard helper should expose a reusable report builder");
+  assert(helper.includes("buildCommercialImpactReport"), "Availability Guard should connect availability to assisted value");
+  assert(helper.includes("unavailableDemandProducts"), "Availability Guard should detect unavailable products with demand");
+  assert(helper.includes("configuratorLinkIssues") && helper.includes("overrideIssues") && helper.includes("orphanAnalyticsEvents"), "Availability Guard should audit runtime references");
+  assert(helper.includes("Findly Availability Guard packet"), "Availability Guard should generate a copyable packet");
+  assert(page.includes("Availability Guard Center"), "Availability Guard page should expose the dashboard title");
+  assert(page.includes("Product availability map"), "Availability Guard page should show product availability");
+  assert(page.includes("Runtime reference audit"), "Availability Guard page should show runtime references");
+  assert(page.includes("Copy availability packet"), "Availability Guard page should let merchants copy the packet");
+  assert(shell.includes("/dashboard/availability"), "Dashboard navigation should expose Availability Guard");
+  assert(overview.includes("/dashboard/availability"), "Dashboard overview should expose Availability Guard");
+  assert(readme.includes("Availability Guard Center"), "README should document Availability Guard");
+  assert(marketing.includes("availability-guard"), "Platform marketing pages should include Availability Guard");
+}
+
 function assertQuizReadinessWorkflow() {
   const page = readFileSync("app/dashboard/quizzes/page.tsx", "utf8");
   const readiness = readFileSync("lib/quiz-readiness.ts", "utf8");
@@ -1186,6 +1208,11 @@ async function assertDeterministicLogic() {
   writeFileSync(compiledCatalogPipeline, readFileSync(compiledCatalogPipeline, "utf8")
     .replace('from "./catalog-intelligence";', 'from "./catalog-intelligence.js";')
     .replace('from "./insights";', 'from "./insights.js";'));
+  const compiledAvailabilityGuard = `${compileDir}/lib/availability-guard.js`;
+  writeFileSync(compiledAvailabilityGuard, readFileSync(compiledAvailabilityGuard, "utf8")
+    .replace('from "./analytics";', 'from "./analytics.js";')
+    .replace('from "./commercial-impact";', 'from "./commercial-impact.js";')
+    .replace('from "./utils";', 'from "./utils.js";'));
   const compiledStarterKits = `${compileDir}/lib/starter-kits.js`;
   writeFileSync(compiledStarterKits, readFileSync(compiledStarterKits, "utf8")
     .replace('from "@/lib/utils";', 'from "./utils.js";'));
@@ -1292,6 +1319,7 @@ async function assertDeterministicLogic() {
   const personaStudio = await import(pathToFileURL(`${compileDir}/lib/persona-studio.js`));
   const merchandisingStudio = await import(pathToFileURL(`${compileDir}/lib/merchandising-studio.js`));
   const catalogPipeline = await import(pathToFileURL(`${compileDir}/lib/catalog-pipeline.js`));
+  const availabilityGuard = await import(pathToFileURL(`${compileDir}/lib/availability-guard.js`));
   const starterKitHelpers = await import(pathToFileURL(`${compileDir}/lib/starter-kits.js`));
   const decisionGraph = await import(pathToFileURL(`${compileDir}/lib/decision-graph.js`));
   const launchChannels = await import(pathToFileURL(`${compileDir}/lib/launch-channels.js`));
@@ -1554,6 +1582,19 @@ async function assertDeterministicLogic() {
   assert(pipelineReport.stages.some((stage) => stage.id === "import-contract") && pipelineReport.sources.some((source) => source.id === "csv-import"), "Expected Catalog Pipeline to expose import stages and CSV source contracts");
   assert(pipelineReport.fieldCoverage.some((field) => field.id === "signals" && field.coverage > 0), "Expected Catalog Pipeline to summarize field coverage");
   assert(pipelineReport.packet.includes("Findly catalog pipeline packet") && pipelineReport.consumers.some((consumer) => consumer.label === "Product finders"), "Expected Catalog Pipeline to generate a handoff packet and downstream consumers");
+  const availabilityReport = availabilityGuard.buildAvailabilityGuardReport({ products: demo.demoProducts, quizzes: [demo.demoQuiz], configurators: [demo.demoConfigurator], events: demo.demoEvents });
+  assert(availabilityReport.summary.activeProducts === demo.demoProducts.length && availabilityReport.summary.commerceUrlCoverage === 100, "Expected Availability Guard to verify seeded active products and Buy Now URLs");
+  assert(availabilityReport.checks.some((check) => check.id === "runtime-references" && check.status === "pass"), "Expected Availability Guard to pass seeded runtime references");
+  assert(availabilityReport.packet.includes("Findly Availability Guard packet"), "Expected Availability Guard to generate a copyable packet");
+  const unavailableProduct = { ...demo.demoProducts[0], active: false, product_url: "" };
+  const brokenAvailabilityReport = availabilityGuard.buildAvailabilityGuardReport({
+    products: [unavailableProduct, ...demo.demoProducts.slice(1)],
+    quizzes: [demo.demoQuiz],
+    configurators: [demo.demoConfigurator],
+    events: [{ id: "event_unavailable_product", user_id: demo.DEMO_USER_ID, quiz_id: demo.demoQuiz.id, product_id: unavailableProduct.id, event_type: "product_recommended", metadata: { product_name: unavailableProduct.name }, created_at: new Date().toISOString() }],
+  });
+  assert(brokenAvailabilityReport.status === "needs-attention" && brokenAvailabilityReport.summary.unavailableDemandProducts > 0, "Expected Availability Guard to flag demand for inactive products");
+  assert(brokenAvailabilityReport.actions.some((action) => action.id === "resolve-unavailable-demand") && brokenAvailabilityReport.summary.configuratorLinkIssues > 0, "Expected Availability Guard to prioritize inactive demand and configurator link repair");
   const thinCatalogReport = catalogIntelligence.analyzeCatalogIntelligence([{ ...demo.demoProducts[0], id: "thin_product", description: "", features: [], tags: [], image_url: "", product_url: "", search_text: "", buyer_needs: [] }]);
   assert(!thinCatalogReport.score || thinCatalogReport.blockers.some((item) => item.id === "catalog-size" || item.id === "matching-signals"), "Expected thin catalog to expose launch blockers");
   const emptyPipelineReport = catalogPipeline.buildCatalogPipelineReport({ products: [], quizzes: [], configurators: [], events: [] });
@@ -1901,6 +1942,7 @@ async function main() {
   await assertPage("/", "Turn product choice");
   await assertPage("/platform", "Findly platform");
   await assertPage("/platform/catalog-pipeline", "Govern imports");
+  await assertPage("/platform/availability-guard", "Keep unavailable products");
   await assertPage("/platform/configurators", "Visual configurators");
   await assertPage("/platform/compatibility-matrix", "Model dependency rules");
   await assertPage("/platform/merchandising-controls", "Tune recommendation pressure");
@@ -1954,6 +1996,7 @@ async function main() {
   assertAttributeStudioWorkflow();
   assertCatalogImportWorkflow();
   assertCatalogPipelineWorkflow();
+  assertAvailabilityGuardWorkflow();
   assertQuizReadinessWorkflow();
   assertConfiguratorReadinessWorkflow();
   assertPreflightReadinessWorkflow();

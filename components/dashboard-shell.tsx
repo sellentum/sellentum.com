@@ -26,6 +26,7 @@ const nav = [
   { href: "/dashboard/experiments", label: "Experiments", icon: Target },
   { href: "/dashboard/templates", label: "Templates", icon: LayoutTemplate },
   { href: "/dashboard/products", label: "Products", icon: Boxes },
+  { href: "/dashboard/availability", label: "Availability guard", icon: ShieldCheck },
   { href: "/dashboard/catalog-pipeline", label: "Catalog pipeline", icon: Database },
   { href: "/dashboard/attributes", label: "Attribute Studio", icon: Layers3 },
   { href: "/dashboard/ontology", label: "Ontology map", icon: Network },
