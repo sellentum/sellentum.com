@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { BarChart3, BookOpenCheck, Boxes, BrainCircuit, ChevronDown, ClipboardCheck, ExternalLink, FlaskConical, Globe2, HelpCircle, LayoutDashboard, LayoutTemplate, LogOut, Megaphone, Menu, Network, PackagePlus, Rocket, Search, Settings, Sparkles, Target, X } from "lucide-react";
+import { BarChart3, BookOpenCheck, Boxes, BrainCircuit, ChevronDown, ClipboardCheck, ExternalLink, FlaskConical, GitPullRequestArrow, Globe2, HelpCircle, LayoutDashboard, LayoutTemplate, LogOut, Megaphone, Menu, Network, PackagePlus, Rocket, Search, Settings, Sparkles, Target, X } from "lucide-react";
 import { useState } from "react";
 import { Logo } from "@/components/logo";
 import { createClient } from "@/lib/supabase/client";
@@ -14,6 +14,7 @@ const nav = [
   { href: "/dashboard/launch", label: "Launch Studio", icon: Rocket },
   { href: "/dashboard/channels", label: "Launch channels", icon: Megaphone },
   { href: "/dashboard/storefront-sandbox", label: "Storefront QA", icon: Globe2 },
+  { href: "/dashboard/release-center", label: "Release Center", icon: GitPullRequestArrow },
   { href: "/dashboard/experiments", label: "Experiments", icon: Target },
   { href: "/dashboard/templates", label: "Templates", icon: LayoutTemplate },
   { href: "/dashboard/products", label: "Products", icon: Boxes },

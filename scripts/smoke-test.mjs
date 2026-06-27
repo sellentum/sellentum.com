@@ -386,6 +386,25 @@ function assertStorefrontSandboxWorkflow() {
   assert(readme.includes("Storefront QA sandbox"), "README should document Storefront QA sandbox");
 }
 
+function assertReleaseCenterWorkflow() {
+  const page = readFileSync("app/dashboard/release-center/page.tsx", "utf8");
+  const helper = readFileSync("lib/release-center.ts", "utf8");
+  const shell = readFileSync("components/dashboard-shell.tsx", "utf8");
+  const overview = readFileSync("app/dashboard/page.tsx", "utf8");
+  const readme = readFileSync("README.md", "utf8");
+  assert(helper.includes("buildReleaseCandidate"), "Release Center helper should expose a reusable release candidate builder");
+  assert(helper.includes("decisionFromGates"), "Release Center should produce a go/review/no-go decision");
+  assert(helper.includes("rollbackPlan"), "Release Center should produce a rollback plan");
+  assert(helper.includes("Findly release candidate"), "Release Center should generate copyable release notes");
+  assert(page.includes("buildReleaseCandidate"), "Release Center page should use the shared release candidate builder");
+  assert(page.includes("Release gates"), "Release Center page should show launch gates");
+  assert(page.includes("Rollback plan"), "Release Center page should show rollback plan");
+  assert(page.includes("Copy release notes"), "Release Center page should let merchants copy release notes");
+  assert(shell.includes("/dashboard/release-center"), "Dashboard navigation should expose Release Center");
+  assert(overview.includes("/dashboard/release-center"), "Dashboard overview should expose Release Center");
+  assert(readme.includes("Release Center"), "README should document Release Center");
+}
+
 function assertExperimentPlannerWorkflow() {
   const page = readFileSync("app/dashboard/experiments/page.tsx", "utf8");
   const helper = readFileSync("lib/experiments.ts", "utf8");
@@ -713,6 +732,17 @@ async function assertDeterministicLogic() {
     .replace('from "./attribution";', 'from "./attribution.js";')
     .replace('from "./discovery-gaps";', 'from "./discovery-gaps.js";')
     .replace('from "./launch-channels";', 'from "./launch-channels.js";'));
+  const compiledReleaseCenter = `${compileDir}/lib/release-center.js`;
+  writeFileSync(compiledReleaseCenter, readFileSync(compiledReleaseCenter, "utf8")
+    .replace('from "./analytics-quality";', 'from "./analytics-quality.js";')
+    .replace('from "./catalog-intelligence";', 'from "./catalog-intelligence.js";')
+    .replace('from "./configurator-readiness";', 'from "./configurator-readiness.js";')
+    .replace('from "./decision-graph";', 'from "./decision-graph.js";')
+    .replace('from "./experiments";', 'from "./experiments.js";')
+    .replace('from "./launch-channels";', 'from "./launch-channels.js";')
+    .replace('from "./quiz-readiness";', 'from "./quiz-readiness.js";')
+    .replace('from "./recommendation-qa";', 'from "./recommendation-qa.js";')
+    .replace('from "./storefront-sandbox";', 'from "./storefront-sandbox.js";'));
 
   const demo = await import(pathToFileURL(`${compileDir}/lib/demo-data.js`));
   const utils = await import(pathToFileURL(`${compileDir}/lib/utils.js`));
@@ -760,6 +790,7 @@ async function assertDeterministicLogic() {
   const launchChannels = await import(pathToFileURL(`${compileDir}/lib/launch-channels.js`));
   const storefrontSandbox = await import(pathToFileURL(`${compileDir}/lib/storefront-sandbox.js`));
   const experiments = await import(pathToFileURL(`${compileDir}/lib/experiments.js`));
+  const releaseCenter = await import(pathToFileURL(`${compileDir}/lib/release-center.js`));
 
   const answers = [
     { questionId: "q_use", question: "Where?", optionId: "o_trail", answer: "Trails & outdoors", matchType: "tag", matchValue: "trail", weight: 5 },
@@ -1111,6 +1142,24 @@ async function assertDeterministicLogic() {
   assert(experimentReport.guardrails.some((guardrail) => guardrail.id === "deterministic-selection" && guardrail.status === "pass"), "Expected experiment planner to include deterministic-selection guardrails");
   assert(experimentReport.packet.includes("Findly experiment plan") && experimentReport.packet.includes("Rollback:"), "Expected experiment planner to generate a copyable packet");
 
+  const releaseCandidate = releaseCenter.buildReleaseCandidate({
+    origin: "https://findly.example",
+    settings: demo.demoSettings,
+    products: demo.demoProducts,
+    quizzes: [demo.demoQuiz],
+    configurators: [demo.demoConfigurator],
+    events: [
+      ...demo.demoEvents,
+      ...channelEvents.map((event) => ({ ...event, metadata: { ...event.metadata, session_id: "release-session", experience_id: "quiz_footwear" } })),
+    ],
+    generatedAt: new Date("2026-06-25T12:00:00Z"),
+  });
+  assert(releaseCandidate.id === "findly-20260625" && releaseCandidate.gates.length >= 8, "Expected Release Center to build a dated release candidate with launch gates");
+  assert(["go", "review", "no-go"].includes(releaseCandidate.decision) && releaseCandidate.score >= 0, "Expected release candidate to produce a go/no-go decision and score");
+  assert(releaseCandidate.scope.some((item) => item.label === "Launch channels") && releaseCandidate.summary.installReadyChannels >= 1, "Expected release candidate to include launch channel scope");
+  assert(releaseCandidate.rollbackPlan.length >= 5 && releaseCandidate.releaseNotes.includes("Rollback plan"), "Expected release candidate to include rollback notes");
+  assert(releaseCandidate.releaseNotes.includes("Findly release candidate") && releaseCandidate.releaseNotes.includes("Launch gates"), "Expected release candidate to generate copyable release notes");
+
   assert(starterKitHelpers.starterKits.length >= 3, "Expected multiple vertical starter kits");
   const firstStarterKit = starterKitHelpers.starterKits[0];
   const starterReadiness = starterKitHelpers.buildStarterKitReadiness(firstStarterKit);
@@ -1229,6 +1278,7 @@ async function main() {
   assertDecisionGraphWorkflow();
   assertLaunchChannelsWorkflow();
   assertStorefrontSandboxWorkflow();
+  assertReleaseCenterWorkflow();
   assertExperimentPlannerWorkflow();
   assertCommercialImpactWorkflow();
   assertSemanticSearchWorkflow();
