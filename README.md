@@ -24,6 +24,7 @@ Findly is a compact guided-selling SaaS product for ecommerce brands. A merchant
 - Storefront QA runbook for staging install, shopper-journey proof, telemetry verification, recovery-path testing and rollback planning
 - Ontology-guided finder generation that uses category clusters, repeated buyer needs and product features before falling back to OpenAI copy
 - Visual finder builder with questions, answer options, optional conditional branching, weights, tag/category/feature/budget rules, per-answer catalog coverage and publish-readiness diagnostics
+- Flow Studio workbench that turns finder questions, answer routes, branch skips and deterministic route QA into a visual no-code canvas
 - Finder merchandising controls to pin, boost or exclude specific products without handing selection to AI
 - One-click product finder generation from the current catalog
 - Deterministic top-three recommendation engine with budget eligibility filtering, buyer-profile intent scoring and merchant overrides
@@ -173,6 +174,7 @@ Import the repository into Vercel, add the variables from `.env.example`, and de
 - `lib/quiz-generation.ts` — ontology-guided quiz generation fallback and OpenAI grounding summary
 - `lib/quiz-blueprint.ts` — launch-ready preview of generated finder questions, option coverage and catalog risks
 - `lib/finder-flow.ts` — deterministic conditional question routing and server-side answer-path validation
+- `lib/flow-studio.ts` and `app/dashboard/flow-studio` — visual finder flow canvas, answer route map, route QA and copyable flow packet
 - `lib/recommendation-qa.ts` — synthetic finder-path recommendation QA for no-result and thin-result launch risks
 - `lib/scenario-coverage.ts` — bounded branch-aware finder scenario QA with answer, route and product coverage scoring
 - `lib/recommendation-recovery.ts` — deterministic shopper-facing recovery guidance for no-result and thin-result finder paths

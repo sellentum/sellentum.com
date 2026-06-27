@@ -348,6 +348,27 @@ function assertDecisionGraphWorkflow() {
   assert(readme.includes("Decision graph workbench"), "README should document the decision graph workbench");
 }
 
+function assertFlowStudioWorkflow() {
+  const page = readFileSync("app/dashboard/flow-studio/page.tsx", "utf8");
+  const helper = readFileSync("lib/flow-studio.ts", "utf8");
+  const shell = readFileSync("components/dashboard-shell.tsx", "utf8");
+  const overview = readFileSync("app/dashboard/page.tsx", "utf8");
+  const readme = readFileSync("README.md", "utf8");
+  assert(helper.includes("buildFlowStudioReport"), "Flow Studio helper should expose a reusable report builder");
+  assert(helper.includes("answerToFinderAnswer") && helper.includes("buildFinderQuestionPath"), "Flow Studio should use the same branch resolver as the finder runtime");
+  assert(helper.includes("getAnswerOptionCoverage"), "Flow Studio should audit answer rule coverage");
+  assert(helper.includes("buildScenarioCoverageReport"), "Flow Studio should include deterministic route QA");
+  assert(helper.includes("Findly visual flow studio packet"), "Flow Studio should generate a copyable flow packet");
+  assert(page.includes("buildFlowStudioReport"), "Flow Studio page should use the shared helper");
+  assert(page.includes("Visual flow canvas"), "Flow Studio page should render a visual flow canvas");
+  assert(page.includes("Answer route map"), "Flow Studio page should expose the answer route map");
+  assert(page.includes("Route QA"), "Flow Studio page should expose route QA");
+  assert(page.includes("Copy flow packet"), "Flow Studio page should let merchants copy a flow packet");
+  assert(shell.includes("/dashboard/flow-studio"), "Dashboard navigation should expose Flow Studio");
+  assert(overview.includes("/dashboard/flow-studio"), "Dashboard overview should link to Flow Studio");
+  assert(readme.includes("Flow Studio workbench"), "README should document Flow Studio");
+}
+
 function assertLaunchChannelsWorkflow() {
   const page = readFileSync("app/dashboard/channels/page.tsx", "utf8");
   const helper = readFileSync("lib/launch-channels.ts", "utf8");
@@ -702,6 +723,13 @@ async function assertDeterministicLogic() {
   writeFileSync(compiledScenarioCoverage, readFileSync(compiledScenarioCoverage, "utf8")
     .replace('from "./finder-flow";', 'from "./finder-flow.js";')
     .replace('from "./utils";', 'from "./utils.js";'));
+  const compiledFlowStudio = `${compileDir}/lib/flow-studio.js`;
+  writeFileSync(compiledFlowStudio, readFileSync(compiledFlowStudio, "utf8")
+    .replace('from "./finder-flow";', 'from "./finder-flow.js";')
+    .replace('from "./quiz-readiness";', 'from "./quiz-readiness.js";')
+    .replace('from "./rule-coverage";', 'from "./rule-coverage.js";')
+    .replace('from "./scenario-coverage";', 'from "./scenario-coverage.js";')
+    .replace('from "./utils";', 'from "./utils.js";'));
   const compiledExplanationGrounding = `${compileDir}/lib/explanation-grounding.js`;
   writeFileSync(compiledExplanationGrounding, readFileSync(compiledExplanationGrounding, "utf8")
     .replace('from "./finder-flow";', 'from "./finder-flow.js";')
@@ -816,6 +844,7 @@ async function assertDeterministicLogic() {
   const quizReadiness = await import(pathToFileURL(`${compileDir}/lib/quiz-readiness.js`));
   const recommendationQa = await import(pathToFileURL(`${compileDir}/lib/recommendation-qa.js`));
   const scenarioCoverage = await import(pathToFileURL(`${compileDir}/lib/scenario-coverage.js`));
+  const flowStudio = await import(pathToFileURL(`${compileDir}/lib/flow-studio.js`));
   const explanationGrounding = await import(pathToFileURL(`${compileDir}/lib/explanation-grounding.js`));
   const recommendationRecovery = await import(pathToFileURL(`${compileDir}/lib/recommendation-recovery.js`));
   const configuratorGuidance = await import(pathToFileURL(`${compileDir}/lib/configurator-guidance.js`));
@@ -898,6 +927,12 @@ async function assertDeterministicLogic() {
   assert(scenarioCoverageReport.productCoverage.some((product) => product.surfacedInScenarios > 0) && scenarioCoverageReport.actions.length, "Expected scenario coverage to expose product coverage and merchant actions");
   const blockedScenarioCoverage = scenarioCoverage.buildScenarioCoverageReport(undefined, demo.demoProducts);
   assert(blockedScenarioCoverage.status === "blocked" && blockedScenarioCoverage.actions.some((action) => action.id === "create-finder"), "Expected missing finder scenario coverage to guide finder creation");
+  const flowStudioReport = flowStudio.buildFlowStudioReport({ quiz: demo.demoQuiz, products: demo.demoProducts });
+  assert(flowStudioReport.nodes.some((node) => node.type === "welcome") && flowStudioReport.nodes.some((node) => node.type === "result"), "Expected Flow Studio to include welcome and result nodes");
+  assert(flowStudioReport.edges.some((edge) => edge.answerId && edge.label === "Trails & outdoors"), "Expected Flow Studio to expose answer edges");
+  assert(flowStudioReport.summary.branchingAnswers > 0 && flowStudioReport.summary.routeScenarios > 0, "Expected Flow Studio to summarize branching and route QA");
+  assert(flowStudioReport.routes.some((route) => route.topProducts.some((product) => product.id === "prod_trail")), "Expected Flow Studio route QA to surface deterministic top products");
+  assert(flowStudioReport.packet.includes("Findly visual flow studio packet") && flowStudioReport.packet.includes("Answer route map"), "Expected Flow Studio to generate a copyable flow packet");
   const explanationGroundingReport = explanationGrounding.buildExplanationGroundingReport({ products: demo.demoProducts, quizzes: [demo.demoQuiz], openaiConfigured: false });
   assert(explanationGroundingReport.summary.auditedRecommendations > 0 && explanationGroundingReport.score > 0, "Expected explanation grounding to audit recommendation copy against product facts");
   assert(explanationGroundingReport.audits.every((audit) => audit.sampleExplanation && audit.factCount > 0), "Expected explanation grounding audits to include sample copy and fact counts");
@@ -1378,6 +1413,7 @@ async function main() {
   assertDashboardCommandCenterWorkflow();
   assertStarterKitWorkflow();
   assertDecisionGraphWorkflow();
+  assertFlowStudioWorkflow();
   assertLaunchChannelsWorkflow();
   assertPartnerSyndicationWorkflow();
   assertStorefrontSandboxWorkflow();

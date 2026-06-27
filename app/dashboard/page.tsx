@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
-import { AlertTriangle, Archive, ArrowDownRight, ArrowRight, ArrowUpRight, BookOpenCheck, BrainCircuit, Check, ChevronRight, CirclePlay, Eye, GitPullRequestArrow, Globe2, Handshake, LayoutTemplate, Megaphone, MousePointerClick, PackagePlus, Rocket, Sparkles, Target, Wrench } from "lucide-react";
+import { AlertTriangle, Archive, ArrowDownRight, ArrowRight, ArrowUpRight, BookOpenCheck, BrainCircuit, Check, ChevronRight, CirclePlay, Eye, GitBranch, GitPullRequestArrow, Globe2, Handshake, LayoutTemplate, Megaphone, MousePointerClick, PackagePlus, Rocket, Sparkles, Target, Wrench } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { LoadingState } from "@/components/loading-state";
 import { buildDashboardCommandCenter } from "@/lib/dashboard-command-center";
@@ -34,6 +34,7 @@ export default function DashboardOverview() {
         <div className="flex flex-wrap justify-end gap-3">
           <Link href="/dashboard/templates" className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-xs font-extrabold text-ink shadow-sm transition hover:-translate-y-0.5"><LayoutTemplate size={15} className="text-moss" /> Use a template</Link>
           <Link href="/dashboard/decision-graph" className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-xs font-extrabold text-ink shadow-sm transition hover:-translate-y-0.5"><BrainCircuit size={15} className="text-moss" /> Decision graph</Link>
+          <Link href="/dashboard/flow-studio" className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-xs font-extrabold text-ink shadow-sm transition hover:-translate-y-0.5"><GitBranch size={15} className="text-moss" /> Flow Studio</Link>
           <Link href="/dashboard/channels" className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-xs font-extrabold text-ink shadow-sm transition hover:-translate-y-0.5"><Megaphone size={15} className="text-moss" /> Channels</Link>
           <Link href="/dashboard/syndication" className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-xs font-extrabold text-ink shadow-sm transition hover:-translate-y-0.5"><Handshake size={15} className="text-moss" /> Syndication</Link>
           <Link href="/dashboard/storefront-sandbox" className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-xs font-extrabold text-ink shadow-sm transition hover:-translate-y-0.5"><Globe2 size={15} className="text-moss" /> Storefront QA</Link>

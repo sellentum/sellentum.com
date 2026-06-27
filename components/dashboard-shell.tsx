@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Archive, BarChart3, BookOpenCheck, Boxes, BrainCircuit, ChevronDown, ClipboardCheck, ExternalLink, FlaskConical, GitPullRequestArrow, Globe2, Handshake, HelpCircle, LayoutDashboard, LayoutTemplate, LogOut, Megaphone, Menu, Network, PackagePlus, Rocket, Search, Settings, Sparkles, Target, X } from "lucide-react";
+import { Archive, BarChart3, BookOpenCheck, Boxes, BrainCircuit, ChevronDown, ClipboardCheck, ExternalLink, FlaskConical, GitBranch, GitPullRequestArrow, Globe2, Handshake, HelpCircle, LayoutDashboard, LayoutTemplate, LogOut, Megaphone, Menu, Network, PackagePlus, Rocket, Search, Settings, Sparkles, Target, X } from "lucide-react";
 import { useState } from "react";
 import { Logo } from "@/components/logo";
 import { createClient } from "@/lib/supabase/client";
@@ -22,6 +22,7 @@ const nav = [
   { href: "/dashboard/products", label: "Products", icon: Boxes },
   { href: "/dashboard/ontology", label: "Ontology map", icon: Network },
   { href: "/dashboard/decision-graph", label: "Decision graph", icon: BrainCircuit },
+  { href: "/dashboard/flow-studio", label: "Flow Studio", icon: GitBranch },
   { href: "/dashboard/quizzes", label: "Product finders", icon: BookOpenCheck },
   { href: "/dashboard/configurators", label: "Configurators", icon: PackagePlus },
   { href: "/dashboard/lab", label: "Recommendation lab", icon: FlaskConical },
