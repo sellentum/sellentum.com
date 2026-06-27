@@ -367,6 +367,29 @@ function assertLaunchChannelsWorkflow() {
   assert(readme.includes("Launch Channels board"), "README should document Launch Channels");
 }
 
+function assertPartnerSyndicationWorkflow() {
+  const page = readFileSync("app/dashboard/syndication/page.tsx", "utf8");
+  const helper = readFileSync("lib/syndication.ts", "utf8");
+  const shell = readFileSync("components/dashboard-shell.tsx", "utf8");
+  const overview = readFileSync("app/dashboard/page.tsx", "utf8");
+  const readme = readFileSync("README.md", "utf8");
+  assert(helper.includes("buildSyndicationReport"), "Syndication helper should expose a reusable report builder");
+  assert(helper.includes("retailer-pdp-advisor") && helper.includes("marketplace-buying-guide") && helper.includes("affiliate-search-guide"), "Syndication helper should package retailer, marketplace and affiliate placements");
+  assert(helper.includes("data-medium=\"syndication\"") || helper.includes("medium: \"syndication\""), "Syndication helper should stamp syndication attribution");
+  assert(helper.includes("Findly partner syndication packet"), "Syndication helper should generate copyable partner packets");
+  assert(helper.includes("Partner acceptance criteria"), "Syndication helper should include partner acceptance criteria");
+  assert(helper.includes("No Supabase keys") && helper.includes("OpenAI keys"), "Syndication helper should document partner data boundaries");
+  assert(page.includes("buildSyndicationReport"), "Syndication page should use the shared report builder");
+  assert(page.includes("Copy syndication packet"), "Syndication page should let merchants copy a partner packet");
+  assert(page.includes("Partner acceptance criteria"), "Syndication page should show partner acceptance criteria");
+  assert(page.includes("Syndication QA"), "Syndication page should show partner QA checks");
+  assert(page.includes("Data policy"), "Syndication page should show the data policy");
+  assert(page.includes("Governance checks"), "Syndication page should show governance checks");
+  assert(shell.includes("/dashboard/syndication"), "Dashboard navigation should expose Syndication");
+  assert(overview.includes("/dashboard/syndication"), "Dashboard overview should link to Syndication");
+  assert(readme.includes("Partner Syndication board"), "README should document partner syndication");
+}
+
 function assertStorefrontSandboxWorkflow() {
   const page = readFileSync("app/dashboard/storefront-sandbox/page.tsx", "utf8");
   const helper = readFileSync("lib/storefront-sandbox.ts", "utf8");
@@ -744,6 +767,10 @@ async function assertDeterministicLogic() {
   const compiledLaunchChannels = `${compileDir}/lib/launch-channels.js`;
   writeFileSync(compiledLaunchChannels, readFileSync(compiledLaunchChannels, "utf8")
     .replace('from "@/lib/widget-snippet";', 'from "./widget-snippet.js";'));
+  const compiledSyndication = `${compileDir}/lib/syndication.js`;
+  writeFileSync(compiledSyndication, readFileSync(compiledSyndication, "utf8")
+    .replace('from "./utils";', 'from "./utils.js";')
+    .replace('from "./widget-snippet";', 'from "./widget-snippet.js";'));
   const compiledStorefrontSandbox = `${compileDir}/lib/storefront-sandbox.js`;
   writeFileSync(compiledStorefrontSandbox, readFileSync(compiledStorefrontSandbox, "utf8")
     .replace('from "./launch-channels";', 'from "./launch-channels.js";')
@@ -816,6 +843,7 @@ async function assertDeterministicLogic() {
   const starterKitHelpers = await import(pathToFileURL(`${compileDir}/lib/starter-kits.js`));
   const decisionGraph = await import(pathToFileURL(`${compileDir}/lib/decision-graph.js`));
   const launchChannels = await import(pathToFileURL(`${compileDir}/lib/launch-channels.js`));
+  const syndication = await import(pathToFileURL(`${compileDir}/lib/syndication.js`));
   const storefrontSandbox = await import(pathToFileURL(`${compileDir}/lib/storefront-sandbox.js`));
   const experiments = await import(pathToFileURL(`${compileDir}/lib/experiments.js`));
   const releaseCenter = await import(pathToFileURL(`${compileDir}/lib/release-center.js`));
@@ -1137,6 +1165,29 @@ async function assertDeterministicLogic() {
   assert(channelReport.channels.some((channel) => channel.id === "pdp-configurator" && channel.snippet.includes('data-experience="configurator"')), "Expected PDP channel to generate configurator embed snippet");
   assert(channelReport.channels.some((channel) => channel.id === "category-inline-search" && channel.snippet.includes('data-mode="inline"') && channel.snippet.includes('data-experience="search"')), "Expected category channel to generate inline search embed snippet");
 
+  const partnerEvents = [
+    { id: "partner_view", user_id: "demo-user", quiz_id: "quiz_footwear", event_type: "widget_view", metadata: { experience_type: "assistant", findly_medium: "syndication", findly_source: "retailer", findly_campaign: "findly-syndication-retailer-pdp-advisor", findly_placement: "partner-pdp-advisor" }, created_at: "2026-06-25T13:00:00Z" },
+    { id: "partner_start", user_id: "demo-user", quiz_id: "quiz_footwear", event_type: "quiz_start", metadata: { experience_type: "assistant", findly_medium: "syndication", findly_source: "retailer", findly_campaign: "findly-syndication-retailer-pdp-advisor", findly_placement: "partner-pdp-advisor" }, created_at: "2026-06-25T13:01:00Z" },
+    { id: "partner_rec", user_id: "demo-user", quiz_id: "quiz_footwear", product_id: "prod_trail", event_type: "product_recommended", metadata: { experience_type: "assistant", findly_medium: "syndication", findly_source: "retailer", findly_campaign: "findly-syndication-retailer-pdp-advisor", findly_placement: "partner-pdp-advisor", product_name: "Terra Trail Runner" }, created_at: "2026-06-25T13:02:00Z" },
+    { id: "partner_click", user_id: "demo-user", quiz_id: "quiz_footwear", product_id: "prod_trail", event_type: "buy_click", metadata: { experience_type: "assistant", findly_medium: "syndication", findly_source: "retailer", findly_campaign: "findly-syndication-retailer-pdp-advisor", findly_placement: "partner-pdp-advisor", product_name: "Terra Trail Runner" }, created_at: "2026-06-25T13:03:00Z" },
+  ];
+  const syndicationReport = syndication.buildSyndicationReport({
+    origin: "https://findly.example",
+    settings: demo.demoSettings,
+    products: demo.demoProducts,
+    quizzes: [demo.demoQuiz],
+    configurators: [demo.demoConfigurator],
+    events: partnerEvents,
+  });
+  assert(syndicationReport.placements.length >= 5 && syndicationReport.summary.installReady === syndicationReport.placements.length, "Expected partner syndication to produce install-ready partner packages");
+  assert(syndicationReport.packet.includes("Findly partner syndication packet") && syndicationReport.packet.includes("Partner acceptance criteria"), "Expected partner syndication packet to include title and acceptance criteria");
+  assert(syndicationReport.packet.includes('data-medium="syndication"') && syndicationReport.packet.includes('data-campaign="findly-syndication-retailer-pdp-advisor"'), "Expected partner syndication snippets to include syndication attribution");
+  const retailerSyndication = syndicationReport.placements.find((placement) => placement.id === "retailer-pdp-advisor");
+  assert(retailerSyndication?.status === "live" && retailerSyndication.metrics.clicks === 1 && retailerSyndication.metrics.clickValue > 0, "Expected retailer partner events to produce live syndication metrics");
+  assert(syndicationReport.placements.some((placement) => placement.id === "marketplace-buying-guide" && placement.snippet.includes('data-mode="inline"') && placement.snippet.includes('data-experience="finder"')), "Expected marketplace package to generate an inline finder snippet");
+  assert(syndicationReport.placements.some((placement) => placement.id === "sales-rep-configurator" && placement.snippet.includes('data-experience="configurator"')), "Expected sales partner package to include configurator syndication");
+  assert(syndicationReport.governance.some((item) => item.id === "partner-boundary" && item.status === "pass"), "Expected syndication governance to confirm partner-safe boundaries");
+
   const sandboxReport = storefrontSandbox.buildStorefrontSandboxReport({
     origin: "https://findly.example",
     settings: demo.demoSettings,
@@ -1328,6 +1379,7 @@ async function main() {
   assertStarterKitWorkflow();
   assertDecisionGraphWorkflow();
   assertLaunchChannelsWorkflow();
+  assertPartnerSyndicationWorkflow();
   assertStorefrontSandboxWorkflow();
   assertReleaseCenterWorkflow();
   assertWorkspaceSnapshotWorkflow();

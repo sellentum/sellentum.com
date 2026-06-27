@@ -16,6 +16,7 @@ Findly is a compact guided-selling SaaS product for ecommerce brands. A merchant
 - Industry starter kits that install editable sample products, finder questions, deterministic answer rules and product-linked configurator drafts for faster merchant onboarding
 - Launch Studio workflow that enriches a catalog, generates a finder, publishes it, prepares finder/advisor/search/configurator embed snippets and copies a developer launch packet from one screen
 - Launch Channels board that packages homepage, category, PDP and support placements with copy-ready snippets, attribution labels, QA checks and channel metrics
+- Partner Syndication board that packages retailer, marketplace, affiliate, support and sales-partner widget snippets with syndication attribution, QA checks and data-policy handoff notes
 - Storefront QA sandbox that previews each channel in a controlled desktop storefront, lists expected telemetry events and exports a copyable QA packet before theme installation
 - Release Center that rolls catalog, experience, channel, sandbox, analytics and optimization gates into a go/no-go release candidate with rollback notes
 - Workspace Snapshot exporter that packages products, finder rules, configurators, brand settings, install snippets, release state and redacted analytics into copyable JSON/CSV/handoff files
@@ -186,6 +187,7 @@ Import the repository into Vercel, add the variables from `.env.example`, and de
 - `lib/public-runtime-guard.ts` — bounded JSON parsing, public rate-limit responses and analytics metadata sanitization for embeddable runtimes
 - `lib/experience-launch.ts` — multi-experience launch cards for finder, advisor, semantic search and configurator embeds
 - `lib/launch-channels.ts` and `app/dashboard/channels` — channelized storefront placement planner for attributed snippets, install QA and early channel metrics
+- `lib/syndication.ts` and `app/dashboard/syndication` — partner-safe syndication packets for retailer, marketplace, affiliate, support and sales channels
 - `lib/storefront-sandbox.ts` and `app/dashboard/storefront-sandbox` — controlled storefront QA preview with expected event contracts, acceptance criteria and copyable staging packets
 - `lib/release-center.ts` and `app/dashboard/release-center` — go/no-go release candidate builder with launch gates, release scope, rollback plan and copyable release notes
 - `lib/workspace-snapshot.ts` and `app/dashboard/workspace-snapshot` — safe workspace archive, product/analytics CSV exports and developer/support handoff packet
