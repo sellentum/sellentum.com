@@ -69,6 +69,16 @@ export const platformPages = [
     demoHref: "/dashboard/analytics",
     demoLabel: "View analytics",
   },
+  {
+    slug: "shopper-personas",
+    eyebrow: "Shopper personas",
+    title: "Turn zero-party signals into launchable buyer segments.",
+    description: "Findly reads guided answers, search and advisor language, configurator choices, recommendations and buy clicks, then turns them into deterministic persona plans for marketing and merchandising.",
+    points: ["Segment confidence scoring", "Intent signal matrix", "Product affinity clusters", "Copyable persona packet"],
+    proof: ["Segments come from event evidence, not black-box guesses", "Personas recommend the right finder, advisor, search or configurator play", "Merchants get next actions without advanced personalization complexity"],
+    demoHref: "/dashboard/personas",
+    demoLabel: "Open Persona Studio",
+  },
 ] as const;
 
 export const platformPageMap = new Map<string, (typeof platformPages)[number]>(platformPages.map((page) => [page.slug, page]));

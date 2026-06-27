@@ -61,6 +61,7 @@ Findly is a compact guided-selling SaaS product for ecommerce brands. A merchant
 - Copyable JavaScript widget that opens a finder, advisor, semantic search or configurator in a lazy-loaded modal iframe or direct inline iframe, with install QA checks and launch handoff packets for generated snippets
 - Public runtime guardrails with bounded JSON bodies, shared rate-limit responses and sanitized analytics metadata for embedded finder, advisor, search, configurator and event APIs
 - Analytics for sessions, journey replay, real period-over-period trends, funnel diagnosis, views, starts, completions, recommendations, buy clicks, selected answers, search/advisor themes, matched intent signals, product demand and zero-party opportunity suggestions
+- Shopper Persona Studio that turns zero-party answers, search/advisor terms, configurator choices, recommendations and buy clicks into deterministic buyer segments, product affinities and activation actions
 - Widget attribution analytics for source, medium, campaign, placement, page URL, page title and referrer so merchants can compare storefront launches and campaigns
 - Analytics QA that validates event-contract coverage, session linkage, required metadata, event sequence and product attribution before launch decisions
 - Discovery gap analytics that detect no-result paths, thin recommendation sets, missing shopper language, low-confidence matches and stalled surfaced products
@@ -171,6 +172,7 @@ Import the repository into Vercel, add the variables from `.env.example`, and de
 - `lib/starter-kits.ts` and `app/dashboard/templates` — vertical launch templates that materialize starter catalog products, finder rules and configurator drafts into the workspace
 - `lib/insights.ts` — zero-party insight extraction for shopper answers, query themes, catalog signals, product demand and deterministic merchant opportunities
 - `lib/journey-insights.ts` — anonymous shopper journey reconstruction, drop-off detection and recent path summaries
+- `lib/persona-studio.ts` and `app/dashboard/personas` — shopper persona segmentation from zero-party signals, product affinities, source coverage and copyable activation packets
 - `lib/discovery-gaps.ts` — deterministic analytics intelligence for no-result paths, missing terms, thin results and stalled product recommendations
 - `lib/catalog-benefits.ts` — deterministic spec-to-benefit translation for shopper-friendly ontology insights and question ideas
 - `lib/catalog-intelligence.ts` — catalog health scoring for enrichment coverage, matching signals, semantic text, media and commerce links

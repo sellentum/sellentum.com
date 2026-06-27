@@ -198,6 +198,26 @@ function assertSessionAnalytics() {
   assert(!analytics.includes("percentChangePlaceholder"), "Analytics dashboard should not display placeholder trend percentages");
 }
 
+function assertPersonaStudioWorkflow() {
+  const page = readFileSync("app/dashboard/personas/page.tsx", "utf8");
+  const helper = readFileSync("lib/persona-studio.ts", "utf8");
+  const shell = readFileSync("components/dashboard-shell.tsx", "utf8");
+  const overview = readFileSync("app/dashboard/page.tsx", "utf8");
+  const readme = readFileSync("README.md", "utf8");
+  const marketing = readFileSync("lib/marketing-pages.ts", "utf8");
+  assert(helper.includes("buildPersonaStudioReport"), "Persona Studio helper should expose a reusable report builder");
+  assert(helper.includes("buildZeroPartyInsights"), "Persona Studio should reuse zero-party intent evidence");
+  assert(helper.includes("buildShopperJourneyReport"), "Persona Studio should reuse shopper journey sessions");
+  assert(helper.includes("Findly Shopper Persona packet"), "Persona Studio should generate a copyable handoff packet");
+  assert(page.includes("Shopper Persona Studio"), "Persona Studio page should expose the dashboard title");
+  assert(page.includes("Persona signal matrix"), "Persona Studio page should show the signal matrix");
+  assert(page.includes("Copy persona packet"), "Persona Studio page should let merchants copy the packet");
+  assert(shell.includes("/dashboard/personas"), "Dashboard navigation should expose Persona Studio");
+  assert(overview.includes("/dashboard/personas"), "Dashboard overview should expose Persona Studio");
+  assert(readme.includes("Shopper Persona Studio"), "README should document Shopper Persona Studio");
+  assert(marketing.includes("shopper-personas"), "Platform marketing pages should include shopper personas");
+}
+
 function assertPublicRuntimeGuardrails() {
   const guard = readFileSync("lib/public-runtime-guard.ts", "utf8");
   const rateLimit = readFileSync("lib/rate-limit.ts", "utf8");
@@ -946,6 +966,11 @@ async function assertDeterministicLogic() {
   const compiledCommercialImpact = `${compileDir}/lib/commercial-impact.js`;
   writeFileSync(compiledCommercialImpact, readFileSync(compiledCommercialImpact, "utf8")
     .replace('from "./analytics";', 'from "./analytics.js";'));
+  const compiledPersonaStudio = `${compileDir}/lib/persona-studio.js`;
+  writeFileSync(compiledPersonaStudio, readFileSync(compiledPersonaStudio, "utf8")
+    .replace('from "./insights";', 'from "./insights.js";')
+    .replace('from "./journey-insights";', 'from "./journey-insights.js";')
+    .replace('from "./utils";', 'from "./utils.js";'));
   const compiledStarterKits = `${compileDir}/lib/starter-kits.js`;
   writeFileSync(compiledStarterKits, readFileSync(compiledStarterKits, "utf8")
     .replace('from "@/lib/utils";', 'from "./utils.js";'));
@@ -1039,6 +1064,7 @@ async function assertDeterministicLogic() {
   const configuratorReadiness = await import(pathToFileURL(`${compileDir}/lib/configurator-readiness.js`));
   const conversionPlaybook = await import(pathToFileURL(`${compileDir}/lib/conversion-playbook.js`));
   const commercialImpact = await import(pathToFileURL(`${compileDir}/lib/commercial-impact.js`));
+  const personaStudio = await import(pathToFileURL(`${compileDir}/lib/persona-studio.js`));
   const starterKitHelpers = await import(pathToFileURL(`${compileDir}/lib/starter-kits.js`));
   const decisionGraph = await import(pathToFileURL(`${compileDir}/lib/decision-graph.js`));
   const launchChannels = await import(pathToFileURL(`${compileDir}/lib/launch-channels.js`));
@@ -1203,6 +1229,10 @@ async function assertDeterministicLogic() {
   assert(zeroPartyReport.queryThemes.some((item) => item.label === "trail" && item.count >= 3), "Expected zero-party insights to cluster repeated query themes");
   assert(zeroPartyReport.productDemand[0]?.productName === "Terra Trail Runner" && zeroPartyReport.productDemand[0].clicks === 1, "Expected zero-party insights to connect recommendations and buy clicks to products");
   assert(zeroPartyReport.opportunities.length && zeroPartyReport.summary.uniqueSignals >= 3, "Expected zero-party insights to generate deterministic merchant opportunities");
+  const personaReport = personaStudio.buildPersonaStudioReport(zeroPartyEvents, demo.demoProducts);
+  assert(personaReport.personas.some((persona) => persona.id === "trail-confidence" && persona.productAffinities.some((product) => product.productName === "Terra Trail Runner")), "Expected Persona Studio to identify trail-confidence buyers and product affinity");
+  assert(personaReport.signalMatrix.some((row) => row.id === "query-language" && row.count >= 3), "Expected Persona Studio to summarize search/advisor language signals");
+  assert(personaReport.packet.includes("Findly Shopper Persona packet") && personaReport.actions.length, "Expected Persona Studio to generate a copyable persona packet and action queue");
   const gapReport = discoveryGaps.buildDiscoveryGapReport([
     { id: "g1", user_id: "demo-user", quiz_id: "quiz_footwear", event_type: "quiz_start", metadata: { session_id: "g1", experience_type: "search", query: "orthopedic office shoe under 90", terms: ["orthopedic", "office"], result_count: 0 }, created_at: "2026-06-25T10:01:00Z" },
     { id: "g2", user_id: "demo-user", quiz_id: "quiz_footwear", event_type: "quiz_complete", metadata: { session_id: "g2", experience_type: "finder", result_count: 1, recovery_status: "thin-results", answer_summary: ["Office comfort"] }, created_at: "2026-06-25T10:02:00Z" },
@@ -1592,6 +1622,7 @@ async function main() {
   await assertPage("/", "Turn product choice");
   await assertPage("/platform", "Findly platform");
   await assertPage("/platform/configurators", "Visual configurators");
+  await assertPage("/platform/shopper-personas", "Turn zero-party signals");
   await assertPage("/industries", "Industries");
   await assertPage("/resources", "Demo the product discovery loop");
   await assertPage("/finder/quiz_footwear", "Preparing your product guide");
@@ -1606,6 +1637,7 @@ async function main() {
   assertPublicBrandingRuntime();
   assertExplanationRuntimeSafety();
   assertSessionAnalytics();
+  assertPersonaStudioWorkflow();
   assertPublicRuntimeGuardrails();
   assertLaunchStudioWorkflow();
   assertDashboardCommandCenterWorkflow();

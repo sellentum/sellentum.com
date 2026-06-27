@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
-import { AlertTriangle, Archive, ArrowDownRight, ArrowRight, ArrowUpRight, BookOpenCheck, Bot, BrainCircuit, Check, ChevronRight, CirclePlay, Eye, GalleryVerticalEnd, GitBranch, GitPullRequestArrow, Globe2, Handshake, Layers3, LayoutTemplate, Megaphone, MessageCircle, MousePointerClick, PackagePlus, RadioTower, Rocket, ShieldCheck, Sparkles, Target, Wrench } from "lucide-react";
+import { AlertTriangle, Archive, ArrowDownRight, ArrowRight, ArrowUpRight, BookOpenCheck, Bot, BrainCircuit, Check, ChevronRight, CirclePlay, Eye, GalleryVerticalEnd, GitBranch, GitPullRequestArrow, Globe2, Handshake, Layers3, LayoutTemplate, Megaphone, MessageCircle, MousePointerClick, PackagePlus, RadioTower, Rocket, ShieldCheck, Sparkles, Target, UsersRound, Wrench } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { LoadingState } from "@/components/loading-state";
 import { buildDashboardCommandCenter } from "@/lib/dashboard-command-center";
@@ -38,6 +38,7 @@ export default function DashboardOverview() {
           <Link href="/dashboard/decision-graph" className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-xs font-extrabold text-ink shadow-sm transition hover:-translate-y-0.5"><BrainCircuit size={15} className="text-moss" /> Decision graph</Link>
           <Link href="/dashboard/flow-studio" className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-xs font-extrabold text-ink shadow-sm transition hover:-translate-y-0.5"><GitBranch size={15} className="text-moss" /> Flow Studio</Link>
           <Link href="/dashboard/advisor" className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-xs font-extrabold text-ink shadow-sm transition hover:-translate-y-0.5"><Bot size={15} className="text-moss" /> Advisor</Link>
+          <Link href="/dashboard/personas" className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-xs font-extrabold text-ink shadow-sm transition hover:-translate-y-0.5"><UsersRound size={15} className="text-moss" /> Personas</Link>
           <Link href="/dashboard/experiences" className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-xs font-extrabold text-ink shadow-sm transition hover:-translate-y-0.5"><GalleryVerticalEnd size={15} className="text-moss" /> Experiences</Link>
           <Link href="/dashboard/channels" className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-xs font-extrabold text-ink shadow-sm transition hover:-translate-y-0.5"><Megaphone size={15} className="text-moss" /> Channels</Link>
           <Link href="/dashboard/syndication" className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-xs font-extrabold text-ink shadow-sm transition hover:-translate-y-0.5"><Handshake size={15} className="text-moss" /> Syndication</Link>
