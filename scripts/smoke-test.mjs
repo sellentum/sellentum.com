@@ -405,6 +405,29 @@ function assertReleaseCenterWorkflow() {
   assert(readme.includes("Release Center"), "README should document Release Center");
 }
 
+function assertWorkspaceSnapshotWorkflow() {
+  const page = readFileSync("app/dashboard/workspace-snapshot/page.tsx", "utf8");
+  const helper = readFileSync("lib/workspace-snapshot.ts", "utf8");
+  const shell = readFileSync("components/dashboard-shell.tsx", "utf8");
+  const overview = readFileSync("app/dashboard/page.tsx", "utf8");
+  const readme = readFileSync("README.md", "utf8");
+  assert(helper.includes("buildWorkspaceSnapshot"), "Workspace snapshot helper should expose a reusable snapshot builder");
+  assert(helper.includes("findly-workspace-snapshot-v1"), "Workspace snapshot should version its archive format");
+  assert(helper.includes("safeMetadata"), "Workspace snapshot should restrict analytics metadata before export");
+  assert(helper.includes("productCsv") && helper.includes("analyticsCsv"), "Workspace snapshot should export product and analytics CSV files");
+  assert(helper.includes("Findly workspace snapshot"), "Workspace snapshot should generate copyable handoff notes");
+  assert(page.includes("buildWorkspaceSnapshot"), "Workspace snapshot page should use the shared helper");
+  assert(page.includes("Copy JSON archive"), "Workspace snapshot page should let merchants copy the JSON archive");
+  assert(page.includes("Copy product CSV"), "Workspace snapshot page should let merchants copy product CSV");
+  assert(page.includes("Download archive"), "Workspace snapshot page should let merchants download the archive");
+  assert(page.includes("Safe export checks"), "Workspace snapshot page should show export checks");
+  assert(page.includes("Restore plan"), "Workspace snapshot page should show restore guidance");
+  assert(page.includes("Privacy boundary"), "Workspace snapshot page should explain what is excluded");
+  assert(shell.includes("/dashboard/workspace-snapshot"), "Dashboard navigation should expose Workspace Snapshot");
+  assert(overview.includes("/dashboard/workspace-snapshot"), "Dashboard overview should link to Workspace Snapshot");
+  assert(readme.includes("Workspace Snapshot exporter"), "README should document Workspace Snapshot");
+}
+
 function assertExperimentPlannerWorkflow() {
   const page = readFileSync("app/dashboard/experiments/page.tsx", "utf8");
   const helper = readFileSync("lib/experiments.ts", "utf8");
@@ -743,6 +766,11 @@ async function assertDeterministicLogic() {
     .replace('from "./quiz-readiness";', 'from "./quiz-readiness.js";')
     .replace('from "./recommendation-qa";', 'from "./recommendation-qa.js";')
     .replace('from "./storefront-sandbox";', 'from "./storefront-sandbox.js";'));
+  const compiledWorkspaceSnapshot = `${compileDir}/lib/workspace-snapshot.js`;
+  writeFileSync(compiledWorkspaceSnapshot, readFileSync(compiledWorkspaceSnapshot, "utf8")
+    .replace('from "./decision-graph";', 'from "./decision-graph.js";')
+    .replace('from "./launch-channels";', 'from "./launch-channels.js";')
+    .replace('from "./release-center";', 'from "./release-center.js";'));
 
   const demo = await import(pathToFileURL(`${compileDir}/lib/demo-data.js`));
   const utils = await import(pathToFileURL(`${compileDir}/lib/utils.js`));
@@ -791,6 +819,7 @@ async function assertDeterministicLogic() {
   const storefrontSandbox = await import(pathToFileURL(`${compileDir}/lib/storefront-sandbox.js`));
   const experiments = await import(pathToFileURL(`${compileDir}/lib/experiments.js`));
   const releaseCenter = await import(pathToFileURL(`${compileDir}/lib/release-center.js`));
+  const workspaceSnapshot = await import(pathToFileURL(`${compileDir}/lib/workspace-snapshot.js`));
 
   const answers = [
     { questionId: "q_use", question: "Where?", optionId: "o_trail", answer: "Trails & outdoors", matchType: "tag", matchValue: "trail", weight: 5 },
@@ -1160,6 +1189,28 @@ async function assertDeterministicLogic() {
   assert(releaseCandidate.rollbackPlan.length >= 5 && releaseCandidate.releaseNotes.includes("Rollback plan"), "Expected release candidate to include rollback notes");
   assert(releaseCandidate.releaseNotes.includes("Findly release candidate") && releaseCandidate.releaseNotes.includes("Launch gates"), "Expected release candidate to generate copyable release notes");
 
+  const snapshot = workspaceSnapshot.buildWorkspaceSnapshot({
+    origin: "https://findly.example",
+    settings: demo.demoSettings,
+    products: demo.demoProducts,
+    quizzes: [demo.demoQuiz],
+    configurators: [demo.demoConfigurator],
+    events: [
+      ...demo.demoEvents,
+      ...channelEvents.map((event) => ({ ...event, metadata: { ...event.metadata, session_id: "snapshot-session", experience_id: "quiz_footwear" } })),
+    ],
+    generatedAt: new Date("2026-06-25T12:00:00Z"),
+  });
+  assert(snapshot.id === "snapshot-northstar-goods-20260625" && snapshot.archive.version === "findly-workspace-snapshot-v1", "Expected Workspace Snapshot to build a dated versioned archive");
+  assert(snapshot.exportFiles.some((file) => file.id === "json" && file.filename === "snapshot-northstar-goods-20260625.json"), "Expected Workspace Snapshot to name export files from the snapshot ID");
+  assert(snapshot.productCsv.includes("Terra Trail Runner") && snapshot.productCsv.includes("buyer_needs"), "Expected Workspace Snapshot to export product CSV with discovery fields");
+  assert(snapshot.analyticsCsv.includes("widget_view") && snapshot.analyticsCsv.includes("findly_campaign"), "Expected Workspace Snapshot to export attribution-aware analytics CSV");
+  assert(snapshot.handoff.includes("Findly workspace snapshot") && snapshot.handoff.includes("Release decision") && snapshot.handoff.includes("Restore plan"), "Expected Workspace Snapshot to generate copyable handoff notes");
+  assert(snapshot.archive.launch_channels.channels.some((channel) => channel.snippet.includes("data-experience")), "Expected Workspace Snapshot archive to include launch snippets");
+  assert(snapshot.checks.some((item) => item.id === "release") && snapshot.sections.some((item) => item.id === "channels"), "Expected Workspace Snapshot to expose release and channel checks");
+  assert(!snapshot.json.includes("user_id") && !snapshot.json.includes("OPENAI") && !snapshot.json.includes("SUPABASE"), "Expected Workspace Snapshot JSON to avoid user IDs and environment secret names");
+  assert(snapshot.archive.analytics.recent_events.every((event) => !("session_id" in event.metadata)), "Expected Workspace Snapshot to omit session IDs from shared analytics metadata");
+
   assert(starterKitHelpers.starterKits.length >= 3, "Expected multiple vertical starter kits");
   const firstStarterKit = starterKitHelpers.starterKits[0];
   const starterReadiness = starterKitHelpers.buildStarterKitReadiness(firstStarterKit);
@@ -1279,6 +1330,7 @@ async function main() {
   assertLaunchChannelsWorkflow();
   assertStorefrontSandboxWorkflow();
   assertReleaseCenterWorkflow();
+  assertWorkspaceSnapshotWorkflow();
   assertExperimentPlannerWorkflow();
   assertCommercialImpactWorkflow();
   assertSemanticSearchWorkflow();
