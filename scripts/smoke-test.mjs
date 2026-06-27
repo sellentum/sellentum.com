@@ -367,6 +367,25 @@ function assertLaunchChannelsWorkflow() {
   assert(readme.includes("Launch Channels board"), "README should document Launch Channels");
 }
 
+function assertStorefrontSandboxWorkflow() {
+  const page = readFileSync("app/dashboard/storefront-sandbox/page.tsx", "utf8");
+  const helper = readFileSync("lib/storefront-sandbox.ts", "utf8");
+  const shell = readFileSync("components/dashboard-shell.tsx", "utf8");
+  const overview = readFileSync("app/dashboard/page.tsx", "utf8");
+  const readme = readFileSync("README.md", "utf8");
+  assert(helper.includes("buildStorefrontSandboxReport"), "Storefront sandbox helper should expose a reusable report builder");
+  assert(helper.includes("expectedEvents"), "Storefront sandbox should define expected analytics events");
+  assert(helper.includes("acceptanceCriteria") && helper.includes("qaSteps"), "Storefront sandbox should produce QA steps and acceptance criteria");
+  assert(helper.includes("Findly storefront QA sandbox packet"), "Storefront sandbox should export a copyable QA packet");
+  assert(page.includes("buildStorefrontSandboxReport"), "Storefront sandbox page should use the shared report builder");
+  assert(page.includes("Expected event contract"), "Storefront sandbox page should show expected telemetry");
+  assert(page.includes("Exact snippet"), "Storefront sandbox page should show the exact install snippet");
+  assert(page.includes("Desktop storefront QA preview"), "Storefront sandbox page should render a desktop storefront preview");
+  assert(shell.includes("/dashboard/storefront-sandbox"), "Dashboard navigation should expose Storefront QA sandbox");
+  assert(overview.includes("/dashboard/storefront-sandbox"), "Dashboard overview should expose Storefront QA sandbox");
+  assert(readme.includes("Storefront QA sandbox"), "README should document Storefront QA sandbox");
+}
+
 function assertExperimentPlannerWorkflow() {
   const page = readFileSync("app/dashboard/experiments/page.tsx", "utf8");
   const helper = readFileSync("lib/experiments.ts", "utf8");
@@ -683,6 +702,10 @@ async function assertDeterministicLogic() {
   const compiledLaunchChannels = `${compileDir}/lib/launch-channels.js`;
   writeFileSync(compiledLaunchChannels, readFileSync(compiledLaunchChannels, "utf8")
     .replace('from "@/lib/widget-snippet";', 'from "./widget-snippet.js";'));
+  const compiledStorefrontSandbox = `${compileDir}/lib/storefront-sandbox.js`;
+  writeFileSync(compiledStorefrontSandbox, readFileSync(compiledStorefrontSandbox, "utf8")
+    .replace('from "./launch-channels";', 'from "./launch-channels.js";')
+    .replace('from "@/lib/widget-snippet";', 'from "./widget-snippet.js";'));
   const compiledExperiments = `${compileDir}/lib/experiments.js`;
   writeFileSync(compiledExperiments, readFileSync(compiledExperiments, "utf8")
     .replace('from "./analytics";', 'from "./analytics.js";')
@@ -735,6 +758,7 @@ async function assertDeterministicLogic() {
   const starterKitHelpers = await import(pathToFileURL(`${compileDir}/lib/starter-kits.js`));
   const decisionGraph = await import(pathToFileURL(`${compileDir}/lib/decision-graph.js`));
   const launchChannels = await import(pathToFileURL(`${compileDir}/lib/launch-channels.js`));
+  const storefrontSandbox = await import(pathToFileURL(`${compileDir}/lib/storefront-sandbox.js`));
   const experiments = await import(pathToFileURL(`${compileDir}/lib/experiments.js`));
 
   const answers = [
@@ -1053,6 +1077,19 @@ async function assertDeterministicLogic() {
   assert(channelReport.channels.some((channel) => channel.id === "pdp-configurator" && channel.snippet.includes('data-experience="configurator"')), "Expected PDP channel to generate configurator embed snippet");
   assert(channelReport.channels.some((channel) => channel.id === "category-inline-search" && channel.snippet.includes('data-mode="inline"') && channel.snippet.includes('data-experience="search"')), "Expected category channel to generate inline search embed snippet");
 
+  const sandboxReport = storefrontSandbox.buildStorefrontSandboxReport({
+    origin: "https://findly.example",
+    settings: demo.demoSettings,
+    finders: [demo.demoQuiz],
+    configurators: [demo.demoConfigurator],
+    events: channelEvents,
+  });
+  assert(sandboxReport.cases.length === 4 && sandboxReport.summary.expectedEvents >= 16, "Expected storefront sandbox to generate QA cases and expected event contracts for all channels");
+  assert(sandboxReport.packet.includes("Findly storefront QA sandbox packet") && sandboxReport.packet.includes("Acceptance criteria:"), "Expected storefront sandbox to generate a copyable QA packet");
+  assert(sandboxReport.cases.some((item) => item.id === "homepage-finder" && item.status === "verified" && item.expectedEvents.some((event) => event.event === "buy_click")), "Expected homepage sandbox case to be verified by attributed QA telemetry");
+  assert(sandboxReport.cases.some((item) => item.id === "category-inline-search" && item.mode === "inline" && item.snippet.includes('data-experience="search"')), "Expected category sandbox case to render inline search QA");
+  assert(sandboxReport.cases.every((item) => item.acceptanceCriteria.some((criterion) => criterion.includes("data-source")) && item.qaSteps.length >= 5), "Expected every sandbox case to include attribution acceptance criteria and QA steps");
+
   const experimentReport = experiments.buildExperimentPlanningReport({
     origin: "https://findly.example",
     settings: demo.demoSettings,
@@ -1191,6 +1228,7 @@ async function main() {
   assertStarterKitWorkflow();
   assertDecisionGraphWorkflow();
   assertLaunchChannelsWorkflow();
+  assertStorefrontSandboxWorkflow();
   assertExperimentPlannerWorkflow();
   assertCommercialImpactWorkflow();
   assertSemanticSearchWorkflow();

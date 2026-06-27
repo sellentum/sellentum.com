@@ -16,6 +16,7 @@ Findly is a compact guided-selling SaaS product for ecommerce brands. A merchant
 - Industry starter kits that install editable sample products, finder questions, deterministic answer rules and product-linked configurator drafts for faster merchant onboarding
 - Launch Studio workflow that enriches a catalog, generates a finder, publishes it, prepares finder/advisor/search/configurator embed snippets and copies a developer launch packet from one screen
 - Launch Channels board that packages homepage, category, PDP and support placements with copy-ready snippets, attribution labels, QA checks and channel metrics
+- Storefront QA sandbox that previews each channel in a controlled desktop storefront, lists expected telemetry events and exports a copyable QA packet before theme installation
 - Copyable launch contract with runtime endpoints, widget data attributes, analytics payload requirements, QA checks and troubleshooting guidance for storefront handoff
 - Storefront QA runbook for staging install, shopper-journey proof, telemetry verification, recovery-path testing and rollback planning
 - Ontology-guided finder generation that uses category clusters, repeated buyer needs and product features before falling back to OpenAI copy
@@ -183,6 +184,7 @@ Import the repository into Vercel, add the variables from `.env.example`, and de
 - `lib/public-runtime-guard.ts` — bounded JSON parsing, public rate-limit responses and analytics metadata sanitization for embeddable runtimes
 - `lib/experience-launch.ts` — multi-experience launch cards for finder, advisor, semantic search and configurator embeds
 - `lib/launch-channels.ts` and `app/dashboard/channels` — channelized storefront placement planner for attributed snippets, install QA and early channel metrics
+- `lib/storefront-sandbox.ts` and `app/dashboard/storefront-sandbox` — controlled storefront QA preview with expected event contracts, acceptance criteria and copyable staging packets
 - `lib/launch-packet.ts` — copyable developer handoff text for preview URLs, embed snippets, QA checks and analytics contracts
 - `lib/launch-contract.ts` — deterministic launch contract for runtime endpoints, widget attributes, analytics payloads and troubleshooting
 - `lib/storefront-qa-runbook.ts` — deterministic manual QA script for storefront install, analytics proof, recovery testing and rollback
