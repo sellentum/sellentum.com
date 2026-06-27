@@ -60,6 +60,16 @@ export const platformPages = [
     demoLabel: "Try configurator",
   },
   {
+    slug: "bundle-studio",
+    eyebrow: "Bundle & Attach Studio",
+    title: "Increase average order value with compatible bundles.",
+    description: "Findly turns configurator anchors, paid add-ons, compatibility rules and shopper telemetry into a deterministic bundle command center for ecommerce teams.",
+    points: ["Product-linked anchor choices", "Paid add-on attach mapping", "Compatibility guardrail checks", "Copyable AOV lift packet"],
+    proof: ["Bundle selection uses merchant-authored rules, not black-box AI", "Attach opportunities are backed by configurator telemetry", "Teams can promote safe PDP, collection and campaign bundles"],
+    demoHref: "/dashboard/bundles",
+    demoLabel: "Open Bundle Studio",
+  },
+  {
     slug: "widget",
     eyebrow: "Embeddable widget",
     title: "Launch a guided experience on any storefront with one snippet.",

@@ -56,6 +56,7 @@ Findly is a compact guided-selling SaaS product for ecommerce brands. A merchant
 - AI-assisted configurator generation that turns active catalog products into draft visual bundle builders with product-linked anchor choices and compatibility guardrails
 - Visual configurator builder with steps, options, product-linked price deltas, compatibility rules and publish-readiness diagnostics
 - Configurator path QA that simulates valid bundles, product-linked completion paths and incompatible option guardrails before launch
+- Bundle & Attach Studio that converts configurator anchors, paid add-ons, compatibility rules and telemetry into deterministic AOV lift opportunities
 - Customer finder with welcome, progress, AI explanations, side-by-side result comparison, restart and buy-click tracking
 - Published finder runtime that validates the selected branched answer path, builds a semantic buyer profile and ranks products server-side
 - Customer-facing configurator with live bundle price, compatibility filtering, review and buy-click tracking
@@ -226,6 +227,7 @@ Import the repository into Vercel, add the variables from `.env.example`, and de
 - `lib/configurator-readiness.ts` — publish-readiness diagnostics for configurator structure, linked products, pricing and compatibility rules
 - `lib/configurator-qa.ts` — deterministic configurator path QA for required-step completion, product-linked bundles and incompatibility guardrails
 - `lib/configurator-guidance.ts` — deterministic shopper-facing compatibility explanations and safe alternatives for configurator choices
+- `lib/bundle-studio.ts` and `app/dashboard/bundles` — AOV lift workbench for product anchors, paid add-ons, compatibility guardrails, attach telemetry and copyable bundle packets
 - `lib/utils.ts` — deterministic matching, recommendation comparison, configurator compatibility and shared formatting
 - `app/dashboard/launch` — self-serve launch workflow for enrichment, quiz generation, publishing and widget copy
 - `app/dashboard/ontology` — merchant-side catalog ontology map for product attribute clusters and suggested quiz questions

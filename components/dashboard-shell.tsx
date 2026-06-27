@@ -33,6 +33,7 @@ const nav = [
   { href: "/dashboard/flow-studio", label: "Flow Studio", icon: GitBranch },
   { href: "/dashboard/quizzes", label: "Product finders", icon: BookOpenCheck },
   { href: "/dashboard/configurators", label: "Configurators", icon: PackagePlus },
+  { href: "/dashboard/bundles", label: "Bundle Studio", icon: PackagePlus },
   { href: "/dashboard/lab", label: "Recommendation lab", icon: FlaskConical },
   { href: "/dashboard/merchandising", label: "Merchandising", icon: SlidersHorizontal },
   { href: "/dashboard/advisor", label: "Advisor Studio", icon: Bot },

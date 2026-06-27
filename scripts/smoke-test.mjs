@@ -706,6 +706,28 @@ function assertReturnsIntelligenceWorkflow() {
   assert(marketing.includes("returns-fit-intelligence"), "Platform marketing pages should include Returns & Fit Intelligence");
 }
 
+function assertBundleStudioWorkflow() {
+  const page = readFileSync("app/dashboard/bundles/page.tsx", "utf8");
+  const helper = readFileSync("lib/bundle-studio.ts", "utf8");
+  const shell = readFileSync("components/dashboard-shell.tsx", "utf8");
+  const overview = readFileSync("app/dashboard/page.tsx", "utf8");
+  const readme = readFileSync("README.md", "utf8");
+  const marketing = readFileSync("lib/marketing-pages.ts", "utf8");
+  assert(helper.includes("buildBundleStudioReport"), "Bundle Studio helper should expose a reusable report builder");
+  assert(helper.includes("buildCommercialImpactReport"), "Bundle Studio should reuse commercial impact evidence");
+  assert(helper.includes("buildConfiguratorQaReport"), "Bundle Studio should reuse configurator path QA");
+  assert(helper.includes("buildZeroPartyInsights"), "Bundle Studio should reuse zero-party product demand evidence");
+  assert(helper.includes("Findly Bundle & Attach Studio packet"), "Bundle Studio should generate a copyable packet");
+  assert(page.includes("Bundle & Attach Studio"), "Bundle Studio page should expose the dashboard title");
+  assert(page.includes("Attach opportunity map"), "Bundle Studio page should show bundle opportunities");
+  assert(page.includes("Compatibility guardrails"), "Bundle Studio page should show compatibility guardrails");
+  assert(page.includes("Copy bundle packet"), "Bundle Studio page should let merchants copy the packet");
+  assert(shell.includes("/dashboard/bundles"), "Dashboard navigation should expose Bundle Studio");
+  assert(overview.includes("/dashboard/bundles"), "Dashboard overview should expose Bundle Studio");
+  assert(readme.includes("Bundle & Attach Studio"), "README should document Bundle & Attach Studio");
+  assert(marketing.includes("bundle-studio"), "Platform marketing pages should include Bundle Studio");
+}
+
 function assertSemanticSearchWorkflow() {
   const route = readFileSync("app/api/search/route.ts", "utf8");
   const publicRoute = readFileSync("app/api/public/search/[id]/route.ts", "utf8");
@@ -1092,6 +1114,13 @@ async function assertDeterministicLogic() {
     .replace('from "./discovery-gaps";', 'from "./discovery-gaps.js";')
     .replace('from "./insights";', 'from "./insights.js";')
     .replace('from "@/lib/utils";', 'from "./utils.js";'));
+  const compiledBundleStudio = `${compileDir}/lib/bundle-studio.js`;
+  writeFileSync(compiledBundleStudio, readFileSync(compiledBundleStudio, "utf8")
+    .replace('from "./analytics";', 'from "./analytics.js";')
+    .replace('from "./commercial-impact";', 'from "./commercial-impact.js";')
+    .replace('from "./configurator-qa";', 'from "./configurator-qa.js";')
+    .replace('from "./insights";', 'from "./insights.js";')
+    .replace('from "./utils";', 'from "./utils.js";'));
   const compiledPersonaStudio = `${compileDir}/lib/persona-studio.js`;
   writeFileSync(compiledPersonaStudio, readFileSync(compiledPersonaStudio, "utf8")
     .replace('from "./insights";', 'from "./insights.js";')
@@ -1204,6 +1233,7 @@ async function assertDeterministicLogic() {
   const conversionPlaybook = await import(pathToFileURL(`${compileDir}/lib/conversion-playbook.js`));
   const commercialImpact = await import(pathToFileURL(`${compileDir}/lib/commercial-impact.js`));
   const returnsIntelligence = await import(pathToFileURL(`${compileDir}/lib/returns-intelligence.js`));
+  const bundleStudio = await import(pathToFileURL(`${compileDir}/lib/bundle-studio.js`));
   const personaStudio = await import(pathToFileURL(`${compileDir}/lib/persona-studio.js`));
   const merchandisingStudio = await import(pathToFileURL(`${compileDir}/lib/merchandising-studio.js`));
   const catalogPipeline = await import(pathToFileURL(`${compileDir}/lib/catalog-pipeline.js`));
@@ -1307,6 +1337,12 @@ async function assertDeterministicLogic() {
   assert(configuratorQaReport.summary.completionScenarios > 0 && configuratorQaReport.summary.productLinkedScenarioRate > 0, "Expected configurator QA to simulate completed, product-linked bundles");
   assert(configuratorQaReport.summary.compatibilityGuardrails > 0 && configuratorQaReport.summary.failedGuardrails === 0, "Expected configurator QA to verify incompatible option guardrails");
   assert(configuratorQaReport.actions.length || configuratorQaReport.score > 0, "Expected configurator QA to produce a score or remediation actions");
+  const bundleStudioReport = bundleStudio.buildBundleStudioReport({ products: demo.demoProducts, configurators: [demo.demoConfigurator], events: demo.demoEvents });
+  assert(bundleStudioReport.summary.anchorProducts > 0 && bundleStudioReport.summary.addOns > 0, "Expected Bundle Studio to find product anchors and paid add-ons");
+  assert(bundleStudioReport.summary.compatibilityRules > 0 && bundleStudioReport.opportunities.some((opportunity) => opportunity.addOns.length > 0), "Expected Bundle Studio to produce compatible attach opportunities");
+  assert(bundleStudioReport.packet.includes("Findly Bundle & Attach Studio packet") && bundleStudioReport.actions.length, "Expected Bundle Studio to generate a copyable packet and action queue");
+  const emptyBundleStudioReport = bundleStudio.buildBundleStudioReport({ products: demo.demoProducts, configurators: [], events: [] });
+  assert(emptyBundleStudioReport.status === "empty" && emptyBundleStudioReport.actions.some((action) => action.id === "create-configurator-bundle"), "Expected Bundle Studio to guide merchants when no configurator exists");
   const brokenConfiguratorQa = configuratorQa.buildConfiguratorQaReport([{ ...demo.demoConfigurator, steps: [{ ...demo.demoConfigurator.steps[0], options: [] }] }], demo.demoProducts);
   assert(brokenConfiguratorQa.status === "fail" && brokenConfiguratorQa.actions.some((action) => action.id === "fix-configurator-completion" || action.id === "create-configurator-qa"), "Expected broken configurator QA to produce launch-blocking actions");
   const configuratorBlueprintReport = configuratorBlueprint.buildConfiguratorBlueprint(demo.demoProducts, "Generate a trail kit configurator");
@@ -1801,6 +1837,7 @@ async function main() {
   await assertPage("/platform/widget-studio", "Launch every guided experience");
   await assertPage("/platform/headless-api", "Build custom guided-selling");
   await assertPage("/platform/returns-fit-intelligence", "Prevent wrong-fit purchases");
+  await assertPage("/platform/bundle-studio", "Increase average order value");
   await assertPage("/industries", "Industries");
   await assertPage("/resources", "Demo the product discovery loop");
   await assertPage("/finder/quiz_footwear", "Preparing your product guide");
@@ -1837,6 +1874,7 @@ async function main() {
   assertExperimentPlannerWorkflow();
   assertCommercialImpactWorkflow();
   assertReturnsIntelligenceWorkflow();
+  assertBundleStudioWorkflow();
   assertSemanticSearchWorkflow();
   assertAdvisorStudioWorkflow();
   assertAttributeStudioWorkflow();
