@@ -218,6 +218,28 @@ function assertPersonaStudioWorkflow() {
   assert(marketing.includes("shopper-personas"), "Platform marketing pages should include shopper personas");
 }
 
+function assertAudienceCaptureWorkflow() {
+  const page = readFileSync("app/dashboard/audience/page.tsx", "utf8");
+  const helper = readFileSync("lib/audience-capture.ts", "utf8");
+  const shell = readFileSync("components/dashboard-shell.tsx", "utf8");
+  const overview = readFileSync("app/dashboard/page.tsx", "utf8");
+  const readme = readFileSync("README.md", "utf8");
+  const marketing = readFileSync("lib/marketing-pages.ts", "utf8");
+  assert(helper.includes("buildAudienceCaptureReport"), "Audience Capture helper should expose a reusable report builder");
+  assert(helper.includes("buildZeroPartyInsights"), "Audience Capture should reuse zero-party evidence");
+  assert(helper.includes("buildShopperJourneyReport"), "Audience Capture should reuse anonymous journey reconstruction");
+  assert(helper.includes("Findly Audience Capture packet"), "Audience Capture should generate a copyable audience packet");
+  assert(helper.includes("No CRM integration and no PII storage by default"), "Audience Capture should document the no-CRM/no-PII MVP boundary");
+  assert(page.includes("Audience Capture Center"), "Audience Capture page should expose the dashboard title");
+  assert(page.includes("Safe export schema"), "Audience Capture page should show the safe export schema");
+  assert(page.includes("Privacy boundary"), "Audience Capture page should show the privacy boundary");
+  assert(page.includes("Copy audience packet"), "Audience Capture page should let merchants copy the packet");
+  assert(shell.includes("/dashboard/audience"), "Dashboard navigation should expose Audience Capture");
+  assert(overview.includes("/dashboard/audience"), "Dashboard overview should expose Audience Capture");
+  assert(readme.includes("Audience Capture Center"), "README should document Audience Capture Center");
+  assert(marketing.includes("audience-capture"), "Platform marketing pages should include audience capture");
+}
+
 function assertMerchandisingStudioWorkflow() {
   const page = readFileSync("app/dashboard/merchandising/page.tsx", "utf8");
   const helper = readFileSync("lib/merchandising-studio.ts", "utf8");
@@ -1201,6 +1223,12 @@ async function assertDeterministicLogic() {
     .replace('from "./insights";', 'from "./insights.js";')
     .replace('from "./journey-insights";', 'from "./journey-insights.js";')
     .replace('from "./utils";', 'from "./utils.js";'));
+  const compiledAudienceCapture = `${compileDir}/lib/audience-capture.js`;
+  writeFileSync(compiledAudienceCapture, readFileSync(compiledAudienceCapture, "utf8")
+    .replace('from "./analytics";', 'from "./analytics.js";')
+    .replace('from "./insights";', 'from "./insights.js";')
+    .replace('from "./journey-insights";', 'from "./journey-insights.js";')
+    .replace('from "./utils";', 'from "./utils.js";'));
   const compiledMerchandisingStudio = `${compileDir}/lib/merchandising-studio.js`;
   writeFileSync(compiledMerchandisingStudio, readFileSync(compiledMerchandisingStudio, "utf8")
     .replace('from "./insights";', 'from "./insights.js";'));
@@ -1317,6 +1345,7 @@ async function assertDeterministicLogic() {
   const bundleStudio = await import(pathToFileURL(`${compileDir}/lib/bundle-studio.js`));
   const usageMetering = await import(pathToFileURL(`${compileDir}/lib/usage-metering.js`));
   const personaStudio = await import(pathToFileURL(`${compileDir}/lib/persona-studio.js`));
+  const audienceCapture = await import(pathToFileURL(`${compileDir}/lib/audience-capture.js`));
   const merchandisingStudio = await import(pathToFileURL(`${compileDir}/lib/merchandising-studio.js`));
   const catalogPipeline = await import(pathToFileURL(`${compileDir}/lib/catalog-pipeline.js`));
   const availabilityGuard = await import(pathToFileURL(`${compileDir}/lib/availability-guard.js`));
@@ -1520,6 +1549,12 @@ async function assertDeterministicLogic() {
   assert(personaReport.personas.some((persona) => persona.id === "trail-confidence" && persona.productAffinities.some((product) => product.productName === "Terra Trail Runner")), "Expected Persona Studio to identify trail-confidence buyers and product affinity");
   assert(personaReport.signalMatrix.some((row) => row.id === "query-language" && row.count >= 3), "Expected Persona Studio to summarize search/advisor language signals");
   assert(personaReport.packet.includes("Findly Shopper Persona packet") && personaReport.actions.length, "Expected Persona Studio to generate a copyable persona packet and action queue");
+  const audienceReport = audienceCapture.buildAudienceCaptureReport({ products: demo.demoProducts, quizzes: [demo.demoQuiz], configurators: [demo.demoConfigurator], events: demo.demoEvents });
+  assert(audienceReport.summary.explicitSignals > 0 && audienceReport.segments.length > 0, "Expected Audience Capture to turn demo events into zero-party audience segments");
+  assert(audienceReport.moments.some((moment) => moment.id === "recommendation-reveal") && audienceReport.exportFields.some((field) => field.id === "session_id"), "Expected Audience Capture to produce capture moments and safe export fields");
+  assert(audienceReport.packet.includes("Findly Audience Capture packet") && audienceReport.packet.includes("No CRM integration and no PII storage by default"), "Expected Audience Capture to generate a copyable packet with MVP privacy boundaries");
+  const emptyAudienceReport = audienceCapture.buildAudienceCaptureReport({ products: [], quizzes: [], configurators: [], events: [] });
+  assert(emptyAudienceReport.status === "empty" && emptyAudienceReport.actions.some((action) => action.id === "capture-first-audience-signals"), "Expected empty Audience Capture report to guide first signal capture");
   const gapReport = discoveryGaps.buildDiscoveryGapReport([
     { id: "g1", user_id: "demo-user", quiz_id: "quiz_footwear", event_type: "quiz_start", metadata: { session_id: "g1", experience_type: "search", query: "orthopedic office shoe under 90", terms: ["orthopedic", "office"], result_count: 0 }, created_at: "2026-06-25T10:01:00Z" },
     { id: "g2", user_id: "demo-user", quiz_id: "quiz_footwear", event_type: "quiz_complete", metadata: { session_id: "g2", experience_type: "finder", result_count: 1, recovery_status: "thin-results", answer_summary: ["Office comfort"] }, created_at: "2026-06-25T10:02:00Z" },
@@ -1947,6 +1982,7 @@ async function main() {
   await assertPage("/platform/compatibility-matrix", "Model dependency rules");
   await assertPage("/platform/merchandising-controls", "Tune recommendation pressure");
   await assertPage("/platform/shopper-personas", "Turn zero-party signals");
+  await assertPage("/platform/audience-capture", "Turn guided-selling sessions");
   await assertPage("/platform/widget-studio", "Launch every guided experience");
   await assertPage("/platform/headless-api", "Build custom guided-selling");
   await assertPage("/platform/returns-fit-intelligence", "Prevent wrong-fit purchases");
@@ -1967,6 +2003,7 @@ async function main() {
   assertExplanationRuntimeSafety();
   assertSessionAnalytics();
   assertPersonaStudioWorkflow();
+  assertAudienceCaptureWorkflow();
   assertMerchandisingStudioWorkflow();
   assertPublicRuntimeGuardrails();
   assertLaunchStudioWorkflow();

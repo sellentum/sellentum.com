@@ -70,6 +70,7 @@ Findly is a compact guided-selling SaaS product for ecommerce brands. A merchant
 - Public runtime guardrails with bounded JSON bodies, shared rate-limit responses and sanitized analytics metadata for embedded finder, advisor, search, configurator and event APIs
 - Analytics for sessions, journey replay, real period-over-period trends, funnel diagnosis, views, starts, completions, recommendations, buy clicks, selected answers, search/advisor themes, matched intent signals, product demand and zero-party opportunity suggestions
 - Shopper Persona Studio that turns zero-party answers, search/advisor terms, configurator choices, recommendations and buy clicks into deterministic buyer segments, product affinities and activation actions
+- Audience Capture Center that converts anonymous guided-selling sessions into zero-party segments, capture prompts, consent guardrails, safe export fields and copyable audience handoff packets
 - Widget attribution analytics for source, medium, campaign, placement, page URL, page title and referrer so merchants can compare storefront launches and campaigns
 - Analytics QA that validates event-contract coverage, session linkage, required metadata, event sequence and product attribution before launch decisions
 - Discovery gap analytics that detect no-result paths, thin recommendation sets, missing shopper language, low-confidence matches and stalled surfaced products
@@ -184,6 +185,7 @@ Import the repository into Vercel, add the variables from `.env.example`, and de
 - `lib/insights.ts` — zero-party insight extraction for shopper answers, query themes, catalog signals, product demand and deterministic merchant opportunities
 - `lib/journey-insights.ts` — anonymous shopper journey reconstruction, drop-off detection and recent path summaries
 - `lib/persona-studio.ts` and `app/dashboard/personas` — shopper persona segmentation from zero-party signals, product affinities, source coverage and copyable activation packets
+- `lib/audience-capture.ts` and `app/dashboard/audience` — consent-aware zero-party audience capture planning, safe export schemas, anonymous segment readiness and copyable audience packets
 - `lib/discovery-gaps.ts` — deterministic analytics intelligence for no-result paths, missing terms, thin results and stalled product recommendations
 - `lib/catalog-pipeline.ts` and `app/dashboard/catalog-pipeline` — ingestion, enrichment, semantic-readiness and downstream-consumer control center for the product truth layer
 - `lib/availability-guard.ts` and `app/dashboard/availability` — availability guardrails for active products, Buy Now URLs, stale runtime references, inactive demand and recommendation safety
@@ -270,4 +272,4 @@ npm run smoke # requires the app to be running, defaults to http://localhost:300
 
 ## MVP boundaries
 
-Stripe is represented only by the pricing placeholder. Shopify, Magento, WooCommerce, Salesforce, SAP, advanced personalisation, multi-user permissions and enterprise integrations are deliberately out of scope.
+Stripe is represented only by the pricing placeholder. Shopify, Magento, WooCommerce, Salesforce, SAP, CRM/contact sync, advanced personalisation, multi-user permissions and enterprise integrations are deliberately out of scope.

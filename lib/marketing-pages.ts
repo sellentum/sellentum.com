@@ -160,6 +160,16 @@ export const platformPages = [
     demoLabel: "Open Persona Studio",
   },
   {
+    slug: "audience-capture",
+    eyebrow: "Audience Capture",
+    title: "Turn guided-selling sessions into safe zero-party audiences.",
+    description: "Findly converts anonymous finder, search, advisor and configurator events into deterministic segments, consent-aware capture moments and export-ready audience packets for ecommerce teams.",
+    points: ["Anonymous segment readiness", "Capture prompt planner", "Safe export schema", "Copyable audience packet"],
+    proof: ["Segments come from recorded answers, queries, recommendations and buy clicks", "No CRM integration or PII storage is required in the MVP", "Consent guardrails are visible before teams export campaign audiences"],
+    demoHref: "/dashboard/audience",
+    demoLabel: "Open Audience Capture",
+  },
+  {
     slug: "returns-fit-intelligence",
     eyebrow: "Returns & fit intelligence",
     title: "Prevent wrong-fit purchases before they become returns.",

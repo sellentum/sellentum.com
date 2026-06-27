@@ -44,6 +44,7 @@ const nav = [
   { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/dashboard/returns", label: "Returns & fit", icon: HeartPulse },
   { href: "/dashboard/personas", label: "Persona Studio", icon: UsersRound },
+  { href: "/dashboard/audience", label: "Audience Capture", icon: UsersRound },
   { href: "/dashboard/settings", label: "Brand & embed", icon: Settings },
   { href: "/dashboard/preflight", label: "Launch preflight", icon: ClipboardCheck },
 ];
