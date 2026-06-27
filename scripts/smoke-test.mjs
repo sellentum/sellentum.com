@@ -779,6 +779,28 @@ function assertCatalogImportWorkflow() {
   assert(preflightPage.includes("catalog_intelligence_score"), "Preflight page should show catalog intelligence summary fields");
 }
 
+function assertCatalogPipelineWorkflow() {
+  const page = readFileSync("app/dashboard/catalog-pipeline/page.tsx", "utf8");
+  const helper = readFileSync("lib/catalog-pipeline.ts", "utf8");
+  const shell = readFileSync("components/dashboard-shell.tsx", "utf8");
+  const overview = readFileSync("app/dashboard/page.tsx", "utf8");
+  const readme = readFileSync("README.md", "utf8");
+  const marketing = readFileSync("lib/marketing-pages.ts", "utf8");
+  assert(helper.includes("buildCatalogPipelineReport"), "Catalog Pipeline helper should expose a reusable report builder");
+  assert(helper.includes("analyzeCatalogIntelligence"), "Catalog Pipeline should reuse catalog intelligence scoring");
+  assert(helper.includes("buildZeroPartyInsights"), "Catalog Pipeline should include telemetry/product demand feedback");
+  assert(helper.includes("Findly catalog pipeline packet"), "Catalog Pipeline should generate a copyable handoff packet");
+  assert(page.includes("Catalog Pipeline Center"), "Catalog Pipeline page should expose the dashboard title");
+  assert(page.includes("Pipeline stages"), "Catalog Pipeline page should show pipeline stages");
+  assert(page.includes("Source contracts"), "Catalog Pipeline page should show source contracts");
+  assert(page.includes("Field coverage matrix"), "Catalog Pipeline page should show field coverage");
+  assert(page.includes("Copy pipeline packet"), "Catalog Pipeline page should let merchants copy the packet");
+  assert(shell.includes("/dashboard/catalog-pipeline"), "Dashboard navigation should expose Catalog Pipeline");
+  assert(overview.includes("/dashboard/catalog-pipeline"), "Dashboard overview should expose Catalog Pipeline");
+  assert(readme.includes("Catalog Pipeline Center"), "README should document Catalog Pipeline");
+  assert(marketing.includes("catalog-pipeline"), "Platform marketing pages should include Catalog Pipeline");
+}
+
 function assertQuizReadinessWorkflow() {
   const page = readFileSync("app/dashboard/quizzes/page.tsx", "utf8");
   const readiness = readFileSync("lib/quiz-readiness.ts", "utf8");
@@ -996,6 +1018,10 @@ async function assertDeterministicLogic() {
   const compiledMerchandisingStudio = `${compileDir}/lib/merchandising-studio.js`;
   writeFileSync(compiledMerchandisingStudio, readFileSync(compiledMerchandisingStudio, "utf8")
     .replace('from "./insights";', 'from "./insights.js";'));
+  const compiledCatalogPipeline = `${compileDir}/lib/catalog-pipeline.js`;
+  writeFileSync(compiledCatalogPipeline, readFileSync(compiledCatalogPipeline, "utf8")
+    .replace('from "./catalog-intelligence";', 'from "./catalog-intelligence.js";')
+    .replace('from "./insights";', 'from "./insights.js";'));
   const compiledStarterKits = `${compileDir}/lib/starter-kits.js`;
   writeFileSync(compiledStarterKits, readFileSync(compiledStarterKits, "utf8")
     .replace('from "@/lib/utils";', 'from "./utils.js";'));
@@ -1091,6 +1117,7 @@ async function assertDeterministicLogic() {
   const commercialImpact = await import(pathToFileURL(`${compileDir}/lib/commercial-impact.js`));
   const personaStudio = await import(pathToFileURL(`${compileDir}/lib/persona-studio.js`));
   const merchandisingStudio = await import(pathToFileURL(`${compileDir}/lib/merchandising-studio.js`));
+  const catalogPipeline = await import(pathToFileURL(`${compileDir}/lib/catalog-pipeline.js`));
   const starterKitHelpers = await import(pathToFileURL(`${compileDir}/lib/starter-kits.js`));
   const decisionGraph = await import(pathToFileURL(`${compileDir}/lib/decision-graph.js`));
   const launchChannels = await import(pathToFileURL(`${compileDir}/lib/launch-channels.js`));
@@ -1321,8 +1348,14 @@ async function assertDeterministicLogic() {
   const catalogReport = catalogIntelligence.analyzeCatalogIntelligence(demo.demoProducts);
   assert(catalogReport.score >= 80 && catalogReport.activeProducts === demo.demoProducts.length, "Expected seeded demo catalog to have a strong intelligence score");
   assert(catalogReport.warnings.some((item) => item.id === "enrichment"), "Expected non-enriched demo catalog to warn about enrichment coverage");
+  const pipelineReport = catalogPipeline.buildCatalogPipelineReport({ products: demo.demoProducts, quizzes: [demo.demoQuiz], configurators: [demo.demoConfigurator], events: demo.demoEvents });
+  assert(pipelineReport.stages.some((stage) => stage.id === "import-contract") && pipelineReport.sources.some((source) => source.id === "csv-import"), "Expected Catalog Pipeline to expose import stages and CSV source contracts");
+  assert(pipelineReport.fieldCoverage.some((field) => field.id === "signals" && field.coverage > 0), "Expected Catalog Pipeline to summarize field coverage");
+  assert(pipelineReport.packet.includes("Findly catalog pipeline packet") && pipelineReport.consumers.some((consumer) => consumer.label === "Product finders"), "Expected Catalog Pipeline to generate a handoff packet and downstream consumers");
   const thinCatalogReport = catalogIntelligence.analyzeCatalogIntelligence([{ ...demo.demoProducts[0], id: "thin_product", description: "", features: [], tags: [], image_url: "", product_url: "", search_text: "", buyer_needs: [] }]);
   assert(!thinCatalogReport.score || thinCatalogReport.blockers.some((item) => item.id === "catalog-size" || item.id === "matching-signals"), "Expected thin catalog to expose launch blockers");
+  const emptyPipelineReport = catalogPipeline.buildCatalogPipelineReport({ products: [], quizzes: [], configurators: [], events: [] });
+  assert(emptyPipelineReport.status === "empty" && emptyPipelineReport.actions.some((action) => action.id === "fix-import-contract"), "Expected empty Catalog Pipeline to guide product ingestion");
   const ontologyReport = catalogOntology.buildCatalogOntology(demo.demoProducts);
   assert(ontologyReport.categoryClusters.length >= 2, "Expected ontology map to cluster demo products by category");
   assert(ontologyReport.topSignals.some((signal) => signal.key === "trail"), "Expected ontology map to expose repeated trail signal");
@@ -1657,6 +1690,7 @@ async function assertDeterministicLogic() {
 async function main() {
   await assertPage("/", "Turn product choice");
   await assertPage("/platform", "Findly platform");
+  await assertPage("/platform/catalog-pipeline", "Govern imports");
   await assertPage("/platform/configurators", "Visual configurators");
   await assertPage("/platform/merchandising-controls", "Tune recommendation pressure");
   await assertPage("/platform/shopper-personas", "Turn zero-party signals");
@@ -1697,6 +1731,7 @@ async function main() {
   assertAdvisorStudioWorkflow();
   assertAttributeStudioWorkflow();
   assertCatalogImportWorkflow();
+  assertCatalogPipelineWorkflow();
   assertQuizReadinessWorkflow();
   assertConfiguratorReadinessWorkflow();
   assertPreflightReadinessWorkflow();

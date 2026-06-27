@@ -10,6 +10,16 @@ export const platformPages = [
     demoLabel: "Manage catalog",
   },
   {
+    slug: "catalog-pipeline",
+    eyebrow: "Catalog pipeline",
+    title: "Govern imports, enrichment and downstream catalog consumers.",
+    description: "Findly tracks CSV contracts, manual product edits, AI enrichment, semantic readiness, field coverage, downstream experiences and telemetry feedback in one catalog pipeline center.",
+    points: ["Import contract checks", "AI enrichment coverage", "Semantic discovery readiness", "Copyable catalog handoff packet"],
+    proof: ["The same product truth layer feeds finders, advisor, search and configurators", "Pipeline actions are based on concrete field coverage and telemetry", "No schema migration is needed for the MVP workflow"],
+    demoHref: "/dashboard/catalog-pipeline",
+    demoLabel: "Open pipeline",
+  },
+  {
     slug: "guided-selling",
     eyebrow: "Guided selling",
     title: "Turn your best salesperson’s questions into a digital product finder.",
