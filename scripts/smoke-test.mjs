@@ -728,6 +728,29 @@ function assertBundleStudioWorkflow() {
   assert(marketing.includes("bundle-studio"), "Platform marketing pages should include Bundle Studio");
 }
 
+function assertUsageCenterWorkflow() {
+  const page = readFileSync("app/dashboard/usage/page.tsx", "utf8");
+  const helper = readFileSync("lib/usage-metering.ts", "utf8");
+  const shell = readFileSync("components/dashboard-shell.tsx", "utf8");
+  const overview = readFileSync("app/dashboard/page.tsx", "utf8");
+  const readme = readFileSync("README.md", "utf8");
+  const marketing = readFileSync("lib/marketing-pages.ts", "utf8");
+  assert(helper.includes("buildUsageCenterReport"), "Usage Center helper should expose a reusable report builder");
+  assert(helper.includes("usagePlans"), "Usage Center should define placeholder SaaS plan tiers");
+  assert(helper.includes("buildExperienceRegistry"), "Usage Center should reuse published experience metering");
+  assert(helper.includes("buildCommercialImpactReport"), "Usage Center should connect usage to assisted value");
+  assert(helper.includes("Stripe is a placeholder only"), "Usage Center packet should document the Stripe placeholder boundary");
+  assert(helper.includes("Findly Usage & Plan Center packet"), "Usage Center should generate a copyable billing packet");
+  assert(page.includes("Usage & Plan Center"), "Usage Center page should expose the dashboard title");
+  assert(page.includes("Current 30-day usage meters"), "Usage Center page should show usage meters");
+  assert(page.includes("Plan comparison placeholder"), "Usage Center page should show placeholder plan comparison");
+  assert(page.includes("Copy billing packet"), "Usage Center page should let merchants copy the packet");
+  assert(shell.includes("/dashboard/usage"), "Dashboard navigation should expose Usage Center");
+  assert(overview.includes("/dashboard/usage"), "Dashboard overview should expose Usage Center");
+  assert(readme.includes("Usage & Plan Center"), "README should document Usage & Plan Center");
+  assert(marketing.includes("usage-pricing"), "Platform marketing pages should include usage pricing");
+}
+
 function assertSemanticSearchWorkflow() {
   const route = readFileSync("app/api/search/route.ts", "utf8");
   const publicRoute = readFileSync("app/api/public/search/[id]/route.ts", "utf8");
@@ -1121,6 +1144,11 @@ async function assertDeterministicLogic() {
     .replace('from "./configurator-qa";', 'from "./configurator-qa.js";')
     .replace('from "./insights";', 'from "./insights.js";')
     .replace('from "./utils";', 'from "./utils.js";'));
+  const compiledUsageMetering = `${compileDir}/lib/usage-metering.js`;
+  writeFileSync(compiledUsageMetering, readFileSync(compiledUsageMetering, "utf8")
+    .replace('from "./analytics";', 'from "./analytics.js";')
+    .replace('from "./commercial-impact";', 'from "./commercial-impact.js";')
+    .replace('from "./experience-registry";', 'from "./experience-registry.js";'));
   const compiledPersonaStudio = `${compileDir}/lib/persona-studio.js`;
   writeFileSync(compiledPersonaStudio, readFileSync(compiledPersonaStudio, "utf8")
     .replace('from "./insights";', 'from "./insights.js";')
@@ -1234,6 +1262,7 @@ async function assertDeterministicLogic() {
   const commercialImpact = await import(pathToFileURL(`${compileDir}/lib/commercial-impact.js`));
   const returnsIntelligence = await import(pathToFileURL(`${compileDir}/lib/returns-intelligence.js`));
   const bundleStudio = await import(pathToFileURL(`${compileDir}/lib/bundle-studio.js`));
+  const usageMetering = await import(pathToFileURL(`${compileDir}/lib/usage-metering.js`));
   const personaStudio = await import(pathToFileURL(`${compileDir}/lib/persona-studio.js`));
   const merchandisingStudio = await import(pathToFileURL(`${compileDir}/lib/merchandising-studio.js`));
   const catalogPipeline = await import(pathToFileURL(`${compileDir}/lib/catalog-pipeline.js`));
@@ -1343,6 +1372,12 @@ async function assertDeterministicLogic() {
   assert(bundleStudioReport.packet.includes("Findly Bundle & Attach Studio packet") && bundleStudioReport.actions.length, "Expected Bundle Studio to generate a copyable packet and action queue");
   const emptyBundleStudioReport = bundleStudio.buildBundleStudioReport({ products: demo.demoProducts, configurators: [], events: [] });
   assert(emptyBundleStudioReport.status === "empty" && emptyBundleStudioReport.actions.some((action) => action.id === "create-configurator-bundle"), "Expected Bundle Studio to guide merchants when no configurator exists");
+  const usageCenterReport = usageMetering.buildUsageCenterReport({ settings: demo.demoSettings, products: demo.demoProducts, quizzes: [demo.demoQuiz], configurators: [demo.demoConfigurator], events: demo.demoEvents });
+  assert(usageCenterReport.meters.some((meter) => meter.id === "experiences" && meter.status === "over"), "Expected Usage Center to meter published finder/advisor/search/configurator surfaces against starter limits");
+  assert(usageCenterReport.recommendedPlan.id === "growth" && usageCenterReport.status === "needs-upgrade", "Expected Usage Center to recommend the Growth placeholder plan for the seeded demo");
+  assert(usageCenterReport.packet.includes("Findly Usage & Plan Center packet") && usageCenterReport.packet.includes("Stripe is a placeholder only"), "Expected Usage Center to generate a billing packet with the Stripe boundary");
+  const emptyUsageCenterReport = usageMetering.buildUsageCenterReport({ settings: demo.demoSettings, products: [], quizzes: [], configurators: [], events: [] });
+  assert(emptyUsageCenterReport.actions.some((action) => action.id === "fix-experience-metering") && emptyUsageCenterReport.actions.some((action) => action.id === "fix-catalog-metering"), "Expected Usage Center to guide empty workspaces toward billable readiness");
   const brokenConfiguratorQa = configuratorQa.buildConfiguratorQaReport([{ ...demo.demoConfigurator, steps: [{ ...demo.demoConfigurator.steps[0], options: [] }] }], demo.demoProducts);
   assert(brokenConfiguratorQa.status === "fail" && brokenConfiguratorQa.actions.some((action) => action.id === "fix-configurator-completion" || action.id === "create-configurator-qa"), "Expected broken configurator QA to produce launch-blocking actions");
   const configuratorBlueprintReport = configuratorBlueprint.buildConfiguratorBlueprint(demo.demoProducts, "Generate a trail kit configurator");
@@ -1838,6 +1873,7 @@ async function main() {
   await assertPage("/platform/headless-api", "Build custom guided-selling");
   await assertPage("/platform/returns-fit-intelligence", "Prevent wrong-fit purchases");
   await assertPage("/platform/bundle-studio", "Increase average order value");
+  await assertPage("/platform/usage-pricing", "Explain SaaS plan fit");
   await assertPage("/industries", "Industries");
   await assertPage("/resources", "Demo the product discovery loop");
   await assertPage("/finder/quiz_footwear", "Preparing your product guide");
@@ -1875,6 +1911,7 @@ async function main() {
   assertCommercialImpactWorkflow();
   assertReturnsIntelligenceWorkflow();
   assertBundleStudioWorkflow();
+  assertUsageCenterWorkflow();
   assertSemanticSearchWorkflow();
   assertAdvisorStudioWorkflow();
   assertAttributeStudioWorkflow();

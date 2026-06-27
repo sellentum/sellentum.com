@@ -28,6 +28,7 @@ Findly is a compact guided-selling SaaS product for ecommerce brands. A merchant
 - Runtime Operations Center that monitors public endpoint contracts, guardrails, analytics quality, release gates and telemetry proof
 - Release Center that rolls catalog, experience, channel, sandbox, analytics and optimization gates into a go/no-go release candidate with rollback notes
 - Workspace Snapshot exporter that packages products, finder rules, configurators, brand settings, install snippets, release state and redacted analytics into copyable JSON/CSV/handoff files
+- Usage & Plan Center that meters sessions, guided interactions, catalog scale, published experiences and AI-assist credits against Stripe-placeholder plan tiers
 - Copyable launch contract with runtime endpoints, widget data attributes, analytics payload requirements, QA checks and troubleshooting guidance for storefront handoff
 - Storefront QA runbook for staging install, shopper-journey proof, telemetry verification, recovery-path testing and rollback planning
 - Ontology-guided finder generation that uses category clusters, repeated buyer needs and product features before falling back to OpenAI copy
@@ -76,6 +77,7 @@ Findly is a compact guided-selling SaaS product for ecommerce brands. A merchant
 - Commercial impact reporting that estimates assisted product value, unclicked recommendation value, demand coverage and ROI opportunities from recommendation and buy-click events
 - Returns & Fit Intelligence that detects wrong-fit risk from catalog gaps, thin/no-result journeys, stalled recommendations, compatibility guardrails and missing pre-purchase questions
 - Brand, colour, widget copy and launcher-position settings
+- Stripe placeholder plan logic only: visible usage/pricing drivers without checkout sessions, subscriptions, card collection or billing mutations
 - Launch preflight checks for catalog readiness, shopper-language coverage, builder readiness diagnostics, configurator path QA, synthetic recommendation QA, AI/env keys, published experiences, widget setup, analytics coverage and telemetry quality
 - Prioritized launch-readiness report that turns preflight checks into a scored production plan with owners, evidence, effort and next actions
 - Supabase schema, indexes, triggers and row-level security
@@ -218,6 +220,7 @@ Import the repository into Vercel, add the variables from `.env.example`, and de
 - `lib/runtime-operations.ts` and `app/dashboard/operations` — production runtime operations center for public endpoint contracts, guardrails, analytics quality and telemetry proof
 - `lib/release-center.ts` and `app/dashboard/release-center` — go/no-go release candidate builder with launch gates, release scope, rollback plan and copyable release notes
 - `lib/workspace-snapshot.ts` and `app/dashboard/workspace-snapshot` — safe workspace archive, product/analytics CSV exports and developer/support handoff packet
+- `lib/usage-metering.ts` and `app/dashboard/usage` — Stripe-placeholder usage and plan-fit center for sessions, interactions, catalog scale, experiences and AI-assist credits
 - `lib/launch-packet.ts` — copyable developer handoff text for preview URLs, embed snippets, QA checks and analytics contracts
 - `lib/launch-contract.ts` — deterministic launch contract for runtime endpoints, widget attributes, analytics payloads and troubleshooting
 - `lib/storefront-qa-runbook.ts` — deterministic manual QA script for storefront install, analytics proof, recovery testing and rollback

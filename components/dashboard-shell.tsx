@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Archive, BarChart3, BookOpenCheck, Bot, Boxes, Braces, BrainCircuit, ChevronDown, ClipboardCheck, Code2, Database, ExternalLink, FlaskConical, GalleryVerticalEnd, GitBranch, GitPullRequestArrow, Globe2, Handshake, HeartPulse, HelpCircle, Layers3, LayoutDashboard, LayoutTemplate, LogOut, Megaphone, Menu, MessageCircle, Network, PackagePlus, RadioTower, Rocket, Search, Settings, ShieldCheck, SlidersHorizontal, Sparkles, Target, UsersRound, X } from "lucide-react";
+import { Archive, BarChart3, BookOpenCheck, Bot, Boxes, Braces, BrainCircuit, ChevronDown, ClipboardCheck, Code2, CreditCard, Database, ExternalLink, FlaskConical, GalleryVerticalEnd, GitBranch, GitPullRequestArrow, Globe2, Handshake, HeartPulse, HelpCircle, Layers3, LayoutDashboard, LayoutTemplate, LogOut, Megaphone, Menu, MessageCircle, Network, PackagePlus, RadioTower, Rocket, Search, Settings, ShieldCheck, SlidersHorizontal, Sparkles, Target, UsersRound, X } from "lucide-react";
 import { useState } from "react";
 import { Logo } from "@/components/logo";
 import { createClient } from "@/lib/supabase/client";
@@ -22,6 +22,7 @@ const nav = [
   { href: "/dashboard/release-center", label: "Release Center", icon: GitPullRequestArrow },
   { href: "/dashboard/trust-center", label: "AI Trust Center", icon: ShieldCheck },
   { href: "/dashboard/workspace-snapshot", label: "Workspace snapshot", icon: Archive },
+  { href: "/dashboard/usage", label: "Usage & plan", icon: CreditCard },
   { href: "/dashboard/experiments", label: "Experiments", icon: Target },
   { href: "/dashboard/templates", label: "Templates", icon: LayoutTemplate },
   { href: "/dashboard/products", label: "Products", icon: Boxes },

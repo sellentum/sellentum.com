@@ -100,6 +100,16 @@ export const platformPages = [
     demoLabel: "Open API Center",
   },
   {
+    slug: "usage-pricing",
+    eyebrow: "Usage & Plan Center",
+    title: "Explain SaaS plan fit before turning on billing.",
+    description: "Findly meters shopper sessions, guided interactions, catalog scale, published experiences and AI-assist credits so merchants can understand future pricing without enabling Stripe billing in the MVP.",
+    points: ["30-day usage meters", "Starter/Growth/Scale placeholders", "Stripe boundary notes", "Copyable billing handoff packet"],
+    proof: ["Pricing drivers match guided-selling usage, not vague seat counts", "Plan recommendations are deterministic from workspace data", "No checkout, subscription or card charge is enabled in the MVP"],
+    demoHref: "/dashboard/usage",
+    demoLabel: "Open Usage Center",
+  },
+  {
     slug: "analytics",
     eyebrow: "Journey analytics",
     title: "See where guided discovery turns into buying intent.",
