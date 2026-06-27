@@ -38,6 +38,7 @@ Findly is a compact guided-selling SaaS product for ecommerce brands. A merchant
 - OpenAI match explanations with a safe fact-based fallback when no API key is present
 - Explanation grounding QA in Launch Preflight to verify recommendation copy is supported by product facts and selected answer evidence
 - Conversational product advisor combining semantic similarity, deterministic field signals, hard budget constraints and clarification turns for vague requests
+- Advisor Studio for testing open-ended shopper prompts, inspecting intent coverage, recovery suggestions and copyable assistant widget packets before launch
 - Published advisor runtime that loads the merchant catalog server-side instead of trusting browser-supplied products
 - Conversational advisor recovery with quick-refinement prompts, budget guidance and closest catalog options when requests are too broad or blocked
 - Customer-facing semantic search experience for natural-language product discovery over a published catalog context
@@ -187,6 +188,7 @@ Import the repository into Vercel, add the variables from `.env.example`, and de
 - `lib/search-tuning.ts` — merchant-facing search tuning guidance from term coverage, weak confidence and budget blockers
 - `lib/search-recovery.ts` — shopper-facing semantic-search recovery guidance, budget adjustments and near-miss explanation
 - `lib/search-explanations.ts` — grounded OpenAI/fallback copy for already-ranked semantic search results
+- `lib/advisor-studio.ts` and `app/dashboard/advisor` — conversational advisor QA for prompt suites, catalog evidence, recovery prompts, readiness checks and assistant launch packets
 - `lib/recommendation-explanations.ts` — shared grounded OpenAI/fallback copy for already-ranked finder recommendations
 - `lib/explanation-grounding.ts` — launch-time explanation QA for unsupported claims, fact coverage and fallback/OpenAI copy readiness
 - `lib/widget-snippet.ts` — shared widget snippet generation and install-readiness diagnostics for Settings and Launch Studio

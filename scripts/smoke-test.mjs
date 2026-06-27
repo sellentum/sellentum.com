@@ -611,6 +611,28 @@ function assertSemanticSearchWorkflow() {
   assert(tuning.includes("missingTerms"), "Search tuning helper should prioritize missing catalog language");
 }
 
+function assertAdvisorStudioWorkflow() {
+  const page = readFileSync("app/dashboard/advisor/page.tsx", "utf8");
+  const helper = readFileSync("lib/advisor-studio.ts", "utf8");
+  const shell = readFileSync("components/dashboard-shell.tsx", "utf8");
+  const overview = readFileSync("app/dashboard/page.tsx", "utf8");
+  const readme = readFileSync("README.md", "utf8");
+  assert(helper.includes("buildAdvisorStudioReport"), "Advisor Studio helper should expose a reusable report builder");
+  assert(helper.includes("runSemanticProductSearch"), "Advisor Studio should reuse the deterministic search engine for prompt QA");
+  assert(helper.includes("buildAdvisorRecoveryReport"), "Advisor Studio should include advisor recovery guidance");
+  assert(helper.includes("buildWidgetSnippet"), "Advisor Studio should generate assistant widget snippets");
+  assert(helper.includes("Findly Advisor Studio packet"), "Advisor Studio should generate a copyable packet");
+  assert(page.includes("buildAdvisorStudioReport"), "Advisor Studio page should use the shared report builder");
+  assert(page.includes("Advisor Studio"), "Advisor Studio page should expose the dashboard title");
+  assert(page.includes("Advisor response QA"), "Advisor Studio page should show response QA");
+  assert(page.includes("Catalog term coverage"), "Advisor Studio page should expose prompt term coverage");
+  assert(page.includes("Assistant widget snippet"), "Advisor Studio page should expose the assistant snippet");
+  assert(page.includes("Copy advisor packet"), "Advisor Studio page should let merchants copy the packet");
+  assert(shell.includes("/dashboard/advisor"), "Dashboard navigation should expose Advisor Studio");
+  assert(overview.includes("/dashboard/advisor"), "Dashboard overview should expose Advisor Studio");
+  assert(readme.includes("Advisor Studio"), "README should document Advisor Studio");
+}
+
 function assertCatalogImportWorkflow() {
   const page = readFileSync("app/dashboard/products/page.tsx", "utf8");
   const ontologyPage = readFileSync("app/dashboard/ontology/page.tsx", "utf8");
@@ -798,6 +820,11 @@ async function assertDeterministicLogic() {
     .replace('from "./catalog-benefits";', 'from "./catalog-benefits.js";'));
   const compiledSearchEngine = `${compileDir}/lib/search-engine.js`;
   writeFileSync(compiledSearchEngine, readFileSync(compiledSearchEngine, "utf8").replace('from "./catalog-benefits";', 'from "./catalog-benefits.js";'));
+  const compiledAdvisorStudio = `${compileDir}/lib/advisor-studio.js`;
+  writeFileSync(compiledAdvisorStudio, readFileSync(compiledAdvisorStudio, "utf8")
+    .replace('from "./advisor-recovery";', 'from "./advisor-recovery.js";')
+    .replace('from "./search-engine";', 'from "./search-engine.js";')
+    .replace('from "./widget-snippet";', 'from "./widget-snippet.js";'));
   const compiledShopperLanguagePlanner = `${compileDir}/lib/shopper-language-planner.js`;
   writeFileSync(compiledShopperLanguagePlanner, readFileSync(compiledShopperLanguagePlanner, "utf8")
     .replace('from "./catalog-benefits";', 'from "./catalog-benefits.js";')
@@ -913,6 +940,7 @@ async function assertDeterministicLogic() {
   const recommendationTrace = await import(pathToFileURL(`${compileDir}/lib/recommendation-trace.js`));
   const ruleCoverage = await import(pathToFileURL(`${compileDir}/lib/rule-coverage.js`));
   const searchEngine = await import(pathToFileURL(`${compileDir}/lib/search-engine.js`));
+  const advisorStudio = await import(pathToFileURL(`${compileDir}/lib/advisor-studio.js`));
   const shopperLanguagePlanner = await import(pathToFileURL(`${compileDir}/lib/shopper-language-planner.js`));
   const vocabularyStudio = await import(pathToFileURL(`${compileDir}/lib/vocabulary-studio.js`));
   const trustCenter = await import(pathToFileURL(`${compileDir}/lib/trust-center.js`));
@@ -1113,6 +1141,11 @@ async function assertDeterministicLogic() {
   });
   assert(advisorRecoveryReport.status === "no-results" && advisorRecoveryReport.budgetBlocked, "Expected advisor recovery to flag no-result budget blockers");
   assert(advisorRecoveryReport.suggestions.some((suggestion) => suggestion.id === "relax-budget") && advisorRecoveryReport.nearMisses.length, "Expected advisor recovery to suggest budget relaxation and near misses");
+  const advisorStudioReport = advisorStudio.buildAdvisorStudioReport({ products: demo.demoProducts, quizzes: [demo.demoQuiz], events: demo.demoEvents, settings: demo.demoSettings, origin: "https://findly.example", focusPrompt: "trail comfort for rainy weekends" });
+  assert(advisorStudioReport.scenarios.length > 0 && advisorStudioReport.activeScenario.prompt.includes("trail comfort"), "Expected Advisor Studio to build a prompt QA suite with the focused prompt");
+  assert(advisorStudioReport.activeScenario.results.some((result) => result.product.id === "prod_trail"), "Expected Advisor Studio to surface deterministic advisor product matches");
+  assert(advisorStudioReport.checks.some((check) => check.id === "published-context") && advisorStudioReport.actions.length, "Expected Advisor Studio to expose readiness checks and actions");
+  assert(advisorStudioReport.snippet.includes('data-experience="assistant"') && advisorStudioReport.packet.includes("Findly Advisor Studio packet"), "Expected Advisor Studio to generate assistant snippets and packets");
   const commandCenter = dashboardCommandCenter.buildDashboardCommandCenter({ products: demo.demoProducts, quizzes: [demo.demoQuiz], configurators: [demo.demoConfigurator], events: demo.demoEvents, settings: demo.demoSettings });
   assert(commandCenter.snapshot.widget_view > 0 && commandCenter.performance.length === 14, "Expected dashboard command center to build real 14-day analytics");
   assert(commandCenter.launchScore > 0 && commandCenter.catalogScore >= 80 && commandCenter.summary.readyFinders === 1, "Expected dashboard command center to summarize launch readiness");
@@ -1496,6 +1529,7 @@ async function main() {
   assertExperimentPlannerWorkflow();
   assertCommercialImpactWorkflow();
   assertSemanticSearchWorkflow();
+  assertAdvisorStudioWorkflow();
   assertCatalogImportWorkflow();
   assertQuizReadinessWorkflow();
   assertConfiguratorReadinessWorkflow();
