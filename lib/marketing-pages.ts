@@ -60,6 +60,16 @@ export const platformPages = [
     demoLabel: "Try configurator",
   },
   {
+    slug: "compatibility-matrix",
+    eyebrow: "Compatibility Matrix",
+    title: "Model dependency rules before shoppers build impossible carts.",
+    description: "Findly turns configurator incompatibility rules into an auditable matrix for stale references, product-link availability, one-way dependencies and runtime QA guardrails.",
+    points: ["Blocked-pair matrix", "Stale rule detection", "Linked product availability", "Copyable compatibility packet"],
+    proof: ["Dependency rules stay merchant-authored and deterministic", "Configurator QA proves blocked pairs before launch", "Complex B2B-style compatibility is visible without enterprise setup"],
+    demoHref: "/dashboard/compatibility",
+    demoLabel: "Open Compatibility Matrix",
+  },
+  {
     slug: "bundle-studio",
     eyebrow: "Bundle & Attach Studio",
     title: "Increase average order value with compatible bundles.",

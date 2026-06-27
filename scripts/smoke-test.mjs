@@ -728,6 +728,27 @@ function assertBundleStudioWorkflow() {
   assert(marketing.includes("bundle-studio"), "Platform marketing pages should include Bundle Studio");
 }
 
+function assertCompatibilityMatrixWorkflow() {
+  const page = readFileSync("app/dashboard/compatibility/page.tsx", "utf8");
+  const helper = readFileSync("lib/compatibility-matrix.ts", "utf8");
+  const shell = readFileSync("components/dashboard-shell.tsx", "utf8");
+  const overview = readFileSync("app/dashboard/page.tsx", "utf8");
+  const readme = readFileSync("README.md", "utf8");
+  const marketing = readFileSync("lib/marketing-pages.ts", "utf8");
+  assert(helper.includes("buildCompatibilityMatrixReport"), "Compatibility Matrix helper should expose a reusable report builder");
+  assert(helper.includes("buildConfiguratorQaReport"), "Compatibility Matrix should reuse configurator QA evidence");
+  assert(helper.includes("Findly Compatibility Matrix packet"), "Compatibility Matrix should generate a copyable packet");
+  assert(helper.includes("staleRules") && helper.includes("oneWayRules") && helper.includes("inactiveProductLinks"), "Compatibility Matrix should audit stale, one-way and product-link issues");
+  assert(page.includes("Compatibility Matrix Center"), "Compatibility Matrix page should expose the dashboard title");
+  assert(page.includes("Dependency rule matrix"), "Compatibility Matrix page should show the rule matrix");
+  assert(page.includes("Option coverage"), "Compatibility Matrix page should show option coverage");
+  assert(page.includes("Copy matrix packet"), "Compatibility Matrix page should let merchants copy the packet");
+  assert(shell.includes("/dashboard/compatibility"), "Dashboard navigation should expose Compatibility Matrix");
+  assert(overview.includes("/dashboard/compatibility"), "Dashboard overview should expose Compatibility Matrix");
+  assert(readme.includes("Compatibility Matrix Center"), "README should document Compatibility Matrix");
+  assert(marketing.includes("compatibility-matrix"), "Platform marketing pages should include Compatibility Matrix");
+}
+
 function assertUsageCenterWorkflow() {
   const page = readFileSync("app/dashboard/usage/page.tsx", "utf8");
   const helper = readFileSync("lib/usage-metering.ts", "utf8");
@@ -1057,6 +1078,10 @@ async function assertDeterministicLogic() {
   const compiledConfiguratorQa = `${compileDir}/lib/configurator-qa.js`;
   writeFileSync(compiledConfiguratorQa, readFileSync(compiledConfiguratorQa, "utf8")
     .replace('from "@/lib/utils";', 'from "./utils.js";'));
+  const compiledCompatibilityMatrix = `${compileDir}/lib/compatibility-matrix.js`;
+  writeFileSync(compiledCompatibilityMatrix, readFileSync(compiledCompatibilityMatrix, "utf8")
+    .replace('from "./configurator-qa";', 'from "./configurator-qa.js";')
+    .replace('from "./utils";', 'from "./utils.js";'));
   const compiledConfiguratorBlueprint = `${compileDir}/lib/configurator-blueprint.js`;
   writeFileSync(compiledConfiguratorBlueprint, readFileSync(compiledConfiguratorBlueprint, "utf8")
     .replace('from "./catalog-benefits";', 'from "./catalog-benefits.js";'));
@@ -1234,6 +1259,7 @@ async function assertDeterministicLogic() {
   const recommendationRecovery = await import(pathToFileURL(`${compileDir}/lib/recommendation-recovery.js`));
   const configuratorGuidance = await import(pathToFileURL(`${compileDir}/lib/configurator-guidance.js`));
   const configuratorQa = await import(pathToFileURL(`${compileDir}/lib/configurator-qa.js`));
+  const compatibilityMatrix = await import(pathToFileURL(`${compileDir}/lib/compatibility-matrix.js`));
   const configuratorBlueprint = await import(pathToFileURL(`${compileDir}/lib/configurator-blueprint.js`));
   const recommendationTrace = await import(pathToFileURL(`${compileDir}/lib/recommendation-trace.js`));
   const ruleCoverage = await import(pathToFileURL(`${compileDir}/lib/rule-coverage.js`));
@@ -1366,6 +1392,15 @@ async function assertDeterministicLogic() {
   assert(configuratorQaReport.summary.completionScenarios > 0 && configuratorQaReport.summary.productLinkedScenarioRate > 0, "Expected configurator QA to simulate completed, product-linked bundles");
   assert(configuratorQaReport.summary.compatibilityGuardrails > 0 && configuratorQaReport.summary.failedGuardrails === 0, "Expected configurator QA to verify incompatible option guardrails");
   assert(configuratorQaReport.actions.length || configuratorQaReport.score > 0, "Expected configurator QA to produce a score or remediation actions");
+  const compatibilityMatrixReport = compatibilityMatrix.buildCompatibilityMatrixReport({ products: demo.demoProducts, configurators: [demo.demoConfigurator] });
+  assert(compatibilityMatrixReport.summary.compatibilityRules > 0 && compatibilityMatrixReport.summary.blockedPairs > 0, "Expected Compatibility Matrix to expose blocked option pairs");
+  assert(compatibilityMatrixReport.summary.staleRules === 0 && compatibilityMatrixReport.checks.some((check) => check.id === "path-qa" && check.status !== "fail"), "Expected Compatibility Matrix to pass seeded stale-reference and path-QA checks");
+  assert(compatibilityMatrixReport.packet.includes("Findly Compatibility Matrix packet") && compatibilityMatrixReport.rules.some((rule) => rule.shopperMessage.includes("Findly should prevent")), "Expected Compatibility Matrix to generate a packet and shopper-safe rule messages");
+  const staleCompatibilityReport = compatibilityMatrix.buildCompatibilityMatrixReport({
+    products: demo.demoProducts,
+    configurators: [{ ...demo.demoConfigurator, steps: [{ ...demo.demoConfigurator.steps[0], options: [{ ...demo.demoConfigurator.steps[0].options[0], incompatible_option_ids: ["missing-option"] }] }] }],
+  });
+  assert(staleCompatibilityReport.status === "needs-attention" && staleCompatibilityReport.actions.some((action) => action.id === "repair-stale-rules"), "Expected Compatibility Matrix to flag stale compatibility references");
   const bundleStudioReport = bundleStudio.buildBundleStudioReport({ products: demo.demoProducts, configurators: [demo.demoConfigurator], events: demo.demoEvents });
   assert(bundleStudioReport.summary.anchorProducts > 0 && bundleStudioReport.summary.addOns > 0, "Expected Bundle Studio to find product anchors and paid add-ons");
   assert(bundleStudioReport.summary.compatibilityRules > 0 && bundleStudioReport.opportunities.some((opportunity) => opportunity.addOns.length > 0), "Expected Bundle Studio to produce compatible attach opportunities");
@@ -1867,6 +1902,7 @@ async function main() {
   await assertPage("/platform", "Findly platform");
   await assertPage("/platform/catalog-pipeline", "Govern imports");
   await assertPage("/platform/configurators", "Visual configurators");
+  await assertPage("/platform/compatibility-matrix", "Model dependency rules");
   await assertPage("/platform/merchandising-controls", "Tune recommendation pressure");
   await assertPage("/platform/shopper-personas", "Turn zero-party signals");
   await assertPage("/platform/widget-studio", "Launch every guided experience");
@@ -1910,6 +1946,7 @@ async function main() {
   assertExperimentPlannerWorkflow();
   assertCommercialImpactWorkflow();
   assertReturnsIntelligenceWorkflow();
+  assertCompatibilityMatrixWorkflow();
   assertBundleStudioWorkflow();
   assertUsageCenterWorkflow();
   assertSemanticSearchWorkflow();
