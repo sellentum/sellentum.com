@@ -633,6 +633,28 @@ function assertAdvisorStudioWorkflow() {
   assert(readme.includes("Advisor Studio"), "README should document Advisor Studio");
 }
 
+function assertAttributeStudioWorkflow() {
+  const page = readFileSync("app/dashboard/attributes/page.tsx", "utf8");
+  const helper = readFileSync("lib/attribute-studio.ts", "utf8");
+  const shell = readFileSync("components/dashboard-shell.tsx", "utf8");
+  const overview = readFileSync("app/dashboard/page.tsx", "utf8");
+  const readme = readFileSync("README.md", "utf8");
+  assert(helper.includes("buildAttributeStudioReport"), "Attribute Studio helper should expose a reusable report builder");
+  assert(helper.includes("buildCatalogBenefitReport"), "Attribute Studio should reuse spec-to-benefit mapping");
+  assert(helper.includes("analyzeCatalogIntelligence"), "Attribute Studio should include catalog readiness evidence");
+  assert(helper.includes("Findly normalized attribute glossary"), "Attribute Studio should generate a copyable glossary");
+  assert(helper.includes("Findly Attribute Studio packet"), "Attribute Studio should generate a copyable packet");
+  assert(page.includes("buildAttributeStudioReport"), "Attribute Studio page should use the shared report builder");
+  assert(page.includes("Attribute Studio"), "Attribute Studio page should expose the dashboard title");
+  assert(page.includes("Normalized attribute glossary"), "Attribute Studio page should show canonical attributes");
+  assert(page.includes("Attribute variant groups"), "Attribute Studio page should show alias/variant review");
+  assert(page.includes("Product cleanup tasks"), "Attribute Studio page should show product-level cleanup tasks");
+  assert(page.includes("Copy attribute packet"), "Attribute Studio page should let merchants copy the packet");
+  assert(shell.includes("/dashboard/attributes"), "Dashboard navigation should expose Attribute Studio");
+  assert(overview.includes("/dashboard/attributes"), "Dashboard overview should expose Attribute Studio");
+  assert(readme.includes("Attribute Studio"), "README should document Attribute Studio");
+}
+
 function assertCatalogImportWorkflow() {
   const page = readFileSync("app/dashboard/products/page.tsx", "utf8");
   const ontologyPage = readFileSync("app/dashboard/ontology/page.tsx", "utf8");
@@ -820,6 +842,10 @@ async function assertDeterministicLogic() {
     .replace('from "./catalog-benefits";', 'from "./catalog-benefits.js";'));
   const compiledSearchEngine = `${compileDir}/lib/search-engine.js`;
   writeFileSync(compiledSearchEngine, readFileSync(compiledSearchEngine, "utf8").replace('from "./catalog-benefits";', 'from "./catalog-benefits.js";'));
+  const compiledAttributeStudio = `${compileDir}/lib/attribute-studio.js`;
+  writeFileSync(compiledAttributeStudio, readFileSync(compiledAttributeStudio, "utf8")
+    .replace('from "./catalog-benefits";', 'from "./catalog-benefits.js";')
+    .replace('from "./catalog-intelligence";', 'from "./catalog-intelligence.js";'));
   const compiledAdvisorStudio = `${compileDir}/lib/advisor-studio.js`;
   writeFileSync(compiledAdvisorStudio, readFileSync(compiledAdvisorStudio, "utf8")
     .replace('from "./advisor-recovery";', 'from "./advisor-recovery.js";')
@@ -940,6 +966,7 @@ async function assertDeterministicLogic() {
   const recommendationTrace = await import(pathToFileURL(`${compileDir}/lib/recommendation-trace.js`));
   const ruleCoverage = await import(pathToFileURL(`${compileDir}/lib/rule-coverage.js`));
   const searchEngine = await import(pathToFileURL(`${compileDir}/lib/search-engine.js`));
+  const attributeStudio = await import(pathToFileURL(`${compileDir}/lib/attribute-studio.js`));
   const advisorStudio = await import(pathToFileURL(`${compileDir}/lib/advisor-studio.js`));
   const shopperLanguagePlanner = await import(pathToFileURL(`${compileDir}/lib/shopper-language-planner.js`));
   const vocabularyStudio = await import(pathToFileURL(`${compileDir}/lib/vocabulary-studio.js`));
@@ -1186,6 +1213,10 @@ async function assertDeterministicLogic() {
   assert(benefitReport.suggestedQuestion.options.length, "Expected benefit report to produce benefit-led question options");
   const benefitIntentTerms = catalogBenefits.expandBenefitIntentTokens("I need wet-weather protection");
   assert(benefitIntentTerms.includes("water") && benefitIntentTerms.includes("rain"), "Expected benefit intent expansion to map shopper benefit language to concrete catalog terms");
+  const attributeReport = attributeStudio.buildAttributeStudioReport(demo.demoProducts);
+  assert(attributeReport.summary.normalizedAttributes > 0 && attributeReport.attributes.some((attribute) => attribute.canonicalValue.includes("wet-weather") || attribute.canonicalValue.includes("outdoor")), "Expected Attribute Studio to normalize catalog benefit attributes");
+  assert(attributeReport.productTasks.length >= 0 && attributeReport.actions.length, "Expected Attribute Studio to expose product cleanup tasks or ready actions");
+  assert(attributeReport.glossary.includes("Findly normalized attribute glossary") && attributeReport.packet.includes("Findly Attribute Studio packet"), "Expected Attribute Studio to generate copyable glossary and packet text");
   const shopperLanguagePlan = shopperLanguagePlanner.buildShopperLanguagePlan({ products: demo.demoProducts, quizzes: [demo.demoQuiz], events: demo.demoEvents });
   assert(shopperLanguagePlan.score > 0 && shopperLanguagePlan.summary.coveredTerms > 0, "Expected shopper language planner to score catalog-backed vocabulary coverage");
   assert(shopperLanguagePlan.missingTerms.some((term) => term.term === "orthopedic" || term.term === "office"), "Expected shopper language planner to detect missing observed shopper vocabulary");
@@ -1530,6 +1561,7 @@ async function main() {
   assertCommercialImpactWorkflow();
   assertSemanticSearchWorkflow();
   assertAdvisorStudioWorkflow();
+  assertAttributeStudioWorkflow();
   assertCatalogImportWorkflow();
   assertQuizReadinessWorkflow();
   assertConfiguratorReadinessWorkflow();

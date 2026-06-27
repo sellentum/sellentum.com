@@ -9,6 +9,7 @@ Findly is a compact guided-selling SaaS product for ecommerce brands. A merchant
 - Product catalog CRUD plus CSV upload with flexible header aliases, row-level validation and import preview (`name`, `price`, and `category` are required; buyer needs/search text are optional discovery fields)
 - AI catalog enrichment with normalized attributes, buyer needs, semantic search text and optional OpenAI embeddings
 - Catalog intelligence scoring for enrichment coverage, semantic-search readiness, matching signals, product media and commerce links
+- Attribute Studio for normalizing messy specs, aliases, materials, price bands and shopper-benefit language before they power discovery
 - Ontology map for inspecting category clusters, buyer needs, tags, features, spec-to-benefit translations, thin signals and AI-ready quiz question ideas
 - Vocabulary Studio for approving shopper terms, synonym clusters, unsupported search/advisor language and product-level semantic text tasks
 - Decision graph workbench that connects products, catalog signals, finder answer rules, configurator options and observed shopper language into one merchant-readable trust map
@@ -171,6 +172,7 @@ Import the repository into Vercel, add the variables from `.env.example`, and de
 - `lib/discovery-gaps.ts` — deterministic analytics intelligence for no-result paths, missing terms, thin results and stalled product recommendations
 - `lib/catalog-benefits.ts` — deterministic spec-to-benefit translation for shopper-friendly ontology insights and question ideas
 - `lib/catalog-intelligence.ts` — catalog health scoring for enrichment coverage, matching signals, semantic text, media and commerce links
+- `lib/attribute-studio.ts` and `app/dashboard/attributes` — catalog normalization workbench for canonical attributes, raw aliases, spec cleanup tasks and copyable attribute packets
 - `lib/catalog-ontology.ts` — category, buyer-need, tag and feature clustering for ontology mapping and question ideas
 - `lib/vocabulary-studio.ts` and `app/dashboard/vocabulary` — discovery vocabulary governance for approved terms, synonym clusters, unsupported shopper language and product semantic text tasks
 - `lib/decision-graph.ts` and `app/dashboard/decision-graph` — deterministic relationship graph for product signals, finder rules, configurator product links and unresolved shopper language
