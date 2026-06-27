@@ -348,6 +348,25 @@ function assertDecisionGraphWorkflow() {
   assert(readme.includes("Decision graph workbench"), "README should document the decision graph workbench");
 }
 
+function assertLaunchChannelsWorkflow() {
+  const page = readFileSync("app/dashboard/channels/page.tsx", "utf8");
+  const helper = readFileSync("lib/launch-channels.ts", "utf8");
+  const shell = readFileSync("components/dashboard-shell.tsx", "utf8");
+  const overview = readFileSync("app/dashboard/page.tsx", "utf8");
+  const readme = readFileSync("README.md", "utf8");
+  assert(helper.includes("buildLaunchChannelReport"), "Launch channels helper should expose a reusable report builder");
+  assert(helper.includes("homepage-finder") && helper.includes("category-inline-search") && helper.includes("pdp-configurator") && helper.includes("support-advisor"), "Launch channels should include homepage, category, PDP and support placements");
+  assert(helper.includes("buildWidgetSnippet") && helper.includes("buildWidgetInstallReport"), "Launch channels should use shared widget snippet and install QA helpers");
+  assert(helper.includes("findly_campaign") && helper.includes("findly_placement") && helper.includes("findly_source"), "Launch channels should evaluate attributed channel events");
+  assert(page.includes("buildLaunchChannelReport"), "Launch Channels page should use the shared report builder");
+  assert(page.includes("Copy channel packet"), "Launch Channels page should let merchants copy a complete channel packet");
+  assert(page.includes("Channel QA"), "Launch Channels page should show channel QA checks");
+  assert(page.includes("Channel telemetry"), "Launch Channels page should show channel metrics");
+  assert(shell.includes("/dashboard/channels"), "Dashboard navigation should expose Launch Channels");
+  assert(overview.includes("/dashboard/channels"), "Dashboard overview should expose Launch Channels");
+  assert(readme.includes("Launch Channels board"), "README should document Launch Channels");
+}
+
 function assertCommercialImpactWorkflow() {
   const analyticsPage = readFileSync("app/dashboard/analytics/page.tsx", "utf8");
   const commercialImpact = readFileSync("lib/commercial-impact.ts", "utf8");
@@ -642,6 +661,9 @@ async function assertDeterministicLogic() {
   const compiledDecisionGraph = `${compileDir}/lib/decision-graph.js`;
   writeFileSync(compiledDecisionGraph, readFileSync(compiledDecisionGraph, "utf8")
     .replace('from "@/lib/utils";', 'from "./utils.js";'));
+  const compiledLaunchChannels = `${compileDir}/lib/launch-channels.js`;
+  writeFileSync(compiledLaunchChannels, readFileSync(compiledLaunchChannels, "utf8")
+    .replace('from "@/lib/widget-snippet";', 'from "./widget-snippet.js";'));
 
   const demo = await import(pathToFileURL(`${compileDir}/lib/demo-data.js`));
   const utils = await import(pathToFileURL(`${compileDir}/lib/utils.js`));
@@ -686,6 +708,7 @@ async function assertDeterministicLogic() {
   const commercialImpact = await import(pathToFileURL(`${compileDir}/lib/commercial-impact.js`));
   const starterKitHelpers = await import(pathToFileURL(`${compileDir}/lib/starter-kits.js`));
   const decisionGraph = await import(pathToFileURL(`${compileDir}/lib/decision-graph.js`));
+  const launchChannels = await import(pathToFileURL(`${compileDir}/lib/launch-channels.js`));
 
   const answers = [
     { questionId: "q_use", question: "Where?", optionId: "o_trail", answer: "Trails & outdoors", matchType: "tag", matchValue: "trail", weight: 5 },
@@ -982,6 +1005,27 @@ async function assertDeterministicLogic() {
   const runbookText = storefrontQaRunbook.formatStorefrontQaRunbook(runbook);
   assert(runbookText.includes("Acceptance criteria") && runbookText.includes("/api/events") && runbookText.includes(generatedWidgetSnippet), "Expected formatted storefront QA runbook to include acceptance criteria, analytics endpoint and embed snippet");
 
+  const channelEvents = [
+    { id: "channel_view", user_id: "demo-user", quiz_id: "quiz_footwear", event_type: "widget_view", metadata: { experience_type: "finder", findly_source: "homepage", findly_campaign: "findly-homepage-guide", findly_placement: "homepage-hero" }, created_at: "2026-06-25T12:00:00Z" },
+    { id: "channel_start", user_id: "demo-user", quiz_id: "quiz_footwear", event_type: "quiz_start", metadata: { experience_type: "finder", findly_source: "homepage", findly_campaign: "findly-homepage-guide", findly_placement: "homepage-hero" }, created_at: "2026-06-25T12:01:00Z" },
+    { id: "channel_complete", user_id: "demo-user", quiz_id: "quiz_footwear", event_type: "quiz_complete", metadata: { experience_type: "finder", findly_source: "homepage", findly_campaign: "findly-homepage-guide", findly_placement: "homepage-hero", result_count: 2 }, created_at: "2026-06-25T12:02:00Z" },
+    { id: "channel_rec", user_id: "demo-user", quiz_id: "quiz_footwear", product_id: "prod_trail", event_type: "product_recommended", metadata: { experience_type: "finder", findly_source: "homepage", findly_campaign: "findly-homepage-guide", findly_placement: "homepage-hero", rank: 1, product_name: "Terra Trail Runner" }, created_at: "2026-06-25T12:03:00Z" },
+    { id: "channel_click", user_id: "demo-user", quiz_id: "quiz_footwear", product_id: "prod_trail", event_type: "buy_click", metadata: { experience_type: "finder", findly_source: "homepage", findly_campaign: "findly-homepage-guide", findly_placement: "homepage-hero", product_name: "Terra Trail Runner" }, created_at: "2026-06-25T12:04:00Z" },
+  ];
+  const channelReport = launchChannels.buildLaunchChannelReport({
+    origin: "https://findly.example",
+    settings: demo.demoSettings,
+    finders: [demo.demoQuiz],
+    configurators: [demo.demoConfigurator],
+    events: channelEvents,
+  });
+  assert(channelReport.channels.length === 4 && channelReport.summary.installReady === 4, "Expected launch channels to generate four install-ready storefront placements");
+  assert(channelReport.packet.includes("Findly launch channel packet") && channelReport.packet.includes("data-campaign=\"findly-homepage-guide\""), "Expected launch channel packet to include attributed snippets");
+  const homepageChannel = channelReport.channels.find((channel) => channel.id === "homepage-finder");
+  assert(homepageChannel?.status === "live" && homepageChannel.metrics.clicks === 1 && homepageChannel.metrics.clickRate === 100, "Expected attributed homepage channel events to produce live channel metrics");
+  assert(channelReport.channels.some((channel) => channel.id === "pdp-configurator" && channel.snippet.includes('data-experience="configurator"')), "Expected PDP channel to generate configurator embed snippet");
+  assert(channelReport.channels.some((channel) => channel.id === "category-inline-search" && channel.snippet.includes('data-mode="inline"') && channel.snippet.includes('data-experience="search"')), "Expected category channel to generate inline search embed snippet");
+
   assert(starterKitHelpers.starterKits.length >= 3, "Expected multiple vertical starter kits");
   const firstStarterKit = starterKitHelpers.starterKits[0];
   const starterReadiness = starterKitHelpers.buildStarterKitReadiness(firstStarterKit);
@@ -1098,6 +1142,7 @@ async function main() {
   assertDashboardCommandCenterWorkflow();
   assertStarterKitWorkflow();
   assertDecisionGraphWorkflow();
+  assertLaunchChannelsWorkflow();
   assertCommercialImpactWorkflow();
   assertSemanticSearchWorkflow();
   assertCatalogImportWorkflow();
