@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
-import { AlertTriangle, Archive, ArrowDownRight, ArrowRight, ArrowUpRight, BookOpenCheck, Bot, BrainCircuit, Check, ChevronRight, CirclePlay, Eye, GalleryVerticalEnd, GitBranch, GitPullRequestArrow, Globe2, Handshake, Layers3, LayoutTemplate, Megaphone, MessageCircle, MousePointerClick, PackagePlus, Rocket, ShieldCheck, Sparkles, Target, Wrench } from "lucide-react";
+import { AlertTriangle, Archive, ArrowDownRight, ArrowRight, ArrowUpRight, BookOpenCheck, Bot, BrainCircuit, Check, ChevronRight, CirclePlay, Eye, GalleryVerticalEnd, GitBranch, GitPullRequestArrow, Globe2, Handshake, Layers3, LayoutTemplate, Megaphone, MessageCircle, MousePointerClick, PackagePlus, RadioTower, Rocket, ShieldCheck, Sparkles, Target, Wrench } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { LoadingState } from "@/components/loading-state";
 import { buildDashboardCommandCenter } from "@/lib/dashboard-command-center";
@@ -42,6 +42,7 @@ export default function DashboardOverview() {
           <Link href="/dashboard/channels" className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-xs font-extrabold text-ink shadow-sm transition hover:-translate-y-0.5"><Megaphone size={15} className="text-moss" /> Channels</Link>
           <Link href="/dashboard/syndication" className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-xs font-extrabold text-ink shadow-sm transition hover:-translate-y-0.5"><Handshake size={15} className="text-moss" /> Syndication</Link>
           <Link href="/dashboard/storefront-sandbox" className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-xs font-extrabold text-ink shadow-sm transition hover:-translate-y-0.5"><Globe2 size={15} className="text-moss" /> Storefront QA</Link>
+          <Link href="/dashboard/operations" className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-xs font-extrabold text-ink shadow-sm transition hover:-translate-y-0.5"><RadioTower size={15} className="text-moss" /> Runtime Ops</Link>
           <Link href="/dashboard/release-center" className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-xs font-extrabold text-ink shadow-sm transition hover:-translate-y-0.5"><GitPullRequestArrow size={15} className="text-moss" /> Release</Link>
           <Link href="/dashboard/trust-center" className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-xs font-extrabold text-ink shadow-sm transition hover:-translate-y-0.5"><ShieldCheck size={15} className="text-moss" /> AI Trust</Link>
           <Link href="/dashboard/workspace-snapshot" className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-xs font-extrabold text-ink shadow-sm transition hover:-translate-y-0.5"><Archive size={15} className="text-moss" /> Snapshot</Link>

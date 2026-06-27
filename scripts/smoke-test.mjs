@@ -456,6 +456,28 @@ function assertExperienceRegistryWorkflow() {
   assert(readme.includes("Experience Registry"), "README should document Experience Registry");
 }
 
+function assertRuntimeOperationsWorkflow() {
+  const page = readFileSync("app/dashboard/operations/page.tsx", "utf8");
+  const helper = readFileSync("lib/runtime-operations.ts", "utf8");
+  const shell = readFileSync("components/dashboard-shell.tsx", "utf8");
+  const overview = readFileSync("app/dashboard/page.tsx", "utf8");
+  const readme = readFileSync("README.md", "utf8");
+  assert(helper.includes("buildRuntimeOperationsReport"), "Runtime Operations helper should expose a reusable report builder");
+  assert(helper.includes("buildExperienceRegistry"), "Runtime Operations should include experience registry evidence");
+  assert(helper.includes("buildReleaseCandidate"), "Runtime Operations should include release gate evidence");
+  assert(helper.includes("buildAnalyticsQualityReport"), "Runtime Operations should include analytics quality evidence");
+  assert(helper.includes("readBoundedJson") && helper.includes("publicRateLimit") && helper.includes("sanitizeAnalyticsMetadata"), "Runtime Operations should document public runtime guardrails");
+  assert(helper.includes("Findly Runtime Operations packet"), "Runtime Operations should generate a copyable packet");
+  assert(page.includes("buildRuntimeOperationsReport"), "Runtime Operations page should use the shared helper");
+  assert(page.includes("Runtime Operations"), "Runtime Operations page should expose the dashboard title");
+  assert(page.includes("Runtime endpoint contract"), "Runtime Operations page should show endpoint contracts");
+  assert(page.includes("Runtime guardrail contract"), "Runtime Operations page should show guardrails");
+  assert(page.includes("Copy ops packet"), "Runtime Operations page should let merchants copy the packet");
+  assert(shell.includes("/dashboard/operations"), "Dashboard navigation should expose Runtime Operations");
+  assert(overview.includes("/dashboard/operations"), "Dashboard overview should expose Runtime Operations");
+  assert(readme.includes("Runtime Operations Center"), "README should document Runtime Operations");
+}
+
 function assertPartnerSyndicationWorkflow() {
   const page = readFileSync("app/dashboard/syndication/page.tsx", "utf8");
   const helper = readFileSync("lib/syndication.ts", "utf8");
@@ -959,6 +981,11 @@ async function assertDeterministicLogic() {
     .replace('from "./quiz-readiness";', 'from "./quiz-readiness.js";')
     .replace('from "./recommendation-qa";', 'from "./recommendation-qa.js";')
     .replace('from "./storefront-sandbox";', 'from "./storefront-sandbox.js";'));
+  const compiledRuntimeOperations = `${compileDir}/lib/runtime-operations.js`;
+  writeFileSync(compiledRuntimeOperations, readFileSync(compiledRuntimeOperations, "utf8")
+    .replace('from "./analytics-quality";', 'from "./analytics-quality.js";')
+    .replace('from "./experience-registry";', 'from "./experience-registry.js";')
+    .replace('from "./release-center";', 'from "./release-center.js";'));
   const compiledWorkspaceSnapshot = `${compileDir}/lib/workspace-snapshot.js`;
   writeFileSync(compiledWorkspaceSnapshot, readFileSync(compiledWorkspaceSnapshot, "utf8")
     .replace('from "./decision-graph";', 'from "./decision-graph.js";')
@@ -1019,6 +1046,7 @@ async function assertDeterministicLogic() {
   const storefrontSandbox = await import(pathToFileURL(`${compileDir}/lib/storefront-sandbox.js`));
   const experiments = await import(pathToFileURL(`${compileDir}/lib/experiments.js`));
   const releaseCenter = await import(pathToFileURL(`${compileDir}/lib/release-center.js`));
+  const runtimeOperations = await import(pathToFileURL(`${compileDir}/lib/runtime-operations.js`));
   const workspaceSnapshot = await import(pathToFileURL(`${compileDir}/lib/workspace-snapshot.js`));
 
   const answers = [
@@ -1311,6 +1339,10 @@ async function assertDeterministicLogic() {
   assert(registryReport.surfaces.length === 4 && registryReport.surfaces.every((surface) => surface.snippet.includes(`data-experience="${surface.experience}"`)), "Expected Experience Registry to inventory all embeddable surfaces");
   assert(registryReport.surfaces.some((surface) => surface.experience === "assistant") && registryReport.surfaces.some((surface) => surface.experience === "configurator"), "Expected Experience Registry to include advisor and configurator surfaces");
   assert(registryReport.packet.includes("Findly Experience Registry packet") && registryReport.summary.totalViews >= 0, "Expected Experience Registry to generate a deployment packet and metrics");
+  const runtimeOpsReport = runtimeOperations.buildRuntimeOperationsReport({ origin: "https://findly.example", settings: demo.demoSettings, products: demo.demoProducts, quizzes: [demo.demoQuiz], configurators: [demo.demoConfigurator], events: demo.demoEvents });
+  assert(runtimeOpsReport.endpoints.some((endpoint) => endpoint.id === "widget-script") && runtimeOpsReport.endpoints.some((endpoint) => endpoint.id === "analytics-runtime"), "Expected Runtime Operations to list widget and analytics endpoints");
+  assert(runtimeOpsReport.guardrails.some((guardrail) => guardrail.label === "Bounded public JSON") && runtimeOpsReport.checks.some((check) => check.id === "analytics-contract"), "Expected Runtime Operations to expose guardrails and analytics checks");
+  assert(runtimeOpsReport.packet.includes("Findly Runtime Operations packet") && runtimeOpsReport.summary.endpoints >= 5, "Expected Runtime Operations to generate a copyable operations packet");
   const packet = launchPacket.buildLaunchPacket({
     origin: "https://findly.example/",
     publicUrl: "https://findly.example/finder/footwear-finder",
@@ -1586,6 +1618,7 @@ async function main() {
   assertLaunchChannelsWorkflow();
   assertPartnerSyndicationWorkflow();
   assertStorefrontSandboxWorkflow();
+  assertRuntimeOperationsWorkflow();
   assertReleaseCenterWorkflow();
   assertWorkspaceSnapshotWorkflow();
   assertExperimentPlannerWorkflow();
