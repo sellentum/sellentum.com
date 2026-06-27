@@ -521,6 +521,29 @@ function assertWidgetStudioWorkflow() {
   assert(marketing.includes("widget-studio"), "Platform marketing pages should include Widget Studio");
 }
 
+function assertApiCenterWorkflow() {
+  const page = readFileSync("app/dashboard/api-center/page.tsx", "utf8");
+  const helper = readFileSync("lib/api-center.ts", "utf8");
+  const shell = readFileSync("components/dashboard-shell.tsx", "utf8");
+  const overview = readFileSync("app/dashboard/page.tsx", "utf8");
+  const readme = readFileSync("README.md", "utf8");
+  const marketing = readFileSync("lib/marketing-pages.ts", "utf8");
+  assert(helper.includes("buildApiCenterReport"), "API Center helper should expose a reusable report builder");
+  assert(helper.includes("buildRuntimeOperationsReport"), "API Center should reuse runtime operations evidence");
+  assert(helper.includes("buildExperienceRegistry"), "API Center should reuse experience registry telemetry evidence");
+  assert(helper.includes("Findly Headless API Center packet"), "API Center should generate a copyable packet");
+  assert(helper.includes("finder-recommendations") && helper.includes("advisor-search") && helper.includes("configurator-validation"), "API Center should document finder, advisor and configurator endpoints");
+  assert(page.includes("Headless API Center"), "API Center page should expose the dashboard title");
+  assert(page.includes("API endpoint catalog"), "API Center page should show the endpoint catalog");
+  assert(page.includes("Fetch snippet"), "API Center page should show fetch snippets");
+  assert(page.includes("API readiness checks"), "API Center page should show readiness checks");
+  assert(page.includes("Copy API packet"), "API Center page should let merchants copy the packet");
+  assert(shell.includes("/dashboard/api-center"), "Dashboard navigation should expose API Center");
+  assert(overview.includes("/dashboard/api-center"), "Dashboard overview should expose API Center");
+  assert(readme.includes("Headless API Center"), "README should document Headless API Center");
+  assert(marketing.includes("headless-api"), "Platform marketing pages should include Headless API");
+}
+
 function assertRuntimeOperationsWorkflow() {
   const page = readFileSync("app/dashboard/operations/page.tsx", "utf8");
   const helper = readFileSync("lib/runtime-operations.ts", "utf8");
@@ -1121,6 +1144,11 @@ async function assertDeterministicLogic() {
     .replace('from "./analytics-quality";', 'from "./analytics-quality.js";')
     .replace('from "./experience-registry";', 'from "./experience-registry.js";')
     .replace('from "./release-center";', 'from "./release-center.js";'));
+  const compiledApiCenter = `${compileDir}/lib/api-center.js`;
+  writeFileSync(compiledApiCenter, readFileSync(compiledApiCenter, "utf8")
+    .replace('from "./analytics-quality";', 'from "./analytics-quality.js";')
+    .replace('from "./experience-registry";', 'from "./experience-registry.js";')
+    .replace('from "./runtime-operations";', 'from "./runtime-operations.js";'));
   const compiledWorkspaceSnapshot = `${compileDir}/lib/workspace-snapshot.js`;
   writeFileSync(compiledWorkspaceSnapshot, readFileSync(compiledWorkspaceSnapshot, "utf8")
     .replace('from "./decision-graph";', 'from "./decision-graph.js";')
@@ -1187,6 +1215,7 @@ async function assertDeterministicLogic() {
   const experiments = await import(pathToFileURL(`${compileDir}/lib/experiments.js`));
   const releaseCenter = await import(pathToFileURL(`${compileDir}/lib/release-center.js`));
   const runtimeOperations = await import(pathToFileURL(`${compileDir}/lib/runtime-operations.js`));
+  const apiCenter = await import(pathToFileURL(`${compileDir}/lib/api-center.js`));
   const workspaceSnapshot = await import(pathToFileURL(`${compileDir}/lib/workspace-snapshot.js`));
 
   const answers = [
@@ -1513,6 +1542,10 @@ async function assertDeterministicLogic() {
   assert(runtimeOpsReport.endpoints.some((endpoint) => endpoint.id === "widget-script") && runtimeOpsReport.endpoints.some((endpoint) => endpoint.id === "analytics-runtime"), "Expected Runtime Operations to list widget and analytics endpoints");
   assert(runtimeOpsReport.guardrails.some((guardrail) => guardrail.label === "Bounded public JSON") && runtimeOpsReport.checks.some((check) => check.id === "analytics-contract"), "Expected Runtime Operations to expose guardrails and analytics checks");
   assert(runtimeOpsReport.packet.includes("Findly Runtime Operations packet") && runtimeOpsReport.summary.endpoints >= 5, "Expected Runtime Operations to generate a copyable operations packet");
+  const apiCenterReport = apiCenter.buildApiCenterReport({ origin: "https://findly.example", settings: demo.demoSettings, products: demo.demoProducts, quizzes: [demo.demoQuiz], configurators: [demo.demoConfigurator], events: demo.demoEvents });
+  assert(apiCenterReport.endpoints.some((endpoint) => endpoint.id === "finder-recommendations" && endpoint.path.includes("/api/public/finder/")) && apiCenterReport.endpoints.some((endpoint) => endpoint.id === "configurator-validation" && endpoint.requestExample.includes("selectedIds")), "Expected API Center to document finder and configurator runtime endpoints");
+  assert(apiCenterReport.endpoints.some((endpoint) => endpoint.id === "advisor-search") && apiCenterReport.endpoints.some((endpoint) => endpoint.id === "semantic-search"), "Expected API Center to document advisor and semantic search endpoints");
+  assert(apiCenterReport.packet.includes("Findly Headless API Center packet") && apiCenterReport.sdkNotes.some((note) => note.label === "No secret exposure"), "Expected API Center to generate a packet and SDK boundary notes");
   const packet = launchPacket.buildLaunchPacket({
     origin: "https://findly.example/",
     publicUrl: "https://findly.example/finder/footwear-finder",
@@ -1766,6 +1799,7 @@ async function main() {
   await assertPage("/platform/merchandising-controls", "Tune recommendation pressure");
   await assertPage("/platform/shopper-personas", "Turn zero-party signals");
   await assertPage("/platform/widget-studio", "Launch every guided experience");
+  await assertPage("/platform/headless-api", "Build custom guided-selling");
   await assertPage("/platform/returns-fit-intelligence", "Prevent wrong-fit purchases");
   await assertPage("/industries", "Industries");
   await assertPage("/resources", "Demo the product discovery loop");
@@ -1793,6 +1827,7 @@ async function main() {
   assertFlowStudioWorkflow();
   assertExperienceRegistryWorkflow();
   assertWidgetStudioWorkflow();
+  assertApiCenterWorkflow();
   assertLaunchChannelsWorkflow();
   assertPartnerSyndicationWorkflow();
   assertStorefrontSandboxWorkflow();

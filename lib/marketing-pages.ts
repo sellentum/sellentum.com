@@ -80,6 +80,16 @@ export const platformPages = [
     demoLabel: "Open Widget Studio",
   },
   {
+    slug: "headless-api",
+    eyebrow: "Headless API",
+    title: "Build custom guided-selling frontends on Findly’s public runtimes.",
+    description: "Use the same deterministic finder, advisor, semantic search, configurator and analytics services behind the widget inside a custom storefront, agency build or headless commerce stack.",
+    points: ["Finder recommendation API", "Advisor and semantic search APIs", "Configurator validation API", "Analytics event contract"],
+    proof: ["Public runtimes load published resources and active catalog records server-side", "Request examples and fetch snippets are generated from the workspace", "No Supabase, OpenAI or dashboard secrets are exposed to storefront developers"],
+    demoHref: "/dashboard/api-center",
+    demoLabel: "Open API Center",
+  },
+  {
     slug: "analytics",
     eyebrow: "Journey analytics",
     title: "See where guided discovery turns into buying intent.",
