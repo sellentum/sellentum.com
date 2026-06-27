@@ -19,6 +19,7 @@ Findly is a compact guided-selling SaaS product for ecommerce brands. A merchant
 - AI quiz blueprint review in Launch Studio so merchants can inspect planned questions, catalog coverage and generation risks before publishing
 - Industry starter kits that install editable sample products, finder questions, deterministic answer rules and product-linked configurator drafts for faster merchant onboarding
 - Launch Studio workflow that enriches a catalog, generates a finder, publishes it, prepares finder/advisor/search/configurator embed snippets and copies a developer launch packet from one screen
+- Widget Studio that centralizes finder/advisor/search/configurator modal and inline snippets, install contracts, attribution labels, QA checks and copyable developer handoff packets
 - Experience Registry that inventories finder, advisor, search and configurator surfaces with public URLs, snippets, QA status and runtime metrics
 - Launch Channels board that packages homepage, category, PDP and support placements with copy-ready snippets, attribution labels, QA checks and channel metrics
 - Partner Syndication board that packages retailer, marketplace, affiliate, support and sales-partner widget snippets with syndication attribution, QA checks and data-policy handoff notes
@@ -202,6 +203,7 @@ Import the repository into Vercel, add the variables from `.env.example`, and de
 - `lib/recommendation-explanations.ts` — shared grounded OpenAI/fallback copy for already-ranked finder recommendations
 - `lib/explanation-grounding.ts` — launch-time explanation QA for unsupported claims, fact coverage and fallback/OpenAI copy readiness
 - `lib/widget-snippet.ts` — shared widget snippet generation and install-readiness diagnostics for Settings and Launch Studio
+- `lib/widget-studio.ts` and `app/dashboard/widget-studio` — desktop widget implementation center for modal/inline snippets, install contracts, attribution, QA checks and copyable handoff packets
 - `lib/public-runtime-guard.ts` — bounded JSON parsing, public rate-limit responses and analytics metadata sanitization for embeddable runtimes
 - `lib/experience-launch.ts` — multi-experience launch cards for finder, advisor, semantic search and configurator embeds
 - `lib/experience-registry.ts` and `app/dashboard/experiences` — operational registry for all customer-facing discovery surfaces, install QA, snippets and telemetry proof

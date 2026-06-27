@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
-import { AlertTriangle, Archive, ArrowDownRight, ArrowRight, ArrowUpRight, BookOpenCheck, Bot, BrainCircuit, Check, ChevronRight, CirclePlay, Database, Eye, GalleryVerticalEnd, GitBranch, GitPullRequestArrow, Globe2, Handshake, Layers3, LayoutTemplate, Megaphone, MessageCircle, MousePointerClick, PackagePlus, RadioTower, Rocket, ShieldCheck, SlidersHorizontal, Sparkles, Target, UsersRound, Wrench } from "lucide-react";
+import { AlertTriangle, Archive, ArrowDownRight, ArrowRight, ArrowUpRight, BookOpenCheck, Bot, BrainCircuit, Check, ChevronRight, CirclePlay, Code2, Database, Eye, GalleryVerticalEnd, GitBranch, GitPullRequestArrow, Globe2, Handshake, Layers3, LayoutTemplate, Megaphone, MessageCircle, MousePointerClick, PackagePlus, RadioTower, Rocket, ShieldCheck, SlidersHorizontal, Sparkles, Target, UsersRound, Wrench } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { LoadingState } from "@/components/loading-state";
 import { buildDashboardCommandCenter } from "@/lib/dashboard-command-center";
@@ -33,6 +33,7 @@ export default function DashboardOverview() {
         <div><p className="eyebrow text-moss">{today}</p><h1 className="display mt-2 text-4xl sm:text-5xl">Good evening, Alex.</h1><p className="mt-2 text-sm text-black/45">Here’s how {settings.brand_name} is helping shoppers choose.</p></div>
         <div className="flex flex-wrap justify-end gap-3">
           <Link href="/dashboard/templates" className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-xs font-extrabold text-ink shadow-sm transition hover:-translate-y-0.5"><LayoutTemplate size={15} className="text-moss" /> Use a template</Link>
+          <Link href="/dashboard/widget-studio" className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-xs font-extrabold text-ink shadow-sm transition hover:-translate-y-0.5"><Code2 size={15} className="text-moss" /> Widget Studio</Link>
           <Link href="/dashboard/catalog-pipeline" className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-xs font-extrabold text-ink shadow-sm transition hover:-translate-y-0.5"><Database size={15} className="text-moss" /> Catalog pipeline</Link>
           <Link href="/dashboard/attributes" className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-xs font-extrabold text-ink shadow-sm transition hover:-translate-y-0.5"><Layers3 size={15} className="text-moss" /> Attributes</Link>
           <Link href="/dashboard/vocabulary" className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-xs font-extrabold text-ink shadow-sm transition hover:-translate-y-0.5"><MessageCircle size={15} className="text-moss" /> Vocabulary</Link>

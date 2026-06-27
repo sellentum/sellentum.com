@@ -498,6 +498,29 @@ function assertExperienceRegistryWorkflow() {
   assert(readme.includes("Experience Registry"), "README should document Experience Registry");
 }
 
+function assertWidgetStudioWorkflow() {
+  const page = readFileSync("app/dashboard/widget-studio/page.tsx", "utf8");
+  const helper = readFileSync("lib/widget-studio.ts", "utf8");
+  const shell = readFileSync("components/dashboard-shell.tsx", "utf8");
+  const overview = readFileSync("app/dashboard/page.tsx", "utf8");
+  const readme = readFileSync("README.md", "utf8");
+  const marketing = readFileSync("lib/marketing-pages.ts", "utf8");
+  assert(helper.includes("buildWidgetStudioReport"), "Widget Studio helper should expose a reusable report builder");
+  assert(helper.includes("buildLaunchExperienceCards"), "Widget Studio should reuse launch experience cards");
+  assert(helper.includes("buildExperienceRegistry"), "Widget Studio should reuse registry telemetry evidence");
+  assert(helper.includes("buildWidgetInstallReport") && helper.includes("buildWidgetSnippet"), "Widget Studio should use shared widget snippet and install QA helpers");
+  assert(helper.includes("Findly Widget Studio packet"), "Widget Studio should generate a copyable packet");
+  assert(helper.includes("Install contract") && helper.includes("Analytics event contract"), "Widget Studio packet should include install and event contracts");
+  assert(page.includes("Widget Studio"), "Widget Studio page should expose the dashboard title");
+  assert(page.includes("Embeddable experiences"), "Widget Studio page should show embeddable experiences");
+  assert(page.includes("Install contract"), "Widget Studio page should show the install contract");
+  assert(page.includes("Copy widget packet"), "Widget Studio page should let merchants copy the packet");
+  assert(shell.includes("/dashboard/widget-studio"), "Dashboard navigation should expose Widget Studio");
+  assert(overview.includes("/dashboard/widget-studio"), "Dashboard overview should expose Widget Studio");
+  assert(readme.includes("Widget Studio"), "README should document Widget Studio");
+  assert(marketing.includes("widget-studio"), "Platform marketing pages should include Widget Studio");
+}
+
 function assertRuntimeOperationsWorkflow() {
   const page = readFileSync("app/dashboard/operations/page.tsx", "utf8");
   const helper = readFileSync("lib/runtime-operations.ts", "utf8");
@@ -983,6 +1006,11 @@ async function assertDeterministicLogic() {
     .replace('from "./analytics";', 'from "./analytics.js";')
     .replace('from "./experience-launch";', 'from "./experience-launch.js";')
     .replace('from "@/lib/utils";', 'from "./utils.js";'));
+  const compiledWidgetStudio = `${compileDir}/lib/widget-studio.js`;
+  writeFileSync(compiledWidgetStudio, readFileSync(compiledWidgetStudio, "utf8")
+    .replace('from "./experience-registry";', 'from "./experience-registry.js";')
+    .replace('from "./experience-launch";', 'from "./experience-launch.js";')
+    .replace('from "./widget-snippet";', 'from "./widget-snippet.js";'));
   const compiledLaunchContract = `${compileDir}/lib/launch-contract.js`;
   writeFileSync(compiledLaunchContract, readFileSync(compiledLaunchContract, "utf8")
     .replace('from "./widget-snippet";', 'from "./widget-snippet.js";')
@@ -1105,6 +1133,7 @@ async function assertDeterministicLogic() {
   const widgetSnippet = await import(pathToFileURL(`${compileDir}/lib/widget-snippet.js`));
   const experienceLaunch = await import(pathToFileURL(`${compileDir}/lib/experience-launch.js`));
   const experienceRegistry = await import(pathToFileURL(`${compileDir}/lib/experience-registry.js`));
+  const widgetStudio = await import(pathToFileURL(`${compileDir}/lib/widget-studio.js`));
   const launchPacket = await import(pathToFileURL(`${compileDir}/lib/launch-packet.js`));
   const launchContract = await import(pathToFileURL(`${compileDir}/lib/launch-contract.js`));
   const storefrontQaRunbook = await import(pathToFileURL(`${compileDir}/lib/storefront-qa-runbook.js`));
@@ -1438,6 +1467,10 @@ async function assertDeterministicLogic() {
   assert(registryReport.surfaces.length === 4 && registryReport.surfaces.every((surface) => surface.snippet.includes(`data-experience="${surface.experience}"`)), "Expected Experience Registry to inventory all embeddable surfaces");
   assert(registryReport.surfaces.some((surface) => surface.experience === "assistant") && registryReport.surfaces.some((surface) => surface.experience === "configurator"), "Expected Experience Registry to include advisor and configurator surfaces");
   assert(registryReport.packet.includes("Findly Experience Registry packet") && registryReport.summary.totalViews >= 0, "Expected Experience Registry to generate a deployment packet and metrics");
+  const widgetStudioReport = widgetStudio.buildWidgetStudioReport({ origin: "https://findly.example", settings: demo.demoSettings, quizzes: [demo.demoQuiz], configurators: [demo.demoConfigurator], events: demo.demoEvents });
+  assert(widgetStudioReport.experiences.length === 4 && widgetStudioReport.experiences.every((experience) => experience.modalSnippet.includes('data-mode="modal"') && experience.inlineSnippet.includes('data-mode="inline"')), "Expected Widget Studio to generate modal and inline snippets for every surface");
+  assert(widgetStudioReport.installContract.some((field) => field.attribute === "data-experience") && widgetStudioReport.eventContract.some((event) => event.event === "buy_click"), "Expected Widget Studio to expose install and analytics event contracts");
+  assert(widgetStudioReport.packet.includes("Findly Widget Studio packet") && widgetStudioReport.actions.length, "Expected Widget Studio to generate a copyable packet and action queue");
   const runtimeOpsReport = runtimeOperations.buildRuntimeOperationsReport({ origin: "https://findly.example", settings: demo.demoSettings, products: demo.demoProducts, quizzes: [demo.demoQuiz], configurators: [demo.demoConfigurator], events: demo.demoEvents });
   assert(runtimeOpsReport.endpoints.some((endpoint) => endpoint.id === "widget-script") && runtimeOpsReport.endpoints.some((endpoint) => endpoint.id === "analytics-runtime"), "Expected Runtime Operations to list widget and analytics endpoints");
   assert(runtimeOpsReport.guardrails.some((guardrail) => guardrail.label === "Bounded public JSON") && runtimeOpsReport.checks.some((check) => check.id === "analytics-contract"), "Expected Runtime Operations to expose guardrails and analytics checks");
@@ -1694,6 +1727,7 @@ async function main() {
   await assertPage("/platform/configurators", "Visual configurators");
   await assertPage("/platform/merchandising-controls", "Tune recommendation pressure");
   await assertPage("/platform/shopper-personas", "Turn zero-party signals");
+  await assertPage("/platform/widget-studio", "Launch every guided experience");
   await assertPage("/industries", "Industries");
   await assertPage("/resources", "Demo the product discovery loop");
   await assertPage("/finder/quiz_footwear", "Preparing your product guide");
@@ -1719,6 +1753,7 @@ async function main() {
   assertTrustCenterWorkflow();
   assertFlowStudioWorkflow();
   assertExperienceRegistryWorkflow();
+  assertWidgetStudioWorkflow();
   assertLaunchChannelsWorkflow();
   assertPartnerSyndicationWorkflow();
   assertStorefrontSandboxWorkflow();

@@ -70,6 +70,16 @@ export const platformPages = [
     demoLabel: "View embed settings",
   },
   {
+    slug: "widget-studio",
+    eyebrow: "Widget Studio",
+    title: "Launch every guided experience with copy-paste storefront snippets.",
+    description: "Give ecommerce teams a single desktop control center for modal and inline snippets, install contracts, attribution labels, QA checks and developer handoff packets across finder, advisor, search and configurator experiences.",
+    points: ["Modal and inline snippets", "Finder, advisor, search and configurator embeds", "Install and analytics contracts", "Copyable developer handoff packet"],
+    proof: ["Every snippet is generated from the same deterministic widget contract", "Attribution labels are included before storefront launch", "Storefront QA and runtime operations stay one click away"],
+    demoHref: "/dashboard/widget-studio",
+    demoLabel: "Open Widget Studio",
+  },
+  {
     slug: "analytics",
     eyebrow: "Journey analytics",
     title: "See where guided discovery turns into buying intent.",
