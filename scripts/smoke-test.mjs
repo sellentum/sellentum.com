@@ -348,6 +348,29 @@ function assertDecisionGraphWorkflow() {
   assert(readme.includes("Decision graph workbench"), "README should document the decision graph workbench");
 }
 
+function assertVocabularyStudioWorkflow() {
+  const page = readFileSync("app/dashboard/vocabulary/page.tsx", "utf8");
+  const helper = readFileSync("lib/vocabulary-studio.ts", "utf8");
+  const shell = readFileSync("components/dashboard-shell.tsx", "utf8");
+  const overview = readFileSync("app/dashboard/page.tsx", "utf8");
+  const readme = readFileSync("README.md", "utf8");
+  assert(helper.includes("buildVocabularyStudioReport"), "Vocabulary Studio helper should expose a reusable report builder");
+  assert(helper.includes("buildShopperLanguagePlan"), "Vocabulary Studio should reuse the shopper language planner");
+  assert(helper.includes("synonymClusters"), "Vocabulary Studio should group synonym review clusters");
+  assert(helper.includes("unsupportedTerms"), "Vocabulary Studio should expose unsupported shopper language");
+  assert(helper.includes("Findly approved discovery vocabulary"), "Vocabulary Studio should generate a copyable glossary");
+  assert(helper.includes("Findly Vocabulary Studio packet"), "Vocabulary Studio should generate a copyable packet");
+  assert(page.includes("buildVocabularyStudioReport"), "Vocabulary page should use the shared report builder");
+  assert(page.includes("Approved discovery dictionary"), "Vocabulary page should show the approved dictionary");
+  assert(page.includes("Unsupported shopper language"), "Vocabulary page should show unsupported terms");
+  assert(page.includes("Synonym review clusters"), "Vocabulary page should show synonym review clusters");
+  assert(page.includes("Product language tasks"), "Vocabulary page should show product language tasks");
+  assert(page.includes("Copy vocabulary packet"), "Vocabulary page should let merchants copy the packet");
+  assert(shell.includes("/dashboard/vocabulary"), "Dashboard navigation should expose Vocabulary Studio");
+  assert(overview.includes("/dashboard/vocabulary"), "Dashboard overview should link to Vocabulary Studio");
+  assert(readme.includes("Vocabulary Studio"), "README should document Vocabulary Studio");
+}
+
 function assertFlowStudioWorkflow() {
   const page = readFileSync("app/dashboard/flow-studio/page.tsx", "utf8");
   const helper = readFileSync("lib/flow-studio.ts", "utf8");
@@ -755,6 +778,11 @@ async function assertDeterministicLogic() {
     .replace('from "./catalog-benefits";', 'from "./catalog-benefits.js";')
     .replace('from "./catalog-ontology";', 'from "./catalog-ontology.js";')
     .replace('from "./search-engine";', 'from "./search-engine.js";'));
+  const compiledVocabularyStudio = `${compileDir}/lib/vocabulary-studio.js`;
+  writeFileSync(compiledVocabularyStudio, readFileSync(compiledVocabularyStudio, "utf8")
+    .replace('from "./catalog-benefits";', 'from "./catalog-benefits.js";')
+    .replace('from "./catalog-ontology";', 'from "./catalog-ontology.js";')
+    .replace('from "./shopper-language-planner";', 'from "./shopper-language-planner.js";'));
   const compiledExperienceLaunch = `${compileDir}/lib/experience-launch.js`;
   writeFileSync(compiledExperienceLaunch, readFileSync(compiledExperienceLaunch, "utf8")
     .replace('from "./widget-snippet";', 'from "./widget-snippet.js";')
@@ -854,6 +882,7 @@ async function assertDeterministicLogic() {
   const ruleCoverage = await import(pathToFileURL(`${compileDir}/lib/rule-coverage.js`));
   const searchEngine = await import(pathToFileURL(`${compileDir}/lib/search-engine.js`));
   const shopperLanguagePlanner = await import(pathToFileURL(`${compileDir}/lib/shopper-language-planner.js`));
+  const vocabularyStudio = await import(pathToFileURL(`${compileDir}/lib/vocabulary-studio.js`));
   const searchRecovery = await import(pathToFileURL(`${compileDir}/lib/search-recovery.js`));
   const searchTuning = await import(pathToFileURL(`${compileDir}/lib/search-tuning.js`));
   const publicExperience = await import(pathToFileURL(`${compileDir}/lib/public-experience.js`));
@@ -1096,6 +1125,11 @@ async function assertDeterministicLogic() {
   assert(shopperLanguagePlan.missingTerms.some((term) => term.term === "orthopedic" || term.term === "office"), "Expected shopper language planner to detect missing observed shopper vocabulary");
   assert(shopperLanguagePlan.actions.some((action) => action.id === "add-missing-shopper-language"), "Expected shopper language planner to create enrichment actions from missing query terms");
   assert(shopperLanguagePlan.productAudits.some((audit) => audit.suggestedSearchText.includes(audit.productName)), "Expected shopper language planner to create product-level search text suggestions");
+  const vocabularyReport = vocabularyStudio.buildVocabularyStudioReport({ products: demo.demoProducts, quizzes: [demo.demoQuiz], events: demo.demoEvents });
+  assert(vocabularyReport.summary.terms > 0 && vocabularyReport.summary.synonymClusters > 0, "Expected Vocabulary Studio to produce terms and synonym clusters");
+  assert(vocabularyReport.unsupportedTerms.some((term) => term.label === "Orthopedic" || term.label === "Office"), "Expected Vocabulary Studio to expose unsupported observed shopper language");
+  assert(vocabularyReport.governance.some((item) => item.id === "observed-language"), "Expected Vocabulary Studio to include governance checks");
+  assert(vocabularyReport.glossary.includes("Findly approved discovery vocabulary") && vocabularyReport.packet.includes("Findly Vocabulary Studio packet"), "Expected Vocabulary Studio to generate copyable glossary and packet text");
   const generatedSuggestion = quizGeneration.buildOntologyQuizSuggestion(demo.demoProducts, "Help shoppers choose the right footwear");
   assert(generatedSuggestion.questions.length >= 2, "Expected ontology-guided quiz generation to produce multiple questions");
   assert(generatedSuggestion.questions.some((question) => question.options.some((option) => option.match_type === "category" || option.match_type === "tag" || option.match_type === "feature")), "Expected generated quiz to use ontology-backed catalog rules");
@@ -1412,6 +1446,7 @@ async function main() {
   assertLaunchStudioWorkflow();
   assertDashboardCommandCenterWorkflow();
   assertStarterKitWorkflow();
+  assertVocabularyStudioWorkflow();
   assertDecisionGraphWorkflow();
   assertFlowStudioWorkflow();
   assertLaunchChannelsWorkflow();
