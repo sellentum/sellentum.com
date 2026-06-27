@@ -18,6 +18,7 @@ Findly is a compact guided-selling SaaS product for ecommerce brands. A merchant
 - AI quiz blueprint review in Launch Studio so merchants can inspect planned questions, catalog coverage and generation risks before publishing
 - Industry starter kits that install editable sample products, finder questions, deterministic answer rules and product-linked configurator drafts for faster merchant onboarding
 - Launch Studio workflow that enriches a catalog, generates a finder, publishes it, prepares finder/advisor/search/configurator embed snippets and copies a developer launch packet from one screen
+- Experience Registry that inventories finder, advisor, search and configurator surfaces with public URLs, snippets, QA status and runtime metrics
 - Launch Channels board that packages homepage, category, PDP and support placements with copy-ready snippets, attribution labels, QA checks and channel metrics
 - Partner Syndication board that packages retailer, marketplace, affiliate, support and sales-partner widget snippets with syndication attribution, QA checks and data-policy handoff notes
 - Storefront QA sandbox that previews each channel in a controlled desktop storefront, lists expected telemetry events and exports a copyable QA packet before theme installation
@@ -196,6 +197,7 @@ Import the repository into Vercel, add the variables from `.env.example`, and de
 - `lib/widget-snippet.ts` — shared widget snippet generation and install-readiness diagnostics for Settings and Launch Studio
 - `lib/public-runtime-guard.ts` — bounded JSON parsing, public rate-limit responses and analytics metadata sanitization for embeddable runtimes
 - `lib/experience-launch.ts` — multi-experience launch cards for finder, advisor, semantic search and configurator embeds
+- `lib/experience-registry.ts` and `app/dashboard/experiences` — operational registry for all customer-facing discovery surfaces, install QA, snippets and telemetry proof
 - `lib/launch-channels.ts` and `app/dashboard/channels` — channelized storefront placement planner for attributed snippets, install QA and early channel metrics
 - `lib/syndication.ts` and `app/dashboard/syndication` — partner-safe syndication packets for retailer, marketplace, affiliate, support and sales channels
 - `lib/storefront-sandbox.ts` and `app/dashboard/storefront-sandbox` — controlled storefront QA preview with expected event contracts, acceptance criteria and copyable staging packets

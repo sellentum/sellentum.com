@@ -436,6 +436,26 @@ function assertLaunchChannelsWorkflow() {
   assert(readme.includes("Launch Channels board"), "README should document Launch Channels");
 }
 
+function assertExperienceRegistryWorkflow() {
+  const page = readFileSync("app/dashboard/experiences/page.tsx", "utf8");
+  const helper = readFileSync("lib/experience-registry.ts", "utf8");
+  const shell = readFileSync("components/dashboard-shell.tsx", "utf8");
+  const overview = readFileSync("app/dashboard/page.tsx", "utf8");
+  const readme = readFileSync("README.md", "utf8");
+  assert(helper.includes("buildExperienceRegistry"), "Experience Registry helper should expose a reusable report builder");
+  assert(helper.includes("buildLaunchExperienceCards"), "Experience Registry should reuse launch experience cards");
+  assert(helper.includes("buildAnalyticsSnapshot"), "Experience Registry should include telemetry metrics");
+  assert(helper.includes("Findly Experience Registry packet"), "Experience Registry should generate a copyable packet");
+  assert(page.includes("buildExperienceRegistry"), "Experience Registry page should use the shared helper");
+  assert(page.includes("Experience Registry"), "Experience Registry page should expose the dashboard title");
+  assert(page.includes("Copy registry packet"), "Experience Registry page should let merchants copy the packet");
+  assert(page.includes("QA checklist"), "Experience Registry page should show install/runtime QA");
+  assert(page.includes("Recommended rollout candidate"), "Experience Registry page should recommend a rollout candidate");
+  assert(shell.includes("/dashboard/experiences"), "Dashboard navigation should expose Experience Registry");
+  assert(overview.includes("/dashboard/experiences"), "Dashboard overview should expose Experience Registry");
+  assert(readme.includes("Experience Registry"), "README should document Experience Registry");
+}
+
 function assertPartnerSyndicationWorkflow() {
   const page = readFileSync("app/dashboard/syndication/page.tsx", "utf8");
   const helper = readFileSync("lib/syndication.ts", "utf8");
@@ -872,6 +892,11 @@ async function assertDeterministicLogic() {
   writeFileSync(compiledExperienceLaunch, readFileSync(compiledExperienceLaunch, "utf8")
     .replace('from "./widget-snippet";', 'from "./widget-snippet.js";')
     .replace('from "@/lib/widget-snippet";', 'from "./widget-snippet.js";'));
+  const compiledExperienceRegistry = `${compileDir}/lib/experience-registry.js`;
+  writeFileSync(compiledExperienceRegistry, readFileSync(compiledExperienceRegistry, "utf8")
+    .replace('from "./analytics";', 'from "./analytics.js";')
+    .replace('from "./experience-launch";', 'from "./experience-launch.js";')
+    .replace('from "@/lib/utils";', 'from "./utils.js";'));
   const compiledLaunchContract = `${compileDir}/lib/launch-contract.js`;
   writeFileSync(compiledLaunchContract, readFileSync(compiledLaunchContract, "utf8")
     .replace('from "./widget-snippet";', 'from "./widget-snippet.js";')
@@ -976,6 +1001,7 @@ async function assertDeterministicLogic() {
   const publicExperience = await import(pathToFileURL(`${compileDir}/lib/public-experience.js`));
   const widgetSnippet = await import(pathToFileURL(`${compileDir}/lib/widget-snippet.js`));
   const experienceLaunch = await import(pathToFileURL(`${compileDir}/lib/experience-launch.js`));
+  const experienceRegistry = await import(pathToFileURL(`${compileDir}/lib/experience-registry.js`));
   const launchPacket = await import(pathToFileURL(`${compileDir}/lib/launch-packet.js`));
   const launchContract = await import(pathToFileURL(`${compileDir}/lib/launch-contract.js`));
   const storefrontQaRunbook = await import(pathToFileURL(`${compileDir}/lib/storefront-qa-runbook.js`));
@@ -1281,6 +1307,10 @@ async function assertDeterministicLogic() {
   assert(launchCards.length === 4 && launchCards.every((card) => card.snippet.includes(`data-experience="${card.experience}"`)), "Expected launch experience helper to generate snippets for all four embeddable experiences");
   assert(launchCards.find((card) => card.experience === "assistant")?.id === demo.demoQuiz.id && launchCards.find((card) => card.experience === "search")?.targetPath === "/search/quiz_footwear", "Expected advisor/search launch cards to reuse the published finder context");
   assert(launchCards.find((card) => card.experience === "configurator")?.targetPath === "/configurator/config_trail_kit", "Expected configurator launch card to use the published configurator context");
+  const registryReport = experienceRegistry.buildExperienceRegistry({ origin: "https://findly.example", settings: demo.demoSettings, quizzes: [demo.demoQuiz], configurators: [demo.demoConfigurator], events: demo.demoEvents });
+  assert(registryReport.surfaces.length === 4 && registryReport.surfaces.every((surface) => surface.snippet.includes(`data-experience="${surface.experience}"`)), "Expected Experience Registry to inventory all embeddable surfaces");
+  assert(registryReport.surfaces.some((surface) => surface.experience === "assistant") && registryReport.surfaces.some((surface) => surface.experience === "configurator"), "Expected Experience Registry to include advisor and configurator surfaces");
+  assert(registryReport.packet.includes("Findly Experience Registry packet") && registryReport.summary.totalViews >= 0, "Expected Experience Registry to generate a deployment packet and metrics");
   const packet = launchPacket.buildLaunchPacket({
     origin: "https://findly.example/",
     publicUrl: "https://findly.example/finder/footwear-finder",
@@ -1552,6 +1582,7 @@ async function main() {
   assertDecisionGraphWorkflow();
   assertTrustCenterWorkflow();
   assertFlowStudioWorkflow();
+  assertExperienceRegistryWorkflow();
   assertLaunchChannelsWorkflow();
   assertPartnerSyndicationWorkflow();
   assertStorefrontSandboxWorkflow();

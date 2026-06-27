@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Archive, BarChart3, BookOpenCheck, Bot, Boxes, BrainCircuit, ChevronDown, ClipboardCheck, ExternalLink, FlaskConical, GitBranch, GitPullRequestArrow, Globe2, Handshake, HelpCircle, Layers3, LayoutDashboard, LayoutTemplate, LogOut, Megaphone, Menu, MessageCircle, Network, PackagePlus, Rocket, Search, Settings, ShieldCheck, Sparkles, Target, X } from "lucide-react";
+import { Archive, BarChart3, BookOpenCheck, Bot, Boxes, BrainCircuit, ChevronDown, ClipboardCheck, ExternalLink, FlaskConical, GalleryVerticalEnd, GitBranch, GitPullRequestArrow, Globe2, Handshake, HelpCircle, Layers3, LayoutDashboard, LayoutTemplate, LogOut, Megaphone, Menu, MessageCircle, Network, PackagePlus, Rocket, Search, Settings, ShieldCheck, Sparkles, Target, X } from "lucide-react";
 import { useState } from "react";
 import { Logo } from "@/components/logo";
 import { createClient } from "@/lib/supabase/client";
@@ -12,6 +12,7 @@ import { useStore } from "@/lib/store";
 const nav = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard, exact: true },
   { href: "/dashboard/launch", label: "Launch Studio", icon: Rocket },
+  { href: "/dashboard/experiences", label: "Experience Registry", icon: GalleryVerticalEnd },
   { href: "/dashboard/channels", label: "Launch channels", icon: Megaphone },
   { href: "/dashboard/syndication", label: "Syndication", icon: Handshake },
   { href: "/dashboard/storefront-sandbox", label: "Storefront QA", icon: Globe2 },
