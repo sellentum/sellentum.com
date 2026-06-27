@@ -367,6 +367,25 @@ function assertLaunchChannelsWorkflow() {
   assert(readme.includes("Launch Channels board"), "README should document Launch Channels");
 }
 
+function assertExperimentPlannerWorkflow() {
+  const page = readFileSync("app/dashboard/experiments/page.tsx", "utf8");
+  const helper = readFileSync("lib/experiments.ts", "utf8");
+  const shell = readFileSync("components/dashboard-shell.tsx", "utf8");
+  const overview = readFileSync("app/dashboard/page.tsx", "utf8");
+  const readme = readFileSync("README.md", "utf8");
+  assert(helper.includes("buildExperimentPlanningReport"), "Experiment helper should expose a reusable planning report");
+  assert(helper.includes("launcher-promise") && helper.includes("first-question-friction") && helper.includes("results-trust"), "Experiment helper should include funnel optimization experiments");
+  assert(helper.includes("inline-semantic-search") && helper.includes("pdp-bundle-configurator") && helper.includes("channel-attribution-contract"), "Experiment helper should include search, configurator and attribution experiments");
+  assert(helper.includes("rollbackPlan") && helper.includes("successCriteria") && helper.includes("sampleSizeNote"), "Experiment helper should include safe-test governance");
+  assert(page.includes("buildExperimentPlanningReport"), "Experiments page should use the shared report builder");
+  assert(page.includes("Copy experiment packet"), "Experiments page should let merchants copy the experiment packet");
+  assert(page.includes("Experiment guardrails"), "Experiments page should show launch guardrails");
+  assert(page.includes("Success criteria"), "Experiments page should show experiment success criteria");
+  assert(shell.includes("/dashboard/experiments"), "Dashboard navigation should expose Experiments");
+  assert(overview.includes("/dashboard/experiments"), "Dashboard overview should expose Experiments");
+  assert(readme.includes("Experiment planner"), "README should document the experiment planner");
+}
+
 function assertCommercialImpactWorkflow() {
   const analyticsPage = readFileSync("app/dashboard/analytics/page.tsx", "utf8");
   const commercialImpact = readFileSync("lib/commercial-impact.ts", "utf8");
@@ -664,6 +683,13 @@ async function assertDeterministicLogic() {
   const compiledLaunchChannels = `${compileDir}/lib/launch-channels.js`;
   writeFileSync(compiledLaunchChannels, readFileSync(compiledLaunchChannels, "utf8")
     .replace('from "@/lib/widget-snippet";', 'from "./widget-snippet.js";'));
+  const compiledExperiments = `${compileDir}/lib/experiments.js`;
+  writeFileSync(compiledExperiments, readFileSync(compiledExperiments, "utf8")
+    .replace('from "./analytics";', 'from "./analytics.js";')
+    .replace('from "./analytics-quality";', 'from "./analytics-quality.js";')
+    .replace('from "./attribution";', 'from "./attribution.js";')
+    .replace('from "./discovery-gaps";', 'from "./discovery-gaps.js";')
+    .replace('from "./launch-channels";', 'from "./launch-channels.js";'));
 
   const demo = await import(pathToFileURL(`${compileDir}/lib/demo-data.js`));
   const utils = await import(pathToFileURL(`${compileDir}/lib/utils.js`));
@@ -709,6 +735,7 @@ async function assertDeterministicLogic() {
   const starterKitHelpers = await import(pathToFileURL(`${compileDir}/lib/starter-kits.js`));
   const decisionGraph = await import(pathToFileURL(`${compileDir}/lib/decision-graph.js`));
   const launchChannels = await import(pathToFileURL(`${compileDir}/lib/launch-channels.js`));
+  const experiments = await import(pathToFileURL(`${compileDir}/lib/experiments.js`));
 
   const answers = [
     { questionId: "q_use", question: "Where?", optionId: "o_trail", answer: "Trails & outdoors", matchType: "tag", matchValue: "trail", weight: 5 },
@@ -1026,6 +1053,27 @@ async function assertDeterministicLogic() {
   assert(channelReport.channels.some((channel) => channel.id === "pdp-configurator" && channel.snippet.includes('data-experience="configurator"')), "Expected PDP channel to generate configurator embed snippet");
   assert(channelReport.channels.some((channel) => channel.id === "category-inline-search" && channel.snippet.includes('data-mode="inline"') && channel.snippet.includes('data-experience="search"')), "Expected category channel to generate inline search embed snippet");
 
+  const experimentReport = experiments.buildExperimentPlanningReport({
+    origin: "https://findly.example",
+    settings: demo.demoSettings,
+    products: demo.demoProducts,
+    quizzes: [demo.demoQuiz],
+    configurators: [demo.demoConfigurator],
+    events: [
+      ...demo.demoEvents,
+      ...channelEvents.map((event) => ({
+        ...event,
+        metadata: { ...event.metadata, session_id: "experiment-session", experience_id: "quiz_footwear" },
+      })),
+    ],
+  });
+  assert(experimentReport.experiments.length >= 6 && experimentReport.score > 0, "Expected experiment planner to produce a scored experiment backlog");
+  assert(experimentReport.experiments.some((experiment) => experiment.id === "launcher-promise" && experiment.rollbackPlan && experiment.successCriteria.length), "Expected launcher experiment to include rollback and success criteria");
+  assert(experimentReport.experiments.some((experiment) => experiment.id === "inline-semantic-search" && experiment.href === "/dashboard/channels"), "Expected semantic search experiment to route through Launch Channels");
+  assert(experimentReport.experiments.some((experiment) => experiment.id === "channel-attribution-contract" && experiment.primaryMetric.label === "Attribution rate"), "Expected attribution experiment to use attribution quality as a primary metric");
+  assert(experimentReport.guardrails.some((guardrail) => guardrail.id === "deterministic-selection" && guardrail.status === "pass"), "Expected experiment planner to include deterministic-selection guardrails");
+  assert(experimentReport.packet.includes("Findly experiment plan") && experimentReport.packet.includes("Rollback:"), "Expected experiment planner to generate a copyable packet");
+
   assert(starterKitHelpers.starterKits.length >= 3, "Expected multiple vertical starter kits");
   const firstStarterKit = starterKitHelpers.starterKits[0];
   const starterReadiness = starterKitHelpers.buildStarterKitReadiness(firstStarterKit);
@@ -1143,6 +1191,7 @@ async function main() {
   assertStarterKitWorkflow();
   assertDecisionGraphWorkflow();
   assertLaunchChannelsWorkflow();
+  assertExperimentPlannerWorkflow();
   assertCommercialImpactWorkflow();
   assertSemanticSearchWorkflow();
   assertCatalogImportWorkflow();

@@ -55,6 +55,7 @@ Findly is a compact guided-selling SaaS product for ecommerce brands. A merchant
 - Discovery gap analytics that detect no-result paths, thin recommendation sets, missing shopper language, low-confidence matches and stalled surfaced products
 - Real dashboard command center with period trends, live performance bars, launch score, command queue, milestones and experience mix built from actual workspace data
 - Conversion playbook that turns analytics quality, funnel rates, discovery gaps, catalog health and product demand into prioritized merchant actions
+- Experiment planner that turns funnel, channel, attribution and discovery signals into controlled post-launch tests with metrics, guardrails, success criteria and rollback plans
 - Commercial impact reporting that estimates assisted product value, unclicked recommendation value, demand coverage and ROI opportunities from recommendation and buy-click events
 - Brand, colour, widget copy and launcher-position settings
 - Launch preflight checks for catalog readiness, shopper-language coverage, builder readiness diagnostics, configurator path QA, synthetic recommendation QA, AI/env keys, published experiences, widget setup, analytics coverage and telemetry quality
@@ -154,6 +155,7 @@ Import the repository into Vercel, add the variables from `.env.example`, and de
 - `lib/analytics-quality.ts` — event-contract QA for required metadata, session linkage, event ordering and product attribution
 - `lib/commercial-impact.ts` — deterministic assisted-revenue and ROI-opportunity reporting from product recommendation and buy-click events
 - `lib/conversion-playbook.ts` — deterministic merchant optimization actions from funnel, catalog, QA and zero-party intent signals
+- `lib/experiments.ts` and `app/dashboard/experiments` — deterministic post-launch experiment planner for launcher copy, journey friction, result trust, semantic search, configurator and attribution tests
 - `lib/dashboard-command-center.ts` — overview-page command center combining analytics, catalog intelligence, readiness, recommendation QA and discovery gaps
 - `lib/starter-kits.ts` and `app/dashboard/templates` — vertical launch templates that materialize starter catalog products, finder rules and configurator drafts into the workspace
 - `lib/insights.ts` — zero-party insight extraction for shopper answers, query themes, catalog signals, product demand and deterministic merchant opportunities
