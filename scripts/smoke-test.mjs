@@ -371,6 +371,31 @@ function assertVocabularyStudioWorkflow() {
   assert(readme.includes("Vocabulary Studio"), "README should document Vocabulary Studio");
 }
 
+function assertTrustCenterWorkflow() {
+  const page = readFileSync("app/dashboard/trust-center/page.tsx", "utf8");
+  const helper = readFileSync("lib/trust-center.ts", "utf8");
+  const shell = readFileSync("components/dashboard-shell.tsx", "utf8");
+  const overview = readFileSync("app/dashboard/page.tsx", "utf8");
+  const readme = readFileSync("README.md", "utf8");
+  assert(helper.includes("buildTrustCenterReport"), "Trust Center helper should expose a reusable report builder");
+  assert(helper.includes("buildExplanationGroundingReport"), "Trust Center should include explanation grounding evidence");
+  assert(helper.includes("buildAnalyticsQualityReport"), "Trust Center should include analytics quality evidence");
+  assert(helper.includes("buildRecommendationQaReport"), "Trust Center should include recommendation QA evidence");
+  assert(helper.includes("buildVocabularyStudioReport"), "Trust Center should include vocabulary governance evidence");
+  assert(helper.includes("Rules select. AI explains."), "Trust Center should document the safe-AI selection boundary");
+  assert(helper.includes("Findly AI trust packet"), "Trust Center should generate a copyable trust packet");
+  assert(page.includes("buildTrustCenterReport"), "Trust Center dashboard should use the shared report builder");
+  assert(page.includes("AI Trust Center"), "Trust Center page should expose the dashboard title");
+  assert(page.includes("Trust principles"), "Trust Center page should explain trust principles");
+  assert(page.includes("Runtime guardrails"), "Trust Center page should explain public runtime guardrails");
+  assert(page.includes("AI boundary"), "Trust Center page should show the AI boundary");
+  assert(page.includes("Data boundary"), "Trust Center page should show the data boundary");
+  assert(page.includes("Copy trust packet"), "Trust Center page should let merchants copy the trust packet");
+  assert(shell.includes("/dashboard/trust-center"), "Dashboard navigation should expose AI Trust Center");
+  assert(overview.includes("/dashboard/trust-center"), "Dashboard overview should route merchants to AI Trust Center");
+  assert(readme.includes("AI Trust Center"), "README should document AI Trust Center");
+}
+
 function assertFlowStudioWorkflow() {
   const page = readFileSync("app/dashboard/flow-studio/page.tsx", "utf8");
   const helper = readFileSync("lib/flow-studio.ts", "utf8");
@@ -783,6 +808,13 @@ async function assertDeterministicLogic() {
     .replace('from "./catalog-benefits";', 'from "./catalog-benefits.js";')
     .replace('from "./catalog-ontology";', 'from "./catalog-ontology.js";')
     .replace('from "./shopper-language-planner";', 'from "./shopper-language-planner.js";'));
+  const compiledTrustCenter = `${compileDir}/lib/trust-center.js`;
+  writeFileSync(compiledTrustCenter, readFileSync(compiledTrustCenter, "utf8")
+    .replace('from "./analytics-quality";', 'from "./analytics-quality.js";')
+    .replace('from "./decision-graph";', 'from "./decision-graph.js";')
+    .replace('from "./explanation-grounding";', 'from "./explanation-grounding.js";')
+    .replace('from "./recommendation-qa";', 'from "./recommendation-qa.js";')
+    .replace('from "./vocabulary-studio";', 'from "./vocabulary-studio.js";'));
   const compiledExperienceLaunch = `${compileDir}/lib/experience-launch.js`;
   writeFileSync(compiledExperienceLaunch, readFileSync(compiledExperienceLaunch, "utf8")
     .replace('from "./widget-snippet";', 'from "./widget-snippet.js";')
@@ -883,6 +915,7 @@ async function assertDeterministicLogic() {
   const searchEngine = await import(pathToFileURL(`${compileDir}/lib/search-engine.js`));
   const shopperLanguagePlanner = await import(pathToFileURL(`${compileDir}/lib/shopper-language-planner.js`));
   const vocabularyStudio = await import(pathToFileURL(`${compileDir}/lib/vocabulary-studio.js`));
+  const trustCenter = await import(pathToFileURL(`${compileDir}/lib/trust-center.js`));
   const searchRecovery = await import(pathToFileURL(`${compileDir}/lib/search-recovery.js`));
   const searchTuning = await import(pathToFileURL(`${compileDir}/lib/search-tuning.js`));
   const publicExperience = await import(pathToFileURL(`${compileDir}/lib/public-experience.js`));
@@ -1130,6 +1163,11 @@ async function assertDeterministicLogic() {
   assert(vocabularyReport.unsupportedTerms.some((term) => term.label === "Orthopedic" || term.label === "Office"), "Expected Vocabulary Studio to expose unsupported observed shopper language");
   assert(vocabularyReport.governance.some((item) => item.id === "observed-language"), "Expected Vocabulary Studio to include governance checks");
   assert(vocabularyReport.glossary.includes("Findly approved discovery vocabulary") && vocabularyReport.packet.includes("Findly Vocabulary Studio packet"), "Expected Vocabulary Studio to generate copyable glossary and packet text");
+  const trustReport = trustCenter.buildTrustCenterReport({ products: demo.demoProducts, quizzes: [demo.demoQuiz], configurators: [demo.demoConfigurator], events: demo.demoEvents, openaiConfigured: false });
+  assert(trustReport.pillars.some((pillar) => pillar.id === "deterministic-selection") && trustReport.pillars.some((pillar) => pillar.id === "grounded-ai"), "Expected Trust Center to audit deterministic selection and grounded AI");
+  assert(trustReport.principles.some((principle) => principle.label === "Rules select. AI explains."), "Expected Trust Center to document the AI selection boundary");
+  assert(trustReport.aiBoundary.some((item) => item.includes("Rules select products first")) && trustReport.dataBoundary.some((item) => item.includes("anonymous session IDs")), "Expected Trust Center to expose AI and data boundaries");
+  assert(trustReport.packet.includes("Findly AI trust packet") && trustReport.packet.includes("Runtime guardrails"), "Expected Trust Center to generate a copyable trust packet");
   const generatedSuggestion = quizGeneration.buildOntologyQuizSuggestion(demo.demoProducts, "Help shoppers choose the right footwear");
   assert(generatedSuggestion.questions.length >= 2, "Expected ontology-guided quiz generation to produce multiple questions");
   assert(generatedSuggestion.questions.some((question) => question.options.some((option) => option.match_type === "category" || option.match_type === "tag" || option.match_type === "feature")), "Expected generated quiz to use ontology-backed catalog rules");
@@ -1448,6 +1486,7 @@ async function main() {
   assertStarterKitWorkflow();
   assertVocabularyStudioWorkflow();
   assertDecisionGraphWorkflow();
+  assertTrustCenterWorkflow();
   assertFlowStudioWorkflow();
   assertLaunchChannelsWorkflow();
   assertPartnerSyndicationWorkflow();

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Archive, BarChart3, BookOpenCheck, Boxes, BrainCircuit, ChevronDown, ClipboardCheck, ExternalLink, FlaskConical, GitBranch, GitPullRequestArrow, Globe2, Handshake, HelpCircle, LayoutDashboard, LayoutTemplate, LogOut, Megaphone, Menu, MessageCircle, Network, PackagePlus, Rocket, Search, Settings, Sparkles, Target, X } from "lucide-react";
+import { Archive, BarChart3, BookOpenCheck, Boxes, BrainCircuit, ChevronDown, ClipboardCheck, ExternalLink, FlaskConical, GitBranch, GitPullRequestArrow, Globe2, Handshake, HelpCircle, LayoutDashboard, LayoutTemplate, LogOut, Megaphone, Menu, MessageCircle, Network, PackagePlus, Rocket, Search, Settings, ShieldCheck, Sparkles, Target, X } from "lucide-react";
 import { useState } from "react";
 import { Logo } from "@/components/logo";
 import { createClient } from "@/lib/supabase/client";
@@ -16,6 +16,7 @@ const nav = [
   { href: "/dashboard/syndication", label: "Syndication", icon: Handshake },
   { href: "/dashboard/storefront-sandbox", label: "Storefront QA", icon: Globe2 },
   { href: "/dashboard/release-center", label: "Release Center", icon: GitPullRequestArrow },
+  { href: "/dashboard/trust-center", label: "AI Trust Center", icon: ShieldCheck },
   { href: "/dashboard/workspace-snapshot", label: "Workspace snapshot", icon: Archive },
   { href: "/dashboard/experiments", label: "Experiments", icon: Target },
   { href: "/dashboard/templates", label: "Templates", icon: LayoutTemplate },

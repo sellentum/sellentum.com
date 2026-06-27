@@ -12,6 +12,7 @@ Findly is a compact guided-selling SaaS product for ecommerce brands. A merchant
 - Ontology map for inspecting category clusters, buyer needs, tags, features, spec-to-benefit translations, thin signals and AI-ready quiz question ideas
 - Vocabulary Studio for approving shopper terms, synonym clusters, unsupported search/advisor language and product-level semantic text tasks
 - Decision graph workbench that connects products, catalog signals, finder answer rules, configurator options and observed shopper language into one merchant-readable trust map
+- AI Trust Center that proves “Rules select. AI explains.” with deterministic selection audits, grounded explanation QA, runtime guardrails, analytics integrity and partner-safe data boundaries
 - Shopper language planner that compares catalog facts, generated quiz terms and real search/advisor queries to find covered, thin and missing shopper vocabulary before launch
 - AI quiz blueprint review in Launch Studio so merchants can inspect planned questions, catalog coverage and generation risks before publishing
 - Industry starter kits that install editable sample products, finder questions, deterministic answer rules and product-linked configurator drafts for faster merchant onboarding
@@ -172,6 +173,7 @@ Import the repository into Vercel, add the variables from `.env.example`, and de
 - `lib/catalog-ontology.ts` — category, buyer-need, tag and feature clustering for ontology mapping and question ideas
 - `lib/vocabulary-studio.ts` and `app/dashboard/vocabulary` — discovery vocabulary governance for approved terms, synonym clusters, unsupported shopper language and product semantic text tasks
 - `lib/decision-graph.ts` and `app/dashboard/decision-graph` — deterministic relationship graph for product signals, finder rules, configurator product links and unresolved shopper language
+- `lib/trust-center.ts` and `app/dashboard/trust-center` — AI trust governance for deterministic selection, grounded explanations, public runtime guardrails, analytics integrity and partner-safe data boundaries
 - `lib/shopper-language-planner.ts` — deterministic shopper-vocabulary coverage planner for catalog enrichment, synonym review, quiz guidance and preflight launch checks
 - `lib/quiz-generation.ts` — ontology-guided quiz generation fallback and OpenAI grounding summary
 - `lib/quiz-blueprint.ts` — launch-ready preview of generated finder questions, option coverage and catalog risks
