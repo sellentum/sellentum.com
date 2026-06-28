@@ -36,6 +36,7 @@ function assertSystemFontStack() {
   const css = readFileSync("app/globals.css", "utf8");
   assert(!layout.includes("next/font/google"), "App layout should avoid Google font dependency for the simple system-font direction");
   assert(css.includes("Helvetica") && css.includes("Poppins") && css.includes("SF Pro"), "Global CSS should include Helvetica, Poppins and SF Pro in the simple font stack");
+  assert(css.includes("font-size: 16px") && css.includes("line-height: 1.5"), "Global CSS should define a standard 16px type baseline");
 }
 
 function assertPublishedAdvisorRuntime() {
@@ -646,6 +647,28 @@ function assertRuntimeOperationsWorkflow() {
   assert(shell.includes("/dashboard/operations"), "Dashboard navigation should expose Runtime Operations");
   assert(overview.includes("/dashboard/operations"), "Dashboard overview should expose Runtime Operations");
   assert(readme.includes("Runtime Operations Center"), "README should document Runtime Operations");
+}
+
+function assertProductionVerificationWorkflow() {
+  const page = readFileSync("app/dashboard/production/page.tsx", "utf8");
+  const helper = readFileSync("lib/production-verification.ts", "utf8");
+  const shell = readFileSync("components/dashboard-shell.tsx", "utf8");
+  const overview = readFileSync("app/dashboard/page.tsx", "utf8");
+  const readme = readFileSync("README.md", "utf8");
+  const marketing = readFileSync("lib/marketing-pages.ts", "utf8");
+  assert(helper.includes("buildProductionVerificationReport"), "Production Verification helper should expose a reusable report builder");
+  assert(helper.includes("Findly Production Verification packet"), "Production Verification should generate a copyable packet");
+  assert(helper.includes("Production is not complete until the deployed Vercel URL passes typecheck, lint, build and smoke"), "Production Verification should document the deployed smoke boundary");
+  assert(helper.includes("deterministic product selection remains"), "Production Verification should preserve deterministic AI boundaries");
+  assert(page.includes("Production Verification Center"), "Production Verification page should expose the dashboard title");
+  assert(page.includes("Copy verification packet"), "Production Verification page should let merchants copy the packet");
+  assert(page.includes("Desktop QA scenarios"), "Production Verification page should show desktop QA scenarios");
+  assert(page.includes("Required route and API contract"), "Production Verification page should show required routes and APIs");
+  assert(!page.includes("text-[8px]") && !page.includes("text-[9px]") && !page.includes("text-[10px]"), "Production Verification page should avoid tiny arbitrary font sizes");
+  assert(shell.includes("/dashboard/production"), "Dashboard navigation should expose Production Verification");
+  assert(overview.includes("/dashboard/production"), "Dashboard overview should expose Production Verification");
+  assert(readme.includes("Production Verification Center"), "README should document Production Verification Center");
+  assert(marketing.includes("production-verification"), "Platform marketing pages should include Production Verification");
 }
 
 function assertPartnerSyndicationWorkflow() {
@@ -1352,6 +1375,13 @@ async function assertDeterministicLogic() {
     .replace('from "./analytics-quality";', 'from "./analytics-quality.js";')
     .replace('from "./experience-registry";', 'from "./experience-registry.js";')
     .replace('from "./release-center";', 'from "./release-center.js";'));
+  const compiledProductionVerification = `${compileDir}/lib/production-verification.js`;
+  writeFileSync(compiledProductionVerification, readFileSync(compiledProductionVerification, "utf8")
+    .replace('from "./analytics-quality";', 'from "./analytics-quality.js";')
+    .replace('from "./experience-registry";', 'from "./experience-registry.js";')
+    .replace('from "./release-center";', 'from "./release-center.js";')
+    .replace('from "./runtime-operations";', 'from "./runtime-operations.js";')
+    .replace('from "./storefront-sandbox";', 'from "./storefront-sandbox.js";'));
   const compiledApiCenter = `${compileDir}/lib/api-center.js`;
   writeFileSync(compiledApiCenter, readFileSync(compiledApiCenter, "utf8")
     .replace('from "./analytics-quality";', 'from "./analytics-quality.js";')
@@ -1430,6 +1460,7 @@ async function assertDeterministicLogic() {
   const experiments = await import(pathToFileURL(`${compileDir}/lib/experiments.js`));
   const releaseCenter = await import(pathToFileURL(`${compileDir}/lib/release-center.js`));
   const runtimeOperations = await import(pathToFileURL(`${compileDir}/lib/runtime-operations.js`));
+  const productionVerification = await import(pathToFileURL(`${compileDir}/lib/production-verification.js`));
   const apiCenter = await import(pathToFileURL(`${compileDir}/lib/api-center.js`));
   const workspaceSnapshot = await import(pathToFileURL(`${compileDir}/lib/workspace-snapshot.js`));
 
@@ -1809,6 +1840,12 @@ async function assertDeterministicLogic() {
   assert(runtimeOpsReport.endpoints.some((endpoint) => endpoint.id === "widget-script") && runtimeOpsReport.endpoints.some((endpoint) => endpoint.id === "analytics-runtime"), "Expected Runtime Operations to list widget and analytics endpoints");
   assert(runtimeOpsReport.guardrails.some((guardrail) => guardrail.label === "Bounded public JSON") && runtimeOpsReport.checks.some((check) => check.id === "analytics-contract"), "Expected Runtime Operations to expose guardrails and analytics checks");
   assert(runtimeOpsReport.packet.includes("Findly Runtime Operations packet") && runtimeOpsReport.summary.endpoints >= 5, "Expected Runtime Operations to generate a copyable operations packet");
+  const productionVerificationReport = productionVerification.buildProductionVerificationReport({ origin: "https://findly.example", mode: "supabase", settings: demo.demoSettings, products: demo.demoProducts, quizzes: [demo.demoQuiz], configurators: [demo.demoConfigurator], events: demo.demoEvents });
+  assert(productionVerificationReport.requiredRoutes.some((route) => route.route.includes("/api/widget.js")) && productionVerificationReport.desktopQa.some((scenario) => scenario.id === "finder-runtime"), "Expected Production Verification to include required route contracts and desktop QA scenarios");
+  assert(productionVerificationReport.packet.includes("Findly Production Verification packet") && productionVerificationReport.packet.includes("deployed Vercel URL passes typecheck, lint, build and smoke"), "Expected Production Verification to generate a deployed-smoke packet");
+  assert(productionVerificationReport.artifacts.some((artifact) => artifact.command === "npm run build") && productionVerificationReport.actions.length, "Expected Production Verification to include verification commands and action queue");
+  const localProductionVerificationReport = productionVerification.buildProductionVerificationReport({ origin: "http://localhost:3000", mode: "demo", settings: demo.demoSettings, products: demo.demoProducts, quizzes: [demo.demoQuiz], configurators: [demo.demoConfigurator], events: [] });
+  assert(localProductionVerificationReport.status !== "verified" && localProductionVerificationReport.checks.some((check) => check.id === "supabase-mode" && check.status === "warn"), "Expected Production Verification to keep local demo mode out of final production verified status");
   const apiCenterReport = apiCenter.buildApiCenterReport({ origin: "https://findly.example", settings: demo.demoSettings, products: demo.demoProducts, quizzes: [demo.demoQuiz], configurators: [demo.demoConfigurator], events: demo.demoEvents });
   assert(apiCenterReport.endpoints.some((endpoint) => endpoint.id === "finder-recommendations" && endpoint.path.includes("/api/public/finder/")) && apiCenterReport.endpoints.some((endpoint) => endpoint.id === "configurator-validation" && endpoint.requestExample.includes("selectedIds")), "Expected API Center to document finder and configurator runtime endpoints");
   assert(apiCenterReport.endpoints.some((endpoint) => endpoint.id === "advisor-search") && apiCenterReport.endpoints.some((endpoint) => endpoint.id === "semantic-search"), "Expected API Center to document advisor and semantic search endpoints");
@@ -2075,6 +2112,7 @@ async function main() {
   await assertPage("/platform/returns-fit-intelligence", "Prevent wrong-fit purchases");
   await assertPage("/platform/bundle-studio", "Increase average order value");
   await assertPage("/platform/usage-pricing", "Explain SaaS plan fit");
+  await assertPage("/platform/production-verification", "Prove Findly is ready");
   await assertPage("/industries", "Industries");
   await assertPage("/resources", "Demo the product discovery loop");
   await assertPage("/finder/quiz_footwear", "Preparing your product guide");
@@ -2111,6 +2149,7 @@ async function main() {
   assertStorefrontSandboxWorkflow();
   assertRuntimeOperationsWorkflow();
   assertReleaseCenterWorkflow();
+  assertProductionVerificationWorkflow();
   assertWorkspaceSnapshotWorkflow();
   assertExperimentPlannerWorkflow();
   assertCommercialImpactWorkflow();

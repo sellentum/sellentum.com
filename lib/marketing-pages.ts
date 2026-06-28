@@ -130,6 +130,16 @@ export const platformPages = [
     demoLabel: "Open Usage Center",
   },
   {
+    slug: "production-verification",
+    eyebrow: "Production Verification",
+    title: "Prove Findly is ready for a real storefront launch.",
+    description: "Findly packages deployment checks, Vercel-ready commands, Supabase mode evidence, runtime endpoint contracts, desktop QA scenarios and analytics proof into one production verification center.",
+    points: ["Vercel deployment gates", "Required route/API contract", "Desktop storefront QA scenarios", "Copyable production verification packet"],
+    proof: ["Production is not complete until the deployed URL passes typecheck, lint, build and smoke", "Supabase mode is separated from local demo mode before merchant launch", "AI remains bounded to enrichment and explanations while deterministic logic selects products"],
+    demoHref: "/dashboard/production",
+    demoLabel: "Open Production Verification",
+  },
+  {
     slug: "analytics",
     eyebrow: "Journey analytics",
     title: "See where guided discovery turns into buying intent.",
