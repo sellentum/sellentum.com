@@ -16,11 +16,11 @@ create or replace function public.match_products(
 )
 returns table (id text, similarity float)
 language sql stable security definer set search_path = '' as $$
-  select p.id, 1 - (p.embedding <=> query_embedding) as similarity
+  select p.id, 1 - (p.embedding OPERATOR(public.<=>) query_embedding) as similarity
   from public.products p
   where p.user_id = workspace_user_id and p.active = true and p.embedding is not null
     and (max_price is null or p.price <= max_price)
-  order by p.embedding <=> query_embedding
+  order by p.embedding OPERATOR(public.<=>) query_embedding
   limit greatest(1, least(match_count, 50));
 $$;
 
