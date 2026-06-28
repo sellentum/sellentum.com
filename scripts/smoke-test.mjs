@@ -37,6 +37,8 @@ function assertSystemFontStack() {
   assert(!layout.includes("next/font/google"), "App layout should avoid Google font dependency for the simple system-font direction");
   assert(css.includes("Helvetica") && css.includes("Poppins") && css.includes("SF Pro"), "Global CSS should include Helvetica, Poppins and SF Pro in the simple font stack");
   assert(css.includes("font-size: 16px") && css.includes("line-height: 1.5"), "Global CSS should define a standard 16px type baseline");
+  assert(css.includes(".text-\\[7px\\]") && css.includes(".text-\\[10px\\]") && css.includes("font-size: 0.75rem"), "Global CSS should lift tiny arbitrary text classes to a readable baseline");
+  assert(css.includes(".text-\\[11px\\]") && css.includes(".text-\\[15px\\]"), "Global CSS should normalize small intermediate arbitrary text sizes");
 }
 
 function assertPublishedAdvisorRuntime() {
