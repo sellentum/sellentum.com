@@ -25,7 +25,7 @@ const partnerIcon: Record<SyndicationPlacement["partnerType"], typeof Store> = {
 
 export default function SyndicationPage() {
   const { ready, products, quizzes, configurators, events, settings } = useStore();
-  const [origin, setOrigin] = useState("https://your-findly-app.vercel.app");
+  const [origin, setOrigin] = useState("https://your-sellentum-app.vercel.app");
   const [copied, setCopied] = useState("");
   const report = useMemo(() => buildSyndicationReport({ origin, settings, products, quizzes, configurators, events }), [origin, settings, products, quizzes, configurators, events]);
   const [activeId, setActiveId] = useState("");
@@ -49,7 +49,7 @@ export default function SyndicationPage() {
       <div className="flex items-end justify-between gap-6">
         <div>
           <p className="eyebrow text-moss">Partner syndication</p>
-          <h1 className="display mt-2 text-5xl">Package Findly for retailer and partner sites.</h1>
+          <h1 className="display mt-2 text-5xl">Package Sellentum for retailer and partner sites.</h1>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-black/45">Create partner-safe snippets, attribution labels, QA checks and data-policy notes so the same product finder can travel beyond your owned storefront.</p>
         </div>
         <div className="flex gap-3">

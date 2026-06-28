@@ -125,7 +125,7 @@ function suggestedQuestions(clusters: OntologyCluster[], topSignals: OntologySig
   const features = topSignals.filter((signal) => signal.type === "feature").slice(0, 4);
   if (features.length >= 2) {
     questions.push({
-      title: "Which feature should Findly prioritise?",
+      title: "Which feature should Sellentum prioritise?",
       helperText: "Useful when product specs map directly to shopper preferences.",
       options: features.map((signal) => ({
         label: signal.label,

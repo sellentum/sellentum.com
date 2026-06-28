@@ -70,7 +70,7 @@ export default function KnowledgeGraphPage() {
           <div className="max-w-4xl">
             <p className="eyebrow text-lime">Semantic Knowledge Graph</p>
             <h1 className="display mt-3 text-5xl">Connect catalog facts, shopper language, rules and compatibility into one discovery graph.</h1>
-            <p className="mt-4 max-w-3xl text-sm font-bold leading-6 text-white/45">Findly keeps the Zoovu-style knowledge graph practical for an MVP: ontology, benefits, vocabulary, finder rules, grounding evidence and configurator dependencies are visible before AI explains anything.</p>
+            <p className="mt-4 max-w-3xl text-sm font-bold leading-6 text-white/45">Sellentum keeps the Zoovu-style knowledge graph practical for an MVP: ontology, benefits, vocabulary, finder rules, grounding evidence and configurator dependencies are visible before AI explains anything.</p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Link href="/dashboard/ontology" className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-5 py-3 text-sm font-extrabold text-white hover:bg-white/15"><Network size={14} /> Ontology</Link>
               <Link href="/dashboard/decision-graph" className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-5 py-3 text-sm font-extrabold text-white hover:bg-white/15"><GitBranch size={14} /> Decision graph</Link>

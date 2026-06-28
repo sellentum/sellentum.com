@@ -59,7 +59,7 @@ export default function PersonaStudioPage() {
         <div>
           <p className="eyebrow text-moss">Shopper Persona Studio</p>
           <h1 className="display mt-2 max-w-5xl text-5xl">Turn zero-party discovery signals into launchable buyer segments.</h1>
-          <p className="mt-3 max-w-3xl text-sm leading-6 text-black/45">Findly reads finder answers, search/advisor language, configurator choices, recommendations and buy clicks, then turns them into deterministic persona plans merchants can actually act on.</p>
+          <p className="mt-3 max-w-3xl text-sm leading-6 text-black/45">Sellentum reads finder answers, search/advisor language, configurator choices, recommendations and buy clicks, then turns them into deterministic persona plans merchants can actually act on.</p>
         </div>
         <div className="flex gap-3">
           <Link href="/dashboard/analytics" className="btn-secondary"><BarChart3 size={14} /> Analytics</Link>
@@ -173,7 +173,7 @@ export default function PersonaStudioPage() {
 
           <section className="rounded-[28px] border border-black/[0.07] bg-white p-6">
             <h2 className="text-sm font-extrabold">Persona signal matrix</h2>
-            <p className="mt-1 text-xs text-black/35">The evidence Findly uses to separate real buyer intent from noisy traffic.</p>
+            <p className="mt-1 text-xs text-black/35">The evidence Sellentum uses to separate real buyer intent from noisy traffic.</p>
             <div className="mt-5 grid gap-3 xl:grid-cols-5">
               {report.signalMatrix.map((row) => (
                 <article key={row.id} className="rounded-2xl border border-black/[0.07] bg-canvas p-4">

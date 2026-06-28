@@ -55,7 +55,7 @@ export default function AvailabilityGuardPage() {
         <div>
           <p className="eyebrow text-moss">Availability Guard Center</p>
           <h1 className="display mt-2 max-w-5xl text-5xl">Keep unavailable products out of every recommendation path.</h1>
-          <p className="mt-3 max-w-3xl text-sm leading-6 text-black/45">Prove that active products, Buy Now URLs, merchandising overrides, configurator links and analytics product references are safe before Findly recommends anything to shoppers.</p>
+          <p className="mt-3 max-w-3xl text-sm leading-6 text-black/45">Prove that active products, Buy Now URLs, merchandising overrides, configurator links and analytics product references are safe before Sellentum recommends anything to shoppers.</p>
         </div>
         <div className="flex gap-3">
           <Link href="/dashboard/products" className="btn-secondary"><PackageCheck size={14} /> Edit products</Link>
@@ -201,7 +201,7 @@ export default function AvailabilityGuardPage() {
 
           <section className="rounded-[28px] border border-black/[0.07] bg-white p-5">
             <h2 className="flex items-center gap-2 text-sm font-extrabold"><ShieldCheck size={16} className="text-moss" /> Safe AI boundary</h2>
-            <p className="mt-3 text-xs leading-5 text-black/45">OpenAI can explain why an already-selected product fits, but Findly’s runtime should never let AI choose unavailable products. Active status, product URLs and runtime references are checked before launch.</p>
+            <p className="mt-3 text-xs leading-5 text-black/45">OpenAI can explain why an already-selected product fits, but Sellentum’s runtime should never let AI choose unavailable products. Active status, product URLs and runtime references are checked before launch.</p>
             <button onClick={copyPacket} className="mt-5 inline-flex items-center gap-2 rounded-full bg-ink px-4 py-2.5 text-xs font-extrabold text-white">{copied ? "Packet copied" : "Copy availability packet"} <Clipboard size={13} /></button>
           </section>
 

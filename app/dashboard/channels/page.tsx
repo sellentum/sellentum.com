@@ -24,7 +24,7 @@ const channelIcon = {
 
 export default function LaunchChannelsPage() {
   const { ready, settings, quizzes, configurators, events } = useStore();
-  const [origin, setOrigin] = useState("https://your-findly-app.vercel.app");
+  const [origin, setOrigin] = useState("https://your-sellentum-app.vercel.app");
   const [selectedId, setSelectedId] = useState("homepage-finder");
   const [copied, setCopied] = useState<string | null>(null);
   const report = useMemo(() => buildLaunchChannelReport({ origin, settings, finders: quizzes, configurators, events }), [origin, settings, quizzes, configurators, events]);
@@ -46,7 +46,7 @@ export default function LaunchChannelsPage() {
         <div>
           <p className="eyebrow text-moss">Launch channels</p>
           <h1 className="display mt-2 text-5xl">Plan every storefront placement.</h1>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-black/45">Package Findly experiences for homepage, category, PDP and help placements with attribution labels, install QA, launch snippets and early channel metrics.</p>
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-black/45">Package Sellentum experiences for homepage, category, PDP and help placements with attribution labels, install QA, launch snippets and early channel metrics.</p>
         </div>
         <div className="flex gap-3">
           <Link href="/dashboard/settings" className="btn-secondary"><Code2 size={14} /> Brand embed</Link>

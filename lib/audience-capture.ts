@@ -104,15 +104,15 @@ const attributionKeys = [
   "utm_campaign",
   "utm_content",
   "utm_term",
-  "findly_source",
-  "findly_medium",
-  "findly_campaign",
-  "findly_content",
-  "findly_term",
-  "findly_placement",
-  "findly_page_url",
-  "findly_page_title",
-  "findly_referrer",
+  "sellentum_source",
+  "sellentum_medium",
+  "sellentum_campaign",
+  "sellentum_content",
+  "sellentum_term",
+  "sellentum_placement",
+  "sellentum_page_url",
+  "sellentum_page_title",
+  "sellentum_referrer",
 ];
 
 const contactKeys = [
@@ -195,7 +195,7 @@ function eventHasContactField(event: AnalyticsEvent) {
 function eventHasConsent(event: AnalyticsEvent) {
   const consent = normalize([
     text(event.metadata?.consent_status),
-    text(event.metadata?.findly_consent),
+    text(event.metadata?.sellentum_consent),
     text(event.metadata?.marketing_consent),
   ].join(" "));
   return ["granted", "accepted", "true", "opt-in", "opted-in", "subscribed"].some((value) => consent.includes(value));
@@ -352,10 +352,10 @@ function buildExportFields(): AudienceExportField[] {
     { id: "recommended_product", label: "Recommended product", source: "recommendation events", description: "Products shown by deterministic matching.", sensitivity: "commercial" },
     { id: "clicked_product", label: "Clicked product", source: "buy-click events", description: "Products receiving Buy Now intent.", sensitivity: "commercial" },
     { id: "product_category", label: "Product category", source: "catalog", description: "Catalog category for surfaced or clicked products.", sensitivity: "commercial" },
-    { id: "findly_source", label: "Traffic source", source: "widget snippet labels", description: "Source or UTM source attached to the widget session.", sensitivity: "anonymous" },
-    { id: "findly_campaign", label: "Campaign", source: "widget snippet labels", description: "Campaign label used for audience performance comparisons.", sensitivity: "anonymous" },
-    { id: "findly_placement", label: "Placement", source: "widget snippet labels", description: "Storefront page or placement that launched the guided experience.", sensitivity: "anonymous" },
-    { id: "consent_status", label: "Consent status", source: "external/store form", description: "Optional consent flag if the ecommerce site collects contact details outside Findly.", sensitivity: "consent" },
+    { id: "sellentum_source", label: "Traffic source", source: "widget snippet labels", description: "Source or UTM source attached to the widget session.", sensitivity: "anonymous" },
+    { id: "sellentum_campaign", label: "Campaign", source: "widget snippet labels", description: "Campaign label used for audience performance comparisons.", sensitivity: "anonymous" },
+    { id: "sellentum_placement", label: "Placement", source: "widget snippet labels", description: "Storefront page or placement that launched the guided experience.", sensitivity: "anonymous" },
+    { id: "consent_status", label: "Consent status", source: "external/store form", description: "Optional consent flag if the ecommerce site collects contact details outside Sellentum.", sensitivity: "consent" },
     { id: "created_at", label: "Event timestamp", source: "analytics events", description: "Timestamp used for recency windows and exports.", sensitivity: "anonymous" },
   ];
 }
@@ -392,7 +392,7 @@ function buildMoments(events: AnalyticsEvent[], productsById: Map<string, Produc
       reason: `${snapshot.completed} completed journey event${snapshot.completed === 1 ? "" : "s"} can become a consented shortlist-save moment.`,
       prompt: "Save my shortlist and send me the fit notes.",
       fields: ["session_id", "experience_type", "answer_summary", "recommended_product", "consent_status"],
-      guardrail: "Collect email through the ecommerce site’s consented form; Findly exports anonymous intent by default.",
+      guardrail: "Collect email through the ecommerce site’s consented form; Sellentum exports anonymous intent by default.",
     });
   }
 
@@ -405,7 +405,7 @@ function buildMoments(events: AnalyticsEvent[], productsById: Map<string, Produc
       priority: "high",
       reason: `${snapshot.clicked} buy-click event${snapshot.clicked === 1 ? "" : "s"} shows strong commercial intent.`,
       prompt: "Keep this recommendation with your order notes.",
-      fields: ["session_id", "clicked_product", "findly_source", "findly_campaign", "created_at"],
+      fields: ["session_id", "clicked_product", "sellentum_source", "sellentum_campaign", "created_at"],
       guardrail: "Do not block checkout; use this only where the store already has consented messaging.",
     });
   }
@@ -448,7 +448,7 @@ function buildMoments(events: AnalyticsEvent[], productsById: Map<string, Produc
       priority: "medium",
       reason: `${attributedSessions} attributed session${attributedSessions === 1 ? "" : "s"} can be compared by source, campaign and placement.`,
       prompt: `Create a follow-up segment for ${topProducts}.`,
-      fields: ["session_id", "findly_source", "findly_campaign", "findly_placement", "recommended_product"],
+      fields: ["session_id", "sellentum_source", "sellentum_campaign", "sellentum_placement", "recommended_product"],
       guardrail: "Export anonymous session intent unless the store has collected consent separately.",
     });
   }
@@ -508,7 +508,7 @@ function buildChecks(input: AudienceCaptureInput, segments: AudienceSegment[], m
       label: "Consent and PII boundary",
       status: contactFields && consentedContacts < contactFields ? "warn" : "pass",
       detail: contactFields ? `${contactFields} contact-like event${contactFields === 1 ? "" : "s"} detected; ${consentedContacts} show consent metadata.` : "No personal contact fields are required or exported by default.",
-      recommendation: contactFields ? "Only export contact fields when the ecommerce site records explicit consent." : "Keep Findly exports anonymous unless a consented store form owns the contact capture.",
+      recommendation: contactFields ? "Only export contact fields when the ecommerce site records explicit consent." : "Keep Sellentum exports anonymous unless a consented store form owns the contact capture.",
     },
     {
       id: "experience-coverage",
@@ -612,7 +612,7 @@ function buildActions(report: Omit<AudienceCaptureReport, "packet" | "actions">)
 
 function buildPacket(report: Omit<AudienceCaptureReport, "packet">) {
   return [
-    "Findly Audience Capture packet",
+    "Sellentum Audience Capture packet",
     "==============================",
     "",
     `Status: ${report.status.toUpperCase()} · Score: ${report.score}%`,

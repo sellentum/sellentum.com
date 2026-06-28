@@ -49,7 +49,7 @@ function productInputFromEnrichment(original: Product, enriched: { normalized_ca
 
 export default function LaunchStudioPage() {
   const { ready, products, quizzes, configurators, settings, saveProduct, createQuiz, saveQuiz } = useStore();
-  const [origin, setOrigin] = useState("https://your-findly-app.vercel.app");
+  const [origin, setOrigin] = useState("https://your-sellentum-app.vercel.app");
   const [selectedExperience, setSelectedExperience] = useState<WidgetEmbedExperience>("finder");
   const [busy, setBusy] = useState<BusyAction>(null);
   const [error, setError] = useState("");
@@ -98,7 +98,7 @@ export default function LaunchStudioPage() {
     label: selectedLaunchExperience.launcherLabel,
     position: settings.launcher_position === "bottom-left" ? "left" : "right",
     medium: "embed",
-    campaign: "findly-launch",
+    campaign: "sellentum-launch",
     placement: `${selectedLaunchExperience.experience}-launcher`,
   };
   const launchContract = buildLaunchContract({

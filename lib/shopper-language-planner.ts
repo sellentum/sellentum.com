@@ -90,7 +90,7 @@ const stopWords = new Set([
   "best",
   "choose",
   "find",
-  "findly",
+  "sellentum",
   "from",
   "good",
   "help",
@@ -358,7 +358,7 @@ function buildQuizGuidance(terms: ShopperLanguageTerm[], products: Product[], qu
       id: "thin-quiz-branches",
       title: "Avoid one-product answer traps",
       detail: "Thin terms can create finder branches with only one eligible product unless the wording is intentionally narrow.",
-      suggestedQuestion: "What should Findly prioritise?",
+      suggestedQuestion: "What should Sellentum prioritise?",
       suggestedOptions: thinTerms.map((term) => term.label),
       impact: "finder",
     });

@@ -38,7 +38,7 @@ export default function VocabularyPage() {
       <div className="flex items-end justify-between gap-6">
         <div>
           <p className="eyebrow text-moss">Vocabulary Studio</p>
-          <h1 className="display mt-2 text-5xl">Approve the language Findly can safely use.</h1>
+          <h1 className="display mt-2 text-5xl">Approve the language Sellentum can safely use.</h1>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-black/45">Review shopper terms, synonyms, unsupported queries and product-level semantic fields before they power search, advisor answers, quiz options and AI explanations.</p>
         </div>
         <div className="flex gap-3">
@@ -87,7 +87,7 @@ export default function VocabularyPage() {
             <div className="flex items-start justify-between gap-4">
               <div>
                 <h2 className="text-sm font-extrabold">Approved discovery dictionary</h2>
-                <p className="mt-1 text-xs text-black/35">Terms Findly can use for semantic search, advisor interpretation, finder options and grounded explanation evidence.</p>
+                <p className="mt-1 text-xs text-black/35">Terms Sellentum can use for semantic search, advisor interpretation, finder options and grounded explanation evidence.</p>
               </div>
               <Link href="/dashboard/ontology" className="inline-flex items-center gap-1 text-xs font-extrabold text-moss">Open ontology <ArrowRight size={12} /></Link>
             </div>

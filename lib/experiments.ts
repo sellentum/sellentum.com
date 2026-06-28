@@ -128,7 +128,7 @@ function addExperiment(experiments: ExperimentPlan[], experiment: ExperimentPlan
 
 function formatPacket(experiments: ExperimentPlan[], guardrails: ExperimentGuardrail[]) {
   return [
-    "Findly experiment plan",
+    "Sellentum experiment plan",
     "======================",
     "",
     "Guardrails",
@@ -304,7 +304,7 @@ export function buildExperimentPlanningReport({
     evidence: `${discovery.score}% discovery score · ${discovery.summary.missingTermSignals} missing term signal${discovery.summary.missingTermSignals === 1 ? "" : "s"}.`,
     audience: "Collection-page shoppers who know the problem/outcome but not the product name.",
     control: "Standard category browsing and filters.",
-    variant: "Inline Findly semantic search snippet with category placement attribution.",
+    variant: "Inline Sellentum semantic search snippet with category placement attribution.",
     primaryMetric: metric("Discovery score", discovery.score, 82, "coverage of no-result, thin-result and missing-language signals"),
     secondaryMetrics: [
       metric("Missing terms", discovery.summary.missingTermSignals, 0, "uncovered shopper language signals", "count"),
@@ -338,7 +338,7 @@ export function buildExperimentPlanningReport({
     evidence: configurator ? `${configurator.name} has ${configurator.steps.length} configurator step${configurator.steps.length === 1 ? "" : "s"} available.` : "No configurator is available yet.",
     audience: "PDP visitors comparing bundles, variants, accessories or compatibility choices.",
     control: "Standard PDP recommendations or static accessory modules.",
-    variant: "Inline Findly configurator with PDP bundle placement attribution.",
+    variant: "Inline Sellentum configurator with PDP bundle placement attribution.",
     primaryMetric: metric("Configurator click rate", stageRate(eventCount(configuratorEvents.filter((event) => event.event_type === "buy_click"), "configurator"), eventCount(configuratorEvents.filter((event) => event.event_type === "quiz_complete"), "configurator")), 20, "configurator buy clicks divided by completed configurations"),
     secondaryMetrics: [
       metric("Configurator events", configuratorEvents.length, 25, "events attributed to configurator", "count"),

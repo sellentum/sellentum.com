@@ -305,7 +305,7 @@ function buildActions(checks: AdvisorStudioCheck[]): AdvisorStudioAction[] {
 
 function packet(report: Omit<AdvisorStudioReport, "packet">) {
   return [
-    "Findly Advisor Studio packet",
+    "Sellentum Advisor Studio packet",
     "============================",
     "",
     `Status: ${report.status.toUpperCase()} · Score: ${report.score}%`,
@@ -330,7 +330,7 @@ export function buildAdvisorStudioReport({
   quizzes,
   events = [],
   settings,
-  origin = "https://your-findly-app.vercel.app",
+  origin = "https://your-sellentum-app.vercel.app",
   focusPrompt,
 }: {
   products: Product[];
@@ -361,7 +361,7 @@ export function buildAdvisorStudioReport({
     position: settings.launcher_position === "bottom-left" ? "left" : "right",
     source: "storefront",
     medium: "embed",
-    campaign: "findly-advisor",
+    campaign: "sellentum-advisor",
     placement: "support-drawer",
   });
   const install = buildWidgetInstallReport({
@@ -374,7 +374,7 @@ export function buildAdvisorStudioReport({
     position: settings.launcher_position === "bottom-left" ? "left" : "right",
     source: "storefront",
     medium: "embed",
-    campaign: "findly-advisor",
+    campaign: "sellentum-advisor",
     placement: "support-drawer",
   });
   const checks = buildChecks({ products, quizzes, events, scenarios, canInstall: install.canInstall });

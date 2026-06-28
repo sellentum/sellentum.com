@@ -96,7 +96,7 @@ export function buildSearchRecoveryReport(report: ProductSearchReport): SearchRe
     suggestions.push({
       id: "broaden-missing-language",
       title: `Broaden missing terms: ${missingTerms.slice(0, 3).join(", ")}`,
-      detail: "Those words do not appear in active catalog fields yet, so Findly has no deterministic evidence for them.",
+      detail: "Those words do not appear in active catalog fields yet, so Sellentum has no deterministic evidence for them.",
       query: broaderQuery(report, missingTerms),
       severity: noResults ? "critical" : "helpful",
     });
@@ -126,7 +126,7 @@ export function buildSearchRecoveryReport(report: ProductSearchReport): SearchRe
     suggestions.push({
       id: "compare-more-options",
       title: "Try a broader comparison query",
-      detail: "Findly found a match, but fewer than three products are available for side-by-side choice.",
+      detail: "Sellentum found a match, but fewer than three products are available for side-by-side choice.",
       query: report.suggestions[0],
       severity: "info",
     });
@@ -139,7 +139,7 @@ export function buildSearchRecoveryReport(report: ProductSearchReport): SearchRe
   const summary = status === "healthy"
     ? "This search has enough catalog evidence for confident ranking."
     : status === "no-results"
-      ? "No eligible products matched the current constraints, but Findly can still suggest safer refinements."
+      ? "No eligible products matched the current constraints, but Sellentum can still suggest safer refinements."
       : "The search returned products, but some shopper language or constraints need refinement for stronger confidence.";
 
   return {

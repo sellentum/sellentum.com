@@ -29,7 +29,7 @@ export type StorefrontInstallScanReport = {
   scannedAt: string;
   summary: {
     scripts: number;
-    findlyScripts: number;
+    sellentumScripts: number;
     inlineFrames: number;
     modalHints: number;
     attributionLabels: number;
@@ -99,7 +99,7 @@ export function validateStorefrontScanUrl(input: string) {
   return url;
 }
 
-export function extractFindlySnippets(html: string): StorefrontInstallSnippet[] {
+export function extractSellentumSnippets(html: string): StorefrontInstallSnippet[] {
   const scripts = html.match(/<script\b[^>]*>/gi) || [];
   return scripts
     .flatMap((tag): StorefrontInstallSnippet[] => {
@@ -122,8 +122,8 @@ export function extractFindlySnippets(html: string): StorefrontInstallSnippet[] 
 
 function buildChecks({ url, html, snippets, appOrigin }: { url: URL; html: string; snippets: StorefrontInstallSnippet[]; appOrigin?: string }) {
   const normalized = normalizeHtml(html);
-  const findlyFrames = (html.match(/<iframe\b[^>]*(finder|assistant|search|configurator)\//gi) || []).length;
-  const modalHints = (normalized.match(/findly|data-findly|Findly|api\/widget\.js/g) || []).length;
+  const sellentumFrames = (html.match(/<iframe\b[^>]*(finder|assistant|search|configurator)\//gi) || []).length;
+  const modalHints = (normalized.match(/sellentum|data-sellentum|Sellentum|api\/widget\.js/g) || []).length;
   const first = snippets[0];
   const attributionLabels = snippets.reduce((sum, snippet) => sum + [snippet.source, snippet.campaign, snippet.placement].filter(Boolean).length, 0);
   const scriptOrigin = first?.scriptSrc ? (() => {
@@ -133,33 +133,33 @@ function buildChecks({ url, html, snippets, appOrigin }: { url: URL; html: strin
   return [
     check("url", "Storefront URL", "pass", `${url.origin} is eligible for server-side install scanning.`, url.href),
     snippets.length
-      ? check("script", "Findly widget script", "pass", `${snippets.length} Findly widget script${snippets.length === 1 ? "" : "s"} found.`, snippets.map((snippet) => snippet.scriptSrc).join(", "))
-      : check("script", "Findly widget script", "fail", "No script using /api/widget.js was found in the storefront HTML.", "Missing <script src=\".../api/widget.js\">"),
+      ? check("script", "Sellentum widget script", "pass", `${snippets.length} Sellentum widget script${snippets.length === 1 ? "" : "s"} found.`, snippets.map((snippet) => snippet.scriptSrc).join(", "))
+      : check("script", "Sellentum widget script", "fail", "No script using /api/widget.js was found in the storefront HTML.", "Missing <script src=\".../api/widget.js\">"),
     first?.experience
       ? check("experience", "Experience type", "pass", `Installed experience is ${first.experience}.`, first.experience)
-      : check("experience", "Experience type", snippets.length ? "fail" : "warn", "The widget script should include data-experience=\"finder|assistant|search|configurator\".", first?.scriptSrc || "No Findly script found."),
+      : check("experience", "Experience type", snippets.length ? "fail" : "warn", "The widget script should include data-experience=\"finder|assistant|search|configurator\".", first?.scriptSrc || "No Sellentum script found."),
     first?.mode
       ? check("mode", "Embed mode", "pass", `Widget loads in ${first.mode} mode.`, first.mode)
-      : check("mode", "Embed mode", snippets.length ? "fail" : "warn", "The widget script should include data-mode=\"modal\" or data-mode=\"inline\".", first?.scriptSrc || "No Findly script found."),
+      : check("mode", "Embed mode", snippets.length ? "fail" : "warn", "The widget script should include data-mode=\"modal\" or data-mode=\"inline\".", first?.scriptSrc || "No Sellentum script found."),
     first?.id && !first.id.startsWith("YOUR_")
       ? check("experience-id", "Published experience ID", "pass", `Widget points at published ID ${first.id}.`, first.id)
       : check("experience-id", "Published experience ID", snippets.length ? "fail" : "warn", "Replace placeholder IDs with a published finder/configurator ID before launch.", first?.id || "Missing data-id"),
     attributionLabels
       ? check("attribution", "Attribution labels", "pass", `${attributionLabels} explicit source/campaign/placement label${attributionLabels === 1 ? "" : "s"} found.`, snippets.map((snippet) => [snippet.source, snippet.campaign, snippet.placement].filter(Boolean).join(" / ")).filter(Boolean).join(", "))
-      : check("attribution", "Attribution labels", "warn", "No explicit source, campaign or placement labels found; Findly will infer page context only.", "Missing data-source/data-campaign/data-placement"),
+      : check("attribution", "Attribution labels", "warn", "No explicit source, campaign or placement labels found; Sellentum will infer page context only.", "Missing data-source/data-campaign/data-placement"),
     url.protocol === "https:"
       ? check("https", "HTTPS storefront", "pass", "Storefront uses HTTPS.", url.origin)
       : check("https", "HTTPS storefront", "warn", "Use HTTPS before installing on production.", url.origin),
     expectedOrigin && scriptOrigin
       ? scriptOrigin === expectedOrigin
-        ? check("origin", "Expected app origin", "pass", "Widget script origin matches the expected Findly app origin.", scriptOrigin)
+        ? check("origin", "Expected app origin", "pass", "Widget script origin matches the expected Sellentum app origin.", scriptOrigin)
         : check("origin", "Expected app origin", "warn", "Widget script origin differs from the expected app origin.", `${scriptOrigin} vs ${expectedOrigin}`)
-      : check("origin", "Expected app origin", "warn", "Pass the expected Findly app origin to compare production snippet domains.", scriptOrigin || "No script origin"),
-    first?.mode === "inline" && findlyFrames
-      ? check("iframe", "Inline iframe evidence", "pass", `${findlyFrames} Findly iframe hint${findlyFrames === 1 ? "" : "s"} found.`, `${findlyFrames} iframe hints`)
+      : check("origin", "Expected app origin", "warn", "Pass the expected Sellentum app origin to compare production snippet domains.", scriptOrigin || "No script origin"),
+    first?.mode === "inline" && sellentumFrames
+      ? check("iframe", "Inline iframe evidence", "pass", `${sellentumFrames} Sellentum iframe hint${sellentumFrames === 1 ? "" : "s"} found.`, `${sellentumFrames} iframe hints`)
       : first?.mode === "inline"
         ? check("iframe", "Inline iframe evidence", "warn", "Inline scripts may render after hydration; no static iframe was found in initial HTML.", "No static iframe")
-        : check("iframe", "Modal lazy-load evidence", modalHints ? "pass" : "warn", "Modal widgets are expected to lazy-load iframes after shopper click.", `${modalHints} Findly/widget hint${modalHints === 1 ? "" : "s"}`),
+        : check("iframe", "Modal lazy-load evidence", modalHints ? "pass" : "warn", "Modal widgets are expected to lazy-load iframes after shopper click.", `${modalHints} Sellentum/widget hint${modalHints === 1 ? "" : "s"}`),
   ];
 }
 
@@ -167,10 +167,10 @@ function recommendations(checks: StorefrontInstallCheck[]) {
   const recs = checks
     .filter((item) => item.status !== "pass")
     .map((item) => {
-      if (item.id === "script") return "Paste the Findly widget snippet from Widget Studio into the storefront page or theme.";
+      if (item.id === "script") return "Paste the Sellentum widget snippet from Widget Studio into the storefront page or theme.";
       if (item.id === "experience-id") return "Publish the finder/configurator and replace placeholder data-id values.";
       if (item.id === "attribution") return "Add data-source, data-campaign or data-placement labels before campaign launch.";
-      if (item.id === "origin") return "Confirm the script src points at the production Findly/Vercel app URL.";
+      if (item.id === "origin") return "Confirm the script src points at the production Sellentum/Vercel app URL.";
       if (item.id === "https") return "Move the storefront install target to HTTPS before production.";
       return item.detail;
     });
@@ -179,7 +179,7 @@ function recommendations(checks: StorefrontInstallCheck[]) {
 
 function buildPacket(report: Omit<StorefrontInstallScanReport, "packet">) {
   return [
-    "Findly storefront install scan",
+    "Sellentum storefront install scan",
     "==============================",
     "",
     `URL: ${report.url}`,
@@ -209,12 +209,12 @@ export function analyzeStorefrontInstall({
   scannedAt?: Date;
 }): StorefrontInstallScanReport {
   const parsedUrl = validateStorefrontScanUrl(url);
-  const snippets = extractFindlySnippets(html);
+  const snippets = extractSellentumSnippets(html);
   const checks = buildChecks({ url: parsedUrl, html, snippets, appOrigin });
   const blockers = checks.filter((item) => item.status === "fail").length;
   const warnings = checks.filter((item) => item.status === "warn").length;
   const inlineFrames = (html.match(/<iframe\b/gi) || []).length;
-  const modalHints = (html.match(/findly|api\/widget\.js/gi) || []).length;
+  const modalHints = (html.match(/sellentum|api\/widget\.js/gi) || []).length;
   const attributionLabels = snippets.reduce((sum, snippet) => sum + [snippet.source, snippet.campaign, snippet.placement].filter(Boolean).length, 0);
   const baseReport: Omit<StorefrontInstallScanReport, "packet"> = {
     status: statusFromChecks(checks),
@@ -224,7 +224,7 @@ export function analyzeStorefrontInstall({
     scannedAt: scannedAt.toISOString(),
     summary: {
       scripts: (html.match(/<script\b/gi) || []).length,
-      findlyScripts: snippets.length,
+      sellentumScripts: snippets.length,
       inlineFrames,
       modalHints,
       attributionLabels,

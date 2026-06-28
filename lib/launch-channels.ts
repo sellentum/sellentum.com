@@ -84,7 +84,7 @@ const channelTemplates: LaunchChannelTemplate[] = [
     name: "Homepage guided finder",
     placement: "homepage-hero",
     source: "homepage",
-    campaign: "findly-homepage-guide",
+    campaign: "sellentum-homepage-guide",
     audience: "New shoppers who need a quick starting point before browsing the catalog.",
     targetPages: "Homepage hero, top navigation CTA, or campaign landing page",
     experience: "finder",
@@ -98,7 +98,7 @@ const channelTemplates: LaunchChannelTemplate[] = [
     name: "Category semantic search",
     placement: "category-inline",
     source: "category",
-    campaign: "findly-category-search",
+    campaign: "sellentum-category-search",
     audience: "Shoppers already browsing a collection but using benefit or problem language.",
     targetPages: "Collection/category pages, search results pages, buying-guide pages",
     experience: "search",
@@ -112,7 +112,7 @@ const channelTemplates: LaunchChannelTemplate[] = [
     name: "PDP bundle configurator",
     placement: "pdp-bundle",
     source: "pdp",
-    campaign: "findly-pdp-configurator",
+    campaign: "sellentum-pdp-configurator",
     audience: "High-intent shoppers comparing variants, accessories, kits or compatibility.",
     targetPages: "Product detail pages, bundle sections, accessories modules",
     experience: "configurator",
@@ -126,7 +126,7 @@ const channelTemplates: LaunchChannelTemplate[] = [
     name: "Support-style advisor",
     placement: "help-drawer",
     source: "support",
-    campaign: "findly-advisor-help",
+    campaign: "sellentum-advisor-help",
     audience: "Shoppers with vague requests who would otherwise contact support or bounce.",
     targetPages: "Help pages, floating help launcher, PDP lower section",
     experience: "assistant",
@@ -138,7 +138,7 @@ const channelTemplates: LaunchChannelTemplate[] = [
 ];
 
 function originClean(origin: string) {
-  return (origin || "https://your-findly-app.vercel.app").replace(/\/+$/, "");
+  return (origin || "https://your-sellentum-app.vercel.app").replace(/\/+$/, "");
 }
 
 function rate(part: number, total: number) {
@@ -157,9 +157,9 @@ function eventExperience(event: AnalyticsEvent): ExperienceType | "" {
 
 function channelEvents(events: AnalyticsEvent[], channel: LaunchChannelTemplate) {
   return events.filter((event) => {
-    const campaign = metadataString(event, "findly_campaign");
-    const placement = metadataString(event, "findly_placement");
-    const source = metadataString(event, "findly_source");
+    const campaign = metadataString(event, "sellentum_campaign");
+    const placement = metadataString(event, "sellentum_placement");
+    const source = metadataString(event, "sellentum_source");
     const experience = eventExperience(event);
     return campaign === channel.campaign || placement === channel.placement || (source === channel.source && (!experience || experience === channel.experience));
   });
@@ -252,7 +252,7 @@ function nextActionForChannel(channel: LaunchChannelTemplate, status: LaunchChan
     const blocker = installReport.checks.find((check) => check.severity === "blocker");
     return {
       title: "Resolve install blockers",
-      detail: blocker?.detail || "Publish/select the required Findly experience before installing this placement.",
+      detail: blocker?.detail || "Publish/select the required Sellentum experience before installing this placement.",
       href: channel.experience === "configurator" ? "/dashboard/configurators" : "/dashboard/quizzes",
       label: "Open builder",
       priority: "critical",
@@ -296,7 +296,7 @@ function nextActionForChannel(channel: LaunchChannelTemplate, status: LaunchChan
 
 function formatChannelPacket(channels: LaunchChannel[]) {
   return [
-    "Findly launch channel packet",
+    "Sellentum launch channel packet",
     "============================",
     "",
     ...channels.flatMap((channel) => [

@@ -44,10 +44,10 @@ const benefitRules: BenefitRule[] = [
   { id: "compact", terms: ["compact", "small", "space saving", "foldable", "minimal"], label: "Space-saving fit", benefit: "Works better when shoppers have limited room or want less clutter.", shopperQuestion: "Is saving space or keeping the setup minimal important?", category: "convenience" },
   { id: "premium", terms: ["premium", "pro", "professional", "luxury", "advanced"], label: "Premium capability", benefit: "Fits shoppers who want higher-end materials, controls or finish.", shopperQuestion: "Are you shopping for a premium or professional-grade option?", category: "performance" },
   { id: "value", terms: ["value", "budget", "affordable", "starter", "entry", "basic"], label: "Best value", benefit: "Keeps the recommendation practical when price confidence matters.", shopperQuestion: "Would you prefer the strongest value over maximum features?", category: "value" },
-  { id: "compatibility", terms: ["compatible", "compatibility", "fits", "kit", "bundle", "modular", "addon", "add-on"], label: "Compatible setup", benefit: "Helps shoppers avoid choosing parts or options that do not work together.", shopperQuestion: "Do you need Findly to keep selected parts compatible?", category: "confidence" },
+  { id: "compatibility", terms: ["compatible", "compatibility", "fits", "kit", "bundle", "modular", "addon", "add-on"], label: "Compatible setup", benefit: "Helps shoppers avoid choosing parts or options that do not work together.", shopperQuestion: "Do you need Sellentum to keep selected parts compatible?", category: "confidence" },
 ];
 
-const intentStopWords = new Set(["about", "after", "also", "and", "are", "can", "choosing", "does", "findly", "for", "from", "helps", "important", "into", "matter", "most", "need", "option", "product", "products", "shopping", "should", "that", "the", "this", "use", "when", "which", "with", "you", "your"]);
+const intentStopWords = new Set(["about", "after", "also", "and", "are", "can", "choosing", "does", "sellentum", "for", "from", "helps", "important", "into", "matter", "most", "need", "option", "product", "products", "shopping", "should", "that", "the", "this", "use", "when", "which", "with", "you", "your"]);
 
 function normalise(value: string) {
   return value.toLowerCase().replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim();

@@ -76,10 +76,10 @@ function hasSessionMetadata(event: AnalyticsEvent) {
 
 function hasAttributionMetadata(event: AnalyticsEvent) {
   const metadata = event.metadata || {};
-  return typeof metadata.findly_source === "string"
+  return typeof metadata.sellentum_source === "string"
     || typeof metadata.utm_source === "string"
-    || typeof metadata.findly_page_url === "string"
-    || typeof metadata.findly_placement === "string";
+    || typeof metadata.sellentum_page_url === "string"
+    || typeof metadata.sellentum_placement === "string";
 }
 
 function buildPreflight({ products, quizzes, configurators, events, settings, mode, origin }: {

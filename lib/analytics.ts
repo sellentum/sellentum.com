@@ -114,7 +114,7 @@ export function buildFunnelDiagnosis(snapshot: Pick<AnalyticsSnapshot, "sessions
   if (!snapshot.sessions || !snapshot.viewed) {
     return {
       title: "No measurable widget traffic yet",
-      detail: "Findly needs at least one storefront/widget session before the funnel can diagnose shopper behaviour.",
+      detail: "Sellentum needs at least one storefront/widget session before the funnel can diagnose shopper behaviour.",
       recommendation: "Open the embedded experience from a storefront or preview link, complete a journey, then check this view again.",
       severity: "empty",
     };

@@ -78,7 +78,7 @@ export function analyzeCatalogIntelligence(products: Product[]): CatalogIntellig
   checks.push(check(
     "catalog-size",
     "Active catalog size",
-    total >= 2 ? `${total} active products are available for discovery.` : "Add at least two active products so Findly can rank alternatives.",
+    total >= 2 ? `${total} active products are available for discovery.` : "Add at least two active products so Sellentum can rank alternatives.",
     total >= 2 ? "pass" : "blocker",
     Math.max(0, 2 - total),
   ));

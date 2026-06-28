@@ -30,7 +30,7 @@ type StoreContextValue = {
 };
 
 const StoreContext = createContext<StoreContextValue | null>(null);
-const STORAGE_KEY = "findly-demo-state-v2";
+const STORAGE_KEY = "sellentum-demo-state-v2";
 
 type DemoState = { products: Product[]; quizzes: Quiz[]; configurators: Configurator[]; events: AnalyticsEvent[]; settings: WidgetSettings };
 const initialState: DemoState = { products: demoProducts, quizzes: [demoQuiz], configurators: [demoConfigurator], events: demoEvents, settings: demoSettings };

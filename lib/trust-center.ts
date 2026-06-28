@@ -118,7 +118,7 @@ function buildActions(pillars: TrustPillar[]): TrustAction[] {
 
 function packet(report: Omit<TrustCenterReport, "packet">) {
   return [
-    "Findly AI trust packet",
+    "Sellentum AI trust packet",
     "======================",
     "",
     `Status: ${report.status.toUpperCase()} · Score: ${report.score}%`,
@@ -304,7 +304,7 @@ export function buildTrustCenterReport({
     aiBoundary: [
       "Rules select products first; AI only explains selected deterministic matches.",
       "AI explanations must be grounded in catalog facts, answer reasons and approved shopper vocabulary.",
-      "When OpenAI is unavailable, Findly falls back to deterministic explanation copy.",
+      "When OpenAI is unavailable, Sellentum falls back to deterministic explanation copy.",
       "Risky certainty, medical or unsupported claims are treated as grounding blockers.",
       "Recommendation QA, decision graph and preflight reports are reusable audits before every launch.",
     ],
@@ -313,7 +313,7 @@ export function buildTrustCenterReport({
       "The widget tracks anonymous session IDs, experience metadata, recommendation ranks and buy-click product IDs.",
       "Catalog products, answer rules and merchandising overrides remain merchant-owned workspace data.",
       "Partner packets should share launch status, snippets and approved copy—not private API keys or raw customer identities.",
-      "Findly does not need checkout-order attribution for this MVP; commercial impact is modeled from guided-session events.",
+      "Sellentum does not need checkout-order attribution for this MVP; commercial impact is modeled from guided-session events.",
     ],
   };
 

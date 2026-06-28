@@ -317,7 +317,7 @@ function buildActions(layers: SemanticGraphLayer[], weakLinks: SemanticGraphWeak
 
 function buildPacket(report: Omit<SemanticKnowledgeGraphReport, "packet">) {
   return [
-    "Findly Semantic Knowledge Graph packet",
+    "Sellentum Semantic Knowledge Graph packet",
     "======================================",
     "",
     `Status: ${report.status.toUpperCase()} · Score: ${report.score}%`,
@@ -333,7 +333,7 @@ function buildPacket(report: Omit<SemanticKnowledgeGraphReport, "packet">) {
     ...report.weakLinks.map((link) => `- [${link.status.toUpperCase()}] ${link.source}: ${link.detail}`),
     "",
     "Boundary",
-    "- Findly uses this graph to structure catalog understanding, quiz rules, semantic vocabulary, benefit mapping, grounding evidence and compatibility relationships.",
+    "- Sellentum uses this graph to structure catalog understanding, quiz rules, semantic vocabulary, benefit mapping, grounding evidence and compatibility relationships.",
     "- The graph informs discovery and AI prompts, but deterministic runtime logic still selects products before AI writes explanations.",
   ].join("\n");
 }

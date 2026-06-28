@@ -43,7 +43,7 @@ export default function SearchLabPage() {
       <div>
         <p className="eyebrow text-moss">Semantic search</p>
         <h1 className="display mt-2 text-5xl">Search like a shopper thinks.</h1>
-        <p className="mt-3 max-w-2xl text-sm leading-6 text-black/45">Type natural intent, budgets, use cases or must-have features. Findly ranks active products deterministically from enriched catalog language, not AI guesswork.</p>
+        <p className="mt-3 max-w-2xl text-sm leading-6 text-black/45">Type natural intent, budgets, use cases or must-have features. Sellentum ranks active products deterministically from enriched catalog language, not AI guesswork.</p>
       </div>
       <Link href="/dashboard/products" className="btn-secondary self-start"><Boxes size={14} /> Manage catalog</Link>
     </div>

@@ -183,7 +183,7 @@ function scoreForStatus(status: ExperienceRegistryStatus) {
 
 function packet(report: Omit<ExperienceRegistryReport, "packet">) {
   return [
-    "Findly Experience Registry packet",
+    "Sellentum Experience Registry packet",
     "=================================",
     "",
     `Status: ${report.status.toUpperCase()} · Score: ${report.score}%`,

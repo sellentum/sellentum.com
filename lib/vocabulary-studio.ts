@@ -211,7 +211,7 @@ function productTasks(plan: ReturnType<typeof buildShopperLanguagePlan>): Vocabu
 
 function glossary(terms: VocabularyTerm[]) {
   return [
-    "Findly approved discovery vocabulary",
+    "Sellentum approved discovery vocabulary",
     "====================================",
     "",
     ...terms.map((term) => [
@@ -336,7 +336,7 @@ function actions({
 
 function packet(report: Omit<VocabularyStudioReport, "packet">) {
   return [
-    "Findly Vocabulary Studio packet",
+    "Sellentum Vocabulary Studio packet",
     "===============================",
     "",
     `Status: ${report.status.toUpperCase()} · Score: ${report.score}%`,

@@ -138,7 +138,7 @@ export default function FinderPage({ params }: { params: Promise<{ id: string }>
   const comparisonRows = useMemo(() => compareFinderRecommendations(recommendations), [recommendations]);
 
   if (loading) return <main className="grid min-h-screen place-items-center bg-[#e8eadf]"><div className="text-center"><LoaderCircle className="mx-auto animate-spin text-moss" /><p className="mt-3 text-xs font-bold text-black/40">Preparing your product guide…</p></div></main>;
-  if (error || !data) return <main className="grid min-h-screen place-items-center bg-canvas p-6 text-center"><div><span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-black/5"><Sparkles size={21} /></span><h1 className="display mt-5 text-4xl">This finder isn’t available.</h1><p className="mt-2 text-sm text-black/45">{error || "It may be unpublished or no longer exist."}</p><Link href="/" className="btn-primary mt-5">Visit Findly</Link></div></main>;
+  if (error || !data) return <main className="grid min-h-screen place-items-center bg-canvas p-6 text-center"><div><span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-black/5"><Sparkles size={21} /></span><h1 className="display mt-5 text-4xl">This finder isn’t available.</h1><p className="mt-2 text-sm text-black/45">{error || "It may be unpublished or no longer exist."}</p><Link href="/" className="btn-primary mt-5">Visit Sellentum</Link></div></main>;
   const quiz = data.quiz;
 
   return <main className="noise relative min-h-screen overflow-hidden bg-[#e8eadf] p-3 sm:p-6 lg:p-10" style={{ "--finder-accent": accent } as React.CSSProperties}>
@@ -181,7 +181,7 @@ export default function FinderPage({ params }: { params: Promise<{ id: string }>
               <div className="mx-auto mt-10 max-w-lg rounded-2xl border border-black/10 p-8 text-center">
                 <LoaderCircle className="mx-auto animate-spin text-moss" />
                 <h2 className="mt-4 text-sm font-extrabold">Building your recommendations…</h2>
-                <p className="mt-2 text-xs text-black/40">Findly is checking your answers against the live catalog.</p>
+                <p className="mt-2 text-xs text-black/40">Sellentum is checking your answers against the live catalog.</p>
               </div>
             ) : recommendations.length ? (
               <>
@@ -310,7 +310,7 @@ export default function FinderPage({ params }: { params: Promise<{ id: string }>
           </div>
         </div>
       )}
-      <footer className="flex items-center justify-between border-t border-black/[0.05] px-5 py-3 text-xs font-bold text-black/25 sm:px-8"><span>Powered by <b className="text-black/45">findly</b></span><span>Your answers are used only for this recommendation</span></footer>
+      <footer className="flex items-center justify-between border-t border-black/[0.05] px-5 py-3 text-xs font-bold text-black/25 sm:px-8"><span>Powered by <b className="text-black/45">sellentum</b></span><span>Your answers are used only for this recommendation</span></footer>
     </section>
   </main>;
 }

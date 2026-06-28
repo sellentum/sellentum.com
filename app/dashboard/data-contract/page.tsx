@@ -133,7 +133,7 @@ export default function DataContractPage() {
       <div className="mt-6 grid gap-6 xl:grid-cols-[1.2fr_.8fr]">
         <section className="rounded-[28px] border border-black/[0.07] bg-white p-6">
           <div className="flex items-center justify-between">
-            <div><h2 className="text-sm font-extrabold">Workspace health checks</h2><p className="mt-1 text-xs text-black/35">The checks that prove Findly can run catalog, finder, advisor, search, configurator, analytics and embed services from one data layer.</p></div>
+            <div><h2 className="text-sm font-extrabold">Workspace health checks</h2><p className="mt-1 text-xs text-black/35">The checks that prove Sellentum can run catalog, finder, advisor, search, configurator, analytics and embed services from one data layer.</p></div>
             <Link href="/dashboard/api-center" className="inline-flex items-center gap-2 text-xs font-extrabold text-moss">API Center <ArrowRight size={12} /></Link>
           </div>
           <div className="mt-5 space-y-5">
@@ -188,7 +188,7 @@ export default function DataContractPage() {
       </div>
 
       <section className="mt-6 rounded-[28px] border border-black/[0.07] bg-white p-6">
-        <div className="flex items-center justify-between"><div><h2 className="text-sm font-extrabold">Supabase table contract</h2><p className="mt-1 text-xs text-black/35">Required tables and columns for the current Findly product-discovery MVP.</p></div><Database className="text-moss" size={18} /></div>
+        <div className="flex items-center justify-between"><div><h2 className="text-sm font-extrabold">Supabase table contract</h2><p className="mt-1 text-xs text-black/35">Required tables and columns for the current Sellentum product-discovery MVP.</p></div><Database className="text-moss" size={18} /></div>
         <div className="mt-5 grid gap-3 xl:grid-cols-3">
           {report.schemaContracts.map((contract) => (
             <article key={contract.table} className="rounded-2xl border border-black/[0.07] bg-canvas p-4">

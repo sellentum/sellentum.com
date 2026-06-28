@@ -146,7 +146,7 @@ export function buildAdvisorRecoveryReport({
     suggestions.push({
       id: "broaden-missing-language",
       title: `Broaden ${missingTerms.slice(0, 3).join(", ")}`,
-      detail: "Those words are not present in the active catalog, so Findly has no deterministic evidence for them.",
+      detail: "Those words are not present in the active catalog, so Sellentum has no deterministic evidence for them.",
       prompt: terms.filter((term) => !missingTerms.includes(term)).slice(0, 4).join(" ") || fallbackPrompt(products),
       severity: noResults ? "critical" : "helpful",
     });
@@ -188,7 +188,7 @@ export function buildAdvisorRecoveryReport({
     : recoveryStatus === "clarify"
       ? "The request is still broad, so one more shopper preference will improve the recommendation."
       : recoveryStatus === "no-results"
-        ? "No eligible product matched the current constraints, but Findly can suggest safer next prompts."
+        ? "No eligible product matched the current constraints, but Sellentum can suggest safer next prompts."
         : "The advisor returned matches, but the request has weak or thin catalog evidence.";
 
   return {

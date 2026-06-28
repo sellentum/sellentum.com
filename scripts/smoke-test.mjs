@@ -3,7 +3,7 @@ import { existsSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
 
 const baseUrl = process.env.SMOKE_BASE_URL || "http://localhost:3000";
-const compileDir = "/tmp/findly-smoke-compiled";
+const compileDir = "/tmp/sellentum-smoke-compiled";
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -36,7 +36,7 @@ async function assertPage(pathname, expectedText, status = 200) {
 async function assertWidgetScript() {
   const { response, text } = await get("/api/widget.js");
   assert(response.status === 200, `/api/widget.js returned ${response.status}`);
-  for (const token of ["data-experience", "data-mode", "data-id", "assistant", "configurator", "finder", "search", "inline", "ensureFrame", "findly_source", "findly_campaign", "findly_page_url"]) {
+  for (const token of ["data-experience", "data-mode", "data-id", "assistant", "configurator", "finder", "search", "inline", "ensureFrame", "sellentum_source", "sellentum_campaign", "sellentum_page_url"]) {
     assert(text.includes(token), `/api/widget.js missing ${token}`);
   }
   assert(text.indexOf("function open(){ensureFrame()") > text.indexOf("function ensureFrame()"), "Modal widget should lazy-load the iframe only when opened");
@@ -202,7 +202,7 @@ function assertSessionAnalytics() {
   for (const file of ["app/finder/[id]/page.tsx", "app/assistant/[id]/page.tsx", "app/configurator/[id]/page.tsx", "app/search/[id]/page.tsx"]) {
     assert(readFileSync(file, "utf8").includes("getSessionMetadata"), `${file} should attach anonymous session metadata to analytics events`);
   }
-  assert(session.includes("findly_anonymous_session"), "Session helper should persist anonymous shopper sessions");
+  assert(session.includes("sellentum_anonymous_session"), "Session helper should persist anonymous shopper sessions");
   assert(session.includes("getAttributionMetadata"), "Session helper should attach widget attribution metadata to every public event");
   assert(analytics.includes("buildAnalyticsSnapshot"), "Analytics dashboard should group events into session-aware snapshots");
   assert(analyticsHelpers.includes("buildAnalyticsTrends"), "Analytics helpers should calculate real period-over-period trends");
@@ -220,7 +220,7 @@ function assertSessionAnalytics() {
   assert(analytics.includes("buildAttributionReport"), "Analytics dashboard should use shared attribution reporting");
   assert(analytics.includes("Attribution command board"), "Analytics dashboard should expose source/campaign attribution");
   assert(attribution.includes("buildAttributionReport"), "Attribution helper should expose a reusable report builder");
-  assert(attribution.includes("findly_page_url") && attribution.includes("findly_placement"), "Attribution helper should track storefront page and placement labels");
+  assert(attribution.includes("sellentum_page_url") && attribution.includes("sellentum_placement"), "Attribution helper should track storefront page and placement labels");
   assert(analyticsQuality.includes("buildAnalyticsQualityReport"), "Analytics quality helper should expose a reusable report builder");
   assert(analyticsQuality.includes("requiredEventFields"), "Analytics quality helper should validate required event metadata");
   assert(analyticsQuality.includes("sessionSequenceIssues"), "Analytics quality helper should validate event sequence integrity");
@@ -244,7 +244,7 @@ function assertPersonaStudioWorkflow() {
   assert(helper.includes("buildPersonaStudioReport"), "Persona Studio helper should expose a reusable report builder");
   assert(helper.includes("buildZeroPartyInsights"), "Persona Studio should reuse zero-party intent evidence");
   assert(helper.includes("buildShopperJourneyReport"), "Persona Studio should reuse shopper journey sessions");
-  assert(helper.includes("Findly Shopper Persona packet"), "Persona Studio should generate a copyable handoff packet");
+  assert(helper.includes("Sellentum Shopper Persona packet"), "Persona Studio should generate a copyable handoff packet");
   assert(page.includes("Shopper Persona Studio"), "Persona Studio page should expose the dashboard title");
   assert(page.includes("Persona signal matrix"), "Persona Studio page should show the signal matrix");
   assert(page.includes("Copy persona packet"), "Persona Studio page should let merchants copy the packet");
@@ -264,7 +264,7 @@ function assertAudienceCaptureWorkflow() {
   assert(helper.includes("buildAudienceCaptureReport"), "Audience Capture helper should expose a reusable report builder");
   assert(helper.includes("buildZeroPartyInsights"), "Audience Capture should reuse zero-party evidence");
   assert(helper.includes("buildShopperJourneyReport"), "Audience Capture should reuse anonymous journey reconstruction");
-  assert(helper.includes("Findly Audience Capture packet"), "Audience Capture should generate a copyable audience packet");
+  assert(helper.includes("Sellentum Audience Capture packet"), "Audience Capture should generate a copyable audience packet");
   assert(helper.includes("No CRM integration and no PII storage by default"), "Audience Capture should document the no-CRM/no-PII MVP boundary");
   assert(page.includes("Audience Capture Center"), "Audience Capture page should expose the dashboard title");
   assert(page.includes("Safe export schema"), "Audience Capture page should show the safe export schema");
@@ -289,7 +289,7 @@ function assertRecommendationFeedbackWorkflow() {
   const eventRoute = readFileSync("app/api/events/route.ts", "utf8");
   const analyticsQuality = readFileSync("lib/analytics-quality.ts", "utf8");
   assert(helper.includes("buildRecommendationFeedbackReport"), "Recommendation Feedback helper should expose a reusable report builder");
-  assert(helper.includes("Findly Recommendation Feedback packet"), "Recommendation Feedback should generate a copyable packet");
+  assert(helper.includes("Sellentum Recommendation Feedback packet"), "Recommendation Feedback should generate a copyable packet");
   assert(helper.includes("Shopper feedback does not select products"), "Recommendation Feedback should document deterministic selection boundaries");
   assert(component.includes("Helpful") && component.includes("Not right"), "Recommendation feedback component should expose shopper rating controls");
   for (const file of ["app/finder/[id]/page.tsx", "app/assistant/[id]/page.tsx", "app/search/[id]/page.tsx", "app/configurator/[id]/page.tsx"]) {
@@ -317,7 +317,7 @@ function assertContentStudioWorkflow() {
   const readme = readFileSync("README.md", "utf8");
   const marketing = readFileSync("lib/marketing-pages.ts", "utf8");
   assert(helper.includes("buildContentStudioReport"), "Sales Content Studio helper should expose a reusable report builder");
-  assert(helper.includes("Findly Sales Content Studio packet"), "Sales Content Studio should generate a copyable content packet");
+  assert(helper.includes("Sellentum Sales Content Studio packet"), "Sales Content Studio should generate a copyable content packet");
   assert(helper.includes("Grounding boundary"), "Sales Content Studio should document the grounding boundary");
   assert(helper.includes("Product selection remains deterministic"), "Sales Content Studio should preserve deterministic selection boundaries");
   assert(page.includes("Sales Content Studio"), "Sales Content Studio page should expose the dashboard title");
@@ -339,7 +339,7 @@ function assertMerchandisingStudioWorkflow() {
   assert(helper.includes("buildMerchandisingStudioReport"), "Merchandising Studio helper should expose a reusable report builder");
   assert(helper.includes("buildZeroPartyInsights"), "Merchandising Studio should use zero-party product demand evidence");
   assert(helper.includes("recommendation_overrides"), "Merchandising Studio should inspect finder override controls");
-  assert(helper.includes("Findly merchandising packet"), "Merchandising Studio should generate a copyable packet");
+  assert(helper.includes("Sellentum merchandising packet"), "Merchandising Studio should generate a copyable packet");
   assert(page.includes("Merchandising Studio"), "Merchandising Studio page should expose the dashboard title");
   assert(page.includes("Current controls"), "Merchandising Studio page should show current controls");
   assert(page.includes("Product demand lanes"), "Merchandising Studio page should show product demand lanes");
@@ -511,8 +511,8 @@ function assertVocabularyStudioWorkflow() {
   assert(helper.includes("buildShopperLanguagePlan"), "Vocabulary Studio should reuse the shopper language planner");
   assert(helper.includes("synonymClusters"), "Vocabulary Studio should group synonym review clusters");
   assert(helper.includes("unsupportedTerms"), "Vocabulary Studio should expose unsupported shopper language");
-  assert(helper.includes("Findly approved discovery vocabulary"), "Vocabulary Studio should generate a copyable glossary");
-  assert(helper.includes("Findly Vocabulary Studio packet"), "Vocabulary Studio should generate a copyable packet");
+  assert(helper.includes("Sellentum approved discovery vocabulary"), "Vocabulary Studio should generate a copyable glossary");
+  assert(helper.includes("Sellentum Vocabulary Studio packet"), "Vocabulary Studio should generate a copyable packet");
   assert(page.includes("buildVocabularyStudioReport"), "Vocabulary page should use the shared report builder");
   assert(page.includes("Approved discovery dictionary"), "Vocabulary page should show the approved dictionary");
   assert(page.includes("Unsupported shopper language"), "Vocabulary page should show unsupported terms");
@@ -536,7 +536,7 @@ function assertTrustCenterWorkflow() {
   assert(helper.includes("buildRecommendationQaReport"), "Trust Center should include recommendation QA evidence");
   assert(helper.includes("buildVocabularyStudioReport"), "Trust Center should include vocabulary governance evidence");
   assert(helper.includes("Rules select. AI explains."), "Trust Center should document the safe-AI selection boundary");
-  assert(helper.includes("Findly AI trust packet"), "Trust Center should generate a copyable trust packet");
+  assert(helper.includes("Sellentum AI trust packet"), "Trust Center should generate a copyable trust packet");
   assert(page.includes("buildTrustCenterReport"), "Trust Center dashboard should use the shared report builder");
   assert(page.includes("AI Trust Center"), "Trust Center page should expose the dashboard title");
   assert(page.includes("Trust principles"), "Trust Center page should explain trust principles");
@@ -560,7 +560,7 @@ function assertGroundingCenterWorkflow() {
   assert(helper.includes("buildCatalogBenefitReport"), "Grounding Center should use catalog benefit mappings");
   assert(helper.includes("buildExplanationGroundingReport"), "Grounding Center should use explanation grounding audits");
   assert(helper.includes("buildVocabularyStudioReport"), "Grounding Center should use approved vocabulary evidence");
-  assert(helper.includes("Findly Grounding Center packet"), "Grounding Center should generate a copyable packet");
+  assert(helper.includes("Sellentum Grounding Center packet"), "Grounding Center should generate a copyable packet");
   assert(helper.includes("RAG grounding boundary"), "Grounding Center should document the RAG grounding boundary");
   assert(helper.includes("Deterministic matching selects products"), "Grounding Center should preserve the deterministic AI boundary");
   assert(helper.includes("Use only listed catalog facts"), "Grounding Center should define product-fact guardrails");
@@ -588,7 +588,7 @@ function assertSemanticKnowledgeGraphWorkflow() {
   assert(helper.includes("buildCatalogOntology"), "Semantic Knowledge Graph should use catalog ontology evidence");
   assert(helper.includes("buildDecisionGraph"), "Semantic Knowledge Graph should use decision graph evidence");
   assert(helper.includes("buildGroundingCenterReport"), "Semantic Knowledge Graph should use grounding evidence");
-  assert(helper.includes("Findly Semantic Knowledge Graph packet"), "Semantic Knowledge Graph should generate a copyable packet");
+  assert(helper.includes("Sellentum Semantic Knowledge Graph packet"), "Semantic Knowledge Graph should generate a copyable packet");
   assert(helper.includes("deterministic runtime logic still selects products"), "Semantic Knowledge Graph should preserve deterministic AI boundaries");
   assert(page.includes("Semantic Knowledge Graph"), "Knowledge Graph page should expose the dashboard title");
   assert(page.includes("Semantic graph layers"), "Knowledge Graph page should show semantic layers");
@@ -611,7 +611,7 @@ function assertFlowStudioWorkflow() {
   assert(helper.includes("answerToFinderAnswer") && helper.includes("buildFinderQuestionPath"), "Flow Studio should use the same branch resolver as the finder runtime");
   assert(helper.includes("getAnswerOptionCoverage"), "Flow Studio should audit answer rule coverage");
   assert(helper.includes("buildScenarioCoverageReport"), "Flow Studio should include deterministic route QA");
-  assert(helper.includes("Findly visual flow studio packet"), "Flow Studio should generate a copyable flow packet");
+  assert(helper.includes("Sellentum visual flow studio packet"), "Flow Studio should generate a copyable flow packet");
   assert(page.includes("buildFlowStudioReport"), "Flow Studio page should use the shared helper");
   assert(page.includes("Visual flow canvas"), "Flow Studio page should render a visual flow canvas");
   assert(page.includes("Answer route map"), "Flow Studio page should expose the answer route map");
@@ -631,7 +631,7 @@ function assertLaunchChannelsWorkflow() {
   assert(helper.includes("buildLaunchChannelReport"), "Launch channels helper should expose a reusable report builder");
   assert(helper.includes("homepage-finder") && helper.includes("category-inline-search") && helper.includes("pdp-configurator") && helper.includes("support-advisor"), "Launch channels should include homepage, category, PDP and support placements");
   assert(helper.includes("buildWidgetSnippet") && helper.includes("buildWidgetInstallReport"), "Launch channels should use shared widget snippet and install QA helpers");
-  assert(helper.includes("findly_campaign") && helper.includes("findly_placement") && helper.includes("findly_source"), "Launch channels should evaluate attributed channel events");
+  assert(helper.includes("sellentum_campaign") && helper.includes("sellentum_placement") && helper.includes("sellentum_source"), "Launch channels should evaluate attributed channel events");
   assert(page.includes("buildLaunchChannelReport"), "Launch Channels page should use the shared report builder");
   assert(page.includes("Copy channel packet"), "Launch Channels page should let merchants copy a complete channel packet");
   assert(page.includes("Channel QA"), "Launch Channels page should show channel QA checks");
@@ -650,7 +650,7 @@ function assertExperienceRegistryWorkflow() {
   assert(helper.includes("buildExperienceRegistry"), "Experience Registry helper should expose a reusable report builder");
   assert(helper.includes("buildLaunchExperienceCards"), "Experience Registry should reuse launch experience cards");
   assert(helper.includes("buildAnalyticsSnapshot"), "Experience Registry should include telemetry metrics");
-  assert(helper.includes("Findly Experience Registry packet"), "Experience Registry should generate a copyable packet");
+  assert(helper.includes("Sellentum Experience Registry packet"), "Experience Registry should generate a copyable packet");
   assert(page.includes("buildExperienceRegistry"), "Experience Registry page should use the shared helper");
   assert(page.includes("Experience Registry"), "Experience Registry page should expose the dashboard title");
   assert(page.includes("Copy registry packet"), "Experience Registry page should let merchants copy the packet");
@@ -672,7 +672,7 @@ function assertWidgetStudioWorkflow() {
   assert(helper.includes("buildLaunchExperienceCards"), "Widget Studio should reuse launch experience cards");
   assert(helper.includes("buildExperienceRegistry"), "Widget Studio should reuse registry telemetry evidence");
   assert(helper.includes("buildWidgetInstallReport") && helper.includes("buildWidgetSnippet"), "Widget Studio should use shared widget snippet and install QA helpers");
-  assert(helper.includes("Findly Widget Studio packet"), "Widget Studio should generate a copyable packet");
+  assert(helper.includes("Sellentum Widget Studio packet"), "Widget Studio should generate a copyable packet");
   assert(helper.includes("Install contract") && helper.includes("Analytics event contract"), "Widget Studio packet should include install and event contracts");
   assert(page.includes("Widget Studio"), "Widget Studio page should expose the dashboard title");
   assert(page.includes("Embeddable experiences"), "Widget Studio page should show embeddable experiences");
@@ -694,7 +694,7 @@ function assertApiCenterWorkflow() {
   assert(helper.includes("buildApiCenterReport"), "API Center helper should expose a reusable report builder");
   assert(helper.includes("buildRuntimeOperationsReport"), "API Center should reuse runtime operations evidence");
   assert(helper.includes("buildExperienceRegistry"), "API Center should reuse experience registry telemetry evidence");
-  assert(helper.includes("Findly Headless API Center packet"), "API Center should generate a copyable packet");
+  assert(helper.includes("Sellentum Headless API Center packet"), "API Center should generate a copyable packet");
   assert(helper.includes("finder-recommendations") && helper.includes("advisor-search") && helper.includes("configurator-validation"), "API Center should document finder, advisor and configurator endpoints");
   assert(page.includes("Headless API Center"), "API Center page should expose the dashboard title");
   assert(page.includes("API endpoint catalog"), "API Center page should show the endpoint catalog");
@@ -718,7 +718,7 @@ function assertRuntimeOperationsWorkflow() {
   assert(helper.includes("buildReleaseCandidate"), "Runtime Operations should include release gate evidence");
   assert(helper.includes("buildAnalyticsQualityReport"), "Runtime Operations should include analytics quality evidence");
   assert(helper.includes("readBoundedJson") && helper.includes("publicRateLimit") && helper.includes("sanitizeAnalyticsMetadata"), "Runtime Operations should document public runtime guardrails");
-  assert(helper.includes("Findly Runtime Operations packet"), "Runtime Operations should generate a copyable packet");
+  assert(helper.includes("Sellentum Runtime Operations packet"), "Runtime Operations should generate a copyable packet");
   assert(page.includes("buildRuntimeOperationsReport"), "Runtime Operations page should use the shared helper");
   assert(page.includes("Runtime Operations"), "Runtime Operations page should expose the dashboard title");
   assert(page.includes("Runtime endpoint contract"), "Runtime Operations page should show endpoint contracts");
@@ -737,7 +737,7 @@ function assertProductionVerificationWorkflow() {
   const readme = readFileSync("README.md", "utf8");
   const marketing = readFileSync("lib/marketing-pages.ts", "utf8");
   assert(helper.includes("buildProductionVerificationReport"), "Production Verification helper should expose a reusable report builder");
-  assert(helper.includes("Findly Production Verification packet"), "Production Verification should generate a copyable packet");
+  assert(helper.includes("Sellentum Production Verification packet"), "Production Verification should generate a copyable packet");
   assert(helper.includes("Production is not complete until the deployed Vercel URL passes typecheck, lint, build and smoke"), "Production Verification should document the deployed smoke boundary");
   assert(helper.includes("deterministic product selection remains"), "Production Verification should preserve deterministic AI boundaries");
   assert(page.includes("Production Verification Center"), "Production Verification page should expose the dashboard title");
@@ -759,7 +759,7 @@ function assertMvpAuditWorkflow() {
   const readme = readFileSync("README.md", "utf8");
   const marketing = readFileSync("lib/marketing-pages.ts", "utf8");
   assert(helper.includes("buildMvpAuditReport"), "MVP Audit helper should expose a reusable report builder");
-  assert(helper.includes("Findly MVP Completion Audit"), "MVP Audit should generate a copyable packet");
+  assert(helper.includes("Sellentum MVP Completion Audit"), "MVP Audit should generate a copyable packet");
   assert(helper.includes("Done") && helper.includes("Pending / needs verification"), "MVP Audit packet should separate done and pending work");
   assert(helper.includes("full Zoovu-like objective"), "MVP Audit should preserve the full objective boundary");
   assert(page.includes("MVP Completion Audit"), "MVP Audit page should expose the dashboard title");
@@ -782,7 +782,7 @@ function assertPartnerSyndicationWorkflow() {
   assert(helper.includes("buildSyndicationReport"), "Syndication helper should expose a reusable report builder");
   assert(helper.includes("retailer-pdp-advisor") && helper.includes("marketplace-buying-guide") && helper.includes("affiliate-search-guide"), "Syndication helper should package retailer, marketplace and affiliate placements");
   assert(helper.includes("data-medium=\"syndication\"") || helper.includes("medium: \"syndication\""), "Syndication helper should stamp syndication attribution");
-  assert(helper.includes("Findly partner syndication packet"), "Syndication helper should generate copyable partner packets");
+  assert(helper.includes("Sellentum partner syndication packet"), "Syndication helper should generate copyable partner packets");
   assert(helper.includes("Partner acceptance criteria"), "Syndication helper should include partner acceptance criteria");
   assert(helper.includes("No Supabase keys") && helper.includes("OpenAI keys"), "Syndication helper should document partner data boundaries");
   assert(page.includes("buildSyndicationReport"), "Syndication page should use the shared report builder");
@@ -805,7 +805,7 @@ function assertStorefrontSandboxWorkflow() {
   assert(helper.includes("buildStorefrontSandboxReport"), "Storefront sandbox helper should expose a reusable report builder");
   assert(helper.includes("expectedEvents"), "Storefront sandbox should define expected analytics events");
   assert(helper.includes("acceptanceCriteria") && helper.includes("qaSteps"), "Storefront sandbox should produce QA steps and acceptance criteria");
-  assert(helper.includes("Findly storefront QA sandbox packet"), "Storefront sandbox should export a copyable QA packet");
+  assert(helper.includes("Sellentum storefront QA sandbox packet"), "Storefront sandbox should export a copyable QA packet");
   assert(page.includes("buildStorefrontSandboxReport"), "Storefront sandbox page should use the shared report builder");
   assert(page.includes("Expected event contract"), "Storefront sandbox page should show expected telemetry");
   assert(page.includes("Exact snippet"), "Storefront sandbox page should show the exact install snippet");
@@ -825,7 +825,7 @@ function assertStorefrontInstallScannerWorkflow() {
   const marketing = readFileSync("lib/marketing-pages.ts", "utf8");
   assert(helper.includes("analyzeStorefrontInstall"), "Storefront Install Scanner helper should expose a reusable analyzer");
   assert(helper.includes("validateStorefrontScanUrl"), "Storefront Install Scanner should validate scan URLs");
-  assert(helper.includes("Findly storefront install scan"), "Storefront Install Scanner should generate a copyable scan packet");
+  assert(helper.includes("Sellentum storefront install scan"), "Storefront Install Scanner should generate a copyable scan packet");
   assert(helper.includes("Private, localhost and internal network URLs cannot be scanned"), "Storefront Install Scanner should block private/local scan targets");
   assert(route.includes("getWorkspaceIdentity"), "Storefront scan API should require authentication");
   assert(route.includes("MAX_HTML_BYTES") && route.includes("TIMEOUT_MS"), "Storefront scan API should bound HTML fetch size and timeout");
@@ -849,7 +849,7 @@ function assertWorkspaceHealthWorkflow() {
   const marketing = readFileSync("lib/marketing-pages.ts", "utf8");
   assert(helper.includes("buildWorkspaceHealthReport"), "Data Contract helper should expose a reusable report builder");
   assert(helper.includes("auditWorkspaceSchema"), "Data Contract helper should audit the Supabase schema SQL");
-  assert(helper.includes("Findly Workspace Data Contract packet"), "Data Contract helper should generate a copyable packet");
+  assert(helper.includes("Sellentum Workspace Data Contract packet"), "Data Contract helper should generate a copyable packet");
   assert(helper.includes("expectedWorkspaceSchema"), "Data Contract helper should define required workspace table contracts");
   assert(route.includes("getWorkspaceIdentity"), "Workspace health API should require an authenticated workspace");
   assert(route.includes("schema.sql"), "Workspace health API should verify the checked-in Supabase schema contract");
@@ -873,7 +873,7 @@ function assertAiReadinessWorkflow() {
   const readme = readFileSync("README.md", "utf8");
   const marketing = readFileSync("lib/marketing-pages.ts", "utf8");
   assert(helper.includes("buildAiReadinessReport"), "AI Readiness helper should expose a reusable report builder");
-  assert(helper.includes("Findly AI Readiness packet"), "AI Readiness helper should generate a copyable packet");
+  assert(helper.includes("Sellentum AI Readiness packet"), "AI Readiness helper should generate a copyable packet");
   assert(helper.includes("Rules select. AI explains."), "AI Readiness helper should preserve the deterministic AI boundary");
   assert(helper.includes("fallback-ready") && helper.includes("openai-ready"), "AI Readiness helper should distinguish OpenAI and fallback modes");
   assert(route.includes("buildSourceAudit"), "AI health API should audit source-level AI contracts");
@@ -899,7 +899,7 @@ function assertReleaseCenterWorkflow() {
   assert(helper.includes("buildReleaseCandidate"), "Release Center helper should expose a reusable release candidate builder");
   assert(helper.includes("decisionFromGates"), "Release Center should produce a go/review/no-go decision");
   assert(helper.includes("rollbackPlan"), "Release Center should produce a rollback plan");
-  assert(helper.includes("Findly release candidate"), "Release Center should generate copyable release notes");
+  assert(helper.includes("Sellentum release candidate"), "Release Center should generate copyable release notes");
   assert(page.includes("buildReleaseCandidate"), "Release Center page should use the shared release candidate builder");
   assert(page.includes("Release gates"), "Release Center page should show launch gates");
   assert(page.includes("Rollback plan"), "Release Center page should show rollback plan");
@@ -916,10 +916,10 @@ function assertWorkspaceSnapshotWorkflow() {
   const overview = readFileSync("app/dashboard/page.tsx", "utf8");
   const readme = readFileSync("README.md", "utf8");
   assert(helper.includes("buildWorkspaceSnapshot"), "Workspace snapshot helper should expose a reusable snapshot builder");
-  assert(helper.includes("findly-workspace-snapshot-v1"), "Workspace snapshot should version its archive format");
+  assert(helper.includes("sellentum-workspace-snapshot-v1"), "Workspace snapshot should version its archive format");
   assert(helper.includes("safeMetadata"), "Workspace snapshot should restrict analytics metadata before export");
   assert(helper.includes("productCsv") && helper.includes("analyticsCsv"), "Workspace snapshot should export product and analytics CSV files");
-  assert(helper.includes("Findly workspace snapshot"), "Workspace snapshot should generate copyable handoff notes");
+  assert(helper.includes("Sellentum workspace snapshot"), "Workspace snapshot should generate copyable handoff notes");
   assert(page.includes("buildWorkspaceSnapshot"), "Workspace snapshot page should use the shared helper");
   assert(page.includes("Copy JSON archive"), "Workspace snapshot page should let merchants copy the JSON archive");
   assert(page.includes("Copy product CSV"), "Workspace snapshot page should let merchants copy product CSV");
@@ -959,7 +959,7 @@ function assertCommercialImpactWorkflow() {
   assert(analyticsPage.includes("ROI opportunity board"), "Analytics dashboard should expose deterministic ROI opportunities");
   assert(analyticsPage.includes("commercialImpact.confidence"), "Analytics dashboard should render assisted-value confidence boundaries");
   assert(commercialImpact.includes("buildCommercialImpactReport"), "Commercial impact helper should expose a reusable report builder");
-  assert(commercialImpact.includes("Directional: based on Findly recommendation and buy-click events"), "Commercial impact helper should disclose assisted-value confidence boundaries");
+  assert(commercialImpact.includes("Directional: based on Sellentum recommendation and buy-click events"), "Commercial impact helper should disclose assisted-value confidence boundaries");
   assert(commercialImpact.includes("influencedRevenue"), "Commercial impact helper should calculate assisted product value");
   assert(commercialImpact.includes("unclickedRecommendedValue"), "Commercial impact helper should calculate unclicked recommendation value");
   assert(commercialImpact.includes("demandCoverageRate"), "Commercial impact helper should calculate catalog demand coverage");
@@ -976,7 +976,7 @@ function assertReturnsIntelligenceWorkflow() {
   assert(helper.includes("buildDiscoveryGapReport"), "Returns Intelligence should reuse discovery-gap evidence");
   assert(helper.includes("buildCommercialImpactReport"), "Returns Intelligence should reuse commercial click-through evidence");
   assert(helper.includes("buildConfiguratorQaReport"), "Returns Intelligence should reuse configurator compatibility QA");
-  assert(helper.includes("Findly Returns & Fit Intelligence packet"), "Returns Intelligence should generate a copyable packet");
+  assert(helper.includes("Sellentum Returns & Fit Intelligence packet"), "Returns Intelligence should generate a copyable packet");
   assert(page.includes("Returns & Fit Intelligence"), "Returns dashboard should expose the dashboard title");
   assert(page.includes("Product return-risk map"), "Returns dashboard should show product risk mapping");
   assert(page.includes("Pre-purchase question guardrails"), "Returns dashboard should show question guardrails");
@@ -999,7 +999,7 @@ function assertBundleStudioWorkflow() {
   assert(helper.includes("buildCommercialImpactReport"), "Bundle Studio should reuse commercial impact evidence");
   assert(helper.includes("buildConfiguratorQaReport"), "Bundle Studio should reuse configurator path QA");
   assert(helper.includes("buildZeroPartyInsights"), "Bundle Studio should reuse zero-party product demand evidence");
-  assert(helper.includes("Findly Bundle & Attach Studio packet"), "Bundle Studio should generate a copyable packet");
+  assert(helper.includes("Sellentum Bundle & Attach Studio packet"), "Bundle Studio should generate a copyable packet");
   assert(page.includes("Bundle & Attach Studio"), "Bundle Studio page should expose the dashboard title");
   assert(page.includes("Attach opportunity map"), "Bundle Studio page should show bundle opportunities");
   assert(page.includes("Compatibility guardrails"), "Bundle Studio page should show compatibility guardrails");
@@ -1019,7 +1019,7 @@ function assertCompatibilityMatrixWorkflow() {
   const marketing = readFileSync("lib/marketing-pages.ts", "utf8");
   assert(helper.includes("buildCompatibilityMatrixReport"), "Compatibility Matrix helper should expose a reusable report builder");
   assert(helper.includes("buildConfiguratorQaReport"), "Compatibility Matrix should reuse configurator QA evidence");
-  assert(helper.includes("Findly Compatibility Matrix packet"), "Compatibility Matrix should generate a copyable packet");
+  assert(helper.includes("Sellentum Compatibility Matrix packet"), "Compatibility Matrix should generate a copyable packet");
   assert(helper.includes("staleRules") && helper.includes("oneWayRules") && helper.includes("inactiveProductLinks"), "Compatibility Matrix should audit stale, one-way and product-link issues");
   assert(page.includes("Compatibility Matrix Center"), "Compatibility Matrix page should expose the dashboard title");
   assert(page.includes("Dependency rule matrix"), "Compatibility Matrix page should show the rule matrix");
@@ -1043,7 +1043,7 @@ function assertUsageCenterWorkflow() {
   assert(helper.includes("buildExperienceRegistry"), "Usage Center should reuse published experience metering");
   assert(helper.includes("buildCommercialImpactReport"), "Usage Center should connect usage to assisted value");
   assert(helper.includes("Stripe is a placeholder only"), "Usage Center packet should document the Stripe placeholder boundary");
-  assert(helper.includes("Findly Usage & Plan Center packet"), "Usage Center should generate a copyable billing packet");
+  assert(helper.includes("Sellentum Usage & Plan Center packet"), "Usage Center should generate a copyable billing packet");
   assert(page.includes("Usage & Plan Center"), "Usage Center page should expose the dashboard title");
   assert(page.includes("Current 30-day usage meters"), "Usage Center page should show usage meters");
   assert(page.includes("Plan comparison placeholder"), "Usage Center page should show placeholder plan comparison");
@@ -1122,7 +1122,7 @@ function assertAdvisorStudioWorkflow() {
   assert(helper.includes("runSemanticProductSearch"), "Advisor Studio should reuse the deterministic search engine for prompt QA");
   assert(helper.includes("buildAdvisorRecoveryReport"), "Advisor Studio should include advisor recovery guidance");
   assert(helper.includes("buildWidgetSnippet"), "Advisor Studio should generate assistant widget snippets");
-  assert(helper.includes("Findly Advisor Studio packet"), "Advisor Studio should generate a copyable packet");
+  assert(helper.includes("Sellentum Advisor Studio packet"), "Advisor Studio should generate a copyable packet");
   assert(page.includes("buildAdvisorStudioReport"), "Advisor Studio page should use the shared report builder");
   assert(page.includes("Advisor Studio"), "Advisor Studio page should expose the dashboard title");
   assert(page.includes("Advisor response QA"), "Advisor Studio page should show response QA");
@@ -1143,8 +1143,8 @@ function assertAttributeStudioWorkflow() {
   assert(helper.includes("buildAttributeStudioReport"), "Attribute Studio helper should expose a reusable report builder");
   assert(helper.includes("buildCatalogBenefitReport"), "Attribute Studio should reuse spec-to-benefit mapping");
   assert(helper.includes("analyzeCatalogIntelligence"), "Attribute Studio should include catalog readiness evidence");
-  assert(helper.includes("Findly normalized attribute glossary"), "Attribute Studio should generate a copyable glossary");
-  assert(helper.includes("Findly Attribute Studio packet"), "Attribute Studio should generate a copyable packet");
+  assert(helper.includes("Sellentum normalized attribute glossary"), "Attribute Studio should generate a copyable glossary");
+  assert(helper.includes("Sellentum Attribute Studio packet"), "Attribute Studio should generate a copyable packet");
   assert(page.includes("buildAttributeStudioReport"), "Attribute Studio page should use the shared report builder");
   assert(page.includes("Attribute Studio"), "Attribute Studio page should expose the dashboard title");
   assert(page.includes("Normalized attribute glossary"), "Attribute Studio page should show canonical attributes");
@@ -1206,7 +1206,7 @@ function assertCatalogPipelineWorkflow() {
   assert(helper.includes("buildCatalogPipelineReport"), "Catalog Pipeline helper should expose a reusable report builder");
   assert(helper.includes("analyzeCatalogIntelligence"), "Catalog Pipeline should reuse catalog intelligence scoring");
   assert(helper.includes("buildZeroPartyInsights"), "Catalog Pipeline should include telemetry/product demand feedback");
-  assert(helper.includes("Findly catalog pipeline packet"), "Catalog Pipeline should generate a copyable handoff packet");
+  assert(helper.includes("Sellentum catalog pipeline packet"), "Catalog Pipeline should generate a copyable handoff packet");
   assert(page.includes("Catalog Pipeline Center"), "Catalog Pipeline page should expose the dashboard title");
   assert(page.includes("Pipeline stages"), "Catalog Pipeline page should show pipeline stages");
   assert(page.includes("Source contracts"), "Catalog Pipeline page should show source contracts");
@@ -1229,7 +1229,7 @@ function assertAvailabilityGuardWorkflow() {
   assert(helper.includes("buildCommercialImpactReport"), "Availability Guard should connect availability to assisted value");
   assert(helper.includes("unavailableDemandProducts"), "Availability Guard should detect unavailable products with demand");
   assert(helper.includes("configuratorLinkIssues") && helper.includes("overrideIssues") && helper.includes("orphanAnalyticsEvents"), "Availability Guard should audit runtime references");
-  assert(helper.includes("Findly Availability Guard packet"), "Availability Guard should generate a copyable packet");
+  assert(helper.includes("Sellentum Availability Guard packet"), "Availability Guard should generate a copyable packet");
   assert(page.includes("Availability Guard Center"), "Availability Guard page should expose the dashboard title");
   assert(page.includes("Product availability map"), "Availability Guard page should show product availability");
   assert(page.includes("Runtime reference audit"), "Availability Guard page should show runtime references");
@@ -1712,7 +1712,7 @@ async function assertDeterministicLogic() {
   const merchandisingReport = merchandisingStudio.buildMerchandisingStudioReport({ products: demo.demoProducts, quizzes: [demo.demoQuiz], events: demo.demoEvents });
   assert(merchandisingReport.controls.some((control) => control.action === "boost" && control.productName === "Terra Trail Runner"), "Expected Merchandising Studio to inventory finder boost controls");
   assert(merchandisingReport.lanes.some((lane) => lane.recommended > 0 || lane.clicks > 0), "Expected Merchandising Studio to connect product demand lanes to analytics");
-  assert(merchandisingReport.packet.includes("Findly merchandising packet") && merchandisingReport.guardrails.some((guardrail) => guardrail.label === "Hard filters still win"), "Expected Merchandising Studio to generate a packet and deterministic guardrails");
+  assert(merchandisingReport.packet.includes("Sellentum merchandising packet") && merchandisingReport.guardrails.some((guardrail) => guardrail.label === "Hard filters still win"), "Expected Merchandising Studio to generate a packet and deterministic guardrails");
   const staleMerchandisingReport = merchandisingStudio.buildMerchandisingStudioReport({
     products: demo.demoProducts,
     quizzes: [{ ...demo.demoQuiz, recommendation_overrides: [{ id: "override_missing", product_id: "missing-product", action: "pin", weight: 5, note: "Old launch" }] }],
@@ -1732,7 +1732,7 @@ async function assertDeterministicLogic() {
   assert(flowStudioReport.edges.some((edge) => edge.answerId && edge.label === "Trails & outdoors"), "Expected Flow Studio to expose answer edges");
   assert(flowStudioReport.summary.branchingAnswers > 0 && flowStudioReport.summary.routeScenarios > 0, "Expected Flow Studio to summarize branching and route QA");
   assert(flowStudioReport.routes.some((route) => route.topProducts.some((product) => product.id === "prod_trail")), "Expected Flow Studio route QA to surface deterministic top products");
-  assert(flowStudioReport.packet.includes("Findly visual flow studio packet") && flowStudioReport.packet.includes("Answer route map"), "Expected Flow Studio to generate a copyable flow packet");
+  assert(flowStudioReport.packet.includes("Sellentum visual flow studio packet") && flowStudioReport.packet.includes("Answer route map"), "Expected Flow Studio to generate a copyable flow packet");
   const explanationGroundingReport = explanationGrounding.buildExplanationGroundingReport({ products: demo.demoProducts, quizzes: [demo.demoQuiz], openaiConfigured: false });
   assert(explanationGroundingReport.summary.auditedRecommendations > 0 && explanationGroundingReport.score > 0, "Expected explanation grounding to audit recommendation copy against product facts");
   assert(explanationGroundingReport.audits.every((audit) => audit.sampleExplanation && audit.factCount > 0), "Expected explanation grounding audits to include sample copy and fact counts");
@@ -1760,7 +1760,7 @@ async function assertDeterministicLogic() {
   const compatibilityMatrixReport = compatibilityMatrix.buildCompatibilityMatrixReport({ products: demo.demoProducts, configurators: [demo.demoConfigurator] });
   assert(compatibilityMatrixReport.summary.compatibilityRules > 0 && compatibilityMatrixReport.summary.blockedPairs > 0, "Expected Compatibility Matrix to expose blocked option pairs");
   assert(compatibilityMatrixReport.summary.staleRules === 0 && compatibilityMatrixReport.checks.some((check) => check.id === "path-qa" && check.status !== "fail"), "Expected Compatibility Matrix to pass seeded stale-reference and path-QA checks");
-  assert(compatibilityMatrixReport.packet.includes("Findly Compatibility Matrix packet") && compatibilityMatrixReport.rules.some((rule) => rule.shopperMessage.includes("Findly should prevent")), "Expected Compatibility Matrix to generate a packet and shopper-safe rule messages");
+  assert(compatibilityMatrixReport.packet.includes("Sellentum Compatibility Matrix packet") && compatibilityMatrixReport.rules.some((rule) => rule.shopperMessage.includes("Sellentum should prevent")), "Expected Compatibility Matrix to generate a packet and shopper-safe rule messages");
   const staleCompatibilityReport = compatibilityMatrix.buildCompatibilityMatrixReport({
     products: demo.demoProducts,
     configurators: [{ ...demo.demoConfigurator, steps: [{ ...demo.demoConfigurator.steps[0], options: [{ ...demo.demoConfigurator.steps[0].options[0], incompatible_option_ids: ["missing-option"] }] }] }],
@@ -1769,13 +1769,13 @@ async function assertDeterministicLogic() {
   const bundleStudioReport = bundleStudio.buildBundleStudioReport({ products: demo.demoProducts, configurators: [demo.demoConfigurator], events: demo.demoEvents });
   assert(bundleStudioReport.summary.anchorProducts > 0 && bundleStudioReport.summary.addOns > 0, "Expected Bundle Studio to find product anchors and paid add-ons");
   assert(bundleStudioReport.summary.compatibilityRules > 0 && bundleStudioReport.opportunities.some((opportunity) => opportunity.addOns.length > 0), "Expected Bundle Studio to produce compatible attach opportunities");
-  assert(bundleStudioReport.packet.includes("Findly Bundle & Attach Studio packet") && bundleStudioReport.actions.length, "Expected Bundle Studio to generate a copyable packet and action queue");
+  assert(bundleStudioReport.packet.includes("Sellentum Bundle & Attach Studio packet") && bundleStudioReport.actions.length, "Expected Bundle Studio to generate a copyable packet and action queue");
   const emptyBundleStudioReport = bundleStudio.buildBundleStudioReport({ products: demo.demoProducts, configurators: [], events: [] });
   assert(emptyBundleStudioReport.status === "empty" && emptyBundleStudioReport.actions.some((action) => action.id === "create-configurator-bundle"), "Expected Bundle Studio to guide merchants when no configurator exists");
   const usageCenterReport = usageMetering.buildUsageCenterReport({ settings: demo.demoSettings, products: demo.demoProducts, quizzes: [demo.demoQuiz], configurators: [demo.demoConfigurator], events: demo.demoEvents });
   assert(usageCenterReport.meters.some((meter) => meter.id === "experiences" && meter.status === "over"), "Expected Usage Center to meter published finder/advisor/search/configurator surfaces against starter limits");
   assert(usageCenterReport.recommendedPlan.id === "growth" && usageCenterReport.status === "needs-upgrade", "Expected Usage Center to recommend the Growth placeholder plan for the seeded demo");
-  assert(usageCenterReport.packet.includes("Findly Usage & Plan Center packet") && usageCenterReport.packet.includes("Stripe is a placeholder only"), "Expected Usage Center to generate a billing packet with the Stripe boundary");
+  assert(usageCenterReport.packet.includes("Sellentum Usage & Plan Center packet") && usageCenterReport.packet.includes("Stripe is a placeholder only"), "Expected Usage Center to generate a billing packet with the Stripe boundary");
   const emptyUsageCenterReport = usageMetering.buildUsageCenterReport({ settings: demo.demoSettings, products: [], quizzes: [], configurators: [], events: [] });
   assert(emptyUsageCenterReport.actions.some((action) => action.id === "fix-experience-metering") && emptyUsageCenterReport.actions.some((action) => action.id === "fix-catalog-metering"), "Expected Usage Center to guide empty workspaces toward billable readiness");
   const brokenConfiguratorQa = configuratorQa.buildConfiguratorQaReport([{ ...demo.demoConfigurator, steps: [{ ...demo.demoConfigurator.steps[0], options: [] }] }], demo.demoProducts);
@@ -1798,7 +1798,7 @@ async function assertDeterministicLogic() {
   assert(demo.demoEvents.some((event) => event.metadata?.experience_type === "search" && typeof event.metadata.query === "string"), "Expected seeded search analytics to include shopper query metadata");
   assert(demo.demoEvents.some((event) => Array.isArray(event.metadata?.selected_option_names) && event.metadata.selected_option_names.length), "Expected seeded configurator analytics to include selected option names");
   assert(demo.demoEvents.some((event) => typeof event.metadata?.session_id === "string"), "Expected seeded analytics to include anonymous session metadata");
-  assert(demo.demoEvents.some((event) => typeof event.metadata?.findly_source === "string" && typeof event.metadata?.findly_page_url === "string"), "Expected seeded analytics to include storefront attribution metadata");
+  assert(demo.demoEvents.some((event) => typeof event.metadata?.sellentum_source === "string" && typeof event.metadata?.sellentum_page_url === "string"), "Expected seeded analytics to include storefront attribution metadata");
   assert(demo.demoEvents.some((event) => event.event_type === "product_recommended" && typeof event.metadata?.rank === "number"), "Expected seeded recommendation analytics to include rank metadata");
   assert(demo.demoEvents.some((event) => event.event_type === "quiz_complete" && typeof event.metadata?.result_count === "number"), "Expected seeded completion analytics to include result count metadata");
 
@@ -1832,10 +1832,10 @@ async function assertDeterministicLogic() {
   assert(journeyReport.summary.abandonedAfterStart === 0 && journeyReport.dropoffs.some((item) => item.stage === "completed"), "Expected journey report to expose deterministic drop-off stages");
   assert(journeyReport.journeys[0].steps.some((step) => step.label.includes("Completed")), "Expected journey report to preserve shopper path steps");
   const attributionReport = attribution.buildAttributionReport([
-    { id: "attr1", user_id: "demo-user", quiz_id: "quiz_footwear", event_type: "widget_view", metadata: { session_id: "attr-a", experience_type: "finder", experience_id: "quiz_footwear", findly_source: "homepage", findly_campaign: "spring-guide", findly_placement: "hero", findly_page_url: "https://store.example/" }, created_at: "2026-06-25T10:00:00Z" },
-    { id: "attr2", user_id: "demo-user", quiz_id: "quiz_footwear", event_type: "quiz_start", metadata: { session_id: "attr-a", experience_type: "finder", experience_id: "quiz_footwear", findly_source: "homepage", findly_campaign: "spring-guide", findly_placement: "hero", findly_page_url: "https://store.example/" }, created_at: "2026-06-25T10:01:00Z" },
-    { id: "attr3", user_id: "demo-user", quiz_id: "quiz_footwear", event_type: "quiz_complete", metadata: { session_id: "attr-a", experience_type: "finder", experience_id: "quiz_footwear", result_count: 1, findly_source: "homepage", findly_campaign: "spring-guide", findly_placement: "hero", findly_page_url: "https://store.example/" }, created_at: "2026-06-25T10:02:00Z" },
-    { id: "attr4", user_id: "demo-user", quiz_id: "quiz_footwear", product_id: "prod_trail", event_type: "buy_click", metadata: { session_id: "attr-a", experience_type: "finder", experience_id: "quiz_footwear", product_name: "Terra Trail Runner", findly_source: "homepage", findly_campaign: "spring-guide", findly_placement: "hero", findly_page_url: "https://store.example/" }, created_at: "2026-06-25T10:03:00Z" },
+    { id: "attr1", user_id: "demo-user", quiz_id: "quiz_footwear", event_type: "widget_view", metadata: { session_id: "attr-a", experience_type: "finder", experience_id: "quiz_footwear", sellentum_source: "homepage", sellentum_campaign: "spring-guide", sellentum_placement: "hero", sellentum_page_url: "https://store.example/" }, created_at: "2026-06-25T10:00:00Z" },
+    { id: "attr2", user_id: "demo-user", quiz_id: "quiz_footwear", event_type: "quiz_start", metadata: { session_id: "attr-a", experience_type: "finder", experience_id: "quiz_footwear", sellentum_source: "homepage", sellentum_campaign: "spring-guide", sellentum_placement: "hero", sellentum_page_url: "https://store.example/" }, created_at: "2026-06-25T10:01:00Z" },
+    { id: "attr3", user_id: "demo-user", quiz_id: "quiz_footwear", event_type: "quiz_complete", metadata: { session_id: "attr-a", experience_type: "finder", experience_id: "quiz_footwear", result_count: 1, sellentum_source: "homepage", sellentum_campaign: "spring-guide", sellentum_placement: "hero", sellentum_page_url: "https://store.example/" }, created_at: "2026-06-25T10:02:00Z" },
+    { id: "attr4", user_id: "demo-user", quiz_id: "quiz_footwear", product_id: "prod_trail", event_type: "buy_click", metadata: { session_id: "attr-a", experience_type: "finder", experience_id: "quiz_footwear", product_name: "Terra Trail Runner", sellentum_source: "homepage", sellentum_campaign: "spring-guide", sellentum_placement: "hero", sellentum_page_url: "https://store.example/" }, created_at: "2026-06-25T10:03:00Z" },
     { id: "attr5", user_id: "demo-user", quiz_id: "quiz_footwear", event_type: "widget_view", metadata: { session_id: "attr-b", experience_type: "finder", experience_id: "quiz_footwear" }, created_at: "2026-06-25T10:04:00Z" },
     { id: "attr6", user_id: "demo-user", quiz_id: "quiz_footwear", event_type: "quiz_start", metadata: { session_id: "attr-b", experience_type: "finder", experience_id: "quiz_footwear" }, created_at: "2026-06-25T10:05:00Z" },
   ]);
@@ -1856,23 +1856,23 @@ async function assertDeterministicLogic() {
   const personaReport = personaStudio.buildPersonaStudioReport(zeroPartyEvents, demo.demoProducts);
   assert(personaReport.personas.some((persona) => persona.id === "trail-confidence" && persona.productAffinities.some((product) => product.productName === "Terra Trail Runner")), "Expected Persona Studio to identify trail-confidence buyers and product affinity");
   assert(personaReport.signalMatrix.some((row) => row.id === "query-language" && row.count >= 3), "Expected Persona Studio to summarize search/advisor language signals");
-  assert(personaReport.packet.includes("Findly Shopper Persona packet") && personaReport.actions.length, "Expected Persona Studio to generate a copyable persona packet and action queue");
+  assert(personaReport.packet.includes("Sellentum Shopper Persona packet") && personaReport.actions.length, "Expected Persona Studio to generate a copyable persona packet and action queue");
   const audienceReport = audienceCapture.buildAudienceCaptureReport({ products: demo.demoProducts, quizzes: [demo.demoQuiz], configurators: [demo.demoConfigurator], events: demo.demoEvents });
   assert(audienceReport.summary.explicitSignals > 0 && audienceReport.segments.length > 0, "Expected Audience Capture to turn demo events into zero-party audience segments");
   assert(audienceReport.moments.some((moment) => moment.id === "recommendation-reveal") && audienceReport.exportFields.some((field) => field.id === "session_id"), "Expected Audience Capture to produce capture moments and safe export fields");
-  assert(audienceReport.packet.includes("Findly Audience Capture packet") && audienceReport.packet.includes("No CRM integration and no PII storage by default"), "Expected Audience Capture to generate a copyable packet with MVP privacy boundaries");
+  assert(audienceReport.packet.includes("Sellentum Audience Capture packet") && audienceReport.packet.includes("No CRM integration and no PII storage by default"), "Expected Audience Capture to generate a copyable packet with MVP privacy boundaries");
   const emptyAudienceReport = audienceCapture.buildAudienceCaptureReport({ products: [], quizzes: [], configurators: [], events: [] });
   assert(emptyAudienceReport.status === "empty" && emptyAudienceReport.actions.some((action) => action.id === "capture-first-audience-signals"), "Expected empty Audience Capture report to guide first signal capture");
   const feedbackReport = recommendationFeedback.buildRecommendationFeedbackReport(demo.demoEvents, demo.demoProducts);
   assert(feedbackReport.summary.feedback > 0 && feedbackReport.products.some((product) => product.feedback > 0), "Expected Recommendation Feedback to summarize seeded shopper ratings by product");
-  assert(feedbackReport.themes.some((theme) => theme.sentiment === "negative") && feedbackReport.packet.includes("Findly Recommendation Feedback packet"), "Expected Recommendation Feedback to produce negative themes and a copyable packet");
+  assert(feedbackReport.themes.some((theme) => theme.sentiment === "negative") && feedbackReport.packet.includes("Sellentum Recommendation Feedback packet"), "Expected Recommendation Feedback to produce negative themes and a copyable packet");
   assert(feedbackReport.packet.includes("Shopper feedback does not select products"), "Expected Recommendation Feedback packet to preserve deterministic selection boundary");
   const emptyFeedbackReport = recommendationFeedback.buildRecommendationFeedbackReport([], demo.demoProducts);
   assert(emptyFeedbackReport.status === "empty" && emptyFeedbackReport.actions.some((action) => action.id === "capture-first-feedback"), "Expected empty Recommendation Feedback report to guide first feedback capture");
   const contentReport = contentStudio.buildContentStudioReport({ products: demo.demoProducts, events: demo.demoEvents });
   assert(contentReport.assets.length && contentReport.summary.readyAssets > 0, "Expected Content Studio to generate grounded content assets from demo catalog and events");
   assert(contentReport.assets.some((asset) => asset.blocks.faq.length && asset.guardrail.includes("Use only listed product facts")), "Expected Content Studio assets to include FAQs and grounding guardrails");
-  assert(contentReport.packet.includes("Findly Sales Content Studio packet") && contentReport.packet.includes("Product selection remains deterministic"), "Expected Content Studio to generate grounded packet with deterministic boundary");
+  assert(contentReport.packet.includes("Sellentum Sales Content Studio packet") && contentReport.packet.includes("Product selection remains deterministic"), "Expected Content Studio to generate grounded packet with deterministic boundary");
   const emptyContentReport = contentStudio.buildContentStudioReport({ products: [], events: [] });
   assert(emptyContentReport.status === "empty" && emptyContentReport.actions.some((action) => action.id === "fix-catalog-proof"), "Expected empty Content Studio report to guide catalog proof setup");
   const gapReport = discoveryGaps.buildDiscoveryGapReport([
@@ -1894,11 +1894,11 @@ async function assertDeterministicLogic() {
   });
   assert(advisorRecoveryReport.status === "no-results" && advisorRecoveryReport.budgetBlocked, "Expected advisor recovery to flag no-result budget blockers");
   assert(advisorRecoveryReport.suggestions.some((suggestion) => suggestion.id === "relax-budget") && advisorRecoveryReport.nearMisses.length, "Expected advisor recovery to suggest budget relaxation and near misses");
-  const advisorStudioReport = advisorStudio.buildAdvisorStudioReport({ products: demo.demoProducts, quizzes: [demo.demoQuiz], events: demo.demoEvents, settings: demo.demoSettings, origin: "https://findly.example", focusPrompt: "trail comfort for rainy weekends" });
+  const advisorStudioReport = advisorStudio.buildAdvisorStudioReport({ products: demo.demoProducts, quizzes: [demo.demoQuiz], events: demo.demoEvents, settings: demo.demoSettings, origin: "https://sellentum.example", focusPrompt: "trail comfort for rainy weekends" });
   assert(advisorStudioReport.scenarios.length > 0 && advisorStudioReport.activeScenario.prompt.includes("trail comfort"), "Expected Advisor Studio to build a prompt QA suite with the focused prompt");
   assert(advisorStudioReport.activeScenario.results.some((result) => result.product.id === "prod_trail"), "Expected Advisor Studio to surface deterministic advisor product matches");
   assert(advisorStudioReport.checks.some((check) => check.id === "published-context") && advisorStudioReport.actions.length, "Expected Advisor Studio to expose readiness checks and actions");
-  assert(advisorStudioReport.snippet.includes('data-experience="assistant"') && advisorStudioReport.packet.includes("Findly Advisor Studio packet"), "Expected Advisor Studio to generate assistant snippets and packets");
+  assert(advisorStudioReport.snippet.includes('data-experience="assistant"') && advisorStudioReport.packet.includes("Sellentum Advisor Studio packet"), "Expected Advisor Studio to generate assistant snippets and packets");
   const commandCenter = dashboardCommandCenter.buildDashboardCommandCenter({ products: demo.demoProducts, quizzes: [demo.demoQuiz], configurators: [demo.demoConfigurator], events: demo.demoEvents, settings: demo.demoSettings });
   assert(commandCenter.snapshot.widget_view > 0 && commandCenter.performance.length === 14, "Expected dashboard command center to build real 14-day analytics");
   assert(commandCenter.launchScore > 0 && commandCenter.catalogScore >= 80 && commandCenter.summary.readyFinders === 1, "Expected dashboard command center to summarize launch readiness");
@@ -1916,7 +1916,7 @@ async function assertDeterministicLogic() {
   const returnsReport = returnsIntelligence.buildReturnsIntelligenceReport({ products: demo.demoProducts, quizzes: [demo.demoQuiz], configurators: [demo.demoConfigurator], events: demo.demoEvents });
   assert(returnsReport.products.length === demo.demoProducts.length && returnsReport.summary.activeProducts === demo.demoProducts.length, "Expected Returns Intelligence to score active products");
   assert(returnsReport.frictionSignals.some((signal) => signal.id === "compatibility-guardrails" || signal.id === "missing-fit-language"), "Expected Returns Intelligence to expose fit or compatibility friction signals");
-  assert(returnsReport.questionGaps.length && returnsReport.scripts.length && returnsReport.packet.includes("Findly Returns & Fit Intelligence packet"), "Expected Returns Intelligence to generate question guardrails, scripts and a copyable packet");
+  assert(returnsReport.questionGaps.length && returnsReport.scripts.length && returnsReport.packet.includes("Sellentum Returns & Fit Intelligence packet"), "Expected Returns Intelligence to generate question guardrails, scripts and a copyable packet");
   const emptyReturnsReport = returnsIntelligence.buildReturnsIntelligenceReport({ products: [], quizzes: [], configurators: [], events: [] });
   assert(emptyReturnsReport.status === "empty" && emptyReturnsReport.actions.some((action) => action.id === "import-catalog"), "Expected empty Returns Intelligence report to guide catalog import");
 
@@ -1936,11 +1936,11 @@ async function assertDeterministicLogic() {
   const pipelineReport = catalogPipeline.buildCatalogPipelineReport({ products: demo.demoProducts, quizzes: [demo.demoQuiz], configurators: [demo.demoConfigurator], events: demo.demoEvents });
   assert(pipelineReport.stages.some((stage) => stage.id === "import-contract") && pipelineReport.sources.some((source) => source.id === "csv-import"), "Expected Catalog Pipeline to expose import stages and CSV source contracts");
   assert(pipelineReport.fieldCoverage.some((field) => field.id === "signals" && field.coverage > 0), "Expected Catalog Pipeline to summarize field coverage");
-  assert(pipelineReport.packet.includes("Findly catalog pipeline packet") && pipelineReport.consumers.some((consumer) => consumer.label === "Product finders"), "Expected Catalog Pipeline to generate a handoff packet and downstream consumers");
+  assert(pipelineReport.packet.includes("Sellentum catalog pipeline packet") && pipelineReport.consumers.some((consumer) => consumer.label === "Product finders"), "Expected Catalog Pipeline to generate a handoff packet and downstream consumers");
   const availabilityReport = availabilityGuard.buildAvailabilityGuardReport({ products: demo.demoProducts, quizzes: [demo.demoQuiz], configurators: [demo.demoConfigurator], events: demo.demoEvents });
   assert(availabilityReport.summary.activeProducts === demo.demoProducts.length && availabilityReport.summary.commerceUrlCoverage === 100, "Expected Availability Guard to verify seeded active products and Buy Now URLs");
   assert(availabilityReport.checks.some((check) => check.id === "runtime-references" && check.status === "pass"), "Expected Availability Guard to pass seeded runtime references");
-  assert(availabilityReport.packet.includes("Findly Availability Guard packet"), "Expected Availability Guard to generate a copyable packet");
+  assert(availabilityReport.packet.includes("Sellentum Availability Guard packet"), "Expected Availability Guard to generate a copyable packet");
   const unavailableProduct = { ...demo.demoProducts[0], active: false, product_url: "" };
   const brokenAvailabilityReport = availabilityGuard.buildAvailabilityGuardReport({
     products: [unavailableProduct, ...demo.demoProducts.slice(1)],
@@ -1967,7 +1967,7 @@ async function assertDeterministicLogic() {
   const attributeReport = attributeStudio.buildAttributeStudioReport(demo.demoProducts);
   assert(attributeReport.summary.normalizedAttributes > 0 && attributeReport.attributes.some((attribute) => attribute.canonicalValue.includes("wet-weather") || attribute.canonicalValue.includes("outdoor")), "Expected Attribute Studio to normalize catalog benefit attributes");
   assert(attributeReport.productTasks.length >= 0 && attributeReport.actions.length, "Expected Attribute Studio to expose product cleanup tasks or ready actions");
-  assert(attributeReport.glossary.includes("Findly normalized attribute glossary") && attributeReport.packet.includes("Findly Attribute Studio packet"), "Expected Attribute Studio to generate copyable glossary and packet text");
+  assert(attributeReport.glossary.includes("Sellentum normalized attribute glossary") && attributeReport.packet.includes("Sellentum Attribute Studio packet"), "Expected Attribute Studio to generate copyable glossary and packet text");
   const shopperLanguagePlan = shopperLanguagePlanner.buildShopperLanguagePlan({ products: demo.demoProducts, quizzes: [demo.demoQuiz], events: demo.demoEvents });
   assert(shopperLanguagePlan.score > 0 && shopperLanguagePlan.summary.coveredTerms > 0, "Expected shopper language planner to score catalog-backed vocabulary coverage");
   assert(shopperLanguagePlan.missingTerms.some((term) => term.term === "orthopedic" || term.term === "office"), "Expected shopper language planner to detect missing observed shopper vocabulary");
@@ -1977,23 +1977,23 @@ async function assertDeterministicLogic() {
   assert(vocabularyReport.summary.terms > 0 && vocabularyReport.summary.synonymClusters > 0, "Expected Vocabulary Studio to produce terms and synonym clusters");
   assert(vocabularyReport.unsupportedTerms.some((term) => term.label === "Orthopedic" || term.label === "Office"), "Expected Vocabulary Studio to expose unsupported observed shopper language");
   assert(vocabularyReport.governance.some((item) => item.id === "observed-language"), "Expected Vocabulary Studio to include governance checks");
-  assert(vocabularyReport.glossary.includes("Findly approved discovery vocabulary") && vocabularyReport.packet.includes("Findly Vocabulary Studio packet"), "Expected Vocabulary Studio to generate copyable glossary and packet text");
+  assert(vocabularyReport.glossary.includes("Sellentum approved discovery vocabulary") && vocabularyReport.packet.includes("Sellentum Vocabulary Studio packet"), "Expected Vocabulary Studio to generate copyable glossary and packet text");
   const trustReport = trustCenter.buildTrustCenterReport({ products: demo.demoProducts, quizzes: [demo.demoQuiz], configurators: [demo.demoConfigurator], events: demo.demoEvents, openaiConfigured: false });
   assert(trustReport.pillars.some((pillar) => pillar.id === "deterministic-selection") && trustReport.pillars.some((pillar) => pillar.id === "grounded-ai"), "Expected Trust Center to audit deterministic selection and grounded AI");
   assert(trustReport.principles.some((principle) => principle.label === "Rules select. AI explains."), "Expected Trust Center to document the AI selection boundary");
   assert(trustReport.aiBoundary.some((item) => item.includes("Rules select products first")) && trustReport.dataBoundary.some((item) => item.includes("anonymous session IDs")), "Expected Trust Center to expose AI and data boundaries");
-  assert(trustReport.packet.includes("Findly AI trust packet") && trustReport.packet.includes("Runtime guardrails"), "Expected Trust Center to generate a copyable trust packet");
+  assert(trustReport.packet.includes("Sellentum AI trust packet") && trustReport.packet.includes("Runtime guardrails"), "Expected Trust Center to generate a copyable trust packet");
   const groundingReport = groundingCenter.buildGroundingCenterReport({ products: demo.demoProducts, quizzes: [demo.demoQuiz], events: demo.demoEvents, openaiConfigured: false });
   assert(groundingReport.products.length && groundingReport.summary.groundedFacts > 0, "Expected Grounding Center to map product facts for the demo catalog");
   assert(groundingReport.products.some((product) => product.facts.some((fact) => fact.kind === "benefit")) && groundingReport.summary.benefitMappings > 0, "Expected Grounding Center to include shopper benefit mappings");
   assert(groundingReport.checks.some((check) => check.id === "catalog-facts") && groundingReport.checks.some((check) => check.id === "explanation-audits"), "Expected Grounding Center to include catalog and audit readiness checks");
-  assert(groundingReport.packet.includes("Findly Grounding Center packet") && groundingReport.packet.includes("RAG grounding boundary") && groundingReport.packet.includes("Deterministic matching selects products"), "Expected Grounding Center to generate a RAG boundary packet");
+  assert(groundingReport.packet.includes("Sellentum Grounding Center packet") && groundingReport.packet.includes("RAG grounding boundary") && groundingReport.packet.includes("Deterministic matching selects products"), "Expected Grounding Center to generate a RAG boundary packet");
   const emptyGroundingReport = groundingCenter.buildGroundingCenterReport({ products: [], quizzes: [], events: [] });
   assert(emptyGroundingReport.status === "blocked" && emptyGroundingReport.actions.some((action) => action.id === "add-products-for-grounding"), "Expected empty Grounding Center report to block launch until products exist");
   const semanticGraphReport = semanticKnowledgeGraph.buildSemanticKnowledgeGraphReport({ products: demo.demoProducts, quizzes: [demo.demoQuiz], configurators: [demo.demoConfigurator], events: demo.demoEvents });
   assert(semanticGraphReport.layers.length >= 7 && semanticGraphReport.entities.length > 0 && semanticGraphReport.summary.edges > 0, "Expected Semantic Knowledge Graph to build layers, connected entities and edges");
   assert(semanticGraphReport.layers.some((layer) => layer.id === "ontology") && semanticGraphReport.layers.some((layer) => layer.id === "grounding") && semanticGraphReport.layers.some((layer) => layer.id === "compatibility"), "Expected Semantic Knowledge Graph to include ontology, grounding and compatibility layers");
-  assert(semanticGraphReport.packet.includes("Findly Semantic Knowledge Graph packet") && semanticGraphReport.packet.includes("deterministic runtime logic still selects products"), "Expected Semantic Knowledge Graph to generate a deterministic-boundary packet");
+  assert(semanticGraphReport.packet.includes("Sellentum Semantic Knowledge Graph packet") && semanticGraphReport.packet.includes("deterministic runtime logic still selects products"), "Expected Semantic Knowledge Graph to generate a deterministic-boundary packet");
   const emptySemanticGraphReport = semanticKnowledgeGraph.buildSemanticKnowledgeGraphReport({ products: [], quizzes: [], configurators: [], events: [] });
   assert(emptySemanticGraphReport.status === "blocked" && emptySemanticGraphReport.actions.some((action) => action.priority === "critical"), "Expected empty Semantic Knowledge Graph to block launch with critical actions");
   const generatedSuggestion = quizGeneration.buildOntologyQuizSuggestion(demo.demoProducts, "Help shoppers choose the right footwear");
@@ -2035,49 +2035,49 @@ async function assertDeterministicLogic() {
   const publicCopy = publicExperience.buildPublicExperienceCopy("assistant", normalizedSettings);
   assert(publicCopy.brandName === "Acme Labs" && publicCopy.title === "Find the right setup" && publicCopy.assistantGreeting === "Tell us what matters most.", "Expected public experience copy to reuse merchant widget settings");
 
-  const generatedWidgetSnippet = widgetSnippet.buildWidgetSnippet({ origin: "https://findly.example", experience: "search", mode: "inline", id: "quiz_footwear", color: "#22352a", label: "Search products", position: "right", campaign: "spring-guide", placement: "category-hero" });
+  const generatedWidgetSnippet = widgetSnippet.buildWidgetSnippet({ origin: "https://sellentum.example", experience: "search", mode: "inline", id: "quiz_footwear", color: "#22352a", label: "Search products", position: "right", campaign: "spring-guide", placement: "category-hero" });
   assert(generatedWidgetSnippet.includes('data-experience="search"') && generatedWidgetSnippet.includes('data-mode="inline"') && generatedWidgetSnippet.includes('data-id="quiz_footwear"') && generatedWidgetSnippet.includes('data-campaign="spring-guide"') && generatedWidgetSnippet.includes('data-placement="category-hero"'), "Expected widget helper to generate a complete attributed search embed snippet");
   const blockedInstallReport = widgetSnippet.buildWidgetInstallReport({ origin: "http://store.example", experience: "finder", mode: "modal", color: "#22352a", label: "Find my match", position: "right" });
   assert(!blockedInstallReport.canInstall && blockedInstallReport.checks.some((item) => item.id === "id" && item.severity === "blocker"), "Expected widget install report to block placeholder/missing experience IDs");
-  const readyInstallReport = widgetSnippet.buildWidgetInstallReport({ origin: "https://findly.example", experience: "finder", mode: "modal", id: "quiz_footwear", color: "#22352a", label: "Find my match", position: "right" });
+  const readyInstallReport = widgetSnippet.buildWidgetInstallReport({ origin: "https://sellentum.example", experience: "finder", mode: "modal", id: "quiz_footwear", color: "#22352a", label: "Find my match", position: "right" });
   assert(readyInstallReport.canInstall && readyInstallReport.targetPath === "/finder/quiz_footwear", "Expected widget install report to pass for a complete finder embed");
-  const launchCards = experienceLaunch.buildLaunchExperienceCards({ origin: "https://findly.example", settings: demo.demoSettings, finders: [demo.demoQuiz], configurators: [demo.demoConfigurator], mode: "modal" });
+  const launchCards = experienceLaunch.buildLaunchExperienceCards({ origin: "https://sellentum.example", settings: demo.demoSettings, finders: [demo.demoQuiz], configurators: [demo.demoConfigurator], mode: "modal" });
   assert(launchCards.length === 4 && launchCards.every((card) => card.snippet.includes(`data-experience="${card.experience}"`)), "Expected launch experience helper to generate snippets for all four embeddable experiences");
   assert(launchCards.find((card) => card.experience === "assistant")?.id === demo.demoQuiz.id && launchCards.find((card) => card.experience === "search")?.targetPath === "/search/quiz_footwear", "Expected advisor/search launch cards to reuse the published finder context");
   assert(launchCards.find((card) => card.experience === "configurator")?.targetPath === "/configurator/config_trail_kit", "Expected configurator launch card to use the published configurator context");
-  const registryReport = experienceRegistry.buildExperienceRegistry({ origin: "https://findly.example", settings: demo.demoSettings, quizzes: [demo.demoQuiz], configurators: [demo.demoConfigurator], events: demo.demoEvents });
+  const registryReport = experienceRegistry.buildExperienceRegistry({ origin: "https://sellentum.example", settings: demo.demoSettings, quizzes: [demo.demoQuiz], configurators: [demo.demoConfigurator], events: demo.demoEvents });
   assert(registryReport.surfaces.length === 4 && registryReport.surfaces.every((surface) => surface.snippet.includes(`data-experience="${surface.experience}"`)), "Expected Experience Registry to inventory all embeddable surfaces");
   assert(registryReport.surfaces.some((surface) => surface.experience === "assistant") && registryReport.surfaces.some((surface) => surface.experience === "configurator"), "Expected Experience Registry to include advisor and configurator surfaces");
-  assert(registryReport.packet.includes("Findly Experience Registry packet") && registryReport.summary.totalViews >= 0, "Expected Experience Registry to generate a deployment packet and metrics");
-  const widgetStudioReport = widgetStudio.buildWidgetStudioReport({ origin: "https://findly.example", settings: demo.demoSettings, quizzes: [demo.demoQuiz], configurators: [demo.demoConfigurator], events: demo.demoEvents });
+  assert(registryReport.packet.includes("Sellentum Experience Registry packet") && registryReport.summary.totalViews >= 0, "Expected Experience Registry to generate a deployment packet and metrics");
+  const widgetStudioReport = widgetStudio.buildWidgetStudioReport({ origin: "https://sellentum.example", settings: demo.demoSettings, quizzes: [demo.demoQuiz], configurators: [demo.demoConfigurator], events: demo.demoEvents });
   assert(widgetStudioReport.experiences.length === 4 && widgetStudioReport.experiences.every((experience) => experience.modalSnippet.includes('data-mode="modal"') && experience.inlineSnippet.includes('data-mode="inline"')), "Expected Widget Studio to generate modal and inline snippets for every surface");
   assert(widgetStudioReport.installContract.some((field) => field.attribute === "data-experience") && widgetStudioReport.eventContract.some((event) => event.event === "buy_click"), "Expected Widget Studio to expose install and analytics event contracts");
-  assert(widgetStudioReport.packet.includes("Findly Widget Studio packet") && widgetStudioReport.actions.length, "Expected Widget Studio to generate a copyable packet and action queue");
-  const runtimeOpsReport = runtimeOperations.buildRuntimeOperationsReport({ origin: "https://findly.example", settings: demo.demoSettings, products: demo.demoProducts, quizzes: [demo.demoQuiz], configurators: [demo.demoConfigurator], events: demo.demoEvents });
+  assert(widgetStudioReport.packet.includes("Sellentum Widget Studio packet") && widgetStudioReport.actions.length, "Expected Widget Studio to generate a copyable packet and action queue");
+  const runtimeOpsReport = runtimeOperations.buildRuntimeOperationsReport({ origin: "https://sellentum.example", settings: demo.demoSettings, products: demo.demoProducts, quizzes: [demo.demoQuiz], configurators: [demo.demoConfigurator], events: demo.demoEvents });
   assert(runtimeOpsReport.endpoints.some((endpoint) => endpoint.id === "widget-script") && runtimeOpsReport.endpoints.some((endpoint) => endpoint.id === "analytics-runtime"), "Expected Runtime Operations to list widget and analytics endpoints");
   assert(runtimeOpsReport.guardrails.some((guardrail) => guardrail.label === "Bounded public JSON") && runtimeOpsReport.checks.some((check) => check.id === "analytics-contract"), "Expected Runtime Operations to expose guardrails and analytics checks");
-  assert(runtimeOpsReport.packet.includes("Findly Runtime Operations packet") && runtimeOpsReport.summary.endpoints >= 5, "Expected Runtime Operations to generate a copyable operations packet");
-  const productionVerificationReport = productionVerification.buildProductionVerificationReport({ origin: "https://findly.example", mode: "supabase", settings: demo.demoSettings, products: demo.demoProducts, quizzes: [demo.demoQuiz], configurators: [demo.demoConfigurator], events: demo.demoEvents });
+  assert(runtimeOpsReport.packet.includes("Sellentum Runtime Operations packet") && runtimeOpsReport.summary.endpoints >= 5, "Expected Runtime Operations to generate a copyable operations packet");
+  const productionVerificationReport = productionVerification.buildProductionVerificationReport({ origin: "https://sellentum.example", mode: "supabase", settings: demo.demoSettings, products: demo.demoProducts, quizzes: [demo.demoQuiz], configurators: [demo.demoConfigurator], events: demo.demoEvents });
   assert(productionVerificationReport.requiredRoutes.some((route) => route.route.includes("/api/widget.js")) && productionVerificationReport.desktopQa.some((scenario) => scenario.id === "finder-runtime"), "Expected Production Verification to include required route contracts and desktop QA scenarios");
-  assert(productionVerificationReport.packet.includes("Findly Production Verification packet") && productionVerificationReport.packet.includes("deployed Vercel URL passes typecheck, lint, build and smoke"), "Expected Production Verification to generate a deployed-smoke packet");
+  assert(productionVerificationReport.packet.includes("Sellentum Production Verification packet") && productionVerificationReport.packet.includes("deployed Vercel URL passes typecheck, lint, build and smoke"), "Expected Production Verification to generate a deployed-smoke packet");
   assert(productionVerificationReport.artifacts.some((artifact) => artifact.command === "npm run build") && productionVerificationReport.actions.length, "Expected Production Verification to include verification commands and action queue");
   const localProductionVerificationReport = productionVerification.buildProductionVerificationReport({ origin: "http://localhost:3000", mode: "demo", settings: demo.demoSettings, products: demo.demoProducts, quizzes: [demo.demoQuiz], configurators: [demo.demoConfigurator], events: [] });
   assert(localProductionVerificationReport.status !== "verified" && localProductionVerificationReport.checks.some((check) => check.id === "supabase-mode" && check.status === "warn"), "Expected Production Verification to keep local demo mode out of final production verified status");
   const mvpAuditReport = mvpAudit.buildMvpAuditReport({ origin: "http://localhost:3000", mode: "demo", settings: demo.demoSettings, products: demo.demoProducts, quizzes: [demo.demoQuiz], configurators: [demo.demoConfigurator], events: demo.demoEvents });
   assert(mvpAuditReport.doneTasks.length > 8 && mvpAuditReport.pendingTasks.some((task) => task.id === "production-verification"), "Expected MVP Audit to separate built work from production verification tasks");
-  assert(mvpAuditReport.packet.includes("Findly MVP Completion Audit") && mvpAuditReport.packet.includes("Pending / needs verification") && mvpAuditReport.packet.includes("full Zoovu-like objective"), "Expected MVP Audit to generate a done/pending packet that preserves full scope");
+  assert(mvpAuditReport.packet.includes("Sellentum MVP Completion Audit") && mvpAuditReport.packet.includes("Pending / needs verification") && mvpAuditReport.packet.includes("full Zoovu-like objective"), "Expected MVP Audit to generate a done/pending packet that preserves full scope");
   const emptyMvpAuditReport = mvpAudit.buildMvpAuditReport({ origin: "http://localhost:3000", mode: "demo", settings: demo.demoSettings, products: [], quizzes: [], configurators: [], events: [] });
   assert(emptyMvpAuditReport.status === "pending" && emptyMvpAuditReport.actions.some((action) => action.priority === "critical"), "Expected MVP Audit to mark missing catalog/finder evidence as pending");
-  const apiCenterReport = apiCenter.buildApiCenterReport({ origin: "https://findly.example", settings: demo.demoSettings, products: demo.demoProducts, quizzes: [demo.demoQuiz], configurators: [demo.demoConfigurator], events: demo.demoEvents });
+  const apiCenterReport = apiCenter.buildApiCenterReport({ origin: "https://sellentum.example", settings: demo.demoSettings, products: demo.demoProducts, quizzes: [demo.demoQuiz], configurators: [demo.demoConfigurator], events: demo.demoEvents });
   assert(apiCenterReport.endpoints.some((endpoint) => endpoint.id === "finder-recommendations" && endpoint.path.includes("/api/public/finder/")) && apiCenterReport.endpoints.some((endpoint) => endpoint.id === "configurator-validation" && endpoint.requestExample.includes("selectedIds")), "Expected API Center to document finder and configurator runtime endpoints");
   assert(apiCenterReport.endpoints.some((endpoint) => endpoint.id === "advisor-search") && apiCenterReport.endpoints.some((endpoint) => endpoint.id === "semantic-search"), "Expected API Center to document advisor and semantic search endpoints");
-  assert(apiCenterReport.packet.includes("Findly Headless API Center packet") && apiCenterReport.sdkNotes.some((note) => note.label === "No secret exposure"), "Expected API Center to generate a packet and SDK boundary notes");
+  assert(apiCenterReport.packet.includes("Sellentum Headless API Center packet") && apiCenterReport.sdkNotes.some((note) => note.label === "No secret exposure"), "Expected API Center to generate a packet and SDK boundary notes");
   const schemaSql = readFileSync("supabase/schema.sql", "utf8");
   const schemaAudit = workspaceHealth.auditWorkspaceSchema(schemaSql);
   assert(schemaAudit.length >= 10 && schemaAudit.every((contract) => contract.status === "pass"), "Expected Workspace Health schema audit to prove required Supabase table contracts");
   const workspaceHealthReport = workspaceHealth.buildWorkspaceHealthReport({ mode: "supabase", source: "server-api", products: demo.demoProducts, quizzes: [demo.demoQuiz], configurators: [demo.demoConfigurator], events: demo.demoEvents, settings: demo.demoSettings, schemaSql });
   assert(workspaceHealthReport.summary.schemaTables >= 10 && workspaceHealthReport.checks.some((check) => check.id === "server-source" && check.status === "pass"), "Expected Workspace Health to include server-source and schema summary proof");
-  assert(workspaceHealthReport.packet.includes("Findly Workspace Data Contract packet") && workspaceHealthReport.packet.includes("Supabase table contract"), "Expected Workspace Health to generate a data contract packet");
+  assert(workspaceHealthReport.packet.includes("Sellentum Workspace Data Contract packet") && workspaceHealthReport.packet.includes("Supabase table contract"), "Expected Workspace Health to generate a data contract packet");
   const emptyWorkspaceHealthReport = workspaceHealth.buildWorkspaceHealthReport({ mode: "demo", source: "client-store", products: [], quizzes: [], configurators: [], events: [], settings: demo.demoSettings, schemaSql: "" });
   assert(emptyWorkspaceHealthReport.status === "blocked" && emptyWorkspaceHealthReport.actions.some((action) => action.priority === "critical"), "Expected Workspace Health to block empty workspaces with critical actions");
   const healthyAiSourceAudit = {
@@ -2100,14 +2100,14 @@ async function assertDeterministicLogic() {
   };
   const aiReadinessReport = aiReadiness.buildAiReadinessReport({ mode: "supabase", source: "server-api", openaiConfigured: true, products: demo.demoProducts, quizzes: [demo.demoQuiz], configurators: [demo.demoConfigurator], events: demo.demoEvents, sourceAudit: healthyAiSourceAudit });
   assert(aiReadinessReport.sourceContracts.every((item) => item.status === "pass") && aiReadinessReport.surfaces.some((surface) => surface.id === "finder-explanations" && surface.mode === "openai-ready"), "Expected AI Readiness to prove OpenAI-ready source contracts for the healthy demo");
-  assert(aiReadinessReport.packet.includes("Findly AI Readiness packet") && aiReadinessReport.packet.includes("Deterministic rules"), "Expected AI Readiness to generate a deterministic-boundary packet");
+  assert(aiReadinessReport.packet.includes("Sellentum AI Readiness packet") && aiReadinessReport.packet.includes("Deterministic rules"), "Expected AI Readiness to generate a deterministic-boundary packet");
   const fallbackAiReadinessReport = aiReadiness.buildAiReadinessReport({ mode: "demo", source: "client-store", openaiConfigured: false, products: demo.demoProducts, quizzes: [demo.demoQuiz], configurators: [demo.demoConfigurator], events: demo.demoEvents, sourceAudit: healthyAiSourceAudit });
   assert(fallbackAiReadinessReport.openai.liveCheck === "not-configured" && fallbackAiReadinessReport.surfaces.some((surface) => surface.mode === "fallback-ready"), "Expected AI Readiness to support deterministic fallback mode when OpenAI is absent");
   const blockedAiReadinessReport = aiReadiness.buildAiReadinessReport({ mode: "demo", source: "client-store", products: [], quizzes: [], configurators: [], events: [], sourceAudit: {} });
   assert(blockedAiReadinessReport.status === "blocked" && blockedAiReadinessReport.actions.some((action) => action.priority === "critical"), "Expected AI Readiness to block empty/missing source-contract snapshots");
   const packet = launchPacket.buildLaunchPacket({
-    origin: "https://findly.example/",
-    publicUrl: "https://findly.example/finder/footwear-finder",
+    origin: "https://sellentum.example/",
+    publicUrl: "https://sellentum.example/finder/footwear-finder",
     widgetExperience: "Guided product finder",
     embedSnippet: generatedWidgetSnippet,
     installReport: readyInstallReport,
@@ -2116,17 +2116,17 @@ async function assertDeterministicLogic() {
     activeProducts: demo.demoProducts.length,
     enrichedPercent: 75,
   });
-  assert(packet.includes("Findly launch packet") && packet.includes("Stable embed ID: quiz_footwear"), "Expected launch packet to include a title and stable embed ID");
+  assert(packet.includes("Sellentum launch packet") && packet.includes("Stable embed ID: quiz_footwear"), "Expected launch packet to include a title and stable embed ID");
   assert(packet.includes("Analytics events tracked") && packet.includes("buy_click"), "Expected launch packet to document analytics events");
   assert(packet.includes(generatedWidgetSnippet), "Expected launch packet to include the generated embed snippet");
   const contract = launchContract.buildLaunchContract({
-    config: { origin: "https://findly.example", experience: "finder", mode: "modal", id: "quiz_footwear", color: "#22352a", label: "Find my match", position: "right" },
+    config: { origin: "https://sellentum.example", experience: "finder", mode: "modal", id: "quiz_footwear", color: "#22352a", label: "Find my match", position: "right" },
     installReport: readyInstallReport,
-    publicUrl: "https://findly.example/finder/quiz_footwear",
+    publicUrl: "https://sellentum.example/finder/quiz_footwear",
     activeProducts: demo.demoProducts.length,
     enrichedPercent: 75,
   });
-  assert(contract.apiEndpoints.includes("https://findly.example/api/widget.js") && contract.events.some((event) => event.event === "buy_click"), "Expected launch contract to include runtime endpoints and buy-click analytics");
+  assert(contract.apiEndpoints.includes("https://sellentum.example/api/widget.js") && contract.events.some((event) => event.event === "buy_click"), "Expected launch contract to include runtime endpoints and buy-click analytics");
   const contractText = launchContract.formatLaunchContract(contract);
   assert(contractText.includes("Analytics contract") && contractText.includes('data-experience="finder"'), "Expected formatted launch contract to document analytics and widget attributes");
   const runbook = storefrontQaRunbook.buildStorefrontQaRunbook({
@@ -2138,11 +2138,11 @@ async function assertDeterministicLogic() {
   assert(runbook.steps.length >= 5 && runbook.analyticsEvents.includes("buy_click"), "Expected storefront QA runbook to include manual QA steps and analytics proof points");
   const runbookText = storefrontQaRunbook.formatStorefrontQaRunbook(runbook);
   assert(runbookText.includes("Acceptance criteria") && runbookText.includes("/api/events") && runbookText.includes(generatedWidgetSnippet), "Expected formatted storefront QA runbook to include acceptance criteria, analytics endpoint and embed snippet");
-  const installedStorefrontHtml = `<html><body><script src="https://findly.example/api/widget.js" data-experience="finder" data-mode="modal" data-id="quiz_footwear" data-source="homepage" data-campaign="findly-homepage-guide" data-placement="homepage-hero" data-height="780px" async></script></body></html>`;
-  const installScanReport = storefrontInstallScanner.analyzeStorefrontInstall({ url: "https://store.example/products/trail", html: installedStorefrontHtml, appOrigin: "https://findly.example", scannedAt: new Date("2026-06-28T10:00:00Z") });
-  assert(installScanReport.status === "installed" && installScanReport.summary.findlyScripts === 1 && installScanReport.summary.attributionLabels === 3, "Expected Storefront Install Scanner to verify a complete attributed widget install");
-  assert(installScanReport.packet.includes("Findly storefront install scan") && installScanReport.packet.includes("Recommended next tasks") && installScanReport.snippets[0]?.id === "quiz_footwear", "Expected Storefront Install Scanner to generate a scan packet and parsed snippet data");
-  const missingInstallScanReport = storefrontInstallScanner.analyzeStorefrontInstall({ url: "https://store.example/products/trail", html: "<html><body><h1>No widget here</h1></body></html>", appOrigin: "https://findly.example" });
+  const installedStorefrontHtml = `<html><body><script src="https://sellentum.example/api/widget.js" data-experience="finder" data-mode="modal" data-id="quiz_footwear" data-source="homepage" data-campaign="sellentum-homepage-guide" data-placement="homepage-hero" data-height="780px" async></script></body></html>`;
+  const installScanReport = storefrontInstallScanner.analyzeStorefrontInstall({ url: "https://store.example/products/trail", html: installedStorefrontHtml, appOrigin: "https://sellentum.example", scannedAt: new Date("2026-06-28T10:00:00Z") });
+  assert(installScanReport.status === "installed" && installScanReport.summary.sellentumScripts === 1 && installScanReport.summary.attributionLabels === 3, "Expected Storefront Install Scanner to verify a complete attributed widget install");
+  assert(installScanReport.packet.includes("Sellentum storefront install scan") && installScanReport.packet.includes("Recommended next tasks") && installScanReport.snippets[0]?.id === "quiz_footwear", "Expected Storefront Install Scanner to generate a scan packet and parsed snippet data");
+  const missingInstallScanReport = storefrontInstallScanner.analyzeStorefrontInstall({ url: "https://store.example/products/trail", html: "<html><body><h1>No widget here</h1></body></html>", appOrigin: "https://sellentum.example" });
   assert(missingInstallScanReport.status === "missing" && missingInstallScanReport.checks.some((item) => item.id === "script" && item.status === "fail"), "Expected Storefront Install Scanner to flag missing widget scripts");
   let blockedPrivateScan = false;
   try {
@@ -2153,34 +2153,34 @@ async function assertDeterministicLogic() {
   assert(blockedPrivateScan, "Expected Storefront Install Scanner to block localhost/private scan targets");
 
   const channelEvents = [
-    { id: "channel_view", user_id: "demo-user", quiz_id: "quiz_footwear", event_type: "widget_view", metadata: { experience_type: "finder", findly_source: "homepage", findly_campaign: "findly-homepage-guide", findly_placement: "homepage-hero" }, created_at: "2026-06-25T12:00:00Z" },
-    { id: "channel_start", user_id: "demo-user", quiz_id: "quiz_footwear", event_type: "quiz_start", metadata: { experience_type: "finder", findly_source: "homepage", findly_campaign: "findly-homepage-guide", findly_placement: "homepage-hero" }, created_at: "2026-06-25T12:01:00Z" },
-    { id: "channel_complete", user_id: "demo-user", quiz_id: "quiz_footwear", event_type: "quiz_complete", metadata: { experience_type: "finder", findly_source: "homepage", findly_campaign: "findly-homepage-guide", findly_placement: "homepage-hero", result_count: 2 }, created_at: "2026-06-25T12:02:00Z" },
-    { id: "channel_rec", user_id: "demo-user", quiz_id: "quiz_footwear", product_id: "prod_trail", event_type: "product_recommended", metadata: { experience_type: "finder", findly_source: "homepage", findly_campaign: "findly-homepage-guide", findly_placement: "homepage-hero", rank: 1, product_name: "Terra Trail Runner" }, created_at: "2026-06-25T12:03:00Z" },
-    { id: "channel_click", user_id: "demo-user", quiz_id: "quiz_footwear", product_id: "prod_trail", event_type: "buy_click", metadata: { experience_type: "finder", findly_source: "homepage", findly_campaign: "findly-homepage-guide", findly_placement: "homepage-hero", product_name: "Terra Trail Runner" }, created_at: "2026-06-25T12:04:00Z" },
+    { id: "channel_view", user_id: "demo-user", quiz_id: "quiz_footwear", event_type: "widget_view", metadata: { experience_type: "finder", sellentum_source: "homepage", sellentum_campaign: "sellentum-homepage-guide", sellentum_placement: "homepage-hero" }, created_at: "2026-06-25T12:00:00Z" },
+    { id: "channel_start", user_id: "demo-user", quiz_id: "quiz_footwear", event_type: "quiz_start", metadata: { experience_type: "finder", sellentum_source: "homepage", sellentum_campaign: "sellentum-homepage-guide", sellentum_placement: "homepage-hero" }, created_at: "2026-06-25T12:01:00Z" },
+    { id: "channel_complete", user_id: "demo-user", quiz_id: "quiz_footwear", event_type: "quiz_complete", metadata: { experience_type: "finder", sellentum_source: "homepage", sellentum_campaign: "sellentum-homepage-guide", sellentum_placement: "homepage-hero", result_count: 2 }, created_at: "2026-06-25T12:02:00Z" },
+    { id: "channel_rec", user_id: "demo-user", quiz_id: "quiz_footwear", product_id: "prod_trail", event_type: "product_recommended", metadata: { experience_type: "finder", sellentum_source: "homepage", sellentum_campaign: "sellentum-homepage-guide", sellentum_placement: "homepage-hero", rank: 1, product_name: "Terra Trail Runner" }, created_at: "2026-06-25T12:03:00Z" },
+    { id: "channel_click", user_id: "demo-user", quiz_id: "quiz_footwear", product_id: "prod_trail", event_type: "buy_click", metadata: { experience_type: "finder", sellentum_source: "homepage", sellentum_campaign: "sellentum-homepage-guide", sellentum_placement: "homepage-hero", product_name: "Terra Trail Runner" }, created_at: "2026-06-25T12:04:00Z" },
   ];
   const channelReport = launchChannels.buildLaunchChannelReport({
-    origin: "https://findly.example",
+    origin: "https://sellentum.example",
     settings: demo.demoSettings,
     finders: [demo.demoQuiz],
     configurators: [demo.demoConfigurator],
     events: channelEvents,
   });
   assert(channelReport.channels.length === 4 && channelReport.summary.installReady === 4, "Expected launch channels to generate four install-ready storefront placements");
-  assert(channelReport.packet.includes("Findly launch channel packet") && channelReport.packet.includes("data-campaign=\"findly-homepage-guide\""), "Expected launch channel packet to include attributed snippets");
+  assert(channelReport.packet.includes("Sellentum launch channel packet") && channelReport.packet.includes("data-campaign=\"sellentum-homepage-guide\""), "Expected launch channel packet to include attributed snippets");
   const homepageChannel = channelReport.channels.find((channel) => channel.id === "homepage-finder");
   assert(homepageChannel?.status === "live" && homepageChannel.metrics.clicks === 1 && homepageChannel.metrics.clickRate === 100, "Expected attributed homepage channel events to produce live channel metrics");
   assert(channelReport.channels.some((channel) => channel.id === "pdp-configurator" && channel.snippet.includes('data-experience="configurator"')), "Expected PDP channel to generate configurator embed snippet");
   assert(channelReport.channels.some((channel) => channel.id === "category-inline-search" && channel.snippet.includes('data-mode="inline"') && channel.snippet.includes('data-experience="search"')), "Expected category channel to generate inline search embed snippet");
 
   const partnerEvents = [
-    { id: "partner_view", user_id: "demo-user", quiz_id: "quiz_footwear", event_type: "widget_view", metadata: { experience_type: "assistant", findly_medium: "syndication", findly_source: "retailer", findly_campaign: "findly-syndication-retailer-pdp-advisor", findly_placement: "partner-pdp-advisor" }, created_at: "2026-06-25T13:00:00Z" },
-    { id: "partner_start", user_id: "demo-user", quiz_id: "quiz_footwear", event_type: "quiz_start", metadata: { experience_type: "assistant", findly_medium: "syndication", findly_source: "retailer", findly_campaign: "findly-syndication-retailer-pdp-advisor", findly_placement: "partner-pdp-advisor" }, created_at: "2026-06-25T13:01:00Z" },
-    { id: "partner_rec", user_id: "demo-user", quiz_id: "quiz_footwear", product_id: "prod_trail", event_type: "product_recommended", metadata: { experience_type: "assistant", findly_medium: "syndication", findly_source: "retailer", findly_campaign: "findly-syndication-retailer-pdp-advisor", findly_placement: "partner-pdp-advisor", product_name: "Terra Trail Runner" }, created_at: "2026-06-25T13:02:00Z" },
-    { id: "partner_click", user_id: "demo-user", quiz_id: "quiz_footwear", product_id: "prod_trail", event_type: "buy_click", metadata: { experience_type: "assistant", findly_medium: "syndication", findly_source: "retailer", findly_campaign: "findly-syndication-retailer-pdp-advisor", findly_placement: "partner-pdp-advisor", product_name: "Terra Trail Runner" }, created_at: "2026-06-25T13:03:00Z" },
+    { id: "partner_view", user_id: "demo-user", quiz_id: "quiz_footwear", event_type: "widget_view", metadata: { experience_type: "assistant", sellentum_medium: "syndication", sellentum_source: "retailer", sellentum_campaign: "sellentum-syndication-retailer-pdp-advisor", sellentum_placement: "partner-pdp-advisor" }, created_at: "2026-06-25T13:00:00Z" },
+    { id: "partner_start", user_id: "demo-user", quiz_id: "quiz_footwear", event_type: "quiz_start", metadata: { experience_type: "assistant", sellentum_medium: "syndication", sellentum_source: "retailer", sellentum_campaign: "sellentum-syndication-retailer-pdp-advisor", sellentum_placement: "partner-pdp-advisor" }, created_at: "2026-06-25T13:01:00Z" },
+    { id: "partner_rec", user_id: "demo-user", quiz_id: "quiz_footwear", product_id: "prod_trail", event_type: "product_recommended", metadata: { experience_type: "assistant", sellentum_medium: "syndication", sellentum_source: "retailer", sellentum_campaign: "sellentum-syndication-retailer-pdp-advisor", sellentum_placement: "partner-pdp-advisor", product_name: "Terra Trail Runner" }, created_at: "2026-06-25T13:02:00Z" },
+    { id: "partner_click", user_id: "demo-user", quiz_id: "quiz_footwear", product_id: "prod_trail", event_type: "buy_click", metadata: { experience_type: "assistant", sellentum_medium: "syndication", sellentum_source: "retailer", sellentum_campaign: "sellentum-syndication-retailer-pdp-advisor", sellentum_placement: "partner-pdp-advisor", product_name: "Terra Trail Runner" }, created_at: "2026-06-25T13:03:00Z" },
   ];
   const syndicationReport = syndication.buildSyndicationReport({
-    origin: "https://findly.example",
+    origin: "https://sellentum.example",
     settings: demo.demoSettings,
     products: demo.demoProducts,
     quizzes: [demo.demoQuiz],
@@ -2188,8 +2188,8 @@ async function assertDeterministicLogic() {
     events: partnerEvents,
   });
   assert(syndicationReport.placements.length >= 5 && syndicationReport.summary.installReady === syndicationReport.placements.length, "Expected partner syndication to produce install-ready partner packages");
-  assert(syndicationReport.packet.includes("Findly partner syndication packet") && syndicationReport.packet.includes("Partner acceptance criteria"), "Expected partner syndication packet to include title and acceptance criteria");
-  assert(syndicationReport.packet.includes('data-medium="syndication"') && syndicationReport.packet.includes('data-campaign="findly-syndication-retailer-pdp-advisor"'), "Expected partner syndication snippets to include syndication attribution");
+  assert(syndicationReport.packet.includes("Sellentum partner syndication packet") && syndicationReport.packet.includes("Partner acceptance criteria"), "Expected partner syndication packet to include title and acceptance criteria");
+  assert(syndicationReport.packet.includes('data-medium="syndication"') && syndicationReport.packet.includes('data-campaign="sellentum-syndication-retailer-pdp-advisor"'), "Expected partner syndication snippets to include syndication attribution");
   const retailerSyndication = syndicationReport.placements.find((placement) => placement.id === "retailer-pdp-advisor");
   assert(retailerSyndication?.status === "live" && retailerSyndication.metrics.clicks === 1 && retailerSyndication.metrics.clickValue > 0, "Expected retailer partner events to produce live syndication metrics");
   assert(syndicationReport.placements.some((placement) => placement.id === "marketplace-buying-guide" && placement.snippet.includes('data-mode="inline"') && placement.snippet.includes('data-experience="finder"')), "Expected marketplace package to generate an inline finder snippet");
@@ -2197,20 +2197,20 @@ async function assertDeterministicLogic() {
   assert(syndicationReport.governance.some((item) => item.id === "partner-boundary" && item.status === "pass"), "Expected syndication governance to confirm partner-safe boundaries");
 
   const sandboxReport = storefrontSandbox.buildStorefrontSandboxReport({
-    origin: "https://findly.example",
+    origin: "https://sellentum.example",
     settings: demo.demoSettings,
     finders: [demo.demoQuiz],
     configurators: [demo.demoConfigurator],
     events: channelEvents,
   });
   assert(sandboxReport.cases.length === 4 && sandboxReport.summary.expectedEvents >= 16, "Expected storefront sandbox to generate QA cases and expected event contracts for all channels");
-  assert(sandboxReport.packet.includes("Findly storefront QA sandbox packet") && sandboxReport.packet.includes("Acceptance criteria:"), "Expected storefront sandbox to generate a copyable QA packet");
+  assert(sandboxReport.packet.includes("Sellentum storefront QA sandbox packet") && sandboxReport.packet.includes("Acceptance criteria:"), "Expected storefront sandbox to generate a copyable QA packet");
   assert(sandboxReport.cases.some((item) => item.id === "homepage-finder" && item.status === "verified" && item.expectedEvents.some((event) => event.event === "buy_click")), "Expected homepage sandbox case to be verified by attributed QA telemetry");
   assert(sandboxReport.cases.some((item) => item.id === "category-inline-search" && item.mode === "inline" && item.snippet.includes('data-experience="search"')), "Expected category sandbox case to render inline search QA");
   assert(sandboxReport.cases.every((item) => item.acceptanceCriteria.some((criterion) => criterion.includes("data-source")) && item.qaSteps.length >= 5), "Expected every sandbox case to include attribution acceptance criteria and QA steps");
 
   const experimentReport = experiments.buildExperimentPlanningReport({
-    origin: "https://findly.example",
+    origin: "https://sellentum.example",
     settings: demo.demoSettings,
     products: demo.demoProducts,
     quizzes: [demo.demoQuiz],
@@ -2228,10 +2228,10 @@ async function assertDeterministicLogic() {
   assert(experimentReport.experiments.some((experiment) => experiment.id === "inline-semantic-search" && experiment.href === "/dashboard/channels"), "Expected semantic search experiment to route through Launch Channels");
   assert(experimentReport.experiments.some((experiment) => experiment.id === "channel-attribution-contract" && experiment.primaryMetric.label === "Attribution rate"), "Expected attribution experiment to use attribution quality as a primary metric");
   assert(experimentReport.guardrails.some((guardrail) => guardrail.id === "deterministic-selection" && guardrail.status === "pass"), "Expected experiment planner to include deterministic-selection guardrails");
-  assert(experimentReport.packet.includes("Findly experiment plan") && experimentReport.packet.includes("Rollback:"), "Expected experiment planner to generate a copyable packet");
+  assert(experimentReport.packet.includes("Sellentum experiment plan") && experimentReport.packet.includes("Rollback:"), "Expected experiment planner to generate a copyable packet");
 
   const releaseCandidate = releaseCenter.buildReleaseCandidate({
-    origin: "https://findly.example",
+    origin: "https://sellentum.example",
     settings: demo.demoSettings,
     products: demo.demoProducts,
     quizzes: [demo.demoQuiz],
@@ -2242,14 +2242,14 @@ async function assertDeterministicLogic() {
     ],
     generatedAt: new Date("2026-06-25T12:00:00Z"),
   });
-  assert(releaseCandidate.id === "findly-20260625" && releaseCandidate.gates.length >= 8, "Expected Release Center to build a dated release candidate with launch gates");
+  assert(releaseCandidate.id === "sellentum-20260625" && releaseCandidate.gates.length >= 8, "Expected Release Center to build a dated release candidate with launch gates");
   assert(["go", "review", "no-go"].includes(releaseCandidate.decision) && releaseCandidate.score >= 0, "Expected release candidate to produce a go/no-go decision and score");
   assert(releaseCandidate.scope.some((item) => item.label === "Launch channels") && releaseCandidate.summary.installReadyChannels >= 1, "Expected release candidate to include launch channel scope");
   assert(releaseCandidate.rollbackPlan.length >= 5 && releaseCandidate.releaseNotes.includes("Rollback plan"), "Expected release candidate to include rollback notes");
-  assert(releaseCandidate.releaseNotes.includes("Findly release candidate") && releaseCandidate.releaseNotes.includes("Launch gates"), "Expected release candidate to generate copyable release notes");
+  assert(releaseCandidate.releaseNotes.includes("Sellentum release candidate") && releaseCandidate.releaseNotes.includes("Launch gates"), "Expected release candidate to generate copyable release notes");
 
   const snapshot = workspaceSnapshot.buildWorkspaceSnapshot({
-    origin: "https://findly.example",
+    origin: "https://sellentum.example",
     settings: demo.demoSettings,
     products: demo.demoProducts,
     quizzes: [demo.demoQuiz],
@@ -2260,11 +2260,11 @@ async function assertDeterministicLogic() {
     ],
     generatedAt: new Date("2026-06-25T12:00:00Z"),
   });
-  assert(snapshot.id === "snapshot-northstar-goods-20260625" && snapshot.archive.version === "findly-workspace-snapshot-v1", "Expected Workspace Snapshot to build a dated versioned archive");
+  assert(snapshot.id === "snapshot-northstar-goods-20260625" && snapshot.archive.version === "sellentum-workspace-snapshot-v1", "Expected Workspace Snapshot to build a dated versioned archive");
   assert(snapshot.exportFiles.some((file) => file.id === "json" && file.filename === "snapshot-northstar-goods-20260625.json"), "Expected Workspace Snapshot to name export files from the snapshot ID");
   assert(snapshot.productCsv.includes("Terra Trail Runner") && snapshot.productCsv.includes("buyer_needs"), "Expected Workspace Snapshot to export product CSV with discovery fields");
-  assert(snapshot.analyticsCsv.includes("widget_view") && snapshot.analyticsCsv.includes("findly_campaign"), "Expected Workspace Snapshot to export attribution-aware analytics CSV");
-  assert(snapshot.handoff.includes("Findly workspace snapshot") && snapshot.handoff.includes("Release decision") && snapshot.handoff.includes("Restore plan"), "Expected Workspace Snapshot to generate copyable handoff notes");
+  assert(snapshot.analyticsCsv.includes("widget_view") && snapshot.analyticsCsv.includes("sellentum_campaign"), "Expected Workspace Snapshot to export attribution-aware analytics CSV");
+  assert(snapshot.handoff.includes("Sellentum workspace snapshot") && snapshot.handoff.includes("Release decision") && snapshot.handoff.includes("Restore plan"), "Expected Workspace Snapshot to generate copyable handoff notes");
   assert(snapshot.archive.launch_channels.channels.some((channel) => channel.snippet.includes("data-experience")), "Expected Workspace Snapshot archive to include launch snippets");
   assert(snapshot.checks.some((item) => item.id === "release") && snapshot.sections.some((item) => item.id === "channels"), "Expected Workspace Snapshot to expose release and channel checks");
   assert(!snapshot.json.includes("user_id") && !snapshot.json.includes("OPENAI") && !snapshot.json.includes("SUPABASE"), "Expected Workspace Snapshot JSON to avoid user IDs and environment secret names");
@@ -2365,7 +2365,7 @@ async function assertDeterministicLogic() {
 
 async function main() {
   await assertPage("/", "Turn product choice");
-  await assertPage("/platform", "Findly platform");
+  await assertPage("/platform", "Sellentum platform");
   await assertPage("/platform/catalog-pipeline", "Govern imports");
   await assertPage("/platform/availability-guard", "Keep unavailable products");
   await assertPage("/platform/configurators", "Visual configurators");
@@ -2376,14 +2376,14 @@ async function main() {
   await assertPage("/platform/shopper-personas", "Turn zero-party signals");
   await assertPage("/platform/audience-capture", "Turn guided-selling sessions");
   await assertPage("/platform/widget-studio", "Launch every guided experience");
-  await assertPage("/platform/storefront-install-scanner", "Verify the Findly widget");
+  await assertPage("/platform/storefront-install-scanner", "Verify the Sellentum widget");
   await assertPage("/platform/headless-api", "Build custom guided-selling");
   await assertPage("/platform/workspace-data-contract", "Prove the workspace data layer");
   await assertPage("/platform/ai-readiness", "Use OpenAI where it helps");
   await assertPage("/platform/returns-fit-intelligence", "Prevent wrong-fit purchases");
   await assertPage("/platform/bundle-studio", "Increase average order value");
   await assertPage("/platform/usage-pricing", "Explain SaaS plan fit");
-  await assertPage("/platform/production-verification", "Prove Findly is ready");
+  await assertPage("/platform/production-verification", "Prove Sellentum is ready");
   await assertPage("/platform/mvp-audit", "Track exactly what is done");
   await assertPage("/platform/grounding-center", "Give AI a safe product-fact map");
   await assertPage("/platform/semantic-knowledge-graph", "Connect product facts");
@@ -2454,10 +2454,10 @@ async function main() {
   assertConfiguratorReadinessWorkflow();
   assertPreflightReadinessWorkflow();
   await assertDeterministicLogic();
-  console.log("Findly smoke test passed");
+  console.log("Sellentum smoke test passed");
 }
 
 main().catch((error) => {
-  console.error(`Findly smoke test failed: ${error.message}`);
+  console.error(`Sellentum smoke test failed: ${error.message}`);
   process.exit(1);
 });

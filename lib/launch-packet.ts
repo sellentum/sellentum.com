@@ -18,7 +18,7 @@ export type LaunchPacketInput = {
 };
 
 function cleanOrigin(origin: string) {
-  return (origin || "https://your-findly-app.vercel.app").replace(/\/+$/, "");
+  return (origin || "https://your-sellentum-app.vercel.app").replace(/\/+$/, "");
 }
 
 function readinessLabel(report: WidgetInstallReport) {
@@ -41,7 +41,7 @@ export function buildLaunchPacket(input: LaunchPacketInput) {
   }).join("\n");
 
   return [
-    "Findly launch packet",
+    "Sellentum launch packet",
     "====================",
     "",
     `Brand: ${input.settings.brand_name || "Your brand"}`,
@@ -87,6 +87,6 @@ export function buildLaunchPacket(input: LaunchPacketInput) {
     "--------------------",
     "1. Paste the script once before the storefront closing </body> tag.",
     "2. Keep the stable embed ID in the snippet; the preview URL may use either the ID or slug.",
-    "3. Run Findly Preflight after deployment and confirm widget_view, quiz_start and buy_click events appear in Analytics.",
+    "3. Run Sellentum Preflight after deployment and confirm widget_view, quiz_start and buy_click events appear in Analytics.",
   ].join("\n");
 }

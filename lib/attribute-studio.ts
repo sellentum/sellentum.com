@@ -166,7 +166,7 @@ const rules: Rule[] = [
     canonicalValue: "compatible setup",
     aliases: ["compatible", "compatibility", "fits", "kit", "bundle", "modular", "addon", "add-on"],
     shopperBenefit: "Helps shoppers avoid choosing parts or options that do not work together.",
-    suggestedQuestion: "Do you need Findly to keep selected parts compatible?",
+    suggestedQuestion: "Do you need Sellentum to keep selected parts compatible?",
   },
   {
     id: "premium",
@@ -432,7 +432,7 @@ function buildActions(report: Omit<AttributeStudioReport, "actions" | "packet" |
       id: "add-catalog-depth",
       priority: "critical",
       title: "Add more active products",
-      detail: "Attribute normalization only becomes useful when Findly can compare alternatives.",
+      detail: "Attribute normalization only becomes useful when Sellentum can compare alternatives.",
       evidence: `${report.summary.activeProducts} active product${report.summary.activeProducts === 1 ? "" : "s"} available.`,
       href: "/dashboard/products",
       label: "Add products",
@@ -495,7 +495,7 @@ function buildActions(report: Omit<AttributeStudioReport, "actions" | "packet" |
 
 function glossary(report: Omit<AttributeStudioReport, "actions" | "packet" | "glossary">) {
   return [
-    "Findly normalized attribute glossary",
+    "Sellentum normalized attribute glossary",
     "====================================",
     "",
     `Status: ${report.status.toUpperCase()} · Score: ${report.score}%`,
@@ -514,7 +514,7 @@ function glossary(report: Omit<AttributeStudioReport, "actions" | "packet" | "gl
 
 function packet(report: Omit<AttributeStudioReport, "packet">) {
   return [
-    "Findly Attribute Studio packet",
+    "Sellentum Attribute Studio packet",
     "==============================",
     "",
     `Status: ${report.status.toUpperCase()} · Score: ${report.score}%`,

@@ -20,7 +20,7 @@ async function fetchHtml(url: URL) {
       signal: controller.signal,
       headers: {
         accept: "text/html,application/xhtml+xml",
-        "user-agent": "FindlyInstallScanner/1.0",
+        "user-agent": "SellentumInstallScanner/1.0",
       },
     });
     const contentType = response.headers.get("content-type") || "";

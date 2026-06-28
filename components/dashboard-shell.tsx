@@ -68,7 +68,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
   async function logout() {
     if (mode === "supabase") await createClient()?.auth.signOut();
-    document.cookie = "findly_demo_session=; path=/; max-age=0";
+    document.cookie = "sellentum_demo_session=; path=/; max-age=0";
     router.push("/login"); router.refresh();
   }
 
@@ -90,7 +90,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       </nav>
       <div className="mt-auto p-3">
         <div className="mb-3 rounded-2xl bg-ink p-4 text-white">
-          <div className="grid h-8 w-8 place-items-center rounded-xl bg-lime text-ink"><Sparkles size={15} /></div><p className="mt-3 text-xs font-extrabold">Need a hand?</p><p className="mt-1 text-xs leading-4 text-white/45">Set up your first finder with our quick-start guide.</p><a href="mailto:hello@findly.app" className="mt-3 inline-flex items-center gap-1 text-xs font-extrabold text-lime">Contact support <ExternalLink size={10} /></a>
+          <div className="grid h-8 w-8 place-items-center rounded-xl bg-lime text-ink"><Sparkles size={15} /></div><p className="mt-3 text-xs font-extrabold">Need a hand?</p><p className="mt-1 text-xs leading-4 text-white/45">Set up your first finder with our quick-start guide.</p><a href="mailto:hello@sellentum.app" className="mt-3 inline-flex items-center gap-1 text-xs font-extrabold text-lime">Contact support <ExternalLink size={10} /></a>
         </div>
         <button onClick={logout} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold text-black/45 hover:bg-white hover:text-ink"><LogOut size={16} /> Log out</button>
       </div>

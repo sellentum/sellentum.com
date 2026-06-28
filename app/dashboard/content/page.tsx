@@ -70,7 +70,7 @@ export default function SalesContentStudioPage() {
           <div className="max-w-4xl">
             <p className="eyebrow text-lime">Sales Content Studio</p>
             <h1 className="display mt-3 text-5xl">Turn product-discovery intelligence into grounded sales content.</h1>
-            <p className="mt-4 max-w-3xl text-sm font-bold leading-6 text-white/45">Findly packages catalog proof, zero-party intent, recommendation demand and shopper feedback into PDP, collection, email and support copy blocks for {settings.brand_name}. Product selection stays deterministic; Content Studio only packages proof and messaging.</p>
+            <p className="mt-4 max-w-3xl text-sm font-bold leading-6 text-white/45">Sellentum packages catalog proof, zero-party intent, recommendation demand and shopper feedback into PDP, collection, email and support copy blocks for {settings.brand_name}. Product selection stays deterministic; Content Studio only packages proof and messaging.</p>
           </div>
           <div className="w-[360px] shrink-0 rounded-[26px] border border-white/10 bg-white/[0.06] p-5">
             <div className="flex items-center justify-between">

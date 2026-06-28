@@ -42,7 +42,7 @@ export default function DecisionGraphPage() {
       <div>
         <span className="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-lime/45 text-moss"><Workflow size={25} /></span>
         <h1 className="display mt-5 text-4xl">Your decision graph starts with products.</h1>
-        <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-black/45">Add or import products, then Findly will connect catalog facts to finder rules, shopper language and configurator compatibility.</p>
+        <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-black/45">Add or import products, then Sellentum will connect catalog facts to finder rules, shopper language and configurator compatibility.</p>
         <Link href="/dashboard/products" className="btn-primary mt-6"><Boxes size={15} /> Add products</Link>
       </div>
     </div>;
@@ -54,7 +54,7 @@ export default function DecisionGraphPage() {
         <div>
           <p className="eyebrow text-moss">Decision graph</p>
           <h1 className="display mt-2 text-5xl">Prove every recommendation path.</h1>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-black/45">A Zoovu-style trust layer for Findly: catalog signals, answer rules, configurator links and shopper language are mapped into one deterministic graph before AI writes a single explanation.</p>
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-black/45">A Zoovu-style trust layer for Sellentum: catalog signals, answer rules, configurator links and shopper language are mapped into one deterministic graph before AI writes a single explanation.</p>
         </div>
         <div className="flex gap-3">
           <Link href="/dashboard/ontology" className="btn-secondary self-start"><Network size={14} /> Ontology map</Link>
@@ -214,7 +214,7 @@ export default function DecisionGraphPage() {
             <h2 className="flex items-center gap-2 text-sm font-extrabold"><Sparkles size={16} className="text-moss" /> Why this is safe AI</h2>
             <div className="mt-4 space-y-3">
               {[
-                ["Products are selected first", "Findly ranks active products through rules, signals, budgets and compatibility before AI writes copy."],
+                ["Products are selected first", "Sellentum ranks active products through rules, signals, budgets and compatibility before AI writes copy."],
                 ["AI cannot invent graph edges", "Missing shopper terms and broken rules are flagged as actions instead of patched by generated text."],
                 ["Merchants can inspect proof", "Every answer rule, option link and observed language gap points back to a builder or catalog action."],
               ].map(([title, detail], index) => (

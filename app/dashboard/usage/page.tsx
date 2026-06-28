@@ -36,7 +36,7 @@ const priorityTone: Record<UsageActionPriority, string> = {
 
 export default function UsageCenterPage() {
   const { ready, settings, products, quizzes, configurators, events } = useStore();
-  const [origin, setOrigin] = useState("https://your-findly-app.vercel.app");
+  const [origin, setOrigin] = useState("https://your-sellentum-app.vercel.app");
   const [copied, setCopied] = useState(false);
   const report = useMemo(() => buildUsageCenterReport({ origin, settings, products, quizzes, configurators, events }), [origin, settings, products, quizzes, configurators, events]);
 
@@ -58,7 +58,7 @@ export default function UsageCenterPage() {
         <div>
           <p className="eyebrow text-moss">Usage & Plan Center</p>
           <h1 className="display mt-2 max-w-5xl text-5xl">Show SaaS plan fit without turning on billing yet.</h1>
-          <p className="mt-3 max-w-3xl text-sm leading-6 text-black/45">Meter shopper sessions, guided interactions, catalog scale, published experiences and AI-assist credits so Findly can explain future pricing while keeping Stripe safely in placeholder mode for the MVP.</p>
+          <p className="mt-3 max-w-3xl text-sm leading-6 text-black/45">Meter shopper sessions, guided interactions, catalog scale, published experiences and AI-assist credits so Sellentum can explain future pricing while keeping Stripe safely in placeholder mode for the MVP.</p>
         </div>
         <div className="flex gap-3">
           <Link href="/dashboard/analytics" className="btn-secondary"><Gauge size={14} /> Usage analytics</Link>

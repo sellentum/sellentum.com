@@ -19,7 +19,7 @@ export default function IndustriesPage() {
         <div className="relative mx-auto max-w-[1280px] text-center">
           <p className="eyebrow text-moss">Industries</p>
           <h1 className="mx-auto mt-6 max-w-5xl text-6xl font-extrabold leading-[.95] tracking-[-.07em] lg:text-8xl">For ecommerce catalogs where choice needs guidance.</h1>
-          <p className="mx-auto mt-7 max-w-2xl text-sm leading-7 text-black/52">Findly is best for products where shoppers need context: use case, fit, conditions, compatibility, budget, style or routine.</p>
+          <p className="mx-auto mt-7 max-w-2xl text-sm leading-7 text-black/52">Sellentum is best for products where shoppers need context: use case, fit, conditions, compatibility, budget, style or routine.</p>
         </div>
       </section>
 
@@ -49,7 +49,7 @@ export default function IndustriesPage() {
         </div>
       </section>
 
-      <footer className="border-t border-black/10 px-6 py-10 lg:px-10"><div className="mx-auto flex max-w-[1280px] items-center justify-between text-xs font-bold text-black/35"><Logo /><span>© 2026 Findly</span></div></footer>
+      <footer className="border-t border-black/10 px-6 py-10 lg:px-10"><div className="mx-auto flex max-w-[1280px] items-center justify-between text-xs font-bold text-black/35"><Logo /><span>© 2026 Sellentum</span></div></footer>
     </main>
   );
 }

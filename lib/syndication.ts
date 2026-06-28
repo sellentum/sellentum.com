@@ -96,7 +96,7 @@ const templates: SyndicationTemplate[] = [
     partnerType: "Retailer",
     audience: "Retailer shoppers comparing products on a partner PDP who need guided reassurance before buying.",
     targetPages: "Retailer product detail pages, buying-guide modules, comparison widgets",
-    objective: "Give downstream retailers a branded Findly advisor without exposing merchant admin access.",
+    objective: "Give downstream retailers a branded Sellentum advisor without exposing merchant admin access.",
     experience: "assistant",
     mode: "modal",
     source: "retailer",
@@ -158,7 +158,7 @@ const templates: SyndicationTemplate[] = [
 ];
 
 function cleanOrigin(origin: string) {
-  return (origin || "https://your-findly-app.vercel.app").replace(/\/+$/, "");
+  return (origin || "https://your-sellentum-app.vercel.app").replace(/\/+$/, "");
 }
 
 function rate(part: number, total: number) {
@@ -176,16 +176,16 @@ function eventExperience(event: AnalyticsEvent): ExperienceType | "" {
 }
 
 function partnerCampaign(template: SyndicationTemplate) {
-  return `findly-syndication-${template.id}`;
+  return `sellentum-syndication-${template.id}`;
 }
 
 function placementEvents(events: AnalyticsEvent[], template: SyndicationTemplate) {
   const campaign = partnerCampaign(template);
   return events.filter((event) => {
-    const eventCampaign = eventMetadata(event, "findly_campaign");
-    const source = eventMetadata(event, "findly_source");
-    const placement = eventMetadata(event, "findly_placement");
-    const medium = eventMetadata(event, "findly_medium");
+    const eventCampaign = eventMetadata(event, "sellentum_campaign");
+    const source = eventMetadata(event, "sellentum_source");
+    const placement = eventMetadata(event, "sellentum_placement");
+    const medium = eventMetadata(event, "sellentum_medium");
     const experience = eventExperience(event);
     return eventCampaign === campaign
       || placement === template.placement
@@ -302,7 +302,7 @@ function dataPolicyForPlacement(template: SyndicationTemplate) {
     "No Supabase keys, OpenAI keys, merchant admin routes or private dashboard URLs are shared with the partner.",
     `Partner receives only a public ${widgetExperienceLabel(template.experience).toLowerCase()} runtime inside a controlled script/iframe.`,
     "Analytics uses campaign, source, placement, page URL, page title and referrer labels; avoid sending customer names, emails or order IDs.",
-    "Product recommendations remain selected by Findly's deterministic catalog/rule engine; AI copy is generated only after products are selected.",
+    "Product recommendations remain selected by Sellentum's deterministic catalog/rule engine; AI copy is generated only after products are selected.",
   ];
 }
 
@@ -385,7 +385,7 @@ function governance(placements: SyndicationPlacement[], products: Product[]) {
 
 function formatPacket(report: Omit<SyndicationReport, "packet">) {
   return [
-    "Findly partner syndication packet",
+    "Sellentum partner syndication packet",
     "=================================",
     "",
     `Status: ${report.status.toUpperCase()} · Score: ${report.score}%`,

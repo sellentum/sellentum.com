@@ -157,7 +157,7 @@ export const starterKits: StarterKit[] = [
     quiz: {
       name: "Performance footwear finder",
       welcome_title: "Find the shoe built for your next run",
-      welcome_message: "Answer three quick questions and Findly will match activity, terrain and budget to the right product.",
+      welcome_message: "Answer three quick questions and Sellentum will match activity, terrain and budget to the right product.",
       questions: [
         {
           key: "goal",
@@ -194,7 +194,7 @@ export const starterKits: StarterKit[] = [
     configurator: {
       name: "Performance footwear kit configurator",
       title: "Build your running kit",
-      subtitle: "Choose the anchor shoe, conditions and finishing touches while Findly keeps incompatible bundles out of the cart.",
+      subtitle: "Choose the anchor shoe, conditions and finishing touches while Sellentum keeps incompatible bundles out of the cart.",
       hero_image_url: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1400&q=85",
       base_price: 0,
       steps: [
@@ -213,7 +213,7 @@ export const starterKits: StarterKit[] = [
         {
           key: "conditions",
           title: "Match the conditions",
-          helper_text: "Findly explains blocked combinations before the shopper reaches checkout.",
+          helper_text: "Sellentum explains blocked combinations before the shopper reaches checkout.",
           selection_type: "single",
           required: true,
           options: [
@@ -300,7 +300,7 @@ export const starterKits: StarterKit[] = [
     quiz: {
       name: "Beauty routine finder",
       welcome_title: "Build a routine your skin can stick with",
-      welcome_message: "Tell Findly your goal, tolerance and budget. Product selection stays rule-based; explanation copy stays grounded.",
+      welcome_message: "Tell Sellentum your goal, tolerance and budget. Product selection stays rule-based; explanation copy stays grounded.",
       questions: [
         {
           key: "skin-goal",
@@ -325,7 +325,7 @@ export const starterKits: StarterKit[] = [
         {
           key: "beauty-budget",
           title: "What price range should we respect?",
-          helper_text: "Findly treats budget as a hard rule.",
+          helper_text: "Sellentum treats budget as a hard rule.",
           options: [
             { key: "under-30", label: "Up to £30", match_type: "budget_max", match_value: "30", weight: 5 },
             { key: "under-45", label: "Up to £45", match_type: "budget_max", match_value: "45", weight: 5 },
@@ -337,7 +337,7 @@ export const starterKits: StarterKit[] = [
     configurator: {
       name: "Skincare routine configurator",
       title: "Build a three-step routine",
-      subtitle: "Pick a base goal, treatment and moisturiser while Findly keeps sensitivity and texture choices clear.",
+      subtitle: "Pick a base goal, treatment and moisturiser while Sellentum keeps sensitivity and texture choices clear.",
       hero_image_url: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=1400&q=85",
       base_price: 0,
       steps: [
@@ -440,7 +440,7 @@ export const starterKits: StarterKit[] = [
     quiz: {
       name: "Home office setup finder",
       welcome_title: "Design a workspace that fits how you work",
-      welcome_message: "Findly will match your working style, space and budget to a reliable setup recommendation.",
+      welcome_message: "Sellentum will match your working style, space and budget to a reliable setup recommendation.",
       questions: [
         {
           key: "work-style",
@@ -464,7 +464,7 @@ export const starterKits: StarterKit[] = [
         },
         {
           key: "office-budget",
-          title: "What budget should Findly stay under?",
+          title: "What budget should Sellentum stay under?",
           helper_text: "Budget is used as a hard filter before ranking.",
           options: [
             { key: "under-100", label: "Up to £100", match_type: "budget_max", match_value: "100", weight: 5 },

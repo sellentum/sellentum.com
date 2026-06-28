@@ -33,7 +33,7 @@ export type WorkspaceExportFile = {
 };
 
 export type WorkspaceSnapshotArchive = {
-  version: "findly-workspace-snapshot-v1";
+  version: "sellentum-workspace-snapshot-v1";
   snapshot_id: string;
   generated_at: string;
   origin: string;
@@ -116,12 +116,12 @@ const allowedMetadataKeys = [
   "experience_id",
   "experience_name",
   "experience_slug",
-  "findly_source",
-  "findly_medium",
-  "findly_campaign",
-  "findly_placement",
-  "findly_content",
-  "findly_term",
+  "sellentum_source",
+  "sellentum_medium",
+  "sellentum_campaign",
+  "sellentum_placement",
+  "sellentum_content",
+  "sellentum_term",
   "page_url",
   "page_title",
   "referrer",
@@ -136,7 +136,7 @@ const allowedMetadataKeys = [
 ];
 
 function cleanOrigin(origin: string) {
-  return (origin || "https://your-findly-app.vercel.app").replace(/\/+$/, "");
+  return (origin || "https://your-sellentum-app.vercel.app").replace(/\/+$/, "");
 }
 
 function slugify(value: string) {
@@ -207,7 +207,7 @@ function safeMetadata(metadata?: Record<string, unknown>) {
 }
 
 function analyticsCsv(events: AnalyticsEvent[]) {
-  const header = ["id", "event_type", "quiz_id", "product_id", "experience_type", "findly_source", "findly_campaign", "findly_placement", "created_at"];
+  const header = ["id", "event_type", "quiz_id", "product_id", "experience_type", "sellentum_source", "sellentum_campaign", "sellentum_placement", "created_at"];
   return [
     csvRow(header),
     ...events.map((event) => csvRow([
@@ -216,9 +216,9 @@ function analyticsCsv(events: AnalyticsEvent[]) {
       event.quiz_id,
       event.product_id || "",
       typeof event.metadata?.experience_type === "string" ? event.metadata.experience_type : "",
-      typeof event.metadata?.findly_source === "string" ? event.metadata.findly_source : "",
-      typeof event.metadata?.findly_campaign === "string" ? event.metadata.findly_campaign : "",
-      typeof event.metadata?.findly_placement === "string" ? event.metadata.findly_placement : "",
+      typeof event.metadata?.sellentum_source === "string" ? event.metadata.sellentum_source : "",
+      typeof event.metadata?.sellentum_campaign === "string" ? event.metadata.sellentum_campaign : "",
+      typeof event.metadata?.sellentum_placement === "string" ? event.metadata.sellentum_placement : "",
       event.created_at,
     ])),
   ].join("\n");
@@ -299,7 +299,7 @@ function formatHandoff({
   restorePlan: string[];
 }) {
   return [
-    `Findly workspace snapshot: ${archive.brand.brand_name}`,
+    `Sellentum workspace snapshot: ${archive.brand.brand_name}`,
     "========================================",
     "",
     `Snapshot ID: ${archive.snapshot_id}`,
@@ -357,7 +357,7 @@ export function buildWorkspaceSnapshot({
   generatedAt?: Date;
 }): WorkspaceSnapshot {
   const safeOrigin = cleanOrigin(origin);
-  const id = snapshotId(settings.brand_name || "Findly", generatedAt);
+  const id = snapshotId(settings.brand_name || "Sellentum", generatedAt);
   const release = buildReleaseCandidate({ origin: safeOrigin, products, quizzes, configurators, events, settings, generatedAt });
   const decisionGraph = buildDecisionGraph({ products, quizzes, configurators, events });
   const launchChannels = buildLaunchChannelReport({ origin: safeOrigin, settings, finders: quizzes, configurators, events });
@@ -446,7 +446,7 @@ export function buildWorkspaceSnapshot({
   ];
 
   const archive: WorkspaceSnapshotArchive = {
-    version: "findly-workspace-snapshot-v1",
+    version: "sellentum-workspace-snapshot-v1",
     snapshot_id: id,
     generated_at: generatedAt.toISOString(),
     origin: safeOrigin,

@@ -1,6 +1,6 @@
-# Findly MVP
+# Sellentum MVP
 
-Findly is a compact guided-selling SaaS product for ecommerce brands. A merchant can import products, build question flows, create configurable bundles, connect choices to deterministic matching signals, publish the experience, and embed it on any website. OpenAI turns the selected product facts into concise match explanations; it never chooses the products.
+Sellentum is a compact guided-selling SaaS product for ecommerce brands. A merchant can import products, build question flows, create configurable bundles, connect choices to deterministic matching signals, publish the experience, and embed it on any website. OpenAI turns the selected product facts into concise match explanations; it never chooses the products.
 
 ## What is included
 
@@ -30,7 +30,7 @@ Findly is a compact guided-selling SaaS product for ecommerce brands. A merchant
 - Launch Channels board that packages homepage, category, PDP and support placements with copy-ready snippets, attribution labels, QA checks and channel metrics
 - Partner Syndication board that packages retailer, marketplace, affiliate, support and sales-partner widget snippets with syndication attribution, QA checks and data-policy handoff notes
 - Storefront QA sandbox that previews each channel in a controlled desktop storefront, lists expected telemetry events and exports a copyable QA packet before theme installation
-- Storefront Install Scanner that fetches a staging/production page, verifies the Findly widget script and data attributes, checks attribution labels and exports a copyable install scan packet
+- Storefront Install Scanner that fetches a staging/production page, verifies the Sellentum widget script and data attributes, checks attribution labels and exports a copyable install scan packet
 - Runtime Operations Center that monitors public endpoint contracts, guardrails, analytics quality, release gates and telemetry proof
 - Release Center that rolls catalog, experience, channel, sandbox, analytics and optimization gates into a go/no-go release candidate with rollback notes
 - Production Verification Center that packages Vercel deployment gates, Supabase/demo mode evidence, required route/API contracts, desktop QA scenarios, final verification commands and copyable production handoff packets
@@ -165,7 +165,7 @@ Publish a finder or configurator, then copy the generated snippet from **Brand &
   data-position="right"
   data-height="780px"
   data-medium="embed"
-  data-campaign="findly-launch"
+  data-campaign="sellentum-launch"
   data-placement="pdp-bottom"
   async
 ></script>

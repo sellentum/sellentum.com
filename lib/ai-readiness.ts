@@ -190,7 +190,7 @@ function buildSurfaces(audit: AiReadinessSourceAudit, openaiConfigured: boolean)
       route: "public.match_products + semantic candidates",
       required: [audit.semanticCandidates, audit.pgvectorSchema],
       detail: "Uses OpenAI embeddings and pgvector to retrieve candidates before deterministic ranking.",
-      boundary: "Vector similarity can add candidate signals, but final ranking still uses Findly scoring.",
+      boundary: "Vector similarity can add candidate signals, but final ranking still uses Sellentum scoring.",
     },
   ];
 
@@ -230,7 +230,7 @@ function buildContracts(audit: AiReadinessSourceAudit): AiSourceContract[] {
 
 function buildPacket(report: Omit<AiReadinessReport, "packet">) {
   return [
-    "Findly AI Readiness packet",
+    "Sellentum AI Readiness packet",
     `Generated: ${report.generatedAt}`,
     `Source: ${report.source}`,
     `Workspace mode: ${report.mode}`,

@@ -12,7 +12,7 @@ export type LaunchContractCheck = {
   id: string;
   label: string;
   detail: string;
-  owner: "merchant" | "developer" | "findly";
+  owner: "merchant" | "developer" | "sellentum";
   status: "ready" | "review" | "blocked";
 };
 
@@ -28,7 +28,7 @@ export type LaunchContract = {
 };
 
 function cleanOrigin(origin: string) {
-  return (origin || "https://your-findly-app.vercel.app").replace(/\/+$/, "");
+  return (origin || "https://your-sellentum-app.vercel.app").replace(/\/+$/, "");
 }
 
 function statusFromInstallSeverity(severity: WidgetInstallReport["checks"][number]["severity"]): LaunchContractCheck["status"] {
@@ -104,13 +104,13 @@ export function buildLaunchContract({
         event: "widget_view",
         purpose: "Proves the script/frame loaded on the storefront.",
         requiredMetadata: ["experience_type", "experience_id", "session_id"],
-        optionalMetadata: ["catalog_active_products", "findly_source", "findly_campaign", "findly_placement", "findly_page_url"],
+        optionalMetadata: ["catalog_active_products", "sellentum_source", "sellentum_campaign", "sellentum_placement", "sellentum_page_url"],
       },
       {
         event: "quiz_start",
         purpose: "Captures shopper start/search/first interaction.",
         requiredMetadata: ["experience_type", "experience_id", "session_id"],
-        optionalMetadata: ["query", "answers", "terms", "selected_options", "recovery_status", "findly_source", "findly_campaign", "findly_placement"],
+        optionalMetadata: ["query", "answers", "terms", "selected_options", "recovery_status", "sellentum_source", "sellentum_campaign", "sellentum_placement"],
       },
       {
         event: "quiz_complete",

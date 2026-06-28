@@ -1,4 +1,4 @@
--- Findly MVP schema for Supabase/PostgreSQL
+-- Sellentum MVP schema for Supabase/PostgreSQL
 -- Run this file once in the Supabase SQL editor.
 
 create extension if not exists pgcrypto;

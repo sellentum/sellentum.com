@@ -163,7 +163,7 @@ function shopperPriorityStep(products: ConfiguratorBlueprintProduct[], signals: 
   return {
     key: "shopper-priority",
     title: "What should this setup prioritise?",
-    helper_text: "Findly keeps choices compatible with the priority you select.",
+    helper_text: "Sellentum keeps choices compatible with the priority you select.",
     selection_type: "single",
     required: true,
     options,

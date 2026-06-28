@@ -314,7 +314,7 @@ function buildActions(report: Omit<BundleStudioReport, "actions" | "packet" | "h
       id: "capture-bundle-telemetry",
       priority: "medium",
       title: "Capture bundle telemetry",
-      detail: "A published configurator exists, but Findly has not seen completed configurator journeys in this analytics window.",
+      detail: "A published configurator exists, but Sellentum has not seen completed configurator journeys in this analytics window.",
       evidence: "0 completed configurator journeys.",
       actionHref: "/dashboard/widget-studio",
       actionLabel: "Check widget install",
@@ -354,7 +354,7 @@ function headline(status: BundleStudioStatus, summary: BundleStudioReport["summa
 
 function buildPacket(report: Omit<BundleStudioReport, "packet">) {
   const lines = [
-    "Findly Bundle & Attach Studio packet",
+    "Sellentum Bundle & Attach Studio packet",
     "",
     `Status: ${report.status} · Score: ${report.score}%`,
     `Headline: ${report.headline}`,

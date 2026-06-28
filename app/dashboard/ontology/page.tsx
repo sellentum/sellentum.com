@@ -29,7 +29,7 @@ export default function OntologyPage() {
       <div>
         <span className="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-lime/45 text-moss"><Network size={25} /></span>
         <h1 className="display mt-5 text-4xl">Your ontology starts with products.</h1>
-        <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-black/45">Add or import catalog items, then Findly will map the buyer needs, features, tags and categories that power discovery.</p>
+        <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-black/45">Add or import catalog items, then Sellentum will map the buyer needs, features, tags and categories that power discovery.</p>
         <Link href="/dashboard/products" className="btn-primary mt-6"><Boxes size={15} /> Add products</Link>
       </div>
     </div>;
@@ -40,7 +40,7 @@ export default function OntologyPage() {
       <div>
         <p className="eyebrow text-moss">Catalog ontology</p>
         <h1 className="display mt-2 text-5xl">Map product facts to shopper intent.</h1>
-        <p className="mt-3 max-w-2xl text-sm leading-6 text-black/45">Findly turns your catalog into a practical knowledge map: categories, buyer needs, tags and features that can become finder questions, search terms and recommendation explanations.</p>
+        <p className="mt-3 max-w-2xl text-sm leading-6 text-black/45">Sellentum turns your catalog into a practical knowledge map: categories, buyer needs, tags and features that can become finder questions, search terms and recommendation explanations.</p>
       </div>
       <div className="flex gap-2">
         <Link href="/dashboard/products" className="btn-secondary self-start"><Sparkles size={14} /> Enrich catalog</Link>
@@ -69,7 +69,7 @@ export default function OntologyPage() {
           <div className="flex items-center justify-between gap-4">
             <div>
               <h2 className="flex items-center gap-2 text-sm font-extrabold"><Network size={16} className="text-moss" /> Category clusters</h2>
-              <p className="mt-1 text-xs leading-4 text-black/35">Each cluster shows the signals Findly can use for matching and explanations.</p>
+              <p className="mt-1 text-xs leading-4 text-black/35">Each cluster shows the signals Sellentum can use for matching and explanations.</p>
             </div>
             <span className="rounded-full bg-black/5 px-3 py-1.5 text-xs font-extrabold text-black/35">{ontology.categoryClusters.length} clusters</span>
           </div>
@@ -200,7 +200,7 @@ export default function OntologyPage() {
             <p className="flex items-center gap-2 text-xs font-extrabold"><Lightbulb size={14} className="text-moss" /> Spec-to-benefit translator</p>
             <span className="rounded-full bg-lime/30 px-2.5 py-1 text-xs font-extrabold text-moss">{benefitReport.productsWithBenefits}/{benefitReport.activeProducts || 0} products</span>
           </div>
-          <p className="mt-2 text-xs leading-5 text-black/40">Findly converts technical catalog language into shopper outcomes for questions, search tuning and recommendation copy.</p>
+          <p className="mt-2 text-xs leading-5 text-black/40">Sellentum converts technical catalog language into shopper outcomes for questions, search tuning and recommendation copy.</p>
           <div className="mt-4 space-y-3">
             {benefitReport.benefits.slice(0, 4).map((benefit) => <article key={benefit.id} className="rounded-2xl bg-canvas p-4">
               <div className="flex items-start justify-between gap-3">

@@ -319,7 +319,7 @@ function budgetAverage(draft: PersonaDraft) {
 
 function buildPacket(report: Omit<PersonaStudioReport, "packet">) {
   return [
-    "Findly Shopper Persona packet",
+    "Sellentum Shopper Persona packet",
     "==============================",
     "",
     `Status: ${report.status.toUpperCase()} · Score: ${report.score}%`,

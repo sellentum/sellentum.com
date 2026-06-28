@@ -17,7 +17,7 @@ export type ReleaseGate = {
   label: string;
   detail: string;
   status: ReleaseGateStatus;
-  owner: "Merchant" | "Developer" | "Growth" | "Catalog" | "Findly";
+  owner: "Merchant" | "Developer" | "Growth" | "Catalog" | "Sellentum";
   href: string;
   action: string;
 };
@@ -72,7 +72,7 @@ function decisionFromGates(gates: ReleaseGate[], score: number): ReleaseDecision
 }
 
 function releaseId(date: Date) {
-  return `findly-${date.toISOString().slice(0, 10).replace(/-/g, "")}`;
+  return `sellentum-${date.toISOString().slice(0, 10).replace(/-/g, "")}`;
 }
 
 function gate(id: string, label: string, detail: string, status: ReleaseGateStatus, owner: ReleaseGate["owner"], href: string, action: string): ReleaseGate {
@@ -107,7 +107,7 @@ function buildActions(gates: ReleaseGate[]): ReleaseAction[] {
 
 function formatReleaseNotes(candidate: Omit<ReleaseCandidate, "releaseNotes">) {
   return [
-    `Findly release candidate: ${candidate.title}`,
+    `Sellentum release candidate: ${candidate.title}`,
     "========================================",
     "",
     `Release ID: ${candidate.id}`,
@@ -185,7 +185,7 @@ export function buildReleaseCandidate({
       "Recommendation reliability",
       `${recommendationQa.score}% QA score · ${recommendationQa.summary.passingScenarios}/${recommendationQa.summary.scenariosChecked} scenarios passed.`,
       recommendationQa.status,
-      "Findly",
+      "Sellentum",
       "/dashboard/lab",
       "Debug recommendations",
     ),
@@ -221,7 +221,7 @@ export function buildReleaseCandidate({
       "Analytics event quality",
       `${analyticsQuality.score}% analytics QA score across ${events.length} events.`,
       analyticsQuality.score >= 85 ? "pass" : analyticsQuality.score >= 60 ? "warn" : "fail",
-      "Findly",
+      "Sellentum",
       "/dashboard/analytics",
       "Open analytics",
     ),
@@ -239,7 +239,7 @@ export function buildReleaseCandidate({
   const decision = decisionFromGates(gates, score);
   const baseCandidate = {
     id: releaseId(generatedAt),
-    title: `${settings.brand_name || "Findly"} storefront release`,
+    title: `${settings.brand_name || "Sellentum"} storefront release`,
     decision,
     score,
     generatedAt: generatedAt.toISOString(),
@@ -263,7 +263,7 @@ export function buildReleaseCandidate({
     gates,
     actions: buildActions(gates),
     rollbackPlan: [
-      "Remove or comment out the newest Findly script snippet from the storefront theme slot.",
+      "Remove or comment out the newest Sellentum script snippet from the storefront theme slot.",
       "Restore the previous stable snippet from the last copied launch packet or channel packet.",
       "If a published finder/configurator caused the issue, unpublish it and route the channel back to the previous stable experience ID.",
       "Run Storefront QA Sandbox for the restored placement and confirm widget_view plus buy_click telemetry are accepted.",

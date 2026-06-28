@@ -1,6 +1,6 @@
 import { getAttributionMetadata } from "./attribution";
 
-const SESSION_KEY = "findly_anonymous_session";
+const SESSION_KEY = "sellentum_anonymous_session";
 
 type StoredSession = {
   id: string;

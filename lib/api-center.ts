@@ -64,7 +64,7 @@ export type ApiCenterReport = {
 };
 
 function cleanOrigin(origin: string) {
-  return (origin || "https://your-findly-app.vercel.app").replace(/\/+$/, "");
+  return (origin || "https://your-sellentum-app.vercel.app").replace(/\/+$/, "");
 }
 
 function json(value: unknown) {
@@ -245,7 +245,7 @@ function buildEndpoints(origin: string, quizzes: Quiz[], configurators: Configur
       experience: "analytics",
       purpose: "Record widget telemetry from custom storefront UIs using the same contract as the embed script.",
       status: "ready",
-      request: { event_type: "quiz_start", quiz_id: finder?.id || finderId, metadata: { experience_type: "finder", experience_id: finderId, session_id: "anonymous-session-id", findly_source: "custom-ui" } },
+      request: { event_type: "quiz_start", quiz_id: finder?.id || finderId, metadata: { experience_type: "finder", experience_id: finderId, session_id: "anonymous-session-id", sellentum_source: "custom-ui" } },
       responseFields: ["accepted", "event_id"],
       guardrails: ["Sanitized metadata", "Required event contract", "Anonymous session IDs", "Rate-limited public writes"],
     }),
@@ -255,7 +255,7 @@ function buildEndpoints(origin: string, quizzes: Quiz[], configurators: Configur
       method: "GET",
       path: `${clean}/api/widget.js`,
       experience: "widget",
-      purpose: "Load the framework-independent script when a custom UI still wants Findly’s modal or inline iframe launcher.",
+      purpose: "Load the framework-independent script when a custom UI still wants Sellentum’s modal or inline iframe launcher.",
       status: "ready",
       request: "No request body.",
       responseFields: ["JavaScript widget runtime"],
@@ -376,7 +376,7 @@ function headline(status: ApiCenterStatus, score: number) {
 
 function packet(report: Omit<ApiCenterReport, "packet">) {
   return [
-    "Findly Headless API Center packet",
+    "Sellentum Headless API Center packet",
     "=================================",
     "",
     `Status: ${report.status.toUpperCase()} · Score: ${report.score}%`,
@@ -460,7 +460,7 @@ export function buildApiCenterReport({
     sdkNotes: [
       {
         label: "Selection boundary",
-        detail: "Custom frontends can call Findly APIs directly, but product selection remains server-side and deterministic.",
+        detail: "Custom frontends can call Sellentum APIs directly, but product selection remains server-side and deterministic.",
         proof: "Finder, advisor, search and configurator endpoints load published resources and active catalog records on the server.",
       },
       {

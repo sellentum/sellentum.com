@@ -29,7 +29,7 @@ function CheckIcon({ status }: { status: StorefrontInstallCheckStatus }) {
 
 export default function InstallScannerPage() {
   const { ready, quizzes, configurators } = useStore();
-  const [appOrigin, setAppOrigin] = useState("https://your-findly-app.vercel.app");
+  const [appOrigin, setAppOrigin] = useState("https://your-sellentum-app.vercel.app");
   const [url, setUrl] = useState("");
   const [report, setReport] = useState<StorefrontInstallScanReport | null>(null);
   const [error, setError] = useState("");
@@ -77,8 +77,8 @@ export default function InstallScannerPage() {
         <div className="flex items-start justify-between gap-10">
           <div className="max-w-4xl">
             <p className="eyebrow text-lime">Storefront Install Scanner</p>
-            <h1 className="display mt-3 text-5xl">Scan a storefront page for the Findly widget before launch.</h1>
-            <p className="mt-4 max-w-3xl text-sm font-bold leading-6 text-white/45">Paste a staging or production storefront URL. Findly fetches the page HTML, checks for the widget script, validates data attributes, compares app origins and produces install QA evidence.</p>
+            <h1 className="display mt-3 text-5xl">Scan a storefront page for the Sellentum widget before launch.</h1>
+            <p className="mt-4 max-w-3xl text-sm font-bold leading-6 text-white/45">Paste a staging or production storefront URL. Sellentum fetches the page HTML, checks for the widget script, validates data attributes, compares app origins and produces install QA evidence.</p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Link href="/dashboard/widget-studio" className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-5 py-3 text-sm font-extrabold text-white hover:bg-white/15"><Code2 size={14} /> Widget Studio</Link>
               <Link href="/dashboard/storefront-sandbox" className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-5 py-3 text-sm font-extrabold text-white hover:bg-white/15"><MonitorCheck size={14} /> QA Sandbox</Link>
@@ -91,7 +91,7 @@ export default function InstallScannerPage() {
               <span className={cn("rounded-full px-3 py-1.5 text-xs font-extrabold uppercase", report ? statusTone[report.status] : "bg-white/10 text-white/45")}>{report?.status || "not scanned"}</span>
             </div>
             <p className="display mt-8 text-6xl">{report ? `${report.score}%` : "—"}</p>
-            <p className="mt-2 text-sm font-bold leading-6 text-white/45">{report ? `${report.summary.findlyScripts} widget script${report.summary.findlyScripts === 1 ? "" : "s"} · ${report.summary.blockers} blockers · ${report.summary.warnings} warnings.` : "Run a scan after installing the snippet on a staging storefront page."}</p>
+            <p className="mt-2 text-sm font-bold leading-6 text-white/45">{report ? `${report.summary.sellentumScripts} widget script${report.summary.sellentumScripts === 1 ? "" : "s"} · ${report.summary.blockers} blockers · ${report.summary.warnings} warnings.` : "Run a scan after installing the snippet on a staging storefront page."}</p>
           </div>
         </div>
       </section>
@@ -105,8 +105,8 @@ export default function InstallScannerPage() {
               <input className="field" value={url} onChange={(event) => setUrl(event.target.value)} placeholder="https://store.example.com/products/trail-runner" type="url" required />
             </div>
             <div>
-              <label className="label">Expected Findly app origin</label>
-              <input className="field" value={appOrigin} onChange={(event) => setAppOrigin(event.target.value)} placeholder="https://your-findly-app.vercel.app" type="url" />
+              <label className="label">Expected Sellentum app origin</label>
+              <input className="field" value={appOrigin} onChange={(event) => setAppOrigin(event.target.value)} placeholder="https://your-sellentum-app.vercel.app" type="url" />
             </div>
             <button disabled={scanning} className="btn-primary w-full">{scanning ? <LoaderCircle className="animate-spin" size={15} /> : <Search size={15} />} {scanning ? "Scanning storefront…" : "Scan storefront install"}</button>
             {error && <p className="rounded-2xl bg-red-50 p-4 text-sm font-bold leading-5 text-red-700">{error}</p>}
@@ -152,7 +152,7 @@ export default function InstallScannerPage() {
       {report && (
         <div className="mt-6 grid gap-6 xl:grid-cols-[.85fr_1.15fr]">
           <section className="rounded-[28px] border border-black/[0.07] bg-white p-6">
-            <div className="flex items-center justify-between"><div><h2 className="text-sm font-extrabold">Detected snippets</h2><p className="mt-1 text-sm text-black/45">Findly scripts discovered in the scanned HTML.</p></div><Code2 className="text-moss" size={18} /></div>
+            <div className="flex items-center justify-between"><div><h2 className="text-sm font-extrabold">Detected snippets</h2><p className="mt-1 text-sm text-black/45">Sellentum scripts discovered in the scanned HTML.</p></div><Code2 className="text-moss" size={18} /></div>
             <div className="mt-5 space-y-3">
               {report.snippets.map((snippet, index) => (
                 <article key={`${snippet.scriptSrc}-${index}`} className="rounded-2xl border border-black/[0.07] bg-canvas p-4">
@@ -162,7 +162,7 @@ export default function InstallScannerPage() {
                   </div>
                 </article>
               ))}
-              {!report.snippets.length && <p className="rounded-2xl bg-red-50 p-4 text-sm font-bold text-red-700">No Findly widget snippets were detected.</p>}
+              {!report.snippets.length && <p className="rounded-2xl bg-red-50 p-4 text-sm font-bold text-red-700">No Sellentum widget snippets were detected.</p>}
             </div>
           </section>
 

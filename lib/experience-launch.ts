@@ -38,7 +38,7 @@ const experiencePurpose: Record<WidgetEmbedExperience, string> = {
 };
 
 function cleanOrigin(origin: string) {
-  return (origin || "https://your-findly-app.vercel.app").replace(/\/+$/, "");
+  return (origin || "https://your-sellentum-app.vercel.app").replace(/\/+$/, "");
 }
 
 function preferredPublishedFinder(finders: Quiz[], preferredId?: string) {
@@ -90,7 +90,7 @@ function buildCard(input: LaunchExperienceInput, experience: WidgetEmbedExperien
     label,
     position,
     medium: "embed",
-    campaign: "findly-launch",
+    campaign: "sellentum-launch",
     placement: `${experience}-launcher`,
   });
   const installReport = buildWidgetInstallReport({
@@ -102,7 +102,7 @@ function buildCard(input: LaunchExperienceInput, experience: WidgetEmbedExperien
     label,
     position,
     medium: "embed",
-    campaign: "findly-launch",
+    campaign: "sellentum-launch",
     placement: `${experience}-launcher`,
   });
 

@@ -16,7 +16,7 @@ const statusTone: Record<StorefrontSandboxStatus, string> = {
 
 export default function StorefrontSandboxPage() {
   const { ready, settings, quizzes, configurators, events } = useStore();
-  const [origin, setOrigin] = useState("https://your-findly-app.vercel.app");
+  const [origin, setOrigin] = useState("https://your-sellentum-app.vercel.app");
   const report = useMemo(() => buildStorefrontSandboxReport({ origin, settings, finders: quizzes, configurators, events }), [origin, settings, quizzes, configurators, events]);
   const [selectedId, setSelectedId] = useState(report.recommendedCase?.id || "");
   const [copied, setCopied] = useState<string | null>(null);
@@ -135,7 +135,7 @@ export default function StorefrontSandboxPage() {
                       <div>
                         <p className="eyebrow text-moss">{selected.storefrontArea}</p>
                         <h3 className="display mt-3 text-4xl">Find the product that fits before you buy.</h3>
-                        <p className="mt-3 max-w-md text-sm leading-6 text-black/45">This sandbox shows where Findly appears, how the shopper opens it, and which events must arrive in Analytics.</p>
+                        <p className="mt-3 max-w-md text-sm leading-6 text-black/45">This sandbox shows where Sellentum appears, how the shopper opens it, and which events must arrive in Analytics.</p>
                         <div className="mt-6 grid grid-cols-3 gap-3">
                           {["Product card", "Buying guide", "Reviews"].map((label) => <div key={label} className="h-28 rounded-2xl bg-canvas p-4"><p className="text-xs font-extrabold text-black/40">{label}</p></div>)}
                         </div>
@@ -148,7 +148,7 @@ export default function StorefrontSandboxPage() {
                             <div>
                               <span className="mx-auto grid h-12 w-12 place-items-center rounded-2xl text-white" style={{ background: settings.primary_color }}><Sparkles size={20} /></span>
                               <h4 className="mt-4 text-sm font-extrabold">Modal launcher preview</h4>
-                              <p className="mx-auto mt-2 max-w-xs text-xs leading-4 text-black/40">Clicking the storefront launcher should lazy-load this Findly iframe and record a widget_view with channel labels.</p>
+                              <p className="mx-auto mt-2 max-w-xs text-xs leading-4 text-black/40">Clicking the storefront launcher should lazy-load this Sellentum iframe and record a widget_view with channel labels.</p>
                               <a href={selected.publicUrl} target="_blank" className="mt-5 inline-flex items-center gap-2 rounded-full px-4 py-3 text-xs font-extrabold text-white" style={{ background: settings.primary_color }}>Open {selected.experienceLabel}<ExternalLink size={12} /></a>
                             </div>
                           </div>

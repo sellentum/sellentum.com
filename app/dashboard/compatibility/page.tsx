@@ -194,7 +194,7 @@ export default function CompatibilityMatrixPage() {
 
           <section className="rounded-[28px] border border-black/[0.07] bg-white p-5">
             <h2 className="flex items-center gap-2 text-sm font-extrabold"><Network size={16} className="text-moss" /> Why this matters</h2>
-            <p className="mt-3 text-xs leading-5 text-black/45">Zoovu wins complex categories because it can reason over dependencies: if a shopper chooses one motor, bracket, finish or fit constraint, incompatible items are removed before the cart. This center makes that same rule layer visible for Findly merchants.</p>
+            <p className="mt-3 text-xs leading-5 text-black/45">Zoovu wins complex categories because it can reason over dependencies: if a shopper chooses one motor, bracket, finish or fit constraint, incompatible items are removed before the cart. This center makes that same rule layer visible for Sellentum merchants.</p>
             <button onClick={copyPacket} className="mt-5 inline-flex items-center gap-2 rounded-full bg-ink px-4 py-2.5 text-xs font-extrabold text-white">{copied ? "Packet copied" : "Copy matrix packet"} <Clipboard size={13} /></button>
           </section>
 

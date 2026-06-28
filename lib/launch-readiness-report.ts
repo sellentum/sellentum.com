@@ -246,7 +246,7 @@ function strengthCopy(check: LaunchReportCheck) {
     "explanation-fact-coverage": "Product facts are strong enough to support launch copy.",
     "widget-script": "The copy-paste widget has at least one launchable target.",
     "settings": "Brand settings are complete enough for a polished storefront widget.",
-    "event-volume": "Analytics events are already flowing into Findly.",
+    "event-volume": "Analytics events are already flowing into Sellentum.",
     "session-events": "Shopper sessions can be grouped into journey analytics.",
     "intent-events": "Zero-party intent metadata is being captured.",
     "analytics-quality-score": "Analytics QA is strong enough to support launch decisions.",

@@ -12,7 +12,7 @@ export async function getWorkspaceIdentity() {
   }
 
   const cookieStore = await cookies();
-  if (cookieStore.get("findly_demo_session")?.value === "1") {
+  if (cookieStore.get("sellentum_demo_session")?.value === "1") {
     return { userId: DEMO_USER_ID, mode: "demo" as const, supabase: null };
   }
   return null;

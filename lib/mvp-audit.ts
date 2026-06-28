@@ -125,7 +125,7 @@ function buildActions(requirements: MvpAuditRequirement[]): MvpAuditAction[] {
 
 function buildPacket(report: Omit<MvpAuditReport, "packet">) {
   return [
-    "Findly MVP Completion Audit",
+    "Sellentum MVP Completion Audit",
     "===========================",
     "",
     `Status: ${report.status.toUpperCase()} · Score: ${report.score}%`,
@@ -298,7 +298,7 @@ export function buildMvpAuditReport({
       "analytics",
       "Analytics event tracking",
       coveredEvents === requiredAnalyticsEvents.length ? "done" : coveredEvents >= 3 ? "review" : "pending",
-      "Findly tracks widget views, starts, completions, recommended products, buy clicks and feedback.",
+      "Sellentum tracks widget views, starts, completions, recommended products, buy clicks and feedback.",
       `${coveredEvents}/${requiredAnalyticsEvents.length} required event types are present in this workspace.`,
       "/dashboard/analytics",
       "Generate a full QA session with every required event and source attribution.",

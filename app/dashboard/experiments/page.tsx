@@ -24,7 +24,7 @@ const priorityTone: Record<ExperimentPriority, string> = {
 
 export default function ExperimentsPage() {
   const { ready, products, quizzes, configurators, events, settings } = useStore();
-  const [origin, setOrigin] = useState("https://your-findly-app.vercel.app");
+  const [origin, setOrigin] = useState("https://your-sellentum-app.vercel.app");
   const report = useMemo(() => buildExperimentPlanningReport({ origin, products, quizzes, configurators, events, settings }), [origin, products, quizzes, configurators, events, settings]);
   const [selectedId, setSelectedId] = useState(report.nextExperiment?.id || "");
   const [copied, setCopied] = useState(false);
@@ -47,7 +47,7 @@ export default function ExperimentsPage() {
         <div>
           <p className="eyebrow text-moss">Experiment planner</p>
           <h1 className="display mt-2 text-5xl">Turn launch data into controlled improvements.</h1>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-black/45">Findly proposes safe post-launch tests from funnel rates, attribution quality, discovery gaps and channel readiness. Product selection stays deterministic; experiments change copy, placement, rules or catalog language.</p>
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-black/45">Sellentum proposes safe post-launch tests from funnel rates, attribution quality, discovery gaps and channel readiness. Product selection stays deterministic; experiments change copy, placement, rules or catalog language.</p>
         </div>
         <div className="flex gap-3">
           <Link href="/dashboard/analytics" className="btn-secondary"><BarChart3 size={14} /> Analytics</Link>

@@ -26,7 +26,7 @@ export type ProductionArtifact = {
   id: string;
   label: string;
   status: ProductionCheckStatus;
-  owner: "Founder" | "Developer" | "Growth" | "Findly";
+  owner: "Founder" | "Developer" | "Growth" | "Sellentum";
   command?: string;
   path?: string;
   detail: string;
@@ -87,7 +87,7 @@ const requiredEventTypes: Array<AnalyticsEvent["event_type"]> = [
 ];
 
 function cleanOrigin(origin: string) {
-  return (origin || "https://your-findly-app.vercel.app").replace(/\/+$/, "");
+  return (origin || "https://your-sellentum-app.vercel.app").replace(/\/+$/, "");
 }
 
 function isLocalOrigin(origin: string) {
@@ -199,7 +199,7 @@ function buildArtifacts({ mode, origin }: { mode: "demo" | "supabase"; origin: s
       id: "openai",
       label: "OpenAI assist boundary",
       status: "pass",
-      owner: "Findly",
+      owner: "Sellentum",
       detail: "OpenAI can enrich copy and explanations, but deterministic logic chooses products.",
       proof: "All public recommendation flows have fallback explanations and deterministic selection gates.",
     },
@@ -334,7 +334,7 @@ function buildActions(checks: ProductionCheck[]): ProductionAction[] {
 
 function buildPacket(report: Omit<ProductionVerificationReport, "packet">) {
   return [
-    "Findly Production Verification packet",
+    "Sellentum Production Verification packet",
     "=====================================",
     "",
     `Status: ${report.status.toUpperCase()} · Score: ${report.score}%`,
@@ -396,8 +396,8 @@ export function buildProductionVerificationReport({
       "deployment-origin",
       "deployment",
       "Production deployment target",
-      localOrigin ? "warn" : clean.includes("your-findly-app") ? "fail" : "pass",
-      localOrigin ? 60 : clean.includes("your-findly-app") ? 0 : 94,
+      localOrigin ? "warn" : clean.includes("your-sellentum-app") ? "fail" : "pass",
+      localOrigin ? 60 : clean.includes("your-sellentum-app") ? 0 : 94,
       "The final smoke suite should target the deployed Vercel domain, not a local dev server.",
       localOrigin ? `${clean} is a local origin. Use it for QA, then repeat smoke on Vercel.` : `${clean} is a non-local deployment target.`,
       "/dashboard/preflight",
@@ -489,10 +489,10 @@ export function buildProductionVerificationReport({
     status,
     score,
     headline: status === "verified"
-      ? "Findly is verified for production handoff after the final deployed smoke run."
+      ? "Sellentum is verified for production handoff after the final deployed smoke run."
       : status === "review"
-        ? "Findly is close to production-ready; deployment and telemetry gates need final review."
-        : "Findly has production blockers that must be fixed before launch.",
+        ? "Sellentum is close to production-ready; deployment and telemetry gates need final review."
+        : "Sellentum has production blockers that must be fixed before launch.",
     summary: {
       checks: checks.length,
       passingChecks: checks.filter((item) => item.status === "pass").length,

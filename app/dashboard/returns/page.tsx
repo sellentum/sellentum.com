@@ -135,7 +135,7 @@ export default function ReturnsIntelligencePage() {
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-sm font-extrabold">Pre-purchase question guardrails</h2>
-                <p className="mt-1 text-xs text-black/35">Questions Findly should ask earlier to prevent expectation mismatch.</p>
+                <p className="mt-1 text-xs text-black/35">Questions Sellentum should ask earlier to prevent expectation mismatch.</p>
               </div>
               <Link href="/dashboard/flow-studio" className="text-xs font-extrabold text-moss">Open Flow Studio</Link>
             </div>

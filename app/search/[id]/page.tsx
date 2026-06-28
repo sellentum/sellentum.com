@@ -112,7 +112,7 @@ export default function PublicSearchPage({ params }: { params: Promise<{ id: str
   const recovery = report.recovery || buildSearchRecoveryReport(report);
 
   if (loading) return <main className="grid min-h-screen place-items-center bg-[#e8eadf]"><div className="text-center"><LoaderCircle className="mx-auto animate-spin text-moss" /><p className="mt-3 text-xs font-bold text-black/40">Preparing product search…</p></div></main>;
-  if (error || !data) return <main className="grid min-h-screen place-items-center bg-canvas p-6 text-center"><div><span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-black/5"><Search size={21} /></span><h1 className="display mt-5 text-4xl">This search experience isn’t available.</h1><p className="mt-2 text-sm text-black/45">{error || "It may be unpublished or no longer exist."}</p><Link href="/" className="btn-primary mt-5">Visit Findly</Link></div></main>;
+  if (error || !data) return <main className="grid min-h-screen place-items-center bg-canvas p-6 text-center"><div><span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-black/5"><Search size={21} /></span><h1 className="display mt-5 text-4xl">This search experience isn’t available.</h1><p className="mt-2 text-sm text-black/45">{error || "It may be unpublished or no longer exist."}</p><Link href="/" className="btn-primary mt-5">Visit Sellentum</Link></div></main>;
 
   return <main className="noise min-h-screen bg-[#e8eadf] p-3 sm:p-6 lg:p-10">
     <section className="relative mx-auto min-h-[calc(100vh-24px)] max-w-6xl overflow-hidden rounded-[28px] border border-white/80 bg-white shadow-soft sm:min-h-[calc(100vh-48px)] lg:min-h-[700px]">
@@ -226,7 +226,7 @@ export default function PublicSearchPage({ params }: { params: Promise<{ id: str
         </main>
       </div>
 
-      <footer className="relative flex items-center justify-between border-t border-black/[0.05] bg-white/80 px-5 py-3 text-xs font-bold text-black/25 sm:px-8"><span>Powered by <b className="text-black/45">findly</b></span><span>Only active catalog products are ranked</span></footer>
+      <footer className="relative flex items-center justify-between border-t border-black/[0.05] bg-white/80 px-5 py-3 text-xs font-bold text-black/25 sm:px-8"><span>Powered by <b className="text-black/45">sellentum</b></span><span>Only active catalog products are ranked</span></footer>
     </section>
   </main>;
 }

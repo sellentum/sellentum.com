@@ -29,7 +29,7 @@ const priorityTone = {
 
 export default function WidgetStudioPage() {
   const { ready, settings, quizzes, configurators, events } = useStore();
-  const [origin, setOrigin] = useState("https://your-findly-app.vercel.app");
+  const [origin, setOrigin] = useState("https://your-sellentum-app.vercel.app");
   const [copied, setCopied] = useState("");
   const report = useMemo(() => buildWidgetStudioReport({ origin, settings, quizzes, configurators, events }), [origin, settings, quizzes, configurators, events]);
 

@@ -35,7 +35,7 @@ const priorityTone: Record<ApiActionPriority, string> = {
 
 export default function ApiCenterPage() {
   const { ready, settings, products, quizzes, configurators, events } = useStore();
-  const [origin, setOrigin] = useState("https://your-findly-app.vercel.app");
+  const [origin, setOrigin] = useState("https://your-sellentum-app.vercel.app");
   const [copied, setCopied] = useState("");
   const [selectedEndpointId, setSelectedEndpointId] = useState("finder-recommendations");
   const report = useMemo(() => buildApiCenterReport({ origin, settings, products, quizzes, configurators, events }), [origin, settings, products, quizzes, configurators, events]);
@@ -58,7 +58,7 @@ export default function ApiCenterPage() {
       <div className="flex items-end justify-between gap-6">
         <div>
           <p className="eyebrow text-moss">Headless API Center</p>
-          <h1 className="display mt-2 max-w-5xl text-5xl">Ship Findly discovery through custom storefront APIs.</h1>
+          <h1 className="display mt-2 max-w-5xl text-5xl">Ship Sellentum discovery through custom storefront APIs.</h1>
           <p className="mt-3 max-w-3xl text-sm leading-6 text-black/45">Package finder, advisor, semantic search, configurator, widget and analytics runtimes for custom React, headless commerce or agency-built storefronts—without exposing private keys or moving product selection into the browser.</p>
         </div>
         <div className="flex gap-3">

@@ -144,7 +144,7 @@ export default function TrustCenterPage() {
             <div className="flex items-start justify-between gap-4">
               <div>
                 <h2 className="text-sm font-extrabold">Runtime guardrails</h2>
-                <p className="mt-1 text-xs text-black/35">What Findly allows AI and public embeds to do in this MVP.</p>
+                <p className="mt-1 text-xs text-black/35">What Sellentum allows AI and public embeds to do in this MVP.</p>
               </div>
               <span className="grid h-10 w-10 place-items-center rounded-xl bg-lime/35 text-moss"><LockKeyhole size={17} /></span>
             </div>

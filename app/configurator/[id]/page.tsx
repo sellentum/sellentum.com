@@ -113,7 +113,7 @@ export default function ConfiguratorPage() {
 
   const explanation = useMemo(() => {
     if (complete && validatedBundle) return validatedBundle.explanation;
-    if (!displayPrimaryProduct) return "Choose a base product and Findly will keep the rest of the bundle compatible.";
+    if (!displayPrimaryProduct) return "Choose a base product and Sellentum will keep the rest of the bundle compatible.";
     const tags = selectionSummary.tags.slice(0, 4).join(", ");
     return `${displayPrimaryProduct.name} is the anchor product. The bundle is tuned around ${tags || "the options you selected"} and only keeps compatible choices in play.`;
   }, [complete, validatedBundle, displayPrimaryProduct, selectionSummary.tags]);

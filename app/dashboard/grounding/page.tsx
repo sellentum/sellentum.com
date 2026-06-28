@@ -60,7 +60,7 @@ export default function GroundingCenterPage() {
           <div className="max-w-4xl">
             <p className="eyebrow text-lime">Grounding Center</p>
             <h1 className="display mt-3 text-5xl">Make every AI explanation trace back to product facts.</h1>
-            <p className="mt-4 max-w-3xl text-sm font-bold leading-6 text-white/45">Findly turns catalog descriptions, features, buyer needs, semantic text, benefit mappings, approved vocabulary and explanation audits into an AI-safe grounding map for each product.</p>
+            <p className="mt-4 max-w-3xl text-sm font-bold leading-6 text-white/45">Sellentum turns catalog descriptions, features, buyer needs, semantic text, benefit mappings, approved vocabulary and explanation audits into an AI-safe grounding map for each product.</p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Link href="/dashboard/vocabulary" className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-5 py-3 text-sm font-extrabold text-white hover:bg-white/15"><Tags size={14} /> Vocabulary</Link>
               <Link href="/dashboard/trust-center" className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-5 py-3 text-sm font-extrabold text-white hover:bg-white/15"><ShieldCheck size={14} /> AI Trust</Link>
@@ -101,7 +101,7 @@ export default function GroundingCenterPage() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-sm font-extrabold">Grounded product fact map</h2>
-              <p className="mt-1 text-sm text-black/45">Product-by-product evidence Findly can safely use for advisor answers, semantic search explanations and result-card copy.</p>
+              <p className="mt-1 text-sm text-black/45">Product-by-product evidence Sellentum can safely use for advisor answers, semantic search explanations and result-card copy.</p>
             </div>
             <Link href="/dashboard/products" className="inline-flex items-center gap-2 text-sm font-extrabold text-moss">Edit catalog <ArrowRight size={12} /></Link>
           </div>

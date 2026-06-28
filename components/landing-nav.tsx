@@ -63,7 +63,7 @@ export function LandingNav() {
         <div className="mx-auto flex h-[88px] max-w-[1440px] items-center px-6 lg:px-10">
           <Logo />
           <nav className="ml-14 hidden h-full items-center gap-8 lg:flex" onMouseLeave={() => setOpen(null)}>
-            <Link href="/#why" className="text-[15px] font-semibold text-black/70 transition hover:text-ink">Why Findly</Link>
+            <Link href="/#why" className="text-[15px] font-semibold text-black/70 transition hover:text-ink">Why Sellentum</Link>
             {(Object.keys(menus) as MenuName[]).map((name) => (
               <button
                 key={name}
@@ -110,7 +110,7 @@ export function LandingNav() {
         <div className="border-b border-black/10 bg-white px-5 py-5 lg:hidden">
           <nav className="flex flex-col gap-1">
             {[
-              ["Why Findly", "/#why"],
+              ["Why Sellentum", "/#why"],
               ["Platform", "/platform"],
               ["Industries", "/industries"],
               ["Resources", "/resources"],

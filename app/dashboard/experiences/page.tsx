@@ -24,7 +24,7 @@ const iconForExperience = {
 
 export default function ExperiencesPage() {
   const { ready, settings, quizzes, configurators, events } = useStore();
-  const [origin, setOrigin] = useState("https://your-findly-app.vercel.app");
+  const [origin, setOrigin] = useState("https://your-sellentum-app.vercel.app");
   const [copied, setCopied] = useState<"packet" | string>("");
   const report = useMemo(() => buildExperienceRegistry({ origin, settings, quizzes, configurators, events }), [origin, settings, quizzes, configurators, events]);
 

@@ -100,7 +100,7 @@ function eventHasExperience(event: AnalyticsEvent) {
 
 function eventHasAttribution(event: AnalyticsEvent) {
   const metadata = event.metadata || {};
-  return hasValue(metadata.findly_source) || hasValue(metadata.findly_campaign) || hasValue(metadata.findly_placement) || hasValue(metadata.findly_page_url) || hasValue(metadata.utm_source);
+  return hasValue(metadata.sellentum_source) || hasValue(metadata.sellentum_campaign) || hasValue(metadata.sellentum_placement) || hasValue(metadata.sellentum_page_url) || hasValue(metadata.utm_source);
 }
 
 function normalizeSchemaSql(schemaSql = "") {
@@ -122,7 +122,7 @@ function buildPacket(report: Omit<WorkspaceHealthReport, "packet">) {
   const failed = report.checks.filter((item) => item.status === "fail");
   const warnings = report.checks.filter((item) => item.status === "warn");
   return [
-    "Findly Workspace Data Contract packet",
+    "Sellentum Workspace Data Contract packet",
     `Generated: ${report.generatedAt}`,
     `Source: ${report.source}`,
     `Mode: ${report.mode}`,

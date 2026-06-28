@@ -32,7 +32,7 @@ function metricValue(value: number, label: string) {
 
 export default function RuntimeOperationsPage() {
   const { ready, products, quizzes, configurators, events, settings } = useStore();
-  const [origin, setOrigin] = useState("https://your-findly-app.vercel.app");
+  const [origin, setOrigin] = useState("https://your-sellentum-app.vercel.app");
   const [copied, setCopied] = useState(false);
   const report = useMemo(() => buildRuntimeOperationsReport({ origin, settings, products, quizzes, configurators, events }), [origin, settings, products, quizzes, configurators, events]);
 
@@ -54,7 +54,7 @@ export default function RuntimeOperationsPage() {
         <div>
           <p className="eyebrow text-moss">Runtime Operations</p>
           <h1 className="display mt-2 max-w-5xl text-5xl">Prove the widget runtime is production-safe.</h1>
-          <p className="mt-3 max-w-3xl text-sm leading-6 text-black/45">Monitor public endpoints, install readiness, analytics contracts, release gates and safety guardrails before sending real storefront traffic to Findly.</p>
+          <p className="mt-3 max-w-3xl text-sm leading-6 text-black/45">Monitor public endpoints, install readiness, analytics contracts, release gates and safety guardrails before sending real storefront traffic to Sellentum.</p>
         </div>
         <div className="flex gap-3">
           <Link href="/dashboard/storefront-sandbox" className="btn-secondary"><Globe2 size={14} /> Storefront QA</Link>
@@ -102,7 +102,7 @@ export default function RuntimeOperationsPage() {
             <div className="flex items-start justify-between gap-4">
               <div>
                 <h2 className="text-sm font-extrabold">Operations health checks</h2>
-                <p className="mt-1 text-xs text-black/35">The checks that determine whether Findly is safe to run on production storefront traffic.</p>
+                <p className="mt-1 text-xs text-black/35">The checks that determine whether Sellentum is safe to run on production storefront traffic.</p>
               </div>
               <Link href="/dashboard/release-center" className="inline-flex items-center gap-1 text-xs font-extrabold text-moss">Open release <ArrowRight size={12} /></Link>
             </div>

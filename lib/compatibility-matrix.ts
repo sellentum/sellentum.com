@@ -133,7 +133,7 @@ function buildRules(rows: OptionRow[]): CompatibilityMatrixRule[] {
           : `${row.option.label} blocks ${target.option.label}, but the reverse reference is not explicitly stored.`,
       shopperMessage: stale
         ? "This rule cannot protect shoppers until the missing option reference is repaired."
-        : `If a shopper chooses ${row.option.label}, Findly should prevent ${target.option.label} from entering the same bundle.`,
+        : `If a shopper chooses ${row.option.label}, Sellentum should prevent ${target.option.label} from entering the same bundle.`,
     } satisfies CompatibilityMatrixRule;
   }));
 }
@@ -305,7 +305,7 @@ function buildActions(report: Omit<CompatibilityMatrixReport, "actions" | "packe
 
 function buildPacket(report: Omit<CompatibilityMatrixReport, "packet">) {
   return [
-    "Findly Compatibility Matrix packet",
+    "Sellentum Compatibility Matrix packet",
     "",
     `Status: ${report.status} · Score: ${report.score}%`,
     `Headline: ${report.headline}`,

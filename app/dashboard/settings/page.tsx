@@ -17,9 +17,9 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [origin, setOrigin] = useState("https://your-findly-app.vercel.app");
+  const [origin, setOrigin] = useState("https://your-sellentum-app.vercel.app");
   const [embedSource, setEmbedSource] = useState("storefront");
-  const [embedCampaign, setEmbedCampaign] = useState("findly-launch");
+  const [embedCampaign, setEmbedCampaign] = useState("sellentum-launch");
   const [embedPlacement, setEmbedPlacement] = useState("site-wide");
   useEffect(() => { setDraft(settings); setOrigin(window.location.origin); }, [settings]);
   const publishedQuiz = quizzes.find((q) => q.published) || quizzes[0];

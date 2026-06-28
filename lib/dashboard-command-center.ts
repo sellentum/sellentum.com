@@ -141,7 +141,7 @@ export function buildDashboardCommandCenter({
     addAction(actions, {
       id: "catalog-products",
       title: "Add more active products",
-      detail: activeProducts ? "Findly needs at least two active products to compare and recommend reliably." : "Your catalog is empty, so no discovery experience can return real products yet.",
+      detail: activeProducts ? "Sellentum needs at least two active products to compare and recommend reliably." : "Your catalog is empty, so no discovery experience can return real products yet.",
       priority: "critical",
       href: "/dashboard/products",
       label: "Add products",

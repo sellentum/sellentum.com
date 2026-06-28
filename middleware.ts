@@ -8,7 +8,7 @@ export async function middleware(request: NextRequest) {
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!url || !key) {
-    if (isDashboard && request.cookies.get("findly_demo_session")?.value !== "1") {
+    if (isDashboard && request.cookies.get("sellentum_demo_session")?.value !== "1") {
       const loginUrl = request.nextUrl.clone();
       loginUrl.pathname = "/login";
       loginUrl.searchParams.set("next", request.nextUrl.pathname);

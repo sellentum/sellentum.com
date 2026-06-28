@@ -80,7 +80,7 @@ function actionPriority(status: RuntimeCheckStatus): RuntimeActionPriority {
 }
 
 function runtimeEndpoints(origin: string): RuntimeEndpoint[] {
-  const cleanOrigin = (origin || "https://your-findly-app.vercel.app").replace(/\/+$/, "");
+  const cleanOrigin = (origin || "https://your-sellentum-app.vercel.app").replace(/\/+$/, "");
   return [
     {
       id: "widget-script",
@@ -170,7 +170,7 @@ function buildActions(checks: RuntimeCheck[]): RuntimeAction[] {
 
 function packet(report: Omit<RuntimeOperationsReport, "packet">) {
   return [
-    "Findly Runtime Operations packet",
+    "Sellentum Runtime Operations packet",
     "================================",
     "",
     `Status: ${report.status.toUpperCase()} · Score: ${report.score}%`,

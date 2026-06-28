@@ -249,7 +249,7 @@ export default function AnalyticsPage() {
             <span className="rounded-full bg-white/10 px-3 py-1.5 text-xs font-extrabold uppercase tracking-wider text-white/55">{attributionReport.summary.bestSource}</span>
           </div>
           <h2 className="display mt-6 text-3xl">Campaign intelligence</h2>
-          <p className="mt-2 text-xs leading-5 text-white/45">Findly now records UTM-style widget labels plus page URL/referrer context with every public journey event.</p>
+          <p className="mt-2 text-xs leading-5 text-white/45">Sellentum now records UTM-style widget labels plus page URL/referrer context with every public journey event.</p>
           <div className="mt-6 grid gap-3 xl:grid-cols-[1fr_.9fr]">
             <div className="space-y-2">
               {attributionReport.actions.slice(0, 3).map((item) => (
@@ -472,7 +472,7 @@ export default function AnalyticsPage() {
             <span className="rounded-full bg-white/10 px-3 py-1.5 text-xs font-extrabold uppercase tracking-wider text-white/55">{discoveryGapReport.status.replace("-", " ")}</span>
           </div>
           <h2 className="display mt-6 text-3xl">Discovery gap planner</h2>
-          <p className="mt-2 text-xs leading-5 text-white/45">Findly turns failed paths, thin results, missing search language and stalled recommendations into deterministic fixes.</p>
+          <p className="mt-2 text-xs leading-5 text-white/45">Sellentum turns failed paths, thin results, missing search language and stalled recommendations into deterministic fixes.</p>
           <div className="mt-6 grid grid-cols-[120px_1fr] gap-4">
             <div className="rounded-2xl bg-white/[.07] p-4 text-center">
               <p className="display text-5xl">{discoveryGapReport.score}</p>

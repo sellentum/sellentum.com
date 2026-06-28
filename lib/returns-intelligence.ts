@@ -267,7 +267,7 @@ function buildQuestionGaps(products: Product[], quizzes: Quiz[], reportProducts:
     gaps.push({
       id: "catalog-outcomes",
       title: "Catalog outcome language",
-      detail: "No active products contain buyer-needs fields, so Findly has weaker language for preventing expectation mismatch.",
+      detail: "No active products contain buyer-needs fields, so Sellentum has weaker language for preventing expectation mismatch.",
       suggestedQuestion: "What outcome should this product help you achieve?",
       answerOptions: ["Confidence and ease", "Performance", "Budget-safe choice"],
       severity: "critical",
@@ -530,7 +530,7 @@ function headlineFor(status: ReturnsIntelligenceStatus, score: number) {
 
 function packetFor(report: Omit<ReturnsIntelligenceReport, "packet">) {
   return [
-    "Findly Returns & Fit Intelligence packet",
+    "Sellentum Returns & Fit Intelligence packet",
     "========================================",
     "",
     `Status: ${report.status.toUpperCase()} · Score: ${report.score}%`,

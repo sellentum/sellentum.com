@@ -42,7 +42,7 @@ export default function AttributeStudioPage() {
       <div>
         <span className="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-lime/45 text-moss"><Layers3 size={25} /></span>
         <h1 className="display mt-5 text-4xl">Attribute Studio needs products.</h1>
-        <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-black/45">Import or add catalog products, then Findly will normalize categories, specs, materials, benefits and shopper-friendly attributes.</p>
+        <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-black/45">Import or add catalog products, then Sellentum will normalize categories, specs, materials, benefits and shopper-friendly attributes.</p>
         <Link href="/dashboard/products" className="btn-primary mt-6"><Boxes size={15} /> Add products</Link>
       </div>
     </div>;
@@ -102,7 +102,7 @@ export default function AttributeStudioPage() {
             <div className="flex items-start justify-between gap-4">
               <div>
                 <h2 className="text-sm font-extrabold">Normalized attribute glossary</h2>
-                <p className="mt-1 text-xs text-black/35">Canonical language Findly can reuse in quiz rules, semantic search, advisor prompts and grounded explanations.</p>
+                <p className="mt-1 text-xs text-black/35">Canonical language Sellentum can reuse in quiz rules, semantic search, advisor prompts and grounded explanations.</p>
               </div>
               <Link href="/dashboard/ontology" className="inline-flex items-center gap-1 text-xs font-extrabold text-moss">Open ontology <ArrowRight size={12} /></Link>
             </div>

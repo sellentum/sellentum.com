@@ -10,18 +10,18 @@ export type AttributionMetadata = {
   utm_campaign?: string;
   utm_content?: string;
   utm_term?: string;
-  findly_source?: string;
-  findly_medium?: string;
-  findly_campaign?: string;
-  findly_content?: string;
-  findly_term?: string;
-  findly_placement?: string;
-  findly_page_url?: string;
-  findly_page_title?: string;
-  findly_referrer?: string;
-  findly_embed_mode?: string;
-  findly_widget_experience?: string;
-  findly_launcher_position?: string;
+  sellentum_source?: string;
+  sellentum_medium?: string;
+  sellentum_campaign?: string;
+  sellentum_content?: string;
+  sellentum_term?: string;
+  sellentum_placement?: string;
+  sellentum_page_url?: string;
+  sellentum_page_title?: string;
+  sellentum_referrer?: string;
+  sellentum_embed_mode?: string;
+  sellentum_widget_experience?: string;
+  sellentum_launcher_position?: string;
 };
 
 export type AttributionChannel = {
@@ -83,18 +83,18 @@ const attributionKeys = [
   "utm_campaign",
   "utm_content",
   "utm_term",
-  "findly_source",
-  "findly_medium",
-  "findly_campaign",
-  "findly_content",
-  "findly_term",
-  "findly_placement",
-  "findly_page_url",
-  "findly_page_title",
-  "findly_referrer",
-  "findly_embed_mode",
-  "findly_widget_experience",
-  "findly_launcher_position",
+  "sellentum_source",
+  "sellentum_medium",
+  "sellentum_campaign",
+  "sellentum_content",
+  "sellentum_term",
+  "sellentum_placement",
+  "sellentum_page_url",
+  "sellentum_page_title",
+  "sellentum_referrer",
+  "sellentum_embed_mode",
+  "sellentum_widget_experience",
+  "sellentum_launcher_position",
 ] as const;
 
 function cleanText(value: unknown, fallback = "", max = 160) {
@@ -129,12 +129,12 @@ function eventHasAttribution(event: AnalyticsEvent) {
 
 function attributionParts(event: AnalyticsEvent) {
   const metadata = event.metadata || {};
-  const source = firstText(metadata, ["utm_source", "findly_source"], "Unattributed");
-  const medium = firstText(metadata, ["utm_medium", "findly_medium"], source === "Unattributed" ? "unknown" : "embed");
-  const campaign = firstText(metadata, ["utm_campaign", "findly_campaign"], "Unlabelled campaign");
-  const placement = firstText(metadata, ["findly_placement", "utm_content", "findly_content"], "Unlabelled placement");
-  const pageUrl = cleanUrl(metadata.findly_page_url) || "Unknown page";
-  const pageTitle = firstText(metadata, ["findly_page_title"], pageUrl === "Unknown page" ? "Unknown page" : "");
+  const source = firstText(metadata, ["utm_source", "sellentum_source"], "Unattributed");
+  const medium = firstText(metadata, ["utm_medium", "sellentum_medium"], source === "Unattributed" ? "unknown" : "embed");
+  const campaign = firstText(metadata, ["utm_campaign", "sellentum_campaign"], "Unlabelled campaign");
+  const placement = firstText(metadata, ["sellentum_placement", "utm_content", "sellentum_content"], "Unlabelled placement");
+  const pageUrl = cleanUrl(metadata.sellentum_page_url) || "Unknown page";
+  const pageTitle = firstText(metadata, ["sellentum_page_title"], pageUrl === "Unknown page" ? "Unknown page" : "");
   return { source, medium, campaign, placement, pageUrl, pageTitle };
 }
 
@@ -279,25 +279,25 @@ export function getAttributionMetadata(): AttributionMetadata {
   if (typeof window === "undefined") return {};
 
   const params = new URLSearchParams(window.location.search);
-  const source = paramValue(params, ["utm_source", "findly_source"]);
-  const medium = paramValue(params, ["utm_medium", "findly_medium"]);
-  const campaign = paramValue(params, ["utm_campaign", "findly_campaign"]);
-  const content = paramValue(params, ["utm_content", "findly_content"]);
-  const term = paramValue(params, ["utm_term", "findly_term"]);
-  const pageUrl = cleanUrl(paramValue(params, ["findly_page_url"])) || cleanUrl(document.referrer) || cleanUrl(window.location.href);
+  const source = paramValue(params, ["utm_source", "sellentum_source"]);
+  const medium = paramValue(params, ["utm_medium", "sellentum_medium"]);
+  const campaign = paramValue(params, ["utm_campaign", "sellentum_campaign"]);
+  const content = paramValue(params, ["utm_content", "sellentum_content"]);
+  const term = paramValue(params, ["utm_term", "sellentum_term"]);
+  const pageUrl = cleanUrl(paramValue(params, ["sellentum_page_url"])) || cleanUrl(document.referrer) || cleanUrl(window.location.href);
   const metadata: AttributionMetadata = {
-    ...(source ? { utm_source: source, findly_source: source } : {}),
-    ...(medium ? { utm_medium: medium, findly_medium: medium } : {}),
-    ...(campaign ? { utm_campaign: campaign, findly_campaign: campaign } : {}),
-    ...(content ? { utm_content: content, findly_content: content } : {}),
-    ...(term ? { utm_term: term, findly_term: term } : {}),
-    ...(paramValue(params, ["findly_placement"]) ? { findly_placement: paramValue(params, ["findly_placement"]) } : {}),
-    ...(pageUrl ? { findly_page_url: pageUrl } : {}),
-    ...(paramValue(params, ["findly_page_title"]) ? { findly_page_title: paramValue(params, ["findly_page_title"]) } : {}),
-    ...(paramValue(params, ["findly_referrer"]) || document.referrer ? { findly_referrer: cleanUrl(paramValue(params, ["findly_referrer"])) || cleanUrl(document.referrer) } : {}),
-    ...(paramValue(params, ["findly_embed_mode"]) ? { findly_embed_mode: paramValue(params, ["findly_embed_mode"]) } : {}),
-    ...(paramValue(params, ["findly_widget_experience"]) ? { findly_widget_experience: paramValue(params, ["findly_widget_experience"]) } : {}),
-    ...(paramValue(params, ["findly_launcher_position"]) ? { findly_launcher_position: paramValue(params, ["findly_launcher_position"]) } : {}),
+    ...(source ? { utm_source: source, sellentum_source: source } : {}),
+    ...(medium ? { utm_medium: medium, sellentum_medium: medium } : {}),
+    ...(campaign ? { utm_campaign: campaign, sellentum_campaign: campaign } : {}),
+    ...(content ? { utm_content: content, sellentum_content: content } : {}),
+    ...(term ? { utm_term: term, sellentum_term: term } : {}),
+    ...(paramValue(params, ["sellentum_placement"]) ? { sellentum_placement: paramValue(params, ["sellentum_placement"]) } : {}),
+    ...(pageUrl ? { sellentum_page_url: pageUrl } : {}),
+    ...(paramValue(params, ["sellentum_page_title"]) ? { sellentum_page_title: paramValue(params, ["sellentum_page_title"]) } : {}),
+    ...(paramValue(params, ["sellentum_referrer"]) || document.referrer ? { sellentum_referrer: cleanUrl(paramValue(params, ["sellentum_referrer"])) || cleanUrl(document.referrer) } : {}),
+    ...(paramValue(params, ["sellentum_embed_mode"]) ? { sellentum_embed_mode: paramValue(params, ["sellentum_embed_mode"]) } : {}),
+    ...(paramValue(params, ["sellentum_widget_experience"]) ? { sellentum_widget_experience: paramValue(params, ["sellentum_widget_experience"]) } : {}),
+    ...(paramValue(params, ["sellentum_launcher_position"]) ? { sellentum_launcher_position: paramValue(params, ["sellentum_launcher_position"]) } : {}),
   };
   return metadata;
 }

@@ -89,7 +89,7 @@ const placementGuidance: Record<LaunchExperienceCard["experience"], string> = {
 };
 
 const installContract: WidgetStudioContractField[] = [
-  { attribute: "src", required: true, example: "https://your-findly-app.vercel.app/api/widget.js", detail: "Loads the framework-independent Findly storefront widget script." },
+  { attribute: "src", required: true, example: "https://your-sellentum-app.vercel.app/api/widget.js", detail: "Loads the framework-independent Sellentum storefront widget script." },
   { attribute: "data-experience", required: true, example: "finder | assistant | search | configurator", detail: "Chooses which customer-facing runtime opens in the iframe." },
   { attribute: "data-mode", required: true, example: "modal | inline", detail: "Modal lazy-loads after shopper intent; inline renders the iframe where the snippet is placed." },
   { attribute: "data-id", required: true, example: "quiz_footwear", detail: "Published finder or configurator ID/slug used as the catalog context." },
@@ -101,16 +101,16 @@ const installContract: WidgetStudioContractField[] = [
 ];
 
 const eventContract: WidgetStudioEventContract[] = [
-  { event: "widget_view", when: "The storefront snippet renders or the modal launcher becomes visible.", requiredMetadata: ["experience_type", "experience_id", "session_id", "findly_page_url"] },
+  { event: "widget_view", when: "The storefront snippet renders or the modal launcher becomes visible.", requiredMetadata: ["experience_type", "experience_id", "session_id", "sellentum_page_url"] },
   { event: "quiz_start", when: "A shopper begins the finder, advisor, search or configurator journey.", requiredMetadata: ["experience_type", "experience_id", "session_id"] },
   { event: "quiz_complete", when: "A shopper reaches recommendations, search results or bundle review.", requiredMetadata: ["experience_type", "experience_id", "session_id", "result_count"] },
   { event: "product_recommended", when: "A ranked product card is shown to the shopper.", requiredMetadata: ["experience_type", "experience_id", "session_id", "rank", "product_name"] },
-  { event: "buy_click", when: "The shopper clicks a product, checkout or buy button from Findly.", requiredMetadata: ["experience_type", "experience_id", "session_id", "product_name"] },
+  { event: "buy_click", when: "The shopper clicks a product, checkout or buy button from Sellentum.", requiredMetadata: ["experience_type", "experience_id", "session_id", "product_name"] },
   { event: "recommendation_feedback", when: "A shopper marks a recommended product Helpful or Not right.", requiredMetadata: ["experience_type", "experience_id", "session_id", "feedback", "product_name"] },
 ];
 
 function cleanOrigin(origin: string) {
-  return (origin || "https://your-findly-app.vercel.app").replace(/\/+$/, "");
+  return (origin || "https://your-sellentum-app.vercel.app").replace(/\/+$/, "");
 }
 
 function check(id: string, label: string, detail: string, status: WidgetStudioCheckStatus): WidgetStudioCheck {
@@ -155,7 +155,7 @@ function snippetConfig(card: LaunchExperienceCard, settings: WidgetSettings, ori
     label: card.launcherLabel,
     position: settings.launcher_position === "bottom-left" ? "left" : "right",
     medium: mode === "inline" ? "embed-inline" : "embed-modal",
-    campaign: "findly-widget-studio",
+    campaign: "sellentum-widget-studio",
     placement: `${card.experience}-${mode}`,
     source: "widget-studio",
   };
@@ -306,7 +306,7 @@ function actionQueue(experiences: WidgetStudioExperience[], qaChecks: WidgetStud
 function packetFor(report: Omit<WidgetStudioReport, "packet">) {
   const recommended = report.recommendedExperience;
   return [
-    "Findly Widget Studio packet",
+    "Sellentum Widget Studio packet",
     "===========================",
     "",
     `Status: ${report.status.toUpperCase()} · Score: ${report.score}%`,

@@ -198,7 +198,7 @@ export default function PreflightPage() {
           <div className="relative">
             <p className="eyebrow text-lime">Production verification</p>
             <h1 className="mt-4 max-w-3xl text-6xl font-extrabold leading-[.9] tracking-[-.07em]">Launch preflight for your product discovery stack.</h1>
-            <p className="mt-5 max-w-2xl text-sm leading-6 text-white/50">Check whether Findly has the catalog data, AI configuration, published experiences, embed setup and analytics signals needed to ship confidently.</p>
+            <p className="mt-5 max-w-2xl text-sm leading-6 text-white/50">Check whether Sellentum has the catalog data, AI configuration, published experiences, embed setup and analytics signals needed to ship confidently.</p>
             <div className="mt-7 flex flex-wrap gap-3">
               <button onClick={load} disabled={refreshing} className="inline-flex items-center gap-2 rounded-full bg-lime px-5 py-3 text-xs font-extrabold text-ink disabled:opacity-60">{refreshing ? <LoaderCircle size={14} className="animate-spin" /> : <RefreshCcw size={14} />}Rerun checks</button>
               <Link href="/dashboard/settings" className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-5 py-3 text-xs font-extrabold text-white hover:bg-white/15">Open embed settings <ExternalLink size={13} /></Link>

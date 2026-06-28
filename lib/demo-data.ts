@@ -184,7 +184,7 @@ export const demoConfigurator: Configurator = {
       id: "config_step_conditions",
       configurator_id: "config_trail_kit",
       title: "Match the conditions",
-      helper_text: "Findly disables choices that would create a poor-fit bundle.",
+      helper_text: "Sellentum disables choices that would create a poor-fit bundle.",
       selection_type: "single",
       required: true,
       position: 1,
@@ -357,15 +357,15 @@ function demoAttribution(index: number) {
   const campaign = campaigns[Math.floor(index / 6) % campaigns.length];
   const placement = placements[Math.floor(index / 3) % placements.length];
   return {
-    findly_source: source,
-    findly_medium: source === "storefront" ? "embed" : source === "spring-email" ? "email" : "paid-social",
-    findly_campaign: campaign,
-    findly_placement: placement,
-    findly_page_url: `https://store.example/${placement === "pdp-bottom" ? "products/terra-trail" : placement === "category-hero" ? "collections/running" : ""}`,
-    findly_page_title: placement === "pdp-bottom" ? "Terra Trail Runner" : placement === "category-hero" ? "Running collection" : "Homepage",
-    findly_referrer: source === "storefront" ? "https://store.example/" : `https://${source}.example/findly`,
-    findly_embed_mode: placement === "homepage-advisor" ? "modal" : "inline",
-    findly_widget_experience: placement === "homepage-advisor" ? "assistant" : "finder",
+    sellentum_source: source,
+    sellentum_medium: source === "storefront" ? "embed" : source === "spring-email" ? "email" : "paid-social",
+    sellentum_campaign: campaign,
+    sellentum_placement: placement,
+    sellentum_page_url: `https://store.example/${placement === "pdp-bottom" ? "products/terra-trail" : placement === "category-hero" ? "collections/running" : ""}`,
+    sellentum_page_title: placement === "pdp-bottom" ? "Terra Trail Runner" : placement === "category-hero" ? "Running collection" : "Homepage",
+    sellentum_referrer: source === "storefront" ? "https://store.example/" : `https://${source}.example/sellentum`,
+    sellentum_embed_mode: placement === "homepage-advisor" ? "modal" : "inline",
+    sellentum_widget_experience: placement === "homepage-advisor" ? "assistant" : "finder",
   };
 }
 

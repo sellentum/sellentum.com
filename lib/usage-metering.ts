@@ -88,7 +88,7 @@ export const usagePlans: UsagePlan[] = [
     description: "For a small storefront proving the guided-selling loop.",
     limits: { sessions: 1_000, interactions: 5_000, products: 250, experiences: 3, aiCredits: 1_000 },
     includes: ["Finder, advisor, search and configurator embeds", "CSV catalog import", "Basic analytics", "Stripe checkout placeholder"],
-    stripePlaceholder: "price_findly_starter_placeholder",
+    stripePlaceholder: "price_sellentum_starter_placeholder",
   },
   {
     id: "growth",
@@ -97,7 +97,7 @@ export const usagePlans: UsagePlan[] = [
     description: "For teams scaling multiple guided experiences and channels.",
     limits: { sessions: 10_000, interactions: 50_000, products: 2_500, experiences: 12, aiCredits: 10_000 },
     includes: ["Launch channels and syndication boards", "Headless API handoff", "Advanced QA centers", "Usage-based overage placeholder"],
-    stripePlaceholder: "price_findly_growth_placeholder",
+    stripePlaceholder: "price_sellentum_growth_placeholder",
   },
   {
     id: "scale",
@@ -106,7 +106,7 @@ export const usagePlans: UsagePlan[] = [
     description: "For larger catalogs, partner deployments and higher-volume usage.",
     limits: { sessions: 100_000, interactions: 500_000, products: 25_000, experiences: 50, aiCredits: 100_000 },
     includes: ["Partner-safe syndication", "Workspace export", "Runtime operations", "Custom pricing placeholder"],
-    stripePlaceholder: "price_findly_scale_placeholder",
+    stripePlaceholder: "price_sellentum_scale_placeholder",
   },
 ];
 
@@ -285,14 +285,14 @@ function buildActions(input: {
 
 function headline(status: UsageCenterStatus, currentPlan: UsagePlan, recommendedPlan: UsagePlan) {
   if (status === "empty") return "Usage metering is ready, but this workspace needs traffic before plan fit can be proven.";
-  if (status === "needs-upgrade") return `${recommendedPlan.name} is the safer placeholder plan for the current Findly usage profile.`;
+  if (status === "needs-upgrade") return `${recommendedPlan.name} is the safer placeholder plan for the current Sellentum usage profile.`;
   if (status === "watch") return `${currentPlan.name} still fits, but one or more metered dimensions is nearing its placeholder limit.`;
   return `${currentPlan.name} is a healthy placeholder fit for the current guided-selling usage.`;
 }
 
 function buildPacket(report: Omit<UsageCenterReport, "packet">) {
   return [
-    "Findly Usage & Plan Center packet",
+    "Sellentum Usage & Plan Center packet",
     "",
     `Status: ${report.status} · Score: ${report.score}%`,
     `Workspace: ${report.summary.periodLabel}`,
@@ -316,7 +316,7 @@ function buildPacket(report: Omit<UsageCenterReport, "packet">) {
 }
 
 export function buildUsageCenterReport({
-  origin = "https://your-findly-app.vercel.app",
+  origin = "https://your-sellentum-app.vercel.app",
   settings,
   products,
   quizzes,

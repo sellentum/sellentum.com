@@ -334,7 +334,7 @@ function buildChecks(report: Omit<GroundingCenterReport, "checks" | "actions" | 
 
 function buildPacket(report: Omit<GroundingCenterReport, "packet">) {
   return [
-    "Findly Grounding Center packet",
+    "Sellentum Grounding Center packet",
     "==============================",
     "",
     `Status: ${report.status.toUpperCase()} · Score: ${report.score}%`,

@@ -29,7 +29,7 @@ const mimeType: Record<WorkspaceExportFile["format"], string> = {
 
 export default function WorkspaceSnapshotPage() {
   const { ready, products, quizzes, configurators, events, settings } = useStore();
-  const [origin, setOrigin] = useState("https://your-findly-app.vercel.app");
+  const [origin, setOrigin] = useState("https://your-sellentum-app.vercel.app");
   const [copied, setCopied] = useState<WorkspaceExportFile["id"] | null>(null);
   const [copyError, setCopyError] = useState("");
   const [activeExport, setActiveExport] = useState<WorkspaceExportFile["id"]>("handoff");
@@ -75,7 +75,7 @@ export default function WorkspaceSnapshotPage() {
       <div className="flex items-end justify-between gap-6">
         <div>
           <p className="eyebrow text-moss">Workspace snapshot</p>
-          <h1 className="display mt-2 text-5xl">Export a clean handoff of the whole Findly setup.</h1>
+          <h1 className="display mt-2 text-5xl">Export a clean handoff of the whole Sellentum setup.</h1>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-black/45">Package products, finders, configurators, brand settings, launch channels, release gates and redacted analytics into a safe archive before production changes.</p>
         </div>
         <div className="flex gap-3">

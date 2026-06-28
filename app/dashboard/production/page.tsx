@@ -42,7 +42,7 @@ function PriorityIcon({ priority }: { priority: ProductionActionPriority }) {
 
 export default function ProductionVerificationPage() {
   const { ready, mode, products, quizzes, configurators, events, settings } = useStore();
-  const [origin, setOrigin] = useState("https://your-findly-app.vercel.app");
+  const [origin, setOrigin] = useState("https://your-sellentum-app.vercel.app");
   const [copied, setCopied] = useState(false);
   const report = useMemo(() => buildProductionVerificationReport({ origin, mode, products, quizzes, configurators, events, settings }), [origin, mode, products, quizzes, configurators, events, settings]);
 
@@ -64,7 +64,7 @@ export default function ProductionVerificationPage() {
         <div className="flex items-start justify-between gap-10">
           <div className="max-w-4xl">
             <p className="eyebrow text-lime">Production Verification Center</p>
-            <h1 className="display mt-3 text-5xl">Prove Findly is ready for a real storefront launch.</h1>
+            <h1 className="display mt-3 text-5xl">Prove Sellentum is ready for a real storefront launch.</h1>
             <p className="mt-4 max-w-3xl text-sm font-bold leading-6 text-white/45">A desktop-first production gate for Vercel deployment, Supabase persistence, public runtime contracts, widget QA, analytics proof and deterministic AI trust boundaries.</p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Link href="/dashboard/preflight" className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-5 py-3 text-xs font-extrabold text-white hover:bg-white/15"><ShieldCheck size={14} /> Run preflight</Link>

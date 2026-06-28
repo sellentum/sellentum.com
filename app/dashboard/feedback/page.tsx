@@ -54,7 +54,7 @@ export default function RecommendationFeedbackPage() {
           <div className="max-w-4xl">
             <p className="eyebrow text-lime">Recommendation Feedback Center</p>
             <h1 className="display mt-3 text-5xl">Close the loop between shopper reactions and recommendation quality.</h1>
-            <p className="mt-4 max-w-3xl text-sm font-bold leading-6 text-white/45">Findly captures quick result-card feedback from finder, advisor, search and configurator experiences, then turns it into deterministic product risks, explanation fixes and optimization actions.</p>
+            <p className="mt-4 max-w-3xl text-sm font-bold leading-6 text-white/45">Sellentum captures quick result-card feedback from finder, advisor, search and configurator experiences, then turns it into deterministic product risks, explanation fixes and optimization actions.</p>
           </div>
           <div className="w-[360px] shrink-0 rounded-[26px] border border-white/10 bg-white/[0.06] p-5">
             <div className="flex items-center justify-between">

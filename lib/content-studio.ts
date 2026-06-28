@@ -201,7 +201,7 @@ function buildAsset(signal: ProductSignal): ContentAsset {
     ? `Is ${product.name} still right for ${intent}?`
     : `${product.name} for ${intent}`;
   const body = cleanSentence(
-    `${product.description} Findly should position it around ${firstProof.toLowerCase()} and ${secondProof.toLowerCase()} for shoppers comparing ${product.category.toLowerCase()} at ${price}`,
+    `${product.description} Sellentum should position it around ${firstProof.toLowerCase()} and ${secondProof.toLowerCase()} for shoppers comparing ${product.category.toLowerCase()} at ${price}`,
     `${product.name} is a ${product.category.toLowerCase()} option with catalog-backed proof for ${intent}.`,
     260,
   );
@@ -226,7 +226,7 @@ function buildAsset(signal: ProductSignal): ContentAsset {
     evidence: `${demandEvidence}; ${feedbackEvidence}; ${proof.length} catalog proof point${proof.length === 1 ? "" : "s"}.`,
     guardrail: "Use only listed product facts and shopper signals; do not invent materials, guarantees, certifications, stock status or discounts.",
     blocks: {
-      eyebrow: surface === "support" ? "Need a better fit?" : surface === "email" ? "Recommended by Findly" : "Guided pick",
+      eyebrow: surface === "support" ? "Need a better fit?" : surface === "email" ? "Recommended by Sellentum" : "Guided pick",
       headline,
       body,
       bullets: proof.length ? proof.map((item) => cleanSentence(item, item, 90)) : [cleanSentence(product.category, product.category, 90)],
@@ -236,7 +236,7 @@ function buildAsset(signal: ProductSignal): ContentAsset {
           answer: cleanSentence(`${product.name} is best for shoppers prioritising ${intent} with proof points like ${proof.slice(0, 2).join(" and ") || product.category}`, `${product.name} is best for shoppers looking for ${intent}.`, 180),
         },
         {
-          question: "Why did Findly recommend it?",
+          question: "Why did Sellentum recommend it?",
           answer: cleanSentence(`It matched catalog evidence from ${proof.slice(0, 3).join(", ") || product.category} and shopper signals from ${signal.answerSignals[0]?.label || signal.querySignals[0]?.label || "the current journey"}`, "It matched the shopper's selected needs against catalog facts.", 180),
         },
       ],
@@ -344,7 +344,7 @@ function buildPlays(assets: ContentAsset[]): ContentPlay[] {
       title: "Publish a PDP guided-proof block",
       channel: "pdp",
       priority: "high",
-      detail: `Use ${topPdp.productName} copy on its product detail page to explain why Findly recommends it.`,
+      detail: `Use ${topPdp.productName} copy on its product detail page to explain why Sellentum recommends it.`,
       evidence: topPdp.evidence,
       assets: [topPdp.title],
       nextStep: "Paste the headline, proof bullets and FAQ under the product description in staging.",
@@ -426,7 +426,7 @@ function buildActions(report: Omit<ContentStudioReport, "packet" | "actions">): 
 
 function buildPacket(report: Omit<ContentStudioReport, "packet">) {
   return [
-    "Findly Sales Content Studio packet",
+    "Sellentum Sales Content Studio packet",
     "==================================",
     "",
     `Status: ${report.status.toUpperCase()} · Score: ${report.score}%`,

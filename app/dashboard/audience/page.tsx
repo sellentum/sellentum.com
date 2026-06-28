@@ -67,7 +67,7 @@ export default function AudienceCapturePage() {
           <div className="max-w-4xl">
             <p className="eyebrow text-lime">Audience Capture Center</p>
             <h1 className="display mt-3 text-5xl">Turn guided-selling sessions into safe zero-party audiences.</h1>
-            <p className="mt-4 max-w-3xl text-sm font-bold leading-6 text-white/45">Findly reads answers, searches, advisor prompts, configurator choices, recommendations and buy clicks, then turns them into anonymous segments, capture prompts and export-ready handoff packets for {settings.brand_name}.</p>
+            <p className="mt-4 max-w-3xl text-sm font-bold leading-6 text-white/45">Sellentum reads answers, searches, advisor prompts, configurator choices, recommendations and buy clicks, then turns them into anonymous segments, capture prompts and export-ready handoff packets for {settings.brand_name}.</p>
           </div>
           <div className="w-[360px] shrink-0 rounded-[26px] border border-white/10 bg-white/[0.06] p-5">
             <div className="flex items-center justify-between">

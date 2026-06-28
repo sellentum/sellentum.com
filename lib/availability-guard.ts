@@ -257,7 +257,7 @@ function buildChecks(summary: AvailabilityGuardReport["summary"]): AvailabilityC
       id: "active-catalog",
       label: "Active catalog",
       status: summary.activeProducts >= 2 ? "pass" : summary.activeProducts ? "warn" : "fail",
-      detail: summary.activeProducts >= 2 ? "Findly has enough active products to compare and recommend." : "Findly needs at least two active products for useful recommendations.",
+      detail: summary.activeProducts >= 2 ? "Sellentum has enough active products to compare and recommend." : "Sellentum needs at least two active products for useful recommendations.",
       evidence: `${summary.activeProducts}/${summary.totalProducts} product${summary.totalProducts === 1 ? "" : "s"} active.`,
     },
     {
@@ -375,7 +375,7 @@ function buildActions(report: Omit<AvailabilityGuardReport, "actions" | "packet"
 
 function buildPacket(report: Omit<AvailabilityGuardReport, "packet">) {
   return [
-    "Findly Availability Guard packet",
+    "Sellentum Availability Guard packet",
     "",
     `Status: ${report.status} · Score: ${report.score}%`,
     `Headline: ${report.headline}`,

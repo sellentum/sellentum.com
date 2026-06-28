@@ -81,7 +81,7 @@ export default function MvpAuditPage() {
           <div className="max-w-4xl">
             <p className="eyebrow text-lime">MVP Completion Audit</p>
             <h1 className="display mt-3 text-5xl">Know exactly what is done, what needs proof, and what is still pending.</h1>
-            <p className="mt-4 max-w-3xl text-sm font-bold leading-6 text-white/45">Findly maps the original Zoovu-like MVP scope to current workspace evidence so we do not confuse local progress with production completion.</p>
+            <p className="mt-4 max-w-3xl text-sm font-bold leading-6 text-white/45">Sellentum maps the original Zoovu-like MVP scope to current workspace evidence so we do not confuse local progress with production completion.</p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Link href="/dashboard/production" className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-5 py-3 text-sm font-extrabold text-white hover:bg-white/15"><MonitorCheck size={14} /> Production proof</Link>
               <Link href="/dashboard/release-center" className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-5 py-3 text-sm font-extrabold text-white hover:bg-white/15"><Rocket size={14} /> Release Center</Link>

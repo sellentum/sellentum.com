@@ -386,7 +386,7 @@ function buildActions(report: Omit<RecommendationFeedbackReport, "packet" | "act
 
 function buildPacket(report: Omit<RecommendationFeedbackReport, "packet">) {
   return [
-    "Findly Recommendation Feedback packet",
+    "Sellentum Recommendation Feedback packet",
     "=====================================",
     "",
     `Status: ${report.status.toUpperCase()} · Score: ${report.score}%`,

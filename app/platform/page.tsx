@@ -11,7 +11,7 @@ export default function PlatformOverviewPage() {
       <section className="relative overflow-hidden px-6 py-24 lg:px-10 lg:py-32">
         <div className="absolute inset-x-0 top-0 h-[520px] bg-[radial-gradient(circle_at_50%_10%,rgba(217,255,97,.35),transparent_45%)]" />
         <div className="relative mx-auto max-w-[1280px] text-center">
-          <p className="eyebrow text-moss">Findly platform</p>
+          <p className="eyebrow text-moss">Sellentum platform</p>
           <h1 className="mx-auto mt-6 max-w-5xl text-6xl font-extrabold leading-[.95] tracking-[-.07em] lg:text-8xl">A practical product discovery suite for small ecommerce teams.</h1>
           <p className="mx-auto mt-7 max-w-2xl text-sm leading-7 text-black/52">Catalog enrichment, guided selling, semantic discovery, configurators, embeds and analytics—built as one focused MVP instead of an enterprise maze.</p>
           <div className="mt-9 flex justify-center gap-3"><Link href="/signup" className="btn-primary">Start building <ArrowRight size={15} /></Link><Link href="/configurator/config_trail_kit" className="btn-secondary">Try configurator</Link></div>
@@ -40,7 +40,7 @@ export default function PlatformOverviewPage() {
         </div>
       </section>
 
-      <footer className="border-t border-black/10 px-6 py-10 lg:px-10"><div className="mx-auto flex max-w-[1280px] items-center justify-between text-xs font-bold text-black/35"><Logo /><span>© 2026 Findly</span></div></footer>
+      <footer className="border-t border-black/10 px-6 py-10 lg:px-10"><div className="mx-auto flex max-w-[1280px] items-center justify-between text-xs font-bold text-black/35"><Logo /><span>© 2026 Sellentum</span></div></footer>
     </main>
   );
 }

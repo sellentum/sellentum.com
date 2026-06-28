@@ -29,7 +29,7 @@ function checkIcon(status: AdvisorStudioCheckStatus) {
 
 export default function AdvisorStudioPage() {
   const { ready, products, quizzes, events, settings } = useStore();
-  const [origin, setOrigin] = useState("https://your-findly-app.vercel.app");
+  const [origin, setOrigin] = useState("https://your-sellentum-app.vercel.app");
   const [prompt, setPrompt] = useState("I need something comfortable for long days under £150");
   const [copied, setCopied] = useState<"packet" | "snippet" | "">("");
   const report = useMemo(() => buildAdvisorStudioReport({ products, quizzes, events, settings, origin, focusPrompt: prompt }), [products, quizzes, events, settings, origin, prompt]);

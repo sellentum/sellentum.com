@@ -105,7 +105,7 @@ function acceptanceCriteria(channel: LaunchChannel) {
   return [
     `${widgetExperienceLabel(channel.experience)} loads at ${channel.publicUrl}.`,
     `Snippet includes data-source="${channel.source}", data-campaign="${channel.campaign}" and data-placement="${channel.placement}".`,
-    "Widget uses the saved Findly brand color, title and welcome copy.",
+    "Widget uses the saved Sellentum brand color, title and welcome copy.",
     "A complete shopper journey records widget_view, quiz_start, quiz_complete and buy_click where applicable.",
     "Analytics shows the expected source/campaign/placement labels after the QA run.",
   ];
@@ -152,7 +152,7 @@ function caseFromChannel(channel: LaunchChannel): StorefrontSandboxCase {
 
 function formatPacket(cases: StorefrontSandboxCase[]) {
   return [
-    "Findly storefront QA sandbox packet",
+    "Sellentum storefront QA sandbox packet",
     "===================================",
     "",
     ...cases.flatMap((item) => [

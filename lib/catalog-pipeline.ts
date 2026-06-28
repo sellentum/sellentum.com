@@ -401,7 +401,7 @@ function buildActions(stages: CatalogPipelineStage[], fieldCoverage: CatalogFiel
 
 function buildPacket(report: Omit<CatalogPipelineReport, "packet">) {
   return [
-    "Findly catalog pipeline packet",
+    "Sellentum catalog pipeline packet",
     "==============================",
     "",
     `Status: ${report.status.toUpperCase()} · Score: ${report.score}%`,

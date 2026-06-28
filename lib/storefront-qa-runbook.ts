@@ -3,7 +3,7 @@ import type { LaunchContract } from "@/lib/launch-contract";
 export type StorefrontQaStep = {
   id: string;
   title: string;
-  owner: "merchant" | "developer" | "findly";
+  owner: "merchant" | "developer" | "sellentum";
   expectedOutcome: string;
   checks: string[];
 };
@@ -112,7 +112,7 @@ export function buildStorefrontQaRunbook({
       {
         id: "recovery-and-fallbacks",
         title: "Test failure and recovery paths",
-        owner: "findly",
+        owner: "sellentum",
         expectedOutcome: "Weak paths give recovery guidance instead of blank states or AI-only product selection.",
         checks: [
           "Try a too-low budget or a missing shopper term.",
@@ -122,7 +122,7 @@ export function buildStorefrontQaRunbook({
       },
     ],
     acceptanceCriteria: [
-      "The storefront has exactly one Findly widget instance for the selected experience.",
+      "The storefront has exactly one Sellentum widget instance for the selected experience.",
       "The public preview URL loads without requiring merchant dashboard authentication.",
       "The selected journey returns catalog-backed recommendations or a clear deterministic recovery state.",
       "All five analytics events can be produced during a manual QA session.",
@@ -130,7 +130,7 @@ export function buildStorefrontQaRunbook({
       "No browser console errors block the widget, iframe or analytics request.",
     ],
     rollbackPlan: [
-      "Remove the Findly script from the storefront theme or tag manager.",
+      "Remove the Sellentum script from the storefront theme or tag manager.",
       "Revert to the previous published experience ID if one existed.",
       "Keep the dashboard experience unpublished until preflight and manual QA pass.",
       "Re-run Launch Studio after catalog, question or embed settings are changed.",

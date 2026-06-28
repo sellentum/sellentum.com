@@ -285,7 +285,7 @@ function buildOpportunities(controls: MerchandisingControl[], lanes: Merchandisi
 
 function buildPacket(report: Omit<MerchandisingStudioReport, "packet">) {
   return [
-    "Findly merchandising packet",
+    "Sellentum merchandising packet",
     "===========================",
     "",
     `Status: ${report.status.toUpperCase()} · Score: ${report.score}%`,

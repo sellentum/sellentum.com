@@ -156,7 +156,7 @@ export function buildCommercialImpactReport(events: AnalyticsEvent[], products: 
       id: "capture-first-impact-session",
       priority: "critical",
       title: "Capture the first impact session",
-      detail: "There are no analytics events in this filter, so Findly cannot estimate influenced product value yet.",
+      detail: "There are no analytics events in this filter, so Sellentum cannot estimate influenced product value yet.",
       evidence: "0 sessions, 0 recommendations and 0 buy clicks captured.",
       recommendation: "Open a published embed, complete a journey and click a product CTA to prove the full impact loop.",
       actionHref: "/dashboard/launch",
@@ -284,7 +284,7 @@ export function buildCommercialImpactReport(events: AnalyticsEvent[], products: 
     status,
     score,
     headline,
-    confidence: "Directional: based on Findly recommendation and buy-click events, not checkout-order attribution.",
+    confidence: "Directional: based on Sellentum recommendation and buy-click events, not checkout-order attribution.",
     summary: {
       sessions: snapshot.sessions,
       recommendations: snapshot.product_recommended,

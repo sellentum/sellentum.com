@@ -53,7 +53,7 @@ export function widgetPlaceholderForExperience(experience: WidgetEmbedExperience
 }
 
 function cleanOrigin(origin: string) {
-  return (origin || "https://your-findly-app.vercel.app").replace(/\/+$/, "");
+  return (origin || "https://your-sellentum-app.vercel.app").replace(/\/+$/, "");
 }
 
 function check(id: string, label: string, detail: string, severity: WidgetInstallCheck["severity"]): WidgetInstallCheck {
@@ -116,7 +116,7 @@ export function buildWidgetInstallReport(config: WidgetSnippetConfig): WidgetIns
       : check("label", "Launcher label", "Add clear launcher copy before installing.", "warning"),
     config.campaign || config.placement || config.source
       ? check("attribution", "Analytics attribution", `Traffic will be labelled${config.campaign ? ` as ${config.campaign}` : ""}${config.placement ? ` on ${config.placement}` : ""}.`, "pass")
-      : check("attribution", "Analytics attribution", "No campaign labels set; Findly will infer page URL/source from the storefront.", "warning"),
+      : check("attribution", "Analytics attribution", "No campaign labels set; Sellentum will infer page URL/source from the storefront.", "warning"),
   ];
 
   return { canInstall: checks.every((item) => item.severity !== "blocker"), targetPath, checks };

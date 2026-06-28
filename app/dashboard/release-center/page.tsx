@@ -16,7 +16,7 @@ const gateTone: Record<ReleaseGateStatus, string> = {
 
 export default function ReleaseCenterPage() {
   const { ready, products, quizzes, configurators, events, settings } = useStore();
-  const [origin, setOrigin] = useState("https://your-findly-app.vercel.app");
+  const [origin, setOrigin] = useState("https://your-sellentum-app.vercel.app");
   const [copied, setCopied] = useState(false);
   const candidate = useMemo(() => buildReleaseCandidate({ origin, products, quizzes, configurators, events, settings }), [origin, products, quizzes, configurators, events, settings]);
 
@@ -36,7 +36,7 @@ export default function ReleaseCenterPage() {
         <div>
           <p className="eyebrow text-moss">Release Center</p>
           <h1 className="display mt-2 text-5xl">Ship with a go/no-go release candidate.</h1>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-black/45">Bundle the current Findly catalog, experiences, channel snippets, sandbox QA, analytics quality and rollback plan into one production handoff.</p>
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-black/45">Bundle the current Sellentum catalog, experiences, channel snippets, sandbox QA, analytics quality and rollback plan into one production handoff.</p>
         </div>
         <div className="flex gap-3">
           <Link href="/dashboard/preflight" className="btn-secondary"><ShieldCheck size={14} /> Preflight</Link>

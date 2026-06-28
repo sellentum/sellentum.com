@@ -3,7 +3,7 @@ import "./globals.css";
 import { StoreProvider } from "@/lib/store";
 
 export const metadata: Metadata = {
-  title: "Findly — Guided selling that feels human",
+  title: "Sellentum — Guided selling that feels human",
   description: "Build AI-powered product finders that turn product choice into confident purchases.",
 };
 

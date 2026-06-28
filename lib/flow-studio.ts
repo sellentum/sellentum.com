@@ -259,7 +259,7 @@ function actionsForReport({
 
 function formatPacket(report: Omit<FlowStudioReport, "packet">, quiz: Quiz) {
   return [
-    `Findly visual flow studio packet: ${quiz.name}`,
+    `Sellentum visual flow studio packet: ${quiz.name}`,
     "========================================",
     "",
     `Status: ${report.status.toUpperCase()} · Score: ${report.score}%`,
