@@ -35,7 +35,16 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
         router.push(params.get("next") || "/dashboard");
         router.refresh();
       } else {
-        const { data, error: authError } = await supabase.auth.signUp({ email, password, options: { data: { full_name: name } } });
+        const appUrl = (process.env.NEXT_PUBLIC_APP_URL || window.location.origin).replace(/\/$/, "");
+        const emailRedirectTo = `${appUrl}/auth/callback?next=/dashboard`;
+        const { data, error: authError } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: { full_name: name },
+            emailRedirectTo,
+          },
+        });
         if (authError) throw authError;
         if (!data.session) setNotice("Check your inbox to confirm your account, then log in.");
         else { router.push("/dashboard"); router.refresh(); }
