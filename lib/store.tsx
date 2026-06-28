@@ -171,20 +171,22 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       const supabase = createClient()!;
       const { data: authData } = await supabase.auth.getUser();
       const userId = authData.user!.id;
-      const { questions, ...quizRow } = next;
-      const { error: quizError } = await supabase.from("quizzes").upsert({ ...quizRow, user_id: userId });
+      next.user_id = userId;
+      const payload = {
+        ...next,
+        user_id: userId,
+        questions: next.questions.map((question) => ({
+          ...question,
+          quiz_id: next.id,
+          options: question.options.map((option) => ({
+            ...option,
+            question_id: question.id,
+            next_question_id: option.next_question_id || null,
+          })),
+        })),
+      };
+      const { error: quizError } = await supabase.rpc("save_quiz_with_children", { payload });
       if (quizError) { setError(quizError.message); throw quizError; }
-      await supabase.from("questions").delete().eq("quiz_id", quiz.id);
-      for (const question of questions) {
-        const questionRow = { id: question.id, quiz_id: question.quiz_id, title: question.title, helper_text: question.helper_text, position: question.position };
-        const { error: questionError } = await supabase.from("questions").insert({ ...questionRow, user_id: userId });
-        if (questionError) { setError(questionError.message); throw questionError; }
-      }
-      const optionRows = questions.flatMap((question) => question.options.map((option) => ({ ...option, next_question_id: option.next_question_id || null, user_id: userId })));
-      if (optionRows.length) {
-        const { error: optionError } = await supabase.from("answer_options").insert(optionRows);
-        if (optionError) { setError(optionError.message); throw optionError; }
-      }
     }
     setState((current) => ({ ...current, quizzes: current.quizzes.some((q) => q.id === next.id) ? current.quizzes.map((q) => q.id === next.id ? next : q) : [next, ...current.quizzes] }));
   }, [mode]);
@@ -222,19 +224,24 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       const supabase = createClient()!;
       const { data: authData } = await supabase.auth.getUser();
       const userId = authData.user!.id;
-      const { steps, ...configuratorRow } = next;
-      const { error: configuratorError } = await supabase.from("configurators").upsert({ ...configuratorRow, user_id: userId });
+      next.user_id = userId;
+      const payload = {
+        ...next,
+        user_id: userId,
+        steps: next.steps.map((step) => ({
+          ...step,
+          configurator_id: next.id,
+          options: step.options.map((option) => ({
+            ...option,
+            step_id: step.id,
+            product_id: option.product_id || null,
+            tags: option.tags || [],
+            incompatible_option_ids: option.incompatible_option_ids || [],
+          })),
+        })),
+      };
+      const { error: configuratorError } = await supabase.rpc("save_configurator_with_children", { payload });
       if (configuratorError) { setError(configuratorError.message); throw configuratorError; }
-      await supabase.from("configurator_steps").delete().eq("configurator_id", configurator.id);
-      for (const step of steps) {
-        const { options, ...stepRow } = step;
-        const { error: stepError } = await supabase.from("configurator_steps").insert({ ...stepRow, user_id: userId });
-        if (stepError) { setError(stepError.message); throw stepError; }
-        if (options.length) {
-          const { error: optionError } = await supabase.from("configurator_options").insert(options.map((option) => ({ ...option, user_id: userId })));
-          if (optionError) { setError(optionError.message); throw optionError; }
-        }
-      }
     }
     setState((current) => ({ ...current, configurators: current.configurators.some((item) => item.id === next.id) ? current.configurators.map((item) => item.id === next.id ? next : item) : [next, ...current.configurators] }));
   }, [mode]);

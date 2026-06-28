@@ -22,6 +22,7 @@ Latest pushed hardening commit:
 
 - `c5a49bb` — `Harden dashboard navigation and widget loader`
 - Stage 2 local verification also passed with no `/api/events` POST during a bundled demo finder journey.
+- Stage 3 adds atomic Supabase RPC saves for nested finder and configurator builders.
 
 ## Fixed in the first hardening stage
 
@@ -40,6 +41,15 @@ Latest pushed hardening commit:
    - Public API-backed experiences still post through `/api/events`.
    - Finder/advisor/search/configurator runtime behavior now branches from the actual data source, not from environment-variable mode.
 
+## Fixed in the third hardening stage
+
+1. Product finder and configurator saves are now transaction-safe in Supabase.
+   - Added `save_quiz_with_children(payload jsonb)` for atomic quiz/question/answer-option saves.
+   - Added `save_configurator_with_children(payload jsonb)` for atomic configurator/step/option saves.
+   - Dashboard client saves now call these RPCs instead of parent upsert + child delete/reinsert loops.
+   - The RPCs run as authenticated invoker functions, enforce workspace ownership through `auth.uid()`, and reject invalid child references.
+   - Data Contract health now checks that these transactional RPCs exist in schema SQL.
+
 ## High-priority production problems
 
 1. Public demo telemetry source split.
@@ -52,9 +62,8 @@ Latest pushed hardening commit:
    - Likely fix: snippets should use global experience IDs, or introduce a globally unique public slug/handle.
 
 3. Quiz and configurator saves are not transactional.
-   - Current client flow updates parent rows, deletes child rows, then reinserts questions/options or steps/options.
-   - If one insert fails after deletion, a merchant can lose the experience structure.
-   - Likely fix: move nested saves into server-side RPC/API operations using a transaction.
+   - Status: fixed in Stage 3.
+   - Remaining watch item: run the new migration in production Supabase and confirm Data Contract shows transactional builder saves as passing.
 
 4. Browser-side analytics insertion conflicts with RLS.
    - `analytics_events` has an owner read policy, but no owner insert policy.
