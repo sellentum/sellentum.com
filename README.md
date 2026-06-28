@@ -1,6 +1,8 @@
-# Sellentum MVP
+# Sellentum
 
 Sellentum is a compact guided-selling SaaS product for ecommerce brands. A merchant can import products, build question flows, create configurable bundles, connect choices to deterministic matching signals, publish the experience, and embed it on any website. OpenAI turns the selected product facts into concise match explanations; it never chooses the products.
+
+For the current human-readable project status, open [`SELLENTUM_PROGRESS_REPORT.md`](./SELLENTUM_PROGRESS_REPORT.md).
 
 ## What is included
 
@@ -34,7 +36,6 @@ Sellentum is a compact guided-selling SaaS product for ecommerce brands. A merch
 - Runtime Operations Center that monitors public endpoint contracts, guardrails, analytics quality, release gates and telemetry proof
 - Release Center that rolls catalog, experience, channel, sandbox, analytics and optimization gates into a go/no-go release candidate with rollback notes
 - Production Verification Center that packages Vercel deployment gates, Supabase/demo mode evidence, required route/API contracts, desktop QA scenarios, final verification commands and copyable production handoff packets
-- MVP Completion Audit that maps the original Zoovu-like scope to current evidence, separates done tasks from pending/needs-verification work, and exports a copyable audit packet after each stage
 - System typography guardrails using a simple Helvetica/Poppins/SF Pro stack, a 16px base, readable line/word spacing and a desktop source sweep that keeps app/component UI on standard `text-xs`/`text-sm` scales instead of tiny arbitrary font sizes
 - Workspace Snapshot exporter that packages products, finder rules, configurators, brand settings, install snippets, release state and redacted analytics into copyable JSON/CSV/handoff files
 - Usage & Plan Center that meters sessions, guided interactions, catalog scale, published experiences and AI-assist credits against Stripe-placeholder plan tiers
@@ -146,7 +147,7 @@ supabase/migrations/008_widget_allowed_domains.sql
 supabase/migrations/009_shared_rate_limits.sql
 ```
 
-For production verification, run the checklist in [`SUPABASE_PRODUCTION_VERIFICATION.md`](./SUPABASE_PRODUCTION_VERIFICATION.md). It includes the read-only schema/RLS/grant check at [`supabase/verification/production_schema_check.sql`](./supabase/verification/production_schema_check.sql) and the optional shared-rate-limit runtime probe at [`supabase/verification/rate_limit_runtime_probe.sql`](./supabase/verification/rate_limit_runtime_probe.sql).
+For production verification, follow the next-step checklist in [`SELLENTUM_PROGRESS_REPORT.md`](./SELLENTUM_PROGRESS_REPORT.md). The SQL files are [`supabase/verification/production_schema_check.sql`](./supabase/verification/production_schema_check.sql) and [`supabase/verification/rate_limit_runtime_probe.sql`](./supabase/verification/rate_limit_runtime_probe.sql).
 
 ## Enable OpenAI explanations
 
@@ -258,8 +259,8 @@ Import the repository into Vercel, add the variables from `.env.example`, and de
 - `lib/runtime-operations.ts` and `app/dashboard/operations` — production runtime operations center for public endpoint contracts, guardrails, analytics quality and telemetry proof
 - `lib/release-center.ts` and `app/dashboard/release-center` — go/no-go release candidate builder with launch gates, release scope, rollback plan and copyable release notes
 - `lib/production-verification.ts` and `app/dashboard/production` — production verification center for Vercel deployment evidence, required routes/APIs, desktop QA scenarios, analytics proof and launch handoff commands
-- `lib/mvp-audit.ts` and `app/dashboard/mvp-audit` — requirement-by-requirement MVP audit with done/pending task lists, production evidence boundaries and copyable stage packets
-- `SUPABASE_PRODUCTION_VERIFICATION.md` and `supabase/verification/*` — production Supabase schema, RLS, grant and shared-rate-limit verification packet
+- `SELLENTUM_PROGRESS_REPORT.md` — human-readable project progress, blockers and next actions
+- `supabase/verification/*` — production Supabase schema, RLS, grant and shared-rate-limit verification SQL
 - `lib/workspace-snapshot.ts` and `app/dashboard/workspace-snapshot` — safe workspace archive, product/analytics CSV exports and developer/support handoff packet
 - `lib/usage-metering.ts` and `app/dashboard/usage` — Stripe-placeholder usage and plan-fit center for sessions, interactions, catalog scale, experiences and AI-assist credits
 - `lib/launch-packet.ts` — copyable developer handoff text for preview URLs, embed snippets, QA checks and analytics contracts
@@ -306,6 +307,6 @@ npm run build
 npm run smoke # requires the app to be running, defaults to http://localhost:3000
 ```
 
-## MVP boundaries
+## Current product boundaries
 
 Stripe is represented only by the pricing placeholder. Shopify, Magento, WooCommerce, Salesforce, SAP, CRM/contact sync, advanced personalisation, multi-user permissions and enterprise integrations are deliberately out of scope.
