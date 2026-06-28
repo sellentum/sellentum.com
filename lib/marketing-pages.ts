@@ -140,6 +140,16 @@ export const platformPages = [
     demoLabel: "Open Data Contract",
   },
   {
+    slug: "ai-readiness",
+    eyebrow: "AI Readiness Center",
+    title: "Use OpenAI where it helps, without letting it choose products.",
+    description: "Findly verifies OpenAI configuration, authenticated AI routes, deterministic fallbacks, grounded prompts, embedding/pgvector contracts and route safety before AI-assisted discovery reaches production.",
+    points: ["OpenAI env and model checks", "Fallback coverage", "Grounded prompt contracts", "Deterministic selection boundary"],
+    proof: ["Catalog enrichment, quiz generation and configurator generation require authenticated workspaces", "Finder and search explanations run only after deterministic ranking", "The readiness packet redacts API keys while proving source-level AI contracts"],
+    demoHref: "/dashboard/ai-readiness",
+    demoLabel: "Open AI Readiness",
+  },
+  {
     slug: "usage-pricing",
     eyebrow: "Usage & Plan Center",
     title: "Explain SaaS plan fit before turning on billing.",

@@ -864,6 +864,32 @@ function assertWorkspaceHealthWorkflow() {
   assert(marketing.includes("workspace-data-contract"), "Platform marketing pages should include Data Contract Center");
 }
 
+function assertAiReadinessWorkflow() {
+  const page = readFileSync("app/dashboard/ai-readiness/page.tsx", "utf8");
+  const helper = readFileSync("lib/ai-readiness.ts", "utf8");
+  const route = readFileSync("app/api/ai/health/route.ts", "utf8");
+  const shell = readFileSync("components/dashboard-shell.tsx", "utf8");
+  const overview = readFileSync("app/dashboard/page.tsx", "utf8");
+  const readme = readFileSync("README.md", "utf8");
+  const marketing = readFileSync("lib/marketing-pages.ts", "utf8");
+  assert(helper.includes("buildAiReadinessReport"), "AI Readiness helper should expose a reusable report builder");
+  assert(helper.includes("Findly AI Readiness packet"), "AI Readiness helper should generate a copyable packet");
+  assert(helper.includes("Rules select. AI explains."), "AI Readiness helper should preserve the deterministic AI boundary");
+  assert(helper.includes("fallback-ready") && helper.includes("openai-ready"), "AI Readiness helper should distinguish OpenAI and fallback modes");
+  assert(route.includes("buildSourceAudit"), "AI health API should audit source-level AI contracts");
+  assert(route.includes("getWorkspaceIdentity"), "AI health API should require an authenticated workspace");
+  assert(route.includes("OPENAI_API_KEY") && !route.includes("apiKey:"), "AI health API should inspect but not expose OpenAI key material");
+  assert(route.includes("source: \"server-api\""), "AI health API should label server-generated proof");
+  assert(page.includes("AI Readiness Center"), "AI Readiness page should expose the dashboard title");
+  assert(page.includes("Refresh AI proof"), "AI Readiness page should refresh server-backed proof");
+  assert(page.includes("GET /api/ai/health"), "AI Readiness page should show the authenticated health endpoint");
+  assert(page.includes("Source contract audit"), "AI Readiness page should render source contract proof");
+  assert(shell.includes("/dashboard/ai-readiness"), "Dashboard navigation should expose AI Readiness");
+  assert(overview.includes("/dashboard/ai-readiness"), "Dashboard overview should link to AI Readiness");
+  assert(readme.includes("AI Readiness Center"), "README should document AI Readiness Center");
+  assert(marketing.includes("ai-readiness"), "Platform marketing pages should include AI Readiness Center");
+}
+
 function assertReleaseCenterWorkflow() {
   const page = readFileSync("app/dashboard/release-center/page.tsx", "utf8");
   const helper = readFileSync("lib/release-center.ts", "utf8");
@@ -1557,6 +1583,8 @@ async function assertDeterministicLogic() {
     .replace('from "./runtime-operations";', 'from "./runtime-operations.js";'));
   const compiledWorkspaceHealth = `${compileDir}/lib/workspace-health.js`;
   writeFileSync(compiledWorkspaceHealth, readFileSync(compiledWorkspaceHealth, "utf8"));
+  const compiledAiReadiness = `${compileDir}/lib/ai-readiness.js`;
+  writeFileSync(compiledAiReadiness, readFileSync(compiledAiReadiness, "utf8"));
   const compiledWorkspaceSnapshot = `${compileDir}/lib/workspace-snapshot.js`;
   writeFileSync(compiledWorkspaceSnapshot, readFileSync(compiledWorkspaceSnapshot, "utf8")
     .replace('from "./decision-graph";', 'from "./decision-graph.js";')
@@ -1637,6 +1665,7 @@ async function assertDeterministicLogic() {
   const mvpAudit = await import(pathToFileURL(`${compileDir}/lib/mvp-audit.js`));
   const apiCenter = await import(pathToFileURL(`${compileDir}/lib/api-center.js`));
   const workspaceHealth = await import(pathToFileURL(`${compileDir}/lib/workspace-health.js`));
+  const aiReadiness = await import(pathToFileURL(`${compileDir}/lib/ai-readiness.js`));
   const workspaceSnapshot = await import(pathToFileURL(`${compileDir}/lib/workspace-snapshot.js`));
 
   const answers = [
@@ -2051,6 +2080,31 @@ async function assertDeterministicLogic() {
   assert(workspaceHealthReport.packet.includes("Findly Workspace Data Contract packet") && workspaceHealthReport.packet.includes("Supabase table contract"), "Expected Workspace Health to generate a data contract packet");
   const emptyWorkspaceHealthReport = workspaceHealth.buildWorkspaceHealthReport({ mode: "demo", source: "client-store", products: [], quizzes: [], configurators: [], events: [], settings: demo.demoSettings, schemaSql: "" });
   assert(emptyWorkspaceHealthReport.status === "blocked" && emptyWorkspaceHealthReport.actions.some((action) => action.priority === "critical"), "Expected Workspace Health to block empty workspaces with critical actions");
+  const healthyAiSourceAudit = {
+    catalogRouteAuthenticated: true,
+    catalogFallback: true,
+    catalogEmbeddings: true,
+    quizRouteAuthenticated: true,
+    quizFallback: true,
+    configuratorRouteAuthenticated: true,
+    configuratorFallback: true,
+    recommendationFallback: true,
+    recommendationPromptGrounded: true,
+    searchFallback: true,
+    searchPromptDeterministic: true,
+    finderSelectionDeterministic: true,
+    semanticCandidates: true,
+    pgvectorSchema: true,
+    explanationRateLimited: true,
+    publicRuntimeGuardrails: true,
+  };
+  const aiReadinessReport = aiReadiness.buildAiReadinessReport({ mode: "supabase", source: "server-api", openaiConfigured: true, products: demo.demoProducts, quizzes: [demo.demoQuiz], configurators: [demo.demoConfigurator], events: demo.demoEvents, sourceAudit: healthyAiSourceAudit });
+  assert(aiReadinessReport.sourceContracts.every((item) => item.status === "pass") && aiReadinessReport.surfaces.some((surface) => surface.id === "finder-explanations" && surface.mode === "openai-ready"), "Expected AI Readiness to prove OpenAI-ready source contracts for the healthy demo");
+  assert(aiReadinessReport.packet.includes("Findly AI Readiness packet") && aiReadinessReport.packet.includes("Deterministic rules"), "Expected AI Readiness to generate a deterministic-boundary packet");
+  const fallbackAiReadinessReport = aiReadiness.buildAiReadinessReport({ mode: "demo", source: "client-store", openaiConfigured: false, products: demo.demoProducts, quizzes: [demo.demoQuiz], configurators: [demo.demoConfigurator], events: demo.demoEvents, sourceAudit: healthyAiSourceAudit });
+  assert(fallbackAiReadinessReport.openai.liveCheck === "not-configured" && fallbackAiReadinessReport.surfaces.some((surface) => surface.mode === "fallback-ready"), "Expected AI Readiness to support deterministic fallback mode when OpenAI is absent");
+  const blockedAiReadinessReport = aiReadiness.buildAiReadinessReport({ mode: "demo", source: "client-store", products: [], quizzes: [], configurators: [], events: [], sourceAudit: {} });
+  assert(blockedAiReadinessReport.status === "blocked" && blockedAiReadinessReport.actions.some((action) => action.priority === "critical"), "Expected AI Readiness to block empty/missing source-contract snapshots");
   const packet = launchPacket.buildLaunchPacket({
     origin: "https://findly.example/",
     publicUrl: "https://findly.example/finder/footwear-finder",
@@ -2325,6 +2379,7 @@ async function main() {
   await assertPage("/platform/storefront-install-scanner", "Verify the Findly widget");
   await assertPage("/platform/headless-api", "Build custom guided-selling");
   await assertPage("/platform/workspace-data-contract", "Prove the workspace data layer");
+  await assertPage("/platform/ai-readiness", "Use OpenAI where it helps");
   await assertPage("/platform/returns-fit-intelligence", "Prevent wrong-fit purchases");
   await assertPage("/platform/bundle-studio", "Increase average order value");
   await assertPage("/platform/usage-pricing", "Explain SaaS plan fit");
@@ -2340,6 +2395,7 @@ async function main() {
   await assertPage("/configurator/config_trail_kit", "Loading configurator");
   await assertPage("/api/preflight", "Authentication required", 401);
   await assertPage("/api/workspace/health", "Authentication required", 401);
+  await assertPage("/api/ai/health", "Authentication required", 401);
   {
     const { response, text } = await postJson("/api/storefront/scan", { url: "https://store.example" });
     assert(response.status === 401 && text.includes("Authentication required"), "Storefront scan API should require authentication");
@@ -2372,6 +2428,7 @@ async function main() {
   assertWidgetStudioWorkflow();
   assertApiCenterWorkflow();
   assertWorkspaceHealthWorkflow();
+  assertAiReadinessWorkflow();
   assertLaunchChannelsWorkflow();
   assertPartnerSyndicationWorkflow();
   assertStorefrontSandboxWorkflow();
