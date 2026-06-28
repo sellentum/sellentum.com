@@ -22,6 +22,7 @@ const nav = [
   { href: "/dashboard/release-center", label: "Release Center", icon: GitPullRequestArrow },
   { href: "/dashboard/production", label: "Production Verification", icon: MonitorCheck },
   { href: "/dashboard/trust-center", label: "AI Trust Center", icon: ShieldCheck },
+  { href: "/dashboard/grounding", label: "Grounding Center", icon: BrainCircuit },
   { href: "/dashboard/workspace-snapshot", label: "Workspace snapshot", icon: Archive },
   { href: "/dashboard/usage", label: "Usage & plan", icon: CreditCard },
   { href: "/dashboard/experiments", label: "Experiments", icon: Target },

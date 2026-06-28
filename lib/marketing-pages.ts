@@ -140,6 +140,16 @@ export const platformPages = [
     demoLabel: "Open Production Verification",
   },
   {
+    slug: "grounding-center",
+    eyebrow: "Grounding Center",
+    title: "Give AI a safe product-fact map before it explains anything.",
+    description: "Findly turns catalog facts, approved vocabulary, shopper benefit mappings and explanation audits into a RAG-style grounding center so advisor, search and result-card copy stays tied to validated evidence.",
+    points: ["Product fact map", "Approved vocabulary evidence", "Benefit mappings", "Copyable grounding packet"],
+    proof: ["AI can explain only facts listed in the grounding map", "Unsupported terms must be approved or rejected before launch", "Deterministic matching still selects products before AI generates copy"],
+    demoHref: "/dashboard/grounding",
+    demoLabel: "Open Grounding Center",
+  },
+  {
     slug: "analytics",
     eyebrow: "Journey analytics",
     title: "See where guided discovery turns into buying intent.",

@@ -37,6 +37,7 @@ function assertSystemFontStack() {
   assert(!layout.includes("next/font/google"), "App layout should avoid Google font dependency for the simple system-font direction");
   assert(css.includes("Helvetica") && css.includes("Poppins") && css.includes("SF Pro"), "Global CSS should include Helvetica, Poppins and SF Pro in the simple font stack");
   assert(css.includes("font-size: 16px") && css.includes("line-height: 1.5"), "Global CSS should define a standard 16px type baseline");
+  assert(css.includes("word-spacing: 0.01em") && css.includes("text-rendering: optimizeLegibility"), "Global CSS should define readable line and word spacing");
   assert(css.includes(".text-\\[7px\\]") && css.includes(".text-\\[10px\\]") && css.includes("font-size: 0.75rem"), "Global CSS should lift tiny arbitrary text classes to a readable baseline");
   assert(css.includes(".text-\\[11px\\]") && css.includes(".text-\\[15px\\]"), "Global CSS should normalize small intermediate arbitrary text sizes");
 }
@@ -521,6 +522,34 @@ function assertTrustCenterWorkflow() {
   assert(shell.includes("/dashboard/trust-center"), "Dashboard navigation should expose AI Trust Center");
   assert(overview.includes("/dashboard/trust-center"), "Dashboard overview should route merchants to AI Trust Center");
   assert(readme.includes("AI Trust Center"), "README should document AI Trust Center");
+}
+
+function assertGroundingCenterWorkflow() {
+  const page = readFileSync("app/dashboard/grounding/page.tsx", "utf8");
+  const helper = readFileSync("lib/grounding-center.ts", "utf8");
+  const shell = readFileSync("components/dashboard-shell.tsx", "utf8");
+  const overview = readFileSync("app/dashboard/page.tsx", "utf8");
+  const readme = readFileSync("README.md", "utf8");
+  const marketing = readFileSync("lib/marketing-pages.ts", "utf8");
+  assert(helper.includes("buildGroundingCenterReport"), "Grounding Center helper should expose a reusable report builder");
+  assert(helper.includes("buildCatalogBenefitReport"), "Grounding Center should use catalog benefit mappings");
+  assert(helper.includes("buildExplanationGroundingReport"), "Grounding Center should use explanation grounding audits");
+  assert(helper.includes("buildVocabularyStudioReport"), "Grounding Center should use approved vocabulary evidence");
+  assert(helper.includes("Findly Grounding Center packet"), "Grounding Center should generate a copyable packet");
+  assert(helper.includes("RAG grounding boundary"), "Grounding Center should document the RAG grounding boundary");
+  assert(helper.includes("Deterministic matching selects products"), "Grounding Center should preserve the deterministic AI boundary");
+  assert(helper.includes("Use only listed catalog facts"), "Grounding Center should define product-fact guardrails");
+  assert(page.includes("buildGroundingCenterReport"), "Grounding Center page should use the shared report builder");
+  assert(page.includes("Grounding Center"), "Grounding Center page should expose the dashboard title");
+  assert(page.includes("Grounded product fact map"), "Grounding Center page should show the product fact map");
+  assert(page.includes("RAG grounding boundary"), "Grounding Center page should explain the RAG boundary");
+  assert(page.includes("Approved evidence detail"), "Grounding Center page should show approved evidence details");
+  assert(page.includes("Copy grounding packet"), "Grounding Center page should let merchants copy the packet");
+  assert(!page.includes("text-[8px]") && !page.includes("text-[9px]") && !page.includes("text-[10px]"), "Grounding Center page should avoid tiny arbitrary font sizes");
+  assert(shell.includes("/dashboard/grounding"), "Dashboard navigation should expose Grounding Center");
+  assert(overview.includes("/dashboard/grounding"), "Dashboard overview should link to Grounding Center");
+  assert(readme.includes("Grounding Center"), "README should document Grounding Center");
+  assert(marketing.includes("grounding-center"), "Platform marketing pages should include Grounding Center");
 }
 
 function assertFlowStudioWorkflow() {
@@ -1242,6 +1271,11 @@ async function assertDeterministicLogic() {
     .replace('from "./explanation-grounding";', 'from "./explanation-grounding.js";')
     .replace('from "./recommendation-qa";', 'from "./recommendation-qa.js";')
     .replace('from "./vocabulary-studio";', 'from "./vocabulary-studio.js";'));
+  const compiledGroundingCenter = `${compileDir}/lib/grounding-center.js`;
+  writeFileSync(compiledGroundingCenter, readFileSync(compiledGroundingCenter, "utf8")
+    .replace('from "./catalog-benefits";', 'from "./catalog-benefits.js";')
+    .replace('from "./explanation-grounding";', 'from "./explanation-grounding.js";')
+    .replace('from "./vocabulary-studio";', 'from "./vocabulary-studio.js";'));
   const compiledExperienceLaunch = `${compileDir}/lib/experience-launch.js`;
   writeFileSync(compiledExperienceLaunch, readFileSync(compiledExperienceLaunch, "utf8")
     .replace('from "./widget-snippet";', 'from "./widget-snippet.js";')
@@ -1427,6 +1461,7 @@ async function assertDeterministicLogic() {
   const shopperLanguagePlanner = await import(pathToFileURL(`${compileDir}/lib/shopper-language-planner.js`));
   const vocabularyStudio = await import(pathToFileURL(`${compileDir}/lib/vocabulary-studio.js`));
   const trustCenter = await import(pathToFileURL(`${compileDir}/lib/trust-center.js`));
+  const groundingCenter = await import(pathToFileURL(`${compileDir}/lib/grounding-center.js`));
   const searchRecovery = await import(pathToFileURL(`${compileDir}/lib/search-recovery.js`));
   const searchTuning = await import(pathToFileURL(`${compileDir}/lib/search-tuning.js`));
   const publicExperience = await import(pathToFileURL(`${compileDir}/lib/public-experience.js`));
@@ -1781,6 +1816,13 @@ async function assertDeterministicLogic() {
   assert(trustReport.principles.some((principle) => principle.label === "Rules select. AI explains."), "Expected Trust Center to document the AI selection boundary");
   assert(trustReport.aiBoundary.some((item) => item.includes("Rules select products first")) && trustReport.dataBoundary.some((item) => item.includes("anonymous session IDs")), "Expected Trust Center to expose AI and data boundaries");
   assert(trustReport.packet.includes("Findly AI trust packet") && trustReport.packet.includes("Runtime guardrails"), "Expected Trust Center to generate a copyable trust packet");
+  const groundingReport = groundingCenter.buildGroundingCenterReport({ products: demo.demoProducts, quizzes: [demo.demoQuiz], events: demo.demoEvents, openaiConfigured: false });
+  assert(groundingReport.products.length && groundingReport.summary.groundedFacts > 0, "Expected Grounding Center to map product facts for the demo catalog");
+  assert(groundingReport.products.some((product) => product.facts.some((fact) => fact.kind === "benefit")) && groundingReport.summary.benefitMappings > 0, "Expected Grounding Center to include shopper benefit mappings");
+  assert(groundingReport.checks.some((check) => check.id === "catalog-facts") && groundingReport.checks.some((check) => check.id === "explanation-audits"), "Expected Grounding Center to include catalog and audit readiness checks");
+  assert(groundingReport.packet.includes("Findly Grounding Center packet") && groundingReport.packet.includes("RAG grounding boundary") && groundingReport.packet.includes("Deterministic matching selects products"), "Expected Grounding Center to generate a RAG boundary packet");
+  const emptyGroundingReport = groundingCenter.buildGroundingCenterReport({ products: [], quizzes: [], events: [] });
+  assert(emptyGroundingReport.status === "blocked" && emptyGroundingReport.actions.some((action) => action.id === "add-products-for-grounding"), "Expected empty Grounding Center report to block launch until products exist");
   const generatedSuggestion = quizGeneration.buildOntologyQuizSuggestion(demo.demoProducts, "Help shoppers choose the right footwear");
   assert(generatedSuggestion.questions.length >= 2, "Expected ontology-guided quiz generation to produce multiple questions");
   assert(generatedSuggestion.questions.some((question) => question.options.some((option) => option.match_type === "category" || option.match_type === "tag" || option.match_type === "feature")), "Expected generated quiz to use ontology-backed catalog rules");
@@ -2115,6 +2157,7 @@ async function main() {
   await assertPage("/platform/bundle-studio", "Increase average order value");
   await assertPage("/platform/usage-pricing", "Explain SaaS plan fit");
   await assertPage("/platform/production-verification", "Prove Findly is ready");
+  await assertPage("/platform/grounding-center", "Give AI a safe product-fact map");
   await assertPage("/industries", "Industries");
   await assertPage("/resources", "Demo the product discovery loop");
   await assertPage("/finder/quiz_footwear", "Preparing your product guide");
@@ -2142,6 +2185,7 @@ async function main() {
   assertVocabularyStudioWorkflow();
   assertDecisionGraphWorkflow();
   assertTrustCenterWorkflow();
+  assertGroundingCenterWorkflow();
   assertFlowStudioWorkflow();
   assertExperienceRegistryWorkflow();
   assertWidgetStudioWorkflow();

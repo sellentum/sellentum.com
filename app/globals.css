@@ -14,7 +14,7 @@
 }
 
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; text-size-adjust: 100%; }
 body {
   margin: 0;
   color: var(--ink);
@@ -22,14 +22,17 @@ body {
   font-family: var(--font-body);
   font-size: 16px;
   line-height: 1.5;
+  letter-spacing: -0.005em;
+  word-spacing: 0.01em;
+  text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
 }
 button, input, textarea, select { font: inherit; }
 button, a { -webkit-tap-highlight-color: transparent; }
 ::selection { background: var(--lime); color: var(--ink); }
 
-.display { font-family: var(--font-display); font-weight: 800; letter-spacing: -0.055em; }
-.eyebrow { font-size: 0.7rem; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; }
+.display { font-family: var(--font-display); font-weight: 800; letter-spacing: -0.035em; line-height: 1.02; word-spacing: 0; }
+.eyebrow { font-size: 0.7rem; font-weight: 800; letter-spacing: 0.14em; line-height: 1.2; text-transform: uppercase; word-spacing: 0.04em; }
 
 /* Standard-size guardrails for older dense dashboard labels. */
 .text-\[7px\],
