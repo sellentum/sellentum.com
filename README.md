@@ -146,6 +146,8 @@ supabase/migrations/008_widget_allowed_domains.sql
 supabase/migrations/009_shared_rate_limits.sql
 ```
 
+For production verification, run the checklist in [`SUPABASE_PRODUCTION_VERIFICATION.md`](./SUPABASE_PRODUCTION_VERIFICATION.md). It includes the read-only schema/RLS/grant check at [`supabase/verification/production_schema_check.sql`](./supabase/verification/production_schema_check.sql) and the optional shared-rate-limit runtime probe at [`supabase/verification/rate_limit_runtime_probe.sql`](./supabase/verification/rate_limit_runtime_probe.sql).
+
 ## Enable OpenAI explanations
 
 Set `OPENAI_API_KEY` on the server. `OPENAI_MODEL` defaults to `gpt-4o-mini` and can be changed without code. OpenAI enables richer catalog enrichment, automatic question design, vector embeddings, semantic conversational matching and grounded product explanations. Every workflow has a deterministic local fallback when no key is configured.
@@ -257,6 +259,7 @@ Import the repository into Vercel, add the variables from `.env.example`, and de
 - `lib/release-center.ts` and `app/dashboard/release-center` — go/no-go release candidate builder with launch gates, release scope, rollback plan and copyable release notes
 - `lib/production-verification.ts` and `app/dashboard/production` — production verification center for Vercel deployment evidence, required routes/APIs, desktop QA scenarios, analytics proof and launch handoff commands
 - `lib/mvp-audit.ts` and `app/dashboard/mvp-audit` — requirement-by-requirement MVP audit with done/pending task lists, production evidence boundaries and copyable stage packets
+- `SUPABASE_PRODUCTION_VERIFICATION.md` and `supabase/verification/*` — production Supabase schema, RLS, grant and shared-rate-limit verification packet
 - `lib/workspace-snapshot.ts` and `app/dashboard/workspace-snapshot` — safe workspace archive, product/analytics CSV exports and developer/support handoff packet
 - `lib/usage-metering.ts` and `app/dashboard/usage` — Stripe-placeholder usage and plan-fit center for sessions, interactions, catalog scale, experiences and AI-assist credits
 - `lib/launch-packet.ts` — copyable developer handoff text for preview URLs, embed snippets, QA checks and analytics contracts

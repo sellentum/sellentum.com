@@ -188,7 +188,7 @@ export default function DataContractPage() {
       </div>
 
       <section className="mt-6 rounded-[28px] border border-black/[0.07] bg-white p-6">
-        <div className="flex items-center justify-between"><div><h2 className="text-sm font-extrabold">Supabase table contract</h2><p className="mt-1 text-xs text-black/35">Required tables and columns for the current Sellentum product-discovery MVP.</p></div><Database className="text-moss" size={18} /></div>
+        <div className="flex items-center justify-between"><div><h2 className="text-sm font-extrabold">Supabase table contract</h2><p className="mt-1 text-xs text-black/35">Required tables, columns and runtime guardrails for the current Sellentum production track.</p></div><Database className="text-moss" size={18} /></div>
         <div className="mt-5 grid gap-3 xl:grid-cols-3">
           {report.schemaContracts.map((contract) => (
             <article key={contract.table} className="rounded-2xl border border-black/[0.07] bg-canvas p-4">
