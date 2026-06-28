@@ -839,6 +839,31 @@ function assertStorefrontInstallScannerWorkflow() {
   assert(marketing.includes("storefront-install-scanner"), "Platform marketing pages should include Storefront Install Scanner");
 }
 
+function assertWorkspaceHealthWorkflow() {
+  const page = readFileSync("app/dashboard/data-contract/page.tsx", "utf8");
+  const helper = readFileSync("lib/workspace-health.ts", "utf8");
+  const route = readFileSync("app/api/workspace/health/route.ts", "utf8");
+  const shell = readFileSync("components/dashboard-shell.tsx", "utf8");
+  const overview = readFileSync("app/dashboard/page.tsx", "utf8");
+  const readme = readFileSync("README.md", "utf8");
+  const marketing = readFileSync("lib/marketing-pages.ts", "utf8");
+  assert(helper.includes("buildWorkspaceHealthReport"), "Data Contract helper should expose a reusable report builder");
+  assert(helper.includes("auditWorkspaceSchema"), "Data Contract helper should audit the Supabase schema SQL");
+  assert(helper.includes("Findly Workspace Data Contract packet"), "Data Contract helper should generate a copyable packet");
+  assert(helper.includes("expectedWorkspaceSchema"), "Data Contract helper should define required workspace table contracts");
+  assert(route.includes("getWorkspaceIdentity"), "Workspace health API should require an authenticated workspace");
+  assert(route.includes("schema.sql"), "Workspace health API should verify the checked-in Supabase schema contract");
+  assert(route.includes("source: \"server-api\""), "Workspace health API should label server-generated proof");
+  assert(page.includes("Data Contract Center"), "Data Contract page should expose the dashboard title");
+  assert(page.includes("Refresh server proof"), "Data Contract page should refresh server-backed proof");
+  assert(page.includes("Supabase table contract"), "Data Contract page should render schema contracts");
+  assert(page.includes("GET /api/workspace/health"), "Data Contract page should show the authenticated health endpoint");
+  assert(shell.includes("/dashboard/data-contract"), "Dashboard navigation should expose Data Contract");
+  assert(overview.includes("/dashboard/data-contract"), "Dashboard overview should link to Data Contract");
+  assert(readme.includes("Data Contract Center"), "README should document Data Contract Center");
+  assert(marketing.includes("workspace-data-contract"), "Platform marketing pages should include Data Contract Center");
+}
+
 function assertReleaseCenterWorkflow() {
   const page = readFileSync("app/dashboard/release-center/page.tsx", "utf8");
   const helper = readFileSync("lib/release-center.ts", "utf8");
@@ -1530,6 +1555,8 @@ async function assertDeterministicLogic() {
     .replace('from "./analytics-quality";', 'from "./analytics-quality.js";')
     .replace('from "./experience-registry";', 'from "./experience-registry.js";')
     .replace('from "./runtime-operations";', 'from "./runtime-operations.js";'));
+  const compiledWorkspaceHealth = `${compileDir}/lib/workspace-health.js`;
+  writeFileSync(compiledWorkspaceHealth, readFileSync(compiledWorkspaceHealth, "utf8"));
   const compiledWorkspaceSnapshot = `${compileDir}/lib/workspace-snapshot.js`;
   writeFileSync(compiledWorkspaceSnapshot, readFileSync(compiledWorkspaceSnapshot, "utf8")
     .replace('from "./decision-graph";', 'from "./decision-graph.js";')
@@ -1609,6 +1636,7 @@ async function assertDeterministicLogic() {
   const productionVerification = await import(pathToFileURL(`${compileDir}/lib/production-verification.js`));
   const mvpAudit = await import(pathToFileURL(`${compileDir}/lib/mvp-audit.js`));
   const apiCenter = await import(pathToFileURL(`${compileDir}/lib/api-center.js`));
+  const workspaceHealth = await import(pathToFileURL(`${compileDir}/lib/workspace-health.js`));
   const workspaceSnapshot = await import(pathToFileURL(`${compileDir}/lib/workspace-snapshot.js`));
 
   const answers = [
@@ -2015,6 +2043,14 @@ async function assertDeterministicLogic() {
   assert(apiCenterReport.endpoints.some((endpoint) => endpoint.id === "finder-recommendations" && endpoint.path.includes("/api/public/finder/")) && apiCenterReport.endpoints.some((endpoint) => endpoint.id === "configurator-validation" && endpoint.requestExample.includes("selectedIds")), "Expected API Center to document finder and configurator runtime endpoints");
   assert(apiCenterReport.endpoints.some((endpoint) => endpoint.id === "advisor-search") && apiCenterReport.endpoints.some((endpoint) => endpoint.id === "semantic-search"), "Expected API Center to document advisor and semantic search endpoints");
   assert(apiCenterReport.packet.includes("Findly Headless API Center packet") && apiCenterReport.sdkNotes.some((note) => note.label === "No secret exposure"), "Expected API Center to generate a packet and SDK boundary notes");
+  const schemaSql = readFileSync("supabase/schema.sql", "utf8");
+  const schemaAudit = workspaceHealth.auditWorkspaceSchema(schemaSql);
+  assert(schemaAudit.length >= 10 && schemaAudit.every((contract) => contract.status === "pass"), "Expected Workspace Health schema audit to prove required Supabase table contracts");
+  const workspaceHealthReport = workspaceHealth.buildWorkspaceHealthReport({ mode: "supabase", source: "server-api", products: demo.demoProducts, quizzes: [demo.demoQuiz], configurators: [demo.demoConfigurator], events: demo.demoEvents, settings: demo.demoSettings, schemaSql });
+  assert(workspaceHealthReport.summary.schemaTables >= 10 && workspaceHealthReport.checks.some((check) => check.id === "server-source" && check.status === "pass"), "Expected Workspace Health to include server-source and schema summary proof");
+  assert(workspaceHealthReport.packet.includes("Findly Workspace Data Contract packet") && workspaceHealthReport.packet.includes("Supabase table contract"), "Expected Workspace Health to generate a data contract packet");
+  const emptyWorkspaceHealthReport = workspaceHealth.buildWorkspaceHealthReport({ mode: "demo", source: "client-store", products: [], quizzes: [], configurators: [], events: [], settings: demo.demoSettings, schemaSql: "" });
+  assert(emptyWorkspaceHealthReport.status === "blocked" && emptyWorkspaceHealthReport.actions.some((action) => action.priority === "critical"), "Expected Workspace Health to block empty workspaces with critical actions");
   const packet = launchPacket.buildLaunchPacket({
     origin: "https://findly.example/",
     publicUrl: "https://findly.example/finder/footwear-finder",
@@ -2288,6 +2324,7 @@ async function main() {
   await assertPage("/platform/widget-studio", "Launch every guided experience");
   await assertPage("/platform/storefront-install-scanner", "Verify the Findly widget");
   await assertPage("/platform/headless-api", "Build custom guided-selling");
+  await assertPage("/platform/workspace-data-contract", "Prove the workspace data layer");
   await assertPage("/platform/returns-fit-intelligence", "Prevent wrong-fit purchases");
   await assertPage("/platform/bundle-studio", "Increase average order value");
   await assertPage("/platform/usage-pricing", "Explain SaaS plan fit");
@@ -2302,6 +2339,7 @@ async function main() {
   await assertPage("/search/quiz_footwear", "Preparing product search");
   await assertPage("/configurator/config_trail_kit", "Loading configurator");
   await assertPage("/api/preflight", "Authentication required", 401);
+  await assertPage("/api/workspace/health", "Authentication required", 401);
   {
     const { response, text } = await postJson("/api/storefront/scan", { url: "https://store.example" });
     assert(response.status === 401 && text.includes("Authentication required"), "Storefront scan API should require authentication");
@@ -2333,6 +2371,7 @@ async function main() {
   assertExperienceRegistryWorkflow();
   assertWidgetStudioWorkflow();
   assertApiCenterWorkflow();
+  assertWorkspaceHealthWorkflow();
   assertLaunchChannelsWorkflow();
   assertPartnerSyndicationWorkflow();
   assertStorefrontSandboxWorkflow();

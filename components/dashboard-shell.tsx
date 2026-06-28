@@ -14,6 +14,7 @@ const nav = [
   { href: "/dashboard/launch", label: "Launch Studio", icon: Rocket },
   { href: "/dashboard/widget-studio", label: "Widget Studio", icon: Code2 },
   { href: "/dashboard/api-center", label: "API Center", icon: Braces },
+  { href: "/dashboard/data-contract", label: "Data Contract", icon: Database },
   { href: "/dashboard/experiences", label: "Experience Registry", icon: GalleryVerticalEnd },
   { href: "/dashboard/channels", label: "Launch channels", icon: Megaphone },
   { href: "/dashboard/syndication", label: "Syndication", icon: Handshake },

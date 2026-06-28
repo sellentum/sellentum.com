@@ -130,6 +130,16 @@ export const platformPages = [
     demoLabel: "Open API Center",
   },
   {
+    slug: "workspace-data-contract",
+    eyebrow: "Data Contract Center",
+    title: "Prove the workspace data layer is healthy before launch.",
+    description: "Findly checks Supabase persistence, required schema tables, catalog records, published finders, configurators, analytics event shape and widget settings from an authenticated health endpoint.",
+    points: ["Server-backed health endpoint", "Supabase table contract", "Runtime data readiness", "Copyable workspace data packet"],
+    proof: ["The dashboard separates browser-store evidence from authenticated server proof", "Required tables and columns are mapped to product-discovery services", "Launch actions point back to the exact workspace area that needs repair"],
+    demoHref: "/dashboard/data-contract",
+    demoLabel: "Open Data Contract",
+  },
+  {
     slug: "usage-pricing",
     eyebrow: "Usage & Plan Center",
     title: "Explain SaaS plan fit before turning on billing.",
