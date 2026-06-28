@@ -239,6 +239,7 @@ function publicBrand(settings: WidgetSettings): Omit<WidgetSettings, "user_id"> 
     widget_title: settings.widget_title,
     welcome_message: settings.welcome_message,
     launcher_position: settings.launcher_position,
+    allowed_domains: settings.allowed_domains,
   };
 }
 

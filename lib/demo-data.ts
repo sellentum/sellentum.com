@@ -323,6 +323,7 @@ export const demoSettings: WidgetSettings = {
   widget_title: "Your personal product guide",
   welcome_message: "Answer a few quick questions and we’ll narrow down the good stuff.",
   launcher_position: "bottom-right",
+  allowed_domains: [],
 };
 
 const demoFinderAnswers = [

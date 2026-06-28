@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { demoConfigurator, demoEvents, demoProducts, demoQuiz, demoSettings, DEMO_USER_ID } from "@/lib/demo-data";
+import { normalizeAllowedDomains } from "@/lib/domain-allowlist";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import type { AnalyticsEvent, AnalyticsEventType, Configurator, Product, ProductInput, Quiz, WidgetSettings } from "@/lib/types";
 import { uid } from "@/lib/utils";
@@ -107,7 +108,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
             .map((step) => ({ ...step, options: [...(step.options || [])].sort((a, b) => a.position - b.position) })),
         })),
         events: (eventsResult.data as AnalyticsEvent[]) || [],
-        settings: (settingsResult.data as WidgetSettings) || createDefaultWorkspaceSettings(userId),
+        settings: settingsResult.data
+          ? { ...createDefaultWorkspaceSettings(userId), ...(settingsResult.data as WidgetSettings), allowed_domains: normalizeAllowedDomains((settingsResult.data as Partial<WidgetSettings>).allowed_domains) }
+          : createDefaultWorkspaceSettings(userId),
       });
       setReady(true);
     }
@@ -255,7 +258,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   }, [mode]);
 
   const saveSettings = useCallback(async (settings: WidgetSettings) => {
-    let next = settings;
+    let next = { ...settings, allowed_domains: normalizeAllowedDomains(settings.allowed_domains) };
     if (mode === "supabase") {
       const supabase = createClient()!;
       const { data: authData } = await supabase.auth.getUser();

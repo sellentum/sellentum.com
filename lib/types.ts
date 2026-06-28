@@ -131,6 +131,7 @@ export type WidgetSettings = {
   widget_title: string;
   welcome_message: string;
   launcher_position: "bottom-right" | "bottom-left";
+  allowed_domains: string[];
 };
 
 export type ProductInput = Omit<Product, "id" | "user_id" | "created_at" | "updated_at">;

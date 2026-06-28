@@ -146,6 +146,7 @@ create table if not exists public.widget_settings (
   widget_title text not null default 'Your personal product guide',
   welcome_message text not null default 'Answer a few questions and we''ll find your best match.',
   launcher_position text not null default 'bottom-right' check (launcher_position in ('bottom-right','bottom-left')),
+  allowed_domains text[] not null default '{}',
   updated_at timestamptz not null default now()
 );
 

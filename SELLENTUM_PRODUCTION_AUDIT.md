@@ -23,6 +23,7 @@ Latest pushed hardening commit:
 - `c5a49bb` — `Harden dashboard navigation and widget loader`
 - Stage 2 local verification also passed with no `/api/events` POST during a bundled demo finder journey.
 - Stage 3 adds atomic Supabase RPC saves for nested finder and configurator builders.
+- Stage 4 adds workspace storefront-domain allowlists for public analytics ingestion.
 
 ## Fixed in the first hardening stage
 
@@ -50,6 +51,15 @@ Latest pushed hardening commit:
    - The RPCs run as authenticated invoker functions, enforce workspace ownership through `auth.uid()`, and reject invalid child references.
    - Data Contract health now checks that these transactional RPCs exist in schema SQL.
 
+## Fixed in the fourth hardening stage
+
+1. Public analytics ingestion now supports a workspace storefront-domain allowlist.
+   - Added `widget_settings.allowed_domains` to the Supabase schema and migration set.
+   - Brand & embed settings now let merchants enter approved storefront domains, one per line.
+   - `/api/events` validates widget/page URL, origin, or referrer against the allowlist before service-role insertion.
+   - Empty allowlists remain unrestricted for existing MVP workspaces until a merchant explicitly enables the launch restriction.
+   - Localhost and direct Sellentum-hosted public pages remain usable for setup/testing.
+
 ## High-priority production problems
 
 1. Public demo telemetry source split.
@@ -75,9 +85,8 @@ Latest pushed hardening commit:
    - Likely fix: use Upstash Redis, Supabase-backed rate limits, or Vercel KV before real traffic.
 
 6. Public analytics ingestion has no merchant/domain allowlist yet.
-   - The service-role API validates published experience IDs and product ownership, which is good.
-   - But any origin can still send events for a known published experience ID.
-   - Likely fix: add allowed domains/widget origins per workspace, or signed widget/session tokens.
+   - Status: fixed in Stage 4 for practical storefront-domain enforcement.
+   - Remaining watch item: signed widget/session tokens would be stronger for enterprise-grade anti-spoofing.
 
 7. Dependency audit reports two moderate vulnerabilities.
    - `npm audit --json` reports `postcss <8.5.10` through the installed Next.js package.
@@ -185,7 +194,7 @@ Latest pushed hardening commit:
 ### Stage 4 — Public experience IDs and widget trust boundary
 
 - Make public embed IDs globally unambiguous.
-- Add allowed origin/domain checks or signed widget sessions.
+- Add signed widget/session tokens if abuse resistance needs to go beyond domain validation.
 - Extend install scanner to validate expected merchant domain.
 
 ### Stage 5 — Production external proof

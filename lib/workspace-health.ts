@@ -67,7 +67,7 @@ export const expectedWorkspaceSchema: Array<Omit<WorkspaceSchemaContract, "statu
   { table: "configurator_steps", purpose: "Ordered configurator questions and selection rules.", requiredColumns: ["id", "configurator_id", "user_id", "title", "selection_type", "required", "position"] },
   { table: "configurator_options", purpose: "Product-linked configurator choices, price deltas and incompatibilities.", requiredColumns: ["id", "step_id", "user_id", "label", "price_delta", "product_id", "tags", "incompatible_option_ids", "position"] },
   { table: "analytics_events", purpose: "Widget, journey, recommendation, feedback and buy-click telemetry.", requiredColumns: ["id", "user_id", "quiz_id", "product_id", "event_type", "metadata", "created_at"] },
-  { table: "widget_settings", purpose: "Brand, colour, CTA and widget copy shared by public runtimes.", requiredColumns: ["user_id", "brand_name", "primary_color", "button_text", "widget_title", "welcome_message", "launcher_position"] },
+  { table: "widget_settings", purpose: "Brand, colour, CTA, widget copy and approved storefront domains shared by public runtimes.", requiredColumns: ["user_id", "brand_name", "primary_color", "button_text", "widget_title", "welcome_message", "launcher_position", "allowed_domains"] },
 ];
 
 const expectedWorkspaceFunctions = [

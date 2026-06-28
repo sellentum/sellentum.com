@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { evaluateStorefrontDomainAllowlist } from "@/lib/domain-allowlist";
 import { handlePublicError, publicRateLimit, readBoundedJson, sanitizeAnalyticsMetadata } from "@/lib/public-runtime-guard";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { ExperienceType } from "@/lib/types";
@@ -30,6 +31,19 @@ export async function POST(request: Request) {
     const experience = useConfigurator ? configurator : quiz || configurator;
     if (!experience) return NextResponse.json({ error: "Published experience not found." }, { status: 404 });
     const experienceType: ExperienceType = useConfigurator || (!quiz && configurator) ? "configurator" : requestedType === "assistant" ? "assistant" : requestedType === "search" ? "search" : "finder";
+    const { data: settings } = await supabase.from("widget_settings").select("*").eq("user_id", experience.user_id).maybeSingle();
+    const originDecision = evaluateStorefrontDomainAllowlist({
+      allowedDomains: (settings as { allowed_domains?: unknown } | null)?.allowed_domains,
+      request,
+      metadata: parsed.data.metadata,
+      appUrl: process.env.NEXT_PUBLIC_APP_URL,
+    });
+    if (!originDecision.allowed) {
+      return NextResponse.json({
+        error: "This storefront is not approved for this Sellentum workspace.",
+        detail: originDecision.reason,
+      }, { status: 403 });
+    }
     if (parsed.data.productId) {
       const { data: product } = await supabase.from("products").select("id").eq("id", parsed.data.productId).eq("user_id", experience.user_id).maybeSingle();
       if (!product) return NextResponse.json({ error: "Product does not belong to this experience." }, { status: 400 });

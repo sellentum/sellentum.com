@@ -11,6 +11,7 @@ export function createDefaultWorkspaceSettings(userId: string): WidgetSettings {
     widget_title: "Your personal product guide",
     welcome_message: "Answer a few questions and we’ll find your best match.",
     launcher_position: "bottom-right",
+    allowed_domains: [],
   };
 }
 

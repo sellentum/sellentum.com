@@ -1,4 +1,5 @@
 import type { WidgetSettings } from "@/lib/types";
+import { normalizeAllowedDomains } from "./domain-allowlist";
 
 export type PublicExperienceKind = "finder" | "assistant" | "search" | "configurator";
 
@@ -24,6 +25,7 @@ const fallbackSettings: WidgetSettings = {
   widget_title: "Your personal product guide",
   welcome_message: "Answer a few questions and we’ll find your best match.",
   launcher_position: "bottom-right",
+  allowed_domains: [],
 };
 
 const kindDefaults: Record<PublicExperienceKind, Pick<PublicExperienceCopy, "eyebrow" | "title" | "description" | "trustLabel" | "assistantGreeting" | "inputPlaceholder">> = {
@@ -79,6 +81,7 @@ export function normalizeWidgetSettings(settings?: Partial<WidgetSettings> | nul
     widget_title: cleanText(settings?.widget_title, fallbackSettings.widget_title),
     welcome_message: cleanText(settings?.welcome_message, fallbackSettings.welcome_message),
     launcher_position: settings?.launcher_position === "bottom-left" ? "bottom-left" : "bottom-right",
+    allowed_domains: normalizeAllowedDomains(settings?.allowed_domains),
   };
 }
 
