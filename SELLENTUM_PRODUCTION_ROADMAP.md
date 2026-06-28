@@ -2,7 +2,7 @@
 
 Last updated: 2026-06-28  
 Current repo branch: `main`  
-Current production-hardening commit: `f8d57ef Add Supabase shared rate limiting`
+Current production-hardening commit: `e89d52a Add Supabase production verification packet`
 
 ## Purpose
 
@@ -52,6 +52,7 @@ What is real now:
 - OpenAI-backed explanation/enrichment paths exist with fallbacks.
 - Vercel deployment and custom domain exist.
 - Supabase-backed shared rate-limit code exists with safe in-memory fallback.
+- Supabase production verification packet and SQL checks exist.
 - Several production hardening stages have already been pushed.
 
 What is not production-proven yet:
@@ -91,6 +92,14 @@ Additional smoke-test note:
 
 - `npm run smoke` now reaches source/runtime assertions when the built app is running, but it currently fails on a pre-existing dashboard overview contract: the overview does not link to every production center expected by `scripts/smoke-test.mjs`.
 - This is not part of Stage 7 acceptance, but it should be cleaned up in Stage 14 or Stage 19 before claiming a fully green production verification suite.
+
+Stage 8 packet progress:
+
+- `SUPABASE_PRODUCTION_VERIFICATION.md` added.
+- `supabase/verification/production_schema_check.sql` added for read-only production schema/RLS/grant checks.
+- `supabase/verification/rate_limit_runtime_probe.sql` added for optional shared-limiter runtime proof.
+- Data Contract Center now checks `rate_limit_buckets` and `check_rate_limit` in the checked-in schema contract.
+- Local verification passed: `npm run lint`, `npm run typecheck`, `npm run build`.
 
 ## Immediate next stages
 
@@ -137,7 +146,7 @@ Suggested implementation:
 
 ### Stage 8 — Supabase production verification packet
 
-Status: Next
+Status: In progress / User action needed
 
 Problem:
 
@@ -149,17 +158,25 @@ Create a clear Supabase verification packet and confirm production tables, colum
 
 Acceptance criteria:
 
-- Confirm all migrations exist in production.
-- Confirm `widget_settings.allowed_domains`.
-- Confirm `rate_limit_buckets`.
-- Confirm `check_rate_limit`.
+- Confirm all migrations exist in production. — Packet created; production SQL run still needed.
+- Confirm `widget_settings.allowed_domains`. — Packet created; production SQL run still needed.
+- Confirm `rate_limit_buckets`. — Packet created; production SQL run still needed.
+- Confirm `check_rate_limit`. — Packet created; production SQL run still needed.
 - Confirm transactional RPCs:
   - `save_quiz_with_children`
   - `save_configurator_with_children`
-- Confirm `analytics_events` RLS read-only browser policy remains safe.
-- Confirm public/server write paths work.
-- Confirm dashboard Data Contract shows expected passes.
-- Document any manual Supabase SQL the user must run.
+- Confirm `analytics_events` RLS read-only browser policy remains safe. — Packet created; production SQL run still needed.
+- Confirm public/server write paths work. — Needs production run after SQL passes.
+- Confirm dashboard Data Contract shows expected passes. — Needs production dashboard check after Vercel redeploy.
+- Document any manual Supabase SQL the user must run. — Done in `SUPABASE_PRODUCTION_VERIFICATION.md`.
+
+User action needed:
+
+1. Apply any missing production migrations, especially `supabase/migrations/009_shared_rate_limits.sql`.
+2. Run `supabase/verification/production_schema_check.sql` in the production Supabase SQL Editor.
+3. If every row passes, run `supabase/verification/rate_limit_runtime_probe.sql`.
+4. Open `https://sellentum.com/dashboard/data-contract`, click `Refresh server proof`, and confirm the schema/RPC checks pass.
+5. Send the result back to Codex. If there are failed SQL rows, paste those rows.
 
 ### Stage 9 — Auth completion and account recovery
 
@@ -247,7 +264,7 @@ Goal: make the current product safe enough to run with real users.
 | 5 | Done | Stable public experience IDs. |
 | 6 | Done | Server-side authenticated analytics writes. |
 | 7 | Done / Needs production proof | Shared production rate limiting. |
-| 8 | Next | Production Supabase schema/RLS verification. |
+| 8 | In progress / User action needed | Production Supabase schema/RLS verification. |
 | 9 | Next | Auth reset/recovery polish. |
 
 ### Phase 2 — Trust, safety, and runtime hardening
@@ -439,4 +456,5 @@ Sellentum should not be considered serious production SaaS until all of these ar
 | 2026-06-28 | `6042c3f` | Stage 5 stable public experience IDs. |
 | 2026-06-28 | `260a373` | Stage 6 server-side workspace analytics writes. |
 | 2026-06-28 | `f8d57ef` | Stage 7 Supabase-backed shared rate limiting. |
+| 2026-06-28 | `e89d52a` | Stage 8 Supabase production verification packet and SQL checks. |
 | 2026-06-28 | Roadmap tracker | Added this production roadmap tracker as the source of truth for future stages. |
