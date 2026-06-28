@@ -262,7 +262,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     if (mode === "supabase") {
       const supabase = createClient()!;
       const { data: authData } = await supabase.auth.getUser();
-      next = { ...settings, user_id: authData.user!.id };
+      next = { ...next, user_id: authData.user!.id };
       const { error: settingsError } = await supabase.from("widget_settings").upsert(next);
       if (settingsError) { setError(settingsError.message); throw settingsError; }
     }
@@ -276,17 +276,22 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   }, [state.quizzes, state.configurators]);
 
   const recordEvent = useCallback(async (eventType: AnalyticsEventType, quizId: string, productId?: string, metadata?: Record<string, unknown>) => {
-    const event: AnalyticsEvent = { id: uid("event"), user_id: DEMO_USER_ID, quiz_id: quizId, product_id: productId, event_type: eventType, metadata, created_at: new Date().toISOString() };
+    const owner = state.quizzes.find((item) => item.id === quizId)?.user_id || state.configurators.find((item) => item.id === quizId)?.user_id || DEMO_USER_ID;
+    const event: AnalyticsEvent = { id: uid("event"), user_id: owner, quiz_id: quizId, product_id: productId, event_type: eventType, metadata, created_at: new Date().toISOString() };
     if (mode === "supabase") {
-      const supabase = createClient()!;
-      const owner = state.quizzes.find((item) => item.id === quizId)?.user_id || state.configurators.find((item) => item.id === quizId)?.user_id;
-      if (!owner) {
-        const message = "Could not record analytics event because the experience owner was not loaded.";
+      const response = await fetch("/api/workspace/events", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ eventType, quizId, productId, metadata }),
+      });
+      const payload = await response.json().catch(() => ({})) as { error?: string; event?: AnalyticsEvent };
+      if (!response.ok) {
+        const message = payload.error || "Could not record workspace analytics event.";
         setError(message);
         throw new Error(message);
       }
-      const { error: eventError } = await supabase.from("analytics_events").insert({ ...event, user_id: owner });
-      if (eventError) { setError(eventError.message); throw eventError; }
+      setState((current) => ({ ...current, events: [payload.event || event, ...current.events] }));
+      return;
     }
     setState((current) => ({ ...current, events: [event, ...current.events] }));
   }, [mode, state.quizzes, state.configurators]);

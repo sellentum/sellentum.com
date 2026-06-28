@@ -25,6 +25,7 @@ Latest pushed hardening commit:
 - Stage 3 adds atomic Supabase RPC saves for nested finder and configurator builders.
 - Stage 4 adds workspace storefront-domain allowlists for public analytics ingestion.
 - Stage 5 makes generated public URLs and runtime API handoffs use stable global experience IDs.
+- Stage 6 routes authenticated workspace analytics writes through a server endpoint instead of browser Supabase inserts.
 
 ## Fixed in the first hardening stage
 
@@ -69,6 +70,14 @@ Latest pushed hardening commit:
    - Public API slug fallback remains only for backwards compatibility and now returns a clear `409` if a slug is shared across workspaces.
    - Builder copy now calls slugs “workspace slugs” and explains that production previews/snippets use stable IDs.
 
+## Fixed in the sixth hardening stage
+
+1. Authenticated workspace analytics writes now use a server route instead of browser-side Supabase inserts.
+   - Added `/api/workspace/events` for logged-in dashboard/workspace analytics writes.
+   - The route validates the authenticated workspace, verifies experience ownership, checks product ownership, sanitizes metadata, and inserts with server-side service-role access.
+   - `store.recordEvent()` now calls the authenticated route in Supabase mode instead of inserting into `analytics_events` from the browser.
+   - Public storefront/widget telemetry remains on `/api/events`, keeping domain-allowlist checks separate from authenticated workspace writes.
+
 ## High-priority production problems
 
 1. Public demo telemetry source split.
@@ -84,9 +93,8 @@ Latest pushed hardening commit:
    - Remaining watch item: run the new migration in production Supabase and confirm Data Contract shows transactional builder saves as passing.
 
 4. Browser-side analytics insertion conflicts with RLS.
-   - `analytics_events` has an owner read policy, but no owner insert policy.
-   - Public events use the service-role API, but `store.recordEvent()` in Supabase mode attempts browser-client inserts.
-   - Likely fix: either add a safe owner insert policy or route all analytics writes through `/api/events` / authenticated server routes.
+   - Status: fixed in Stage 6.
+   - Browser clients no longer insert directly into `analytics_events`; authenticated workspace writes go through `/api/workspace/events`, and public storefront writes remain on `/api/events`.
 
 5. Rate limiting is in-memory.
    - This is acceptable for local MVP testing, but weak on Vercel/serverless because limits are not shared across instances.
@@ -196,7 +204,6 @@ Latest pushed hardening commit:
 ### Stage 3 — Supabase persistence safety
 
 - Move nested quiz/configurator saves to server-side transactional routes or RPCs.
-- Fix/confirm analytics insert path under RLS.
 - Add schema verification for policies, not just table existence.
 
 ### Stage 4 — Public experience IDs and widget trust boundary
