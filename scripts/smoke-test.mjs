@@ -751,28 +751,6 @@ function assertProductionVerificationWorkflow() {
   assert(marketing.includes("production-verification"), "Platform marketing pages should include Production Verification");
 }
 
-function assertMvpAuditWorkflow() {
-  const page = readFileSync("app/dashboard/mvp-audit/page.tsx", "utf8");
-  const helper = readFileSync("lib/mvp-audit.ts", "utf8");
-  const shell = readFileSync("components/dashboard-shell.tsx", "utf8");
-  const overview = readFileSync("app/dashboard/page.tsx", "utf8");
-  const readme = readFileSync("README.md", "utf8");
-  const marketing = readFileSync("lib/marketing-pages.ts", "utf8");
-  assert(helper.includes("buildMvpAuditReport"), "MVP Audit helper should expose a reusable report builder");
-  assert(helper.includes("Sellentum MVP Completion Audit"), "MVP Audit should generate a copyable packet");
-  assert(helper.includes("Done") && helper.includes("Pending / needs verification"), "MVP Audit packet should separate done and pending work");
-  assert(helper.includes("full Zoovu-like objective"), "MVP Audit should preserve the full objective boundary");
-  assert(page.includes("MVP Completion Audit"), "MVP Audit page should expose the dashboard title");
-  assert(page.includes("Done tasks"), "MVP Audit page should show done tasks");
-  assert(page.includes("Pending and needs verification"), "MVP Audit page should show pending tasks");
-  assert(page.includes("Requirement evidence matrix"), "MVP Audit page should show requirement evidence");
-  assert(page.includes("Copy audit packet"), "MVP Audit page should let merchants copy the packet");
-  assert(shell.includes("/dashboard/mvp-audit"), "Dashboard navigation should expose MVP Audit");
-  assert(overview.includes("/dashboard/mvp-audit"), "Dashboard overview should link to MVP Audit");
-  assert(readme.includes("MVP Completion Audit"), "README should document MVP Completion Audit");
-  assert(marketing.includes("mvp-audit"), "Platform marketing pages should include MVP Audit");
-}
-
 function assertPartnerSyndicationWorkflow() {
   const page = readFileSync("app/dashboard/syndication/page.tsx", "utf8");
   const helper = readFileSync("lib/syndication.ts", "utf8");
@@ -1574,8 +1552,6 @@ async function assertDeterministicLogic() {
     .replace('from "./release-center";', 'from "./release-center.js";')
     .replace('from "./runtime-operations";', 'from "./runtime-operations.js";')
     .replace('from "./storefront-sandbox";', 'from "./storefront-sandbox.js";'));
-  const compiledMvpAudit = `${compileDir}/lib/mvp-audit.js`;
-  writeFileSync(compiledMvpAudit, readFileSync(compiledMvpAudit, "utf8"));
   const compiledApiCenter = `${compileDir}/lib/api-center.js`;
   writeFileSync(compiledApiCenter, readFileSync(compiledApiCenter, "utf8")
     .replace('from "./analytics-quality";', 'from "./analytics-quality.js";')
@@ -1662,7 +1638,6 @@ async function assertDeterministicLogic() {
   const releaseCenter = await import(pathToFileURL(`${compileDir}/lib/release-center.js`));
   const runtimeOperations = await import(pathToFileURL(`${compileDir}/lib/runtime-operations.js`));
   const productionVerification = await import(pathToFileURL(`${compileDir}/lib/production-verification.js`));
-  const mvpAudit = await import(pathToFileURL(`${compileDir}/lib/mvp-audit.js`));
   const apiCenter = await import(pathToFileURL(`${compileDir}/lib/api-center.js`));
   const workspaceHealth = await import(pathToFileURL(`${compileDir}/lib/workspace-health.js`));
   const aiReadiness = await import(pathToFileURL(`${compileDir}/lib/ai-readiness.js`));
@@ -2063,11 +2038,6 @@ async function assertDeterministicLogic() {
   assert(productionVerificationReport.artifacts.some((artifact) => artifact.command === "npm run build") && productionVerificationReport.actions.length, "Expected Production Verification to include verification commands and action queue");
   const localProductionVerificationReport = productionVerification.buildProductionVerificationReport({ origin: "http://localhost:3000", mode: "demo", settings: demo.demoSettings, products: demo.demoProducts, quizzes: [demo.demoQuiz], configurators: [demo.demoConfigurator], events: [] });
   assert(localProductionVerificationReport.status !== "verified" && localProductionVerificationReport.checks.some((check) => check.id === "supabase-mode" && check.status === "warn"), "Expected Production Verification to keep local demo mode out of final production verified status");
-  const mvpAuditReport = mvpAudit.buildMvpAuditReport({ origin: "http://localhost:3000", mode: "demo", settings: demo.demoSettings, products: demo.demoProducts, quizzes: [demo.demoQuiz], configurators: [demo.demoConfigurator], events: demo.demoEvents });
-  assert(mvpAuditReport.doneTasks.length > 8 && mvpAuditReport.pendingTasks.some((task) => task.id === "production-verification"), "Expected MVP Audit to separate built work from production verification tasks");
-  assert(mvpAuditReport.packet.includes("Sellentum MVP Completion Audit") && mvpAuditReport.packet.includes("Pending / needs verification") && mvpAuditReport.packet.includes("full Zoovu-like objective"), "Expected MVP Audit to generate a done/pending packet that preserves full scope");
-  const emptyMvpAuditReport = mvpAudit.buildMvpAuditReport({ origin: "http://localhost:3000", mode: "demo", settings: demo.demoSettings, products: [], quizzes: [], configurators: [], events: [] });
-  assert(emptyMvpAuditReport.status === "pending" && emptyMvpAuditReport.actions.some((action) => action.priority === "critical"), "Expected MVP Audit to mark missing catalog/finder evidence as pending");
   const apiCenterReport = apiCenter.buildApiCenterReport({ origin: "https://sellentum.example", settings: demo.demoSettings, products: demo.demoProducts, quizzes: [demo.demoQuiz], configurators: [demo.demoConfigurator], events: demo.demoEvents });
   assert(apiCenterReport.endpoints.some((endpoint) => endpoint.id === "finder-recommendations" && endpoint.path.includes("/api/public/finder/")) && apiCenterReport.endpoints.some((endpoint) => endpoint.id === "configurator-validation" && endpoint.requestExample.includes("selectedIds")), "Expected API Center to document finder and configurator runtime endpoints");
   assert(apiCenterReport.endpoints.some((endpoint) => endpoint.id === "advisor-search") && apiCenterReport.endpoints.some((endpoint) => endpoint.id === "semantic-search"), "Expected API Center to document advisor and semantic search endpoints");
@@ -2384,7 +2354,6 @@ async function main() {
   await assertPage("/platform/bundle-studio", "Increase average order value");
   await assertPage("/platform/usage-pricing", "Explain SaaS plan fit");
   await assertPage("/platform/production-verification", "Prove Sellentum is ready");
-  await assertPage("/platform/mvp-audit", "Track exactly what is done");
   await assertPage("/platform/grounding-center", "Give AI a safe product-fact map");
   await assertPage("/platform/semantic-knowledge-graph", "Connect product facts");
   await assertPage("/industries", "Industries");
@@ -2436,7 +2405,6 @@ async function main() {
   assertRuntimeOperationsWorkflow();
   assertReleaseCenterWorkflow();
   assertProductionVerificationWorkflow();
-  assertMvpAuditWorkflow();
   assertWorkspaceSnapshotWorkflow();
   assertExperimentPlannerWorkflow();
   assertCommercialImpactWorkflow();
