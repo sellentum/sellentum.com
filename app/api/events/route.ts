@@ -17,7 +17,7 @@ export async function POST(request: Request) {
     const body = await readBoundedJson(request, 16_000);
     const parsed = eventSchema.safeParse(body);
     if (!parsed.success) return NextResponse.json({ error: "Invalid analytics event." }, { status: 400 });
-    const limited = publicRateLimit(request, "analytics-event", parsed.data.quizId, 120);
+    const limited = await publicRateLimit(request, "analytics-event", parsed.data.quizId, 120);
     if (limited) return limited;
 
     const supabase = createAdminClient();

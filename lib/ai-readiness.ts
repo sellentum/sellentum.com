@@ -223,7 +223,7 @@ function buildContracts(audit: AiReadinessSourceAudit): AiSourceContract[] {
     contract("finder-boundary", "Finder selection boundary", "runtime", boolStatus(audit.finderSelectionDeterministic), "Finder product selection must happen before AI explanations.", "Looks for auditProductMatches before explainRecommendation.", "/dashboard/lab"),
     contract("semantic-candidates", "Semantic candidate helper", "semantic", boolStatus(audit.semanticCandidates, true), "Supabase catalogs should be able to use pgvector candidates when OpenAI embeddings exist.", "Looks for getSemanticProductCandidates and match_products.", "/dashboard/search"),
     contract("pgvector-schema", "Pgvector schema contract", "semantic", boolStatus(audit.pgvectorSchema, true), "The database must include vector(1536) embeddings and a service-role match_products RPC.", "Looks for vector schema and match_products RPC.", "/dashboard/data-contract"),
-    contract("explain-rate-limit", "Explanation API rate limit", "runtime", boolStatus(audit.explanationRateLimited), "Public explanation requests must be bounded to protect OpenAI usage.", "Looks for checkRateLimit in app/api/explain.", "/dashboard/operations"),
+    contract("explain-rate-limit", "Explanation API rate limit", "runtime", boolStatus(audit.explanationRateLimited), "Public explanation requests must be bounded to protect OpenAI usage.", "Looks for publicRateLimit in app/api/explain.", "/dashboard/operations"),
     contract("public-guardrails", "Public runtime guardrails", "runtime", boolStatus(audit.publicRuntimeGuardrails), "Embedded runtime APIs need bounded JSON bodies and shared rate-limit responses.", "Looks for readBoundedJson and publicRateLimit.", "/dashboard/operations"),
   ];
 }

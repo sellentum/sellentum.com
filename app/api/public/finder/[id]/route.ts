@@ -63,7 +63,7 @@ async function loadPublishedFinder(id: string): Promise<FinderLookup> {
 
 export async function GET(request: Request, context: { params: Promise<{ id: string }> }) {
   const { id } = await context.params;
-  const limited = publicRateLimit(request, "public-finder-config", id, 120);
+  const limited = await publicRateLimit(request, "public-finder-config", id, 120);
   if (limited) return limited;
   const { supabase, quiz, error, status } = await loadPublishedFinder(id);
   if (!supabase) return NextResponse.json({ error }, { status: 503 });
@@ -82,7 +82,7 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
 export async function POST(request: Request, context: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await context.params;
-    const limited = publicRateLimit(request, "public-finder", id, 40);
+    const limited = await publicRateLimit(request, "public-finder", id, 40);
     if (limited) return limited;
 
     const parsed = recommendationSchema.safeParse(await readBoundedJson(request, 10_000));

@@ -1,7 +1,7 @@
 import "server-only";
 
 import { NextResponse } from "next/server";
-import { checkRateLimit } from "./rate-limit";
+import { checkSharedRateLimit } from "./rate-limit";
 
 export class PublicRequestError extends Error {
   status: number;
@@ -23,7 +23,7 @@ export function clientFingerprint(request: Request) {
   return ip.replace(/[^a-zA-Z0-9:._-]/g, "").slice(0, 96) || "local";
 }
 
-export function publicRateLimit(
+export async function publicRateLimit(
   request: Request,
   scope: string,
   identifier = "global",
@@ -32,7 +32,7 @@ export function publicRateLimit(
 ) {
   const safeScope = scope.replace(/[^a-zA-Z0-9:_-]/g, "").slice(0, 64);
   const safeIdentifier = identifier.replace(/[^a-zA-Z0-9:_-]/g, "").slice(0, 120) || "global";
-  const result = checkRateLimit(`${safeScope}:${clientFingerprint(request)}:${safeIdentifier}`, limit, windowMs);
+  const result = await checkSharedRateLimit(`${safeScope}:${clientFingerprint(request)}:${safeIdentifier}`, limit, windowMs);
   if (result.allowed) return null;
 
   return publicJsonError("Too many requests. Please try again shortly.", 429, {
@@ -40,6 +40,7 @@ export function publicRateLimit(
     "X-RateLimit-Limit": String(limit),
     "X-RateLimit-Remaining": "0",
     "X-RateLimit-Reset": String(Math.ceil(result.resetAt / 1000)),
+    "X-RateLimit-Store": result.store,
   });
 }
 

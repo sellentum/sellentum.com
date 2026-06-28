@@ -135,6 +135,15 @@ supabase/migrations/005_finder_branching.sql
 
 -- Adds optional recommendation feedback analytics events.
 supabase/migrations/006_recommendation_feedback.sql
+
+-- Adds transactional finder/configurator builder save RPCs.
+supabase/migrations/007_transactional_experience_saves.sql
+
+-- Adds approved storefront-domain allowlists for widget analytics.
+supabase/migrations/008_widget_allowed_domains.sql
+
+-- Adds Supabase-backed shared rate-limit buckets and RPC.
+supabase/migrations/009_shared_rate_limits.sql
 ```
 
 ## Enable OpenAI explanations
@@ -237,7 +246,7 @@ Import the repository into Vercel, add the variables from `.env.example`, and de
 - `lib/api-center.ts` and `app/dashboard/api-center` — headless API console for finder, advisor, semantic search, configurator, widget and analytics runtime contracts
 - `lib/workspace-health.ts`, `app/api/workspace/health` and `app/dashboard/data-contract` — authenticated workspace data-contract checks for Supabase schema coverage, runtime data health, analytics shape and copyable launch packets
 - `lib/ai-readiness.ts`, `app/api/ai/health` and `app/dashboard/ai-readiness` — authenticated AI readiness checks for OpenAI env/model state, route auth, deterministic fallbacks, grounded prompts, embeddings, pgvector and copyable AI launch packets
-- `lib/public-runtime-guard.ts` — bounded JSON parsing, public rate-limit responses and analytics metadata sanitization for embeddable runtimes
+- `lib/public-runtime-guard.ts` and `lib/rate-limit.ts` — bounded JSON parsing, Supabase-backed shared rate-limit responses with local fallback, and analytics metadata sanitization for embeddable runtimes
 - `lib/experience-launch.ts` — multi-experience launch cards for finder, advisor, semantic search and configurator embeds
 - `lib/experience-registry.ts` and `app/dashboard/experiences` — operational registry for all customer-facing discovery surfaces, install QA, snippets and telemetry proof
 - `lib/launch-channels.ts` and `app/dashboard/channels` — channelized storefront placement planner for attributed snippets, install QA and early channel metrics

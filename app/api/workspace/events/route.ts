@@ -27,7 +27,7 @@ export async function POST(request: Request) {
     const parsed = workspaceEventSchema.safeParse(body);
     if (!parsed.success) return NextResponse.json({ error: "Invalid workspace analytics event." }, { status: 400 });
 
-    const limited = publicRateLimit(request, "workspace-analytics-event", identity.userId, 300);
+    const limited = await publicRateLimit(request, "workspace-analytics-event", identity.userId, 300);
     if (limited) return limited;
 
     const supabase = createAdminClient();

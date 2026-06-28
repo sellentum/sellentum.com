@@ -32,7 +32,7 @@ const requestSchema = z.object({
 
 export async function POST(request: Request) {
   try {
-    const limited = publicRateLimit(request, "assistant", "demo", 25);
+    const limited = await publicRateLimit(request, "assistant", "demo", 25);
     if (limited) return limited;
     const parsed = requestSchema.safeParse(await readBoundedJson(request, 80_000));
     if (!parsed.success) return NextResponse.json({ error: "Tell us what you need in a little more detail." }, { status: 400 });

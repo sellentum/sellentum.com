@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { checkRateLimit } from "@/lib/rate-limit";
+import { publicRateLimit, readBoundedJson } from "@/lib/public-runtime-guard";
 import { explainRecommendation, fallbackRecommendationExplanation } from "@/lib/recommendation-explanations";
 
 const schema = z.object({
@@ -12,10 +12,10 @@ const schema = z.object({
 export async function POST(request: Request) {
   let payload: z.infer<typeof schema> | null = null;
   try {
-    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "local";
-    if (!checkRateLimit(`explain:${ip}`, 30).allowed) return NextResponse.json({ error: "Too many explanation requests. Please try again shortly." }, { status: 429 });
+    const limited = await publicRateLimit(request, "explain", "recommendation", 30);
+    if (limited) return limited;
 
-    const parsed = schema.safeParse(await request.json());
+    const parsed = schema.safeParse(await readBoundedJson(request, 24_000));
     if (!parsed.success) return NextResponse.json({ error: "Invalid recommendation request." }, { status: 400 });
     payload = parsed.data;
     const { product, answers, matchedReasons } = payload;

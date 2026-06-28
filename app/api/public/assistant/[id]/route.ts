@@ -44,7 +44,7 @@ async function loadPublishedQuiz(id: string): Promise<PublishedQuizLookup> {
 export async function POST(request: Request, context: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await context.params;
-    const limited = publicRateLimit(request, "public-advisor", id, 25);
+    const limited = await publicRateLimit(request, "public-advisor", id, 25);
     if (limited) return limited;
 
     const parsed = requestSchema.safeParse(await readBoundedJson(request, 12_000));

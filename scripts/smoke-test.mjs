@@ -180,7 +180,7 @@ function assertExplanationRuntimeSafety() {
   const route = readFileSync("app/api/explain/route.ts", "utf8");
   const finderEngine = readFileSync("lib/finder-engine.ts", "utf8");
   const explanations = readFileSync("lib/recommendation-explanations.ts", "utf8");
-  assert(route.includes("checkRateLimit(`explain:"), "Standalone explanation API should rate-limit public OpenAI/fallback requests");
+  assert(route.includes("publicRateLimit(request, \"explain\""), "Standalone explanation API should rate-limit public OpenAI/fallback requests");
   assert(route.includes("explainRecommendation"), "Standalone explanation API should use the shared recommendation explanation helper");
   assert(route.includes("fallbackRecommendationExplanation"), "Standalone explanation API should fall back to deterministic explanation copy after failures");
   assert(!route.includes("new OpenAI"), "Standalone explanation API should not duplicate direct OpenAI client logic");
@@ -365,7 +365,9 @@ function assertPublicRuntimeGuardrails() {
 
   assert(guard.includes("readBoundedJson"), "Public runtime guard should expose bounded JSON parsing");
   assert(guard.includes("publicRateLimit"), "Public runtime guard should expose shared rate-limit responses");
+  assert(guard.includes("checkSharedRateLimit"), "Public runtime guard should use the production shared limiter");
   assert(guard.includes("sanitizeAnalyticsMetadata"), "Public runtime guard should sanitize analytics metadata");
+  assert(rateLimit.includes("checkSharedRateLimit") && rateLimit.includes("check_rate_limit"), "Rate limiter should use the Supabase shared limiter");
   assert(rateLimit.includes("retryAfter") && rateLimit.includes("resetAt"), "Rate limiter should expose retry timing for public responses");
   assert(eventsRoute.includes("readBoundedJson") && eventsRoute.includes("publicRateLimit") && eventsRoute.includes("sanitizeAnalyticsMetadata"), "Analytics event route should bound bodies, rate-limit and sanitize metadata");
   assert(assistantRoute.includes("readBoundedJson") && assistantRoute.includes("publicRateLimit"), "Demo advisor route should bound browser-supplied product payloads");

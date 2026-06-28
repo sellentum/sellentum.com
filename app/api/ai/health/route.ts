@@ -56,7 +56,7 @@ function buildSourceAudit(): AiReadinessSourceAudit {
     finderSelectionDeterministic: finderEngine.includes("auditProductMatches") && finderEngine.indexOf("auditProductMatches") < finderEngine.indexOf("explainRecommendation"),
     semanticCandidates: semanticCandidates.includes("getSemanticProductCandidates") && semanticCandidates.includes("match_products"),
     pgvectorSchema: schema.includes("vector(1536)") && schema.includes("create or replace function public.match_products") && schema.includes("grant execute on function public.match_products"),
-    explanationRateLimited: explainRoute.includes("checkRateLimit(`explain:"),
+    explanationRateLimited: explainRoute.includes("publicRateLimit(request, \"explain\""),
     publicRuntimeGuardrails: publicRuntimeGuard.includes("readBoundedJson") && publicRuntimeGuard.includes("publicRateLimit") && publicRuntimeGuard.includes("handlePublicError"),
   };
 }

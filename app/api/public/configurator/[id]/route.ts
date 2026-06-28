@@ -62,7 +62,7 @@ async function loadPublishedConfigurator(id: string): Promise<ConfiguratorLookup
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const limited = publicRateLimit(request, "public-configurator-config", id, 120);
+  const limited = await publicRateLimit(request, "public-configurator-config", id, 120);
   if (limited) return limited;
   const { supabase, configurator, error, status } = await loadPublishedConfigurator(id);
   if (!supabase) return NextResponse.json({ error }, { status: 404 });
@@ -84,7 +84,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
-    const limited = publicRateLimit(request, "public-configurator", id, 40);
+    const limited = await publicRateLimit(request, "public-configurator", id, 40);
     if (limited) return limited;
 
     const parsed = validationSchema.safeParse(await readBoundedJson(request, 10_000));
