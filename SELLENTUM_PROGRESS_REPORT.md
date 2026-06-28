@@ -12,10 +12,10 @@ Sellentum is now well beyond the first 10% MVP shell. The current codebase inclu
 My estimate:
 
 - Application/product build: about 85-90% complete for a strong MVP.
-- Production proof/signoff: about 55-65% complete.
-- Overall “ready to call the full objective complete”: about 75-80%.
+- Production proof/signoff: about 65-75% complete.
+- Overall “ready to call the full objective complete”: about 80-85%.
 
-The main reason it is not 100% is not because the screens are missing; it is because true completion needs real external proof: deployed Vercel URL, real Supabase tenant, real OpenAI key verification, real storefront/widget install evidence, and full analytics telemetry from an end-to-end production-like session.
+The main reason it is not 100% is not because the screens are missing. The Vercel/domain step is now verified at `https://www.sellentum.com`, but true completion still needs real Supabase tenant proof, OpenAI key verification, real storefront/widget install evidence, and full analytics telemetry from an end-to-end production-like session.
 
 ## Stage-by-stage progress
 
@@ -26,7 +26,7 @@ The main reason it is not 100% is not because the screens are missing; it is bec
 | 3. Supabase schema and persistence | Built, needs production verification | Schema exists for profiles, products, quizzes, questions, answer options, recommendation rules, analytics events, widget settings, configurators, configurator steps/options, embeddings, indexes, triggers, and RLS. Still needs proof against a real production Supabase project. |
 | 4. Guided-selling quiz builder | Done | Product finder builder supports questions, answer options, match types, match values, weights, publish state, branching, and readiness diagnostics. |
 | 5. Deterministic recommendation engine | Done | Product selection is rule-based first: tags, category, features, hard budget ceilings, active product filtering, buyer-profile signals, merchandising overrides, and stable tie-breakers. AI does not choose products. |
-| 6. Customer-facing finder runtime | Done locally | Published finder route and API validate answer paths server-side, generate 1-3 recommendations, show explanations, comparison support, recovery guidance, restart, and Buy Now tracking. Needs deployed URL QA. |
+| 6. Customer-facing finder runtime | Deployed smoke passed | Published finder route and API validate answer paths server-side, generate 1-3 recommendations, show explanations, comparison support, recovery guidance, restart, and Buy Now tracking. Production route smoke passed on `https://www.sellentum.com`. |
 | 7. AI-assisted catalog enrichment | Built, needs live OpenAI verification | Enrichment route supports OpenAI enrichment, buyer needs, semantic text, embeddings, and deterministic fallback when no key is configured. Needs production `OPENAI_API_KEY` validation on a real catalog. |
 | 8. AI quiz and configurator generation | Done locally | Quiz generation uses ontology fallback plus optional OpenAI. Configurator generation uses deterministic product-linked blueprints plus optional OpenAI structure/copy. Output remains editable and validated. |
 | 9. Semantic search and conversational advisor | Done locally | Search lab, public search runtime, advisor studio, customer advisor, semantic/lexical matching, budget parsing, recovery prompts, pgvector candidate support, and grounded/fallback explanations are implemented. Needs production prompt QA with real catalog data. |
@@ -35,7 +35,7 @@ The main reason it is not 100% is not because the screens are missing; it is bec
 | 12. Analytics and attribution | Done locally | Tracks widget views, starts, completions, recommendations, buy clicks, recommendation feedback, source/campaign/placement/page attribution, journey replay, discovery gaps, product demand, and analytics QA. Needs full production telemetry session. |
 | 13. Merchant optimization centers | Done | Added dashboard modules for analytics, feedback, sales content, personas, audience capture, returns/fit, experiments, commercial impact, merchandising, availability, catalog pipeline, attributes, vocabulary, ontology, decision graph, and semantic knowledge graph. |
 | 14. Headless/API and launch handoff | Done | API Center, Widget Studio, Experience Registry, Launch Channels, Partner Syndication, Workspace Snapshot, launch packets, launch contracts, and storefront QA runbooks are implemented. |
-| 15. Production and operations verification | Built, needs external proof | Runtime Operations Center, Release Center, Production Verification Center, MVP Audit, Storefront QA Sandbox, Storefront Install Scanner, Data Contract Center, and AI Readiness Center are implemented. These prove readiness locally and define production gates, but final completion needs real deployment evidence. |
+| 15. Production and operations verification | Vercel/domain verified, still needs data/env proof | Runtime Operations Center, Release Center, Production Verification Center, MVP Audit, Storefront QA Sandbox, Storefront Install Scanner, Data Contract Center, and AI Readiness Center are implemented. `sellentum.com` is live on Vercel and production smoke passed; final completion still needs real Supabase/OpenAI/storefront telemetry evidence. |
 | 16. Desktop typography and polish | Done | Mobile has intentionally not been prioritized per instruction. Desktop typography guardrails, readable font scale, and no tiny arbitrary app/component text classes are covered by smoke tests. |
 
 ## Major features completed
@@ -132,37 +132,36 @@ The main reason it is not 100% is not because the screens are missing; it is bec
 
 ### Must-do before calling the full objective complete
 
-1. Deploy to Vercel.
-2. Configure production environment variables:
+1. Configure production environment variables:
    - `NEXT_PUBLIC_APP_URL`
    - `NEXT_PUBLIC_SUPABASE_URL`
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
    - `SUPABASE_SERVICE_ROLE_KEY`
    - `OPENAI_API_KEY`
    - optional `OPENAI_MODEL`
-3. Run `supabase/schema.sql` against a real Supabase project.
-4. Verify Supabase auth, RLS, and real workspace persistence.
-5. Import or create a real merchant catalog.
-6. Run real AI enrichment and verify embeddings.
-7. Publish a real finder.
-8. Publish a real configurator if configurator is part of launch scope.
-9. Copy the production widget snippet into a staging/production storefront page.
-10. Run Storefront Install Scanner against that actual URL.
-11. Complete a full customer journey through the embedded widget.
-12. Confirm analytics events:
+2. Run `supabase/schema.sql` against a real Supabase project.
+3. Verify Supabase auth, RLS, and real workspace persistence.
+4. Import or create a real merchant catalog.
+5. Run real AI enrichment and verify embeddings.
+6. Publish a real finder.
+7. Publish a real configurator if configurator is part of launch scope.
+8. Copy the production widget snippet into a staging/production storefront page.
+9. Run Storefront Install Scanner against that actual URL.
+10. Complete a full customer journey through the embedded widget.
+11. Confirm analytics events:
     - `widget_view`
     - `quiz_start`
     - `quiz_complete`
     - `product_recommended`
     - `buy_click`
-13. Run smoke tests against the deployed URL:
+12. Re-run smoke tests against the deployed URL after each production env/data change:
 
 ```bash
-SMOKE_BASE_URL=https://your-production-url npm run smoke
+SMOKE_BASE_URL=https://www.sellentum.com npm run smoke
 ```
 
-14. Export final Production Verification packet.
-15. Re-run MVP Completion Audit and only then mark the overall objective complete.
+13. Export final Production Verification packet.
+14. Re-run MVP Completion Audit and only then mark the overall objective complete.
 
 ### Nice-to-have after MVP
 
@@ -179,7 +178,16 @@ These are intentionally not required for the current MVP:
 
 ## Current verification status
 
-Recent verification performed before the latest pushed stage:
+Latest production verification:
+
+```bash
+curl -I -L https://sellentum.com
+SMOKE_BASE_URL=https://www.sellentum.com npm run smoke
+```
+
+Result: `sellentum.com` redirects to `https://www.sellentum.com/`, Vercel returns `200`, and the Sellentum production smoke suite passed.
+
+Recent local verification before the latest pushed stage:
 
 ```bash
 npm run typecheck
@@ -221,7 +229,7 @@ Recent major pushed stages include:
 | Embeds/widget | 85% | Widget exists; actual storefront install proof remains. |
 | Analytics | 80% | Tracking and dashboards exist; production telemetry proof remains. |
 | Production readiness tooling | 85% | Many verification centers exist; external deployment proof remains. |
-| Final launch readiness | 60% | Blocked mostly by real Vercel/Supabase/OpenAI/storefront evidence. |
+| Final launch readiness | 70% | Vercel/domain and production smoke are verified; remaining blockers are real Supabase/OpenAI/storefront telemetry evidence. |
 
 ## Bottom line
 
@@ -231,7 +239,6 @@ The app is no longer just a landing page or partial prototype. The core Zoovu-li
 
 What remains is the final production proof layer:
 
-- real deployment,
 - real database,
 - real AI key,
 - real storefront install,
