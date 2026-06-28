@@ -24,6 +24,7 @@ Latest pushed hardening commit:
 - Stage 2 local verification also passed with no `/api/events` POST during a bundled demo finder journey.
 - Stage 3 adds atomic Supabase RPC saves for nested finder and configurator builders.
 - Stage 4 adds workspace storefront-domain allowlists for public analytics ingestion.
+- Stage 5 makes generated public URLs and runtime API handoffs use stable global experience IDs.
 
 ## Fixed in the first hardening stage
 
@@ -60,6 +61,14 @@ Latest pushed hardening commit:
    - Empty allowlists remain unrestricted for existing MVP workspaces until a merchant explicitly enables the launch restriction.
    - Localhost and direct Sellentum-hosted public pages remain usable for setup/testing.
 
+## Fixed in the fifth hardening stage
+
+1. Public experience URLs now prefer globally unique stable IDs instead of workspace-local slugs.
+   - Finder, advisor, search, configurator, launch, lab, install-scanner, widget-studio, API-center and production-verification surfaces now generate ID-based public URLs/snippets.
+   - Public runtime POST requests canonicalize to the loaded experience ID after config load.
+   - Public API slug fallback remains only for backwards compatibility and now returns a clear `409` if a slug is shared across workspaces.
+   - Builder copy now calls slugs “workspace slugs” and explains that production previews/snippets use stable IDs.
+
 ## High-priority production problems
 
 1. Public demo telemetry source split.
@@ -67,9 +76,8 @@ Latest pushed hardening commit:
    - Remaining watch item: add automated smoke coverage so this does not regress.
 
 2. Public slug lookup is ambiguous across tenants.
-   - Supabase schema only enforces `unique(user_id, slug)`, but public routes can load by plain slug.
-   - If two merchants publish the same slug, `.maybeSingle()` can fail or return no stable result.
-   - Likely fix: snippets should use global experience IDs, or introduce a globally unique public slug/handle.
+   - Status: fixed in Stage 5 by standardizing generated public URLs/snippets/API handoffs on globally unique experience IDs.
+   - Backwards-compatible slug fallback now rejects ambiguous slugs with `409` instead of resolving unpredictably.
 
 3. Quiz and configurator saves are not transactional.
    - Status: fixed in Stage 3.
@@ -193,7 +201,6 @@ Latest pushed hardening commit:
 
 ### Stage 4 — Public experience IDs and widget trust boundary
 
-- Make public embed IDs globally unambiguous.
 - Add signed widget/session tokens if abuse resistance needs to go beyond domain validation.
 - Extend install scanner to validate expected merchant domain.
 

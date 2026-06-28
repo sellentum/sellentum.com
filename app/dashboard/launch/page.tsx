@@ -88,7 +88,7 @@ export default function LaunchStudioPage() {
   const selectedLaunchExperience = launchExperienceCards.find((card) => card.experience === selectedExperience) || launchExperienceCards[0];
   const snippet = selectedLaunchExperience.snippet;
   const installReport = selectedLaunchExperience.installReport;
-  const publicUrl = selectedLaunchExperience.publicUrl || `${originBase}/finder/${finderForSnippet?.slug || finderForSnippet?.id || "YOUR_FINDER_ID"}`;
+  const publicUrl = selectedLaunchExperience.publicUrl || `${originBase}/finder/${finderForSnippet?.id || "YOUR_FINDER_ID"}`;
   const contractConfig: WidgetSnippetConfig = {
     origin,
     experience: selectedLaunchExperience.experience,

@@ -86,7 +86,7 @@ export function buildLaunchPacket(input: LaunchPacketInput) {
     "Implementation notes",
     "--------------------",
     "1. Paste the script once before the storefront closing </body> tag.",
-    "2. Keep the stable embed ID in the snippet; the preview URL may use either the ID or slug.",
+    "2. Keep the stable embed ID in the snippet and preview URL; slugs are workspace-local labels only.",
     "3. Run Sellentum Preflight after deployment and confirm widget_view, quiz_start and buy_click events appear in Analytics.",
   ].join("\n");
 }

@@ -146,7 +146,7 @@ export default function ConfiguratorPage() {
     if (data.source !== "local") {
       setValidatingBundle(true);
       try {
-        const response = await fetch(`/api/public/configurator/${encodeURIComponent(configurator.slug || configurator.id)}`, {
+        const response = await fetch(`/api/public/configurator/${encodeURIComponent(configurator.id)}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ selectedIds }),

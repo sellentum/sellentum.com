@@ -159,8 +159,8 @@ function buildEndpoints(origin: string, quizzes: Quiz[], configurators: Configur
   const clean = cleanOrigin(origin);
   const finder = preferredPublishedFinder(quizzes);
   const configurator = preferredPublishedConfigurator(configurators);
-  const finderId = finder?.slug || finder?.id || "YOUR_PUBLISHED_FINDER_ID";
-  const configuratorId = configurator?.slug || configurator?.id || "YOUR_PUBLISHED_CONFIGURATOR_ID";
+  const finderId = finder?.id || "YOUR_PUBLISHED_FINDER_ID";
+  const configuratorId = configurator?.id || "YOUR_PUBLISHED_CONFIGURATOR_ID";
   const finderStatus = finderContextStatus(finder);
   const configuratorStatus = configuratorContextStatus(configurator);
 

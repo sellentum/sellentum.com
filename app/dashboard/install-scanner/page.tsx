@@ -116,8 +116,8 @@ export default function InstallScannerPage() {
             <h3 className="text-sm font-extrabold">Suggested staging targets</h3>
             <p className="mt-2 text-sm leading-5 text-black/45">Publish a finder/configurator, paste the widget snippet into a public staging page, then scan that page here.</p>
             <div className="mt-4 grid gap-2">
-              {publishedFinder && <Link href={`/finder/${publishedFinder.slug || publishedFinder.id}`} target="_blank" className="flex items-center justify-between rounded-xl bg-white px-3 py-3 text-xs font-extrabold text-black/45">Finder preview <ExternalLink size={12} /></Link>}
-              {publishedConfigurator && <Link href={`/configurator/${publishedConfigurator.slug || publishedConfigurator.id}`} target="_blank" className="flex items-center justify-between rounded-xl bg-white px-3 py-3 text-xs font-extrabold text-black/45">Configurator preview <ExternalLink size={12} /></Link>}
+              {publishedFinder && <Link href={`/finder/${publishedFinder.id}`} target="_blank" className="flex items-center justify-between rounded-xl bg-white px-3 py-3 text-xs font-extrabold text-black/45">Finder preview <ExternalLink size={12} /></Link>}
+              {publishedConfigurator && <Link href={`/configurator/${publishedConfigurator.id}`} target="_blank" className="flex items-center justify-between rounded-xl bg-white px-3 py-3 text-xs font-extrabold text-black/45">Configurator preview <ExternalLink size={12} /></Link>}
             </div>
           </div>
         </section>

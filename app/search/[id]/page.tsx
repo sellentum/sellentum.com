@@ -84,7 +84,7 @@ export default function PublicSearchPage({ params }: { params: Promise<{ id: str
     try {
       const nextReport = data.source === "local" && data.products
         ? withRecovery(runSemanticProductSearch({ query: nextQuery, products: data.products, limit: 6 }))
-        : await fetch(`/api/public/search/${encodeURIComponent(data.experience.slug || data.experience.id)}`, {
+        : await fetch(`/api/public/search/${encodeURIComponent(data.experience.id)}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ query: nextQuery, limit: 6 }),

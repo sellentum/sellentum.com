@@ -68,7 +68,7 @@ export default function AdvisorStudioPage() {
           <p className="mt-3 max-w-3xl text-sm leading-6 text-black/45">Simulate open-ended shopper requests, inspect parsed intent, prove recovery prompts, and copy the assistant widget packet before you place it on product, category or support pages.</p>
         </div>
         <div className="flex gap-3">
-          <Link href={previewFinder ? `/assistant/${previewFinder.slug || previewFinder.id}` : "/dashboard/quizzes"} target={previewFinder ? "_blank" : undefined} className="btn-secondary"><ExternalLink size={14} /> Preview advisor</Link>
+          <Link href={previewFinder ? `/assistant/${previewFinder.id}` : "/dashboard/quizzes"} target={previewFinder ? "_blank" : undefined} className="btn-secondary"><ExternalLink size={14} /> Preview advisor</Link>
           <button onClick={() => copy(report.packet, "packet")} className="btn-primary"><Clipboard size={14} className="text-lime" /> {copied === "packet" ? "Packet copied" : "Copy advisor packet"}</button>
         </div>
       </div>

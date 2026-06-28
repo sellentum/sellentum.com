@@ -8,6 +8,12 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import type { Configurator, ConfiguratorStep, Product } from "@/lib/types";
 
 type ConfiguratorRow = Omit<Configurator, "steps"> & { steps?: ConfiguratorStep[] };
+type ConfiguratorLookup = {
+  supabase: ReturnType<typeof createAdminClient>;
+  configurator: Configurator | null;
+  error: string | null;
+  status?: number;
+};
 
 const validationSchema = z.object({
   selectedIds: z.array(z.string().min(1).max(120)).max(80),
@@ -22,7 +28,7 @@ function normalizeConfigurator(configurator: ConfiguratorRow): Configurator {
   };
 }
 
-async function loadPublishedConfigurator(id: string) {
+async function loadPublishedConfigurator(id: string): Promise<ConfiguratorLookup> {
   const supabase = createAdminClient();
   if (!supabase) return { supabase: null, configurator: null, error: "Configurator API is not configured." };
 
@@ -40,18 +46,28 @@ async function loadPublishedConfigurator(id: string) {
     .select("*, steps:configurator_steps(*, options:configurator_options(*))")
     .eq("slug", id)
     .eq("published", true)
-    .maybeSingle();
+    .limit(2);
   if (bySlug.error) return { supabase, configurator: null, error: bySlug.error.message };
-  return { supabase, configurator: bySlug.data ? normalizeConfigurator(bySlug.data as unknown as ConfiguratorRow) : null, error: null };
+  const slugMatches = (bySlug.data || []) as unknown as ConfiguratorRow[];
+  if (slugMatches.length > 1) {
+    return {
+      supabase,
+      configurator: null,
+      error: "This configurator slug is used by more than one workspace. Use the stable configurator ID from the widget snippet.",
+      status: 409,
+    };
+  }
+  return { supabase, configurator: slugMatches[0] ? normalizeConfigurator(slugMatches[0]) : null, error: null };
 }
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const limited = publicRateLimit(request, "public-configurator-config", id, 120);
   if (limited) return limited;
-  const { supabase, configurator, error } = await loadPublishedConfigurator(id);
+  const { supabase, configurator, error, status } = await loadPublishedConfigurator(id);
   if (!supabase) return NextResponse.json({ error }, { status: 404 });
-  if (error || !configurator) return NextResponse.json({ error: "Published configurator not found." }, { status: 404 });
+  if (error) return NextResponse.json({ error }, { status: status || 500 });
+  if (!configurator) return NextResponse.json({ error: "Published configurator not found." }, { status: 404 });
 
   const [productsResult, settingsResult] = await Promise.all([
     supabase.from("products").select("*").eq("user_id", configurator.user_id).eq("active", true),
@@ -74,9 +90,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     const parsed = validationSchema.safeParse(await readBoundedJson(request, 10_000));
     if (!parsed.success) return NextResponse.json({ error: "Invalid configurator selection." }, { status: 400 });
 
-    const { supabase, configurator, error } = await loadPublishedConfigurator(id);
+    const { supabase, configurator, error, status } = await loadPublishedConfigurator(id);
     if (!supabase) return NextResponse.json({ error }, { status: 404 });
-    if (error) return NextResponse.json({ error: "Could not load configurator." }, { status: 500 });
+    if (error) return NextResponse.json({ error: status === 409 ? error : "Could not load configurator." }, { status: status || 500 });
     if (!configurator) return NextResponse.json({ error: "Published configurator not found." }, { status: 404 });
 
     const { data: products, error: productsError } = await supabase

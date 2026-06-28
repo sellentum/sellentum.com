@@ -79,7 +79,7 @@ function buildCard(input: LaunchExperienceInput, experience: WidgetEmbedExperien
   const path = widgetPathForExperience(experience);
   const id = source?.id;
   const slug = source?.slug;
-  const urlId = slug || id || (experience === "configurator" ? "YOUR_CONFIGURATOR_ID" : "YOUR_FINDER_ID");
+  const urlId = id || (experience === "configurator" ? "YOUR_CONFIGURATOR_ID" : "YOUR_FINDER_ID");
   const label = launcherLabel(experience, input.settings);
   const snippet = buildWidgetSnippet({
     origin,

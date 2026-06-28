@@ -76,7 +76,7 @@ export default function AssistantPage({ params }: { params: Promise<{ id: string
     setMessages(nextMessages); setQuery(""); setSearching(true); setError(""); setClarifyingOptions([]); setRecovery(null);
     if (!started.current) { started.current = true; track("quiz_start", undefined, { query: clean }); }
     try {
-      const response = await fetch(data.source === "local" ? "/api/assistant" : `/api/public/assistant/${encodeURIComponent(data.quiz.slug || data.quiz.id)}`, {
+      const response = await fetch(data.source === "local" ? "/api/assistant" : `/api/public/assistant/${encodeURIComponent(data.quiz.id)}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data.source === "local" ? { query: clean, history: messages.slice(-6), products: data.products } : { query: clean, history: messages.slice(-6) }),

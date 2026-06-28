@@ -277,7 +277,7 @@ function ConfiguratorEditor({ selected, onBack }: { selected: Configurator; onBa
                 <textarea className="field min-h-24" value={draft.subtitle} onChange={(event) => setDraft({ ...draft, subtitle: event.target.value })} />
                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
                   <div><label className="label">Base price</label><input className="field" type="number" value={draft.base_price} onChange={(event) => setDraft({ ...draft, base_price: Number(event.target.value) })} /></div>
-                  <div><label className="label">Slug</label><div className="flex items-center rounded-xl border border-black/10 bg-canvas px-3"><span className="text-xs text-black/30">/configurator/</span><input className="min-w-0 flex-1 bg-transparent py-3 text-xs font-bold outline-none" value={draft.slug} onChange={(event) => setDraft({ ...draft, slug: slugify(event.target.value) })} /></div></div>
+                  <div><label className="label">Workspace slug</label><div className="flex items-center rounded-xl border border-black/10 bg-canvas px-3"><span className="text-xs text-black/30">slug:</span><input className="min-w-0 flex-1 bg-transparent py-3 text-xs font-bold outline-none" value={draft.slug} onChange={(event) => setDraft({ ...draft, slug: slugify(event.target.value) })} /></div><p className="mt-1 text-xs text-black/30">Production previews and widget snippets use the stable configurator ID.</p></div>
                 </div>
                 <label className="label mt-4">Hero image URL</label>
                 <input className="field" value={draft.hero_image_url} onChange={(event) => setDraft({ ...draft, hero_image_url: event.target.value })} />

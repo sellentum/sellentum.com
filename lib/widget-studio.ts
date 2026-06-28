@@ -92,7 +92,7 @@ const installContract: WidgetStudioContractField[] = [
   { attribute: "src", required: true, example: "https://your-sellentum-app.vercel.app/api/widget.js", detail: "Loads the framework-independent Sellentum storefront widget script." },
   { attribute: "data-experience", required: true, example: "finder | assistant | search | configurator", detail: "Chooses which customer-facing runtime opens in the iframe." },
   { attribute: "data-mode", required: true, example: "modal | inline", detail: "Modal lazy-loads after shopper intent; inline renders the iframe where the snippet is placed." },
-  { attribute: "data-id", required: true, example: "quiz_footwear", detail: "Published finder or configurator ID/slug used as the catalog context." },
+  { attribute: "data-id", required: true, example: "quiz_footwear", detail: "Stable published finder or configurator ID used as the catalog context." },
   { attribute: "data-color", required: true, example: "#22352a", detail: "Themes the launcher, frame chrome and primary storefront affordances." },
   { attribute: "data-label", required: true, example: "Find my match", detail: "Sets the modal launcher CTA or inline frame label." },
   { attribute: "data-position", required: false, example: "right | left", detail: "Controls the floating launcher position for modal installs." },

@@ -13,26 +13,44 @@ const searchSchema = z.object({
   limit: z.number().int().min(1).max(12).optional(),
 });
 
-async function loadPublishedSearchContext(id: string) {
+type PublishedSearchContext = Pick<Quiz, "id" | "user_id" | "name" | "slug" | "published">;
+type PublishedSearchLookup = {
+  supabase: ReturnType<typeof createAdminClient>;
+  quiz: PublishedSearchContext | null;
+  error: string | null;
+  status?: number;
+};
+
+async function loadPublishedSearchContext(id: string): Promise<PublishedSearchLookup> {
   const supabase = createAdminClient();
   if (!supabase) return { supabase: null, quiz: null, error: "Search service is not configured." };
 
   const byId = await supabase.from("quizzes").select("id,user_id,name,slug,published").eq("id", id).eq("published", true).maybeSingle();
   if (byId.error) return { supabase, quiz: null, error: byId.error.message };
-  if (byId.data) return { supabase, quiz: byId.data as Pick<Quiz, "id" | "user_id" | "name" | "slug" | "published">, error: null };
+  if (byId.data) return { supabase, quiz: byId.data as PublishedSearchContext, error: null };
 
-  const bySlug = await supabase.from("quizzes").select("id,user_id,name,slug,published").eq("slug", id).eq("published", true).maybeSingle();
+  const bySlug = await supabase.from("quizzes").select("id,user_id,name,slug,published").eq("slug", id).eq("published", true).limit(2);
   if (bySlug.error) return { supabase, quiz: null, error: bySlug.error.message };
-  return { supabase, quiz: bySlug.data as Pick<Quiz, "id" | "user_id" | "name" | "slug" | "published"> | null, error: null };
+  const slugMatches = (bySlug.data || []) as PublishedSearchContext[];
+  if (slugMatches.length > 1) {
+    return {
+      supabase,
+      quiz: null,
+      error: "This search slug is used by more than one workspace. Use the stable finder ID from the widget snippet.",
+      status: 409,
+    };
+  }
+  return { supabase, quiz: slugMatches[0] || null, error: null };
 }
 
 export async function GET(request: Request, context: { params: Promise<{ id: string }> }) {
   const { id } = await context.params;
   const limited = publicRateLimit(request, "public-search-config", id, 120);
   if (limited) return limited;
-  const { supabase, quiz, error } = await loadPublishedSearchContext(id);
+  const { supabase, quiz, error, status } = await loadPublishedSearchContext(id);
   if (!supabase) return NextResponse.json({ error }, { status: 503 });
-  if (error || !quiz) return NextResponse.json({ error: "Published search experience not found." }, { status: 404 });
+  if (error) return NextResponse.json({ error }, { status: status || 500 });
+  if (!quiz) return NextResponse.json({ error: "Published search experience not found." }, { status: 404 });
 
   const [{ count }, { data: settings }] = await Promise.all([
     supabase.from("products").select("id", { count: "exact", head: true }).eq("user_id", quiz.user_id).eq("active", true),
@@ -55,9 +73,9 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
     const parsed = searchSchema.safeParse(await readBoundedJson(request, 8_000));
     if (!parsed.success) return NextResponse.json({ error: "Enter a product search query." }, { status: 400 });
 
-    const { supabase, quiz, error } = await loadPublishedSearchContext(id);
+    const { supabase, quiz, error, status } = await loadPublishedSearchContext(id);
     if (!supabase) return NextResponse.json({ error }, { status: 503 });
-    if (error) return NextResponse.json({ error: "Could not load search experience." }, { status: 500 });
+    if (error) return NextResponse.json({ error: status === 409 ? error : "Could not load search experience." }, { status: status || 500 });
     if (!quiz) return NextResponse.json({ error: "Published search experience not found." }, { status: 404 });
 
     const { data: products, error: productsError } = await supabase

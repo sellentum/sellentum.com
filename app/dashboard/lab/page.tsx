@@ -95,7 +95,7 @@ export default function LabPage() {
           <h1 className="display mt-2 text-5xl">Test the logic before shoppers do.</h1>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-black/45">Simulate a shopper path, inspect product scores, and see which catalog facts made each product eligible. This is the merchant-side antidote to black-box AI.</p>
         </div>
-        {selectedQuiz && <Link href={`/finder/${selectedQuiz.slug || selectedQuiz.id}`} target="_blank" className="btn-secondary self-start"><ExternalLink size={14} /> Preview finder</Link>}
+        {selectedQuiz && <Link href={`/finder/${selectedQuiz.id}`} target="_blank" className="btn-secondary self-start"><ExternalLink size={14} /> Preview finder</Link>}
       </div>
 
       <div className="mt-8 grid gap-5 xl:grid-cols-[380px_1fr]">

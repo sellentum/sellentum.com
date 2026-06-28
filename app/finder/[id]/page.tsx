@@ -108,7 +108,7 @@ export default function FinderPage({ params }: { params: Promise<{ id: string }>
     }
 
     try {
-      const response = await fetch(`/api/public/finder/${encodeURIComponent(data.quiz.slug || data.quiz.id)}`, {
+      const response = await fetch(`/api/public/finder/${encodeURIComponent(data.quiz.id)}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ answers: nextAnswers.map((answer) => ({ questionId: answer.questionId, optionId: answer.optionId })) }),

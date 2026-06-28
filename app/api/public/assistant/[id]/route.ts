@@ -11,17 +11,34 @@ const requestSchema = z.object({
   history: z.array(z.object({ role: z.enum(["user", "assistant"]), content: z.string().max(700) })).max(8).optional(),
 });
 
-async function loadPublishedQuiz(id: string) {
+type PublishedQuizSummary = Pick<Quiz, "id" | "user_id" | "name" | "slug" | "published">;
+type PublishedQuizLookup = {
+  supabase: ReturnType<typeof createAdminClient>;
+  quiz: PublishedQuizSummary | null;
+  error: string | null;
+  status?: number;
+};
+
+async function loadPublishedQuiz(id: string): Promise<PublishedQuizLookup> {
   const supabase = createAdminClient();
   if (!supabase) return { supabase: null, quiz: null, error: "Advisor service is not configured." };
 
   const byId = await supabase.from("quizzes").select("id,user_id,name,slug,published").eq("id", id).eq("published", true).maybeSingle();
   if (byId.error) return { supabase, quiz: null, error: byId.error.message };
-  if (byId.data) return { supabase, quiz: byId.data as Pick<Quiz, "id" | "user_id" | "name" | "slug" | "published">, error: null };
+  if (byId.data) return { supabase, quiz: byId.data as PublishedQuizSummary, error: null };
 
-  const bySlug = await supabase.from("quizzes").select("id,user_id,name,slug,published").eq("slug", id).eq("published", true).maybeSingle();
+  const bySlug = await supabase.from("quizzes").select("id,user_id,name,slug,published").eq("slug", id).eq("published", true).limit(2);
   if (bySlug.error) return { supabase, quiz: null, error: bySlug.error.message };
-  return { supabase, quiz: bySlug.data as Pick<Quiz, "id" | "user_id" | "name" | "slug" | "published"> | null, error: null };
+  const slugMatches = (bySlug.data || []) as PublishedQuizSummary[];
+  if (slugMatches.length > 1) {
+    return {
+      supabase,
+      quiz: null,
+      error: "This advisor slug is used by more than one workspace. Use the stable finder ID from the widget snippet.",
+      status: 409,
+    };
+  }
+  return { supabase, quiz: slugMatches[0] || null, error: null };
 }
 
 export async function POST(request: Request, context: { params: Promise<{ id: string }> }) {
@@ -33,9 +50,9 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
     const parsed = requestSchema.safeParse(await readBoundedJson(request, 12_000));
     if (!parsed.success) return NextResponse.json({ error: "Tell us what you need in a little more detail." }, { status: 400 });
 
-    const { supabase, quiz, error } = await loadPublishedQuiz(id);
+    const { supabase, quiz, error, status } = await loadPublishedQuiz(id);
     if (!supabase) return NextResponse.json({ error }, { status: 503 });
-    if (error) return NextResponse.json({ error: "Could not load advisor." }, { status: 500 });
+    if (error) return NextResponse.json({ error: status === 409 ? error : "Could not load advisor." }, { status: status || 500 });
     if (!quiz) return NextResponse.json({ error: "Published advisor not found." }, { status: 404 });
 
     const intentText = buildAdvisorIntentText(parsed.data.query, parsed.data.history || []);
