@@ -110,6 +110,16 @@ export const platformPages = [
     demoLabel: "Open Widget Studio",
   },
   {
+    slug: "storefront-install-scanner",
+    eyebrow: "Storefront Install Scanner",
+    title: "Verify the Findly widget is really installed before launch.",
+    description: "Findly scans a staging or production storefront URL for the widget script, experience attributes, production app origin, embed mode, attribution labels and static iframe/modal evidence.",
+    points: ["Server-side storefront scan", "Widget attribute validation", "Origin and HTTPS checks", "Copyable install scan packet"],
+    proof: ["Private and localhost targets are blocked for safer scanning", "The scanner catches placeholder IDs before launch", "Install proof feeds the same production QA workflow as Widget Studio and Storefront QA"],
+    demoHref: "/dashboard/install-scanner",
+    demoLabel: "Open Install Scanner",
+  },
+  {
     slug: "headless-api",
     eyebrow: "Headless API",
     title: "Build custom guided-selling frontends on Findly’s public runtimes.",

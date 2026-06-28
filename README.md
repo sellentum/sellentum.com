@@ -28,6 +28,7 @@ Findly is a compact guided-selling SaaS product for ecommerce brands. A merchant
 - Launch Channels board that packages homepage, category, PDP and support placements with copy-ready snippets, attribution labels, QA checks and channel metrics
 - Partner Syndication board that packages retailer, marketplace, affiliate, support and sales-partner widget snippets with syndication attribution, QA checks and data-policy handoff notes
 - Storefront QA sandbox that previews each channel in a controlled desktop storefront, lists expected telemetry events and exports a copyable QA packet before theme installation
+- Storefront Install Scanner that fetches a staging/production page, verifies the Findly widget script and data attributes, checks attribution labels and exports a copyable install scan packet
 - Runtime Operations Center that monitors public endpoint contracts, guardrails, analytics quality, release gates and telemetry proof
 - Release Center that rolls catalog, experience, channel, sandbox, analytics and optimization gates into a go/no-go release candidate with rollback notes
 - Production Verification Center that packages Vercel deployment gates, Supabase/demo mode evidence, required route/API contracts, desktop QA scenarios, final verification commands and copyable production handoff packets
@@ -236,6 +237,7 @@ Import the repository into Vercel, add the variables from `.env.example`, and de
 - `lib/launch-channels.ts` and `app/dashboard/channels` — channelized storefront placement planner for attributed snippets, install QA and early channel metrics
 - `lib/syndication.ts` and `app/dashboard/syndication` — partner-safe syndication packets for retailer, marketplace, affiliate, support and sales channels
 - `lib/storefront-sandbox.ts` and `app/dashboard/storefront-sandbox` — controlled storefront QA preview with expected event contracts, acceptance criteria and copyable staging packets
+- `lib/storefront-install-scanner.ts`, `app/api/storefront/scan` and `app/dashboard/install-scanner` — authenticated storefront scanner for widget script detection, attribute validation, origin checks and install packets
 - `lib/runtime-operations.ts` and `app/dashboard/operations` — production runtime operations center for public endpoint contracts, guardrails, analytics quality and telemetry proof
 - `lib/release-center.ts` and `app/dashboard/release-center` — go/no-go release candidate builder with launch gates, release scope, rollback plan and copyable release notes
 - `lib/production-verification.ts` and `app/dashboard/production` — production verification center for Vercel deployment evidence, required routes/APIs, desktop QA scenarios, analytics proof and launch handoff commands

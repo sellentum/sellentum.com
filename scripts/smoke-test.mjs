@@ -15,6 +15,17 @@ async function get(pathname) {
   return { response, text };
 }
 
+async function postJson(pathname, body) {
+  const response = await fetch(`${baseUrl}${pathname}`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(body),
+    redirect: "manual",
+  });
+  const text = await response.text();
+  return { response, text };
+}
+
 async function assertPage(pathname, expectedText, status = 200) {
   const { response, text } = await get(pathname);
   assert(response.status === status, `${pathname} returned ${response.status}, expected ${status}`);
@@ -804,6 +815,30 @@ function assertStorefrontSandboxWorkflow() {
   assert(readme.includes("Storefront QA sandbox"), "README should document Storefront QA sandbox");
 }
 
+function assertStorefrontInstallScannerWorkflow() {
+  const page = readFileSync("app/dashboard/install-scanner/page.tsx", "utf8");
+  const helper = readFileSync("lib/storefront-install-scanner.ts", "utf8");
+  const route = readFileSync("app/api/storefront/scan/route.ts", "utf8");
+  const shell = readFileSync("components/dashboard-shell.tsx", "utf8");
+  const overview = readFileSync("app/dashboard/page.tsx", "utf8");
+  const readme = readFileSync("README.md", "utf8");
+  const marketing = readFileSync("lib/marketing-pages.ts", "utf8");
+  assert(helper.includes("analyzeStorefrontInstall"), "Storefront Install Scanner helper should expose a reusable analyzer");
+  assert(helper.includes("validateStorefrontScanUrl"), "Storefront Install Scanner should validate scan URLs");
+  assert(helper.includes("Findly storefront install scan"), "Storefront Install Scanner should generate a copyable scan packet");
+  assert(helper.includes("Private, localhost and internal network URLs cannot be scanned"), "Storefront Install Scanner should block private/local scan targets");
+  assert(route.includes("getWorkspaceIdentity"), "Storefront scan API should require authentication");
+  assert(route.includes("MAX_HTML_BYTES") && route.includes("TIMEOUT_MS"), "Storefront scan API should bound HTML fetch size and timeout");
+  assert(page.includes("Storefront Install Scanner"), "Install Scanner page should expose the dashboard title");
+  assert(page.includes("Scan storefront install"), "Install Scanner page should scan storefront URLs");
+  assert(page.includes("Detected snippets"), "Install Scanner page should show detected snippets");
+  assert(page.includes("Recommended next tasks"), "Install Scanner page should show next tasks");
+  assert(shell.includes("/dashboard/install-scanner"), "Dashboard navigation should expose Install Scanner");
+  assert(overview.includes("/dashboard/install-scanner"), "Dashboard overview should expose Install Scanner");
+  assert(readme.includes("Storefront Install Scanner"), "README should document Storefront Install Scanner");
+  assert(marketing.includes("storefront-install-scanner"), "Platform marketing pages should include Storefront Install Scanner");
+}
+
 function assertReleaseCenterWorkflow() {
   const page = readFileSync("app/dashboard/release-center/page.tsx", "utf8");
   const helper = readFileSync("lib/release-center.ts", "utf8");
@@ -1456,6 +1491,8 @@ async function assertDeterministicLogic() {
   writeFileSync(compiledStorefrontSandbox, readFileSync(compiledStorefrontSandbox, "utf8")
     .replace('from "./launch-channels";', 'from "./launch-channels.js";')
     .replace('from "@/lib/widget-snippet";', 'from "./widget-snippet.js";'));
+  const compiledStorefrontInstallScanner = `${compileDir}/lib/storefront-install-scanner.js`;
+  writeFileSync(compiledStorefrontInstallScanner, readFileSync(compiledStorefrontInstallScanner, "utf8"));
   const compiledExperiments = `${compileDir}/lib/experiments.js`;
   writeFileSync(compiledExperiments, readFileSync(compiledExperiments, "utf8")
     .replace('from "./analytics";', 'from "./analytics.js";')
@@ -1565,6 +1602,7 @@ async function assertDeterministicLogic() {
   const launchChannels = await import(pathToFileURL(`${compileDir}/lib/launch-channels.js`));
   const syndication = await import(pathToFileURL(`${compileDir}/lib/syndication.js`));
   const storefrontSandbox = await import(pathToFileURL(`${compileDir}/lib/storefront-sandbox.js`));
+  const storefrontInstallScanner = await import(pathToFileURL(`${compileDir}/lib/storefront-install-scanner.js`));
   const experiments = await import(pathToFileURL(`${compileDir}/lib/experiments.js`));
   const releaseCenter = await import(pathToFileURL(`${compileDir}/lib/release-center.js`));
   const runtimeOperations = await import(pathToFileURL(`${compileDir}/lib/runtime-operations.js`));
@@ -2010,6 +2048,19 @@ async function assertDeterministicLogic() {
   assert(runbook.steps.length >= 5 && runbook.analyticsEvents.includes("buy_click"), "Expected storefront QA runbook to include manual QA steps and analytics proof points");
   const runbookText = storefrontQaRunbook.formatStorefrontQaRunbook(runbook);
   assert(runbookText.includes("Acceptance criteria") && runbookText.includes("/api/events") && runbookText.includes(generatedWidgetSnippet), "Expected formatted storefront QA runbook to include acceptance criteria, analytics endpoint and embed snippet");
+  const installedStorefrontHtml = `<html><body><script src="https://findly.example/api/widget.js" data-experience="finder" data-mode="modal" data-id="quiz_footwear" data-source="homepage" data-campaign="findly-homepage-guide" data-placement="homepage-hero" data-height="780px" async></script></body></html>`;
+  const installScanReport = storefrontInstallScanner.analyzeStorefrontInstall({ url: "https://store.example/products/trail", html: installedStorefrontHtml, appOrigin: "https://findly.example", scannedAt: new Date("2026-06-28T10:00:00Z") });
+  assert(installScanReport.status === "installed" && installScanReport.summary.findlyScripts === 1 && installScanReport.summary.attributionLabels === 3, "Expected Storefront Install Scanner to verify a complete attributed widget install");
+  assert(installScanReport.packet.includes("Findly storefront install scan") && installScanReport.packet.includes("Recommended next tasks") && installScanReport.snippets[0]?.id === "quiz_footwear", "Expected Storefront Install Scanner to generate a scan packet and parsed snippet data");
+  const missingInstallScanReport = storefrontInstallScanner.analyzeStorefrontInstall({ url: "https://store.example/products/trail", html: "<html><body><h1>No widget here</h1></body></html>", appOrigin: "https://findly.example" });
+  assert(missingInstallScanReport.status === "missing" && missingInstallScanReport.checks.some((item) => item.id === "script" && item.status === "fail"), "Expected Storefront Install Scanner to flag missing widget scripts");
+  let blockedPrivateScan = false;
+  try {
+    storefrontInstallScanner.validateStorefrontScanUrl("http://localhost:3000");
+  } catch {
+    blockedPrivateScan = true;
+  }
+  assert(blockedPrivateScan, "Expected Storefront Install Scanner to block localhost/private scan targets");
 
   const channelEvents = [
     { id: "channel_view", user_id: "demo-user", quiz_id: "quiz_footwear", event_type: "widget_view", metadata: { experience_type: "finder", findly_source: "homepage", findly_campaign: "findly-homepage-guide", findly_placement: "homepage-hero" }, created_at: "2026-06-25T12:00:00Z" },
@@ -2235,6 +2286,7 @@ async function main() {
   await assertPage("/platform/shopper-personas", "Turn zero-party signals");
   await assertPage("/platform/audience-capture", "Turn guided-selling sessions");
   await assertPage("/platform/widget-studio", "Launch every guided experience");
+  await assertPage("/platform/storefront-install-scanner", "Verify the Findly widget");
   await assertPage("/platform/headless-api", "Build custom guided-selling");
   await assertPage("/platform/returns-fit-intelligence", "Prevent wrong-fit purchases");
   await assertPage("/platform/bundle-studio", "Increase average order value");
@@ -2250,6 +2302,10 @@ async function main() {
   await assertPage("/search/quiz_footwear", "Preparing product search");
   await assertPage("/configurator/config_trail_kit", "Loading configurator");
   await assertPage("/api/preflight", "Authentication required", 401);
+  {
+    const { response, text } = await postJson("/api/storefront/scan", { url: "https://store.example" });
+    assert(response.status === 401 && text.includes("Authentication required"), "Storefront scan API should require authentication");
+  }
   await assertWidgetScript();
   assertSystemFontStack();
   assertDesktopTypographyScale();
@@ -2280,6 +2336,7 @@ async function main() {
   assertLaunchChannelsWorkflow();
   assertPartnerSyndicationWorkflow();
   assertStorefrontSandboxWorkflow();
+  assertStorefrontInstallScannerWorkflow();
   assertRuntimeOperationsWorkflow();
   assertReleaseCenterWorkflow();
   assertProductionVerificationWorkflow();

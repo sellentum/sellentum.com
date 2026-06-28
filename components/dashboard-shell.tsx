@@ -18,6 +18,7 @@ const nav = [
   { href: "/dashboard/channels", label: "Launch channels", icon: Megaphone },
   { href: "/dashboard/syndication", label: "Syndication", icon: Handshake },
   { href: "/dashboard/storefront-sandbox", label: "Storefront QA", icon: Globe2 },
+  { href: "/dashboard/install-scanner", label: "Install Scanner", icon: Search },
   { href: "/dashboard/operations", label: "Runtime Ops", icon: RadioTower },
   { href: "/dashboard/release-center", label: "Release Center", icon: GitPullRequestArrow },
   { href: "/dashboard/production", label: "Production Verification", icon: MonitorCheck },
