@@ -12,7 +12,8 @@ import { buildRecommendationRecoveryReport, type RecommendationRecovery } from "
 import type { FinderAnswer, Product, Quiz, Recommendation, WidgetSettings } from "@/lib/types";
 import { auditProductMatches, compareFinderRecommendations, formatCurrency } from "@/lib/utils";
 
-type FinderData = { quiz: Quiz; products: Product[]; settings: WidgetSettings };
+type RuntimeSource = "local" | "public";
+type FinderData = { quiz: Quiz; products: Product[]; settings: WidgetSettings; source: RuntimeSource };
 type FinderEventType = "widget_view" | "quiz_start" | "quiz_complete" | "product_recommended" | "buy_click" | "recommendation_feedback";
 
 function serializeAnswers(items: FinderAnswer[]) {
@@ -45,14 +46,14 @@ export default function FinderPage({ params }: { params: Promise<{ id: string }>
   useEffect(() => {
     if (!store.ready) return;
     const localQuiz = store.quizzes.find((quiz) => quiz.id === id || quiz.slug === id);
-    if (localQuiz) { setData({ quiz: localQuiz, products: store.products, settings: normalizeWidgetSettings(store.settings) }); setLoading(false); return; }
-    fetch(`/api/public/finder/${encodeURIComponent(id)}`).then(async (response) => { if (!response.ok) throw new Error((await response.json()).error || "Finder not found."); return response.json(); }).then((result) => setData({ ...result, settings: normalizeWidgetSettings(result.settings) })).catch((err) => setError(err.message)).finally(() => setLoading(false));
+    if (localQuiz) { setData({ quiz: localQuiz, products: store.products, settings: normalizeWidgetSettings(store.settings), source: "local" }); setLoading(false); return; }
+    fetch(`/api/public/finder/${encodeURIComponent(id)}`).then(async (response) => { if (!response.ok) throw new Error((await response.json()).error || "Finder not found."); return response.json(); }).then((result) => setData({ ...result, source: "public", settings: normalizeWidgetSettings(result.settings) })).catch((err) => setError(err.message)).finally(() => setLoading(false));
   }, [id, store.ready, store.quizzes, store.products, store.settings]);
 
   const track = useCallback(async (eventType: FinderEventType, productId?: string, extraMetadata: Record<string, unknown> = {}) => {
     if (!data) return;
-    const metadata = { experience_type: "finder", experience_id: data.quiz.id, experience_name: data.quiz.name, experience_slug: data.quiz.slug, ...getSessionMetadata(), ...extraMetadata };
-    if (store.mode === "demo") await store.recordEvent(eventType, data.quiz.id, productId, metadata);
+    const metadata = { experience_type: "finder", experience_id: data.quiz.id, experience_name: data.quiz.name, experience_slug: data.quiz.slug, runtime_source: data.source, ...getSessionMetadata(), ...extraMetadata };
+    if (data.source === "local") await store.recordPreviewEvent(eventType, data.quiz.id, productId, metadata);
     else fetch("/api/events", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ eventType, quizId: data.quiz.id, productId, metadata }) }).catch(() => undefined);
   }, [data, store]);
 
@@ -92,7 +93,7 @@ export default function FinderPage({ params }: { params: Promise<{ id: string }>
     setRecommendations([]);
     setRecommending(true);
 
-    if (store.mode === "demo") {
+    if (data.source === "local") {
       const audits = auditProductMatches(data.products, nextAnswers, { overrides: data.quiz.recommendation_overrides || [] });
       const matches = audits.filter((audit) => audit.eligible).slice(0, 3).map(({ product, score, matchedReasons }) => ({ product, score, matchedReasons }));
       const nextRecovery = buildRecommendationRecoveryReport({ products: data.products, answers: nextAnswers, audits, recommendedCount: matches.length });

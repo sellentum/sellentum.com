@@ -27,6 +27,7 @@ type StoreContextValue = {
   deleteConfigurator: (id: string) => Promise<void>;
   saveSettings: (settings: WidgetSettings) => Promise<void>;
   recordEvent: (type: AnalyticsEventType, quizId: string, productId?: string, metadata?: Record<string, unknown>) => Promise<void>;
+  recordPreviewEvent: (type: AnalyticsEventType, quizId: string, productId?: string, metadata?: Record<string, unknown>) => Promise<void>;
   resetDemo: () => void;
 };
 
@@ -258,6 +259,12 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     setState((current) => ({ ...current, settings: next }));
   }, [mode]);
 
+  const recordPreviewEvent = useCallback(async (eventType: AnalyticsEventType, quizId: string, productId?: string, metadata?: Record<string, unknown>) => {
+    const owner = state.quizzes.find((item) => item.id === quizId)?.user_id || state.configurators.find((item) => item.id === quizId)?.user_id || DEMO_USER_ID;
+    const event: AnalyticsEvent = { id: uid("event"), user_id: owner, quiz_id: quizId, product_id: productId, event_type: eventType, metadata, created_at: new Date().toISOString() };
+    setState((current) => ({ ...current, events: [event, ...current.events] }));
+  }, [state.quizzes, state.configurators]);
+
   const recordEvent = useCallback(async (eventType: AnalyticsEventType, quizId: string, productId?: string, metadata?: Record<string, unknown>) => {
     const event: AnalyticsEvent = { id: uid("event"), user_id: DEMO_USER_ID, quiz_id: quizId, product_id: productId, event_type: eventType, metadata, created_at: new Date().toISOString() };
     if (mode === "supabase") {
@@ -279,7 +286,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     setState(normalizeDemoState(initialState));
   }, []);
 
-  const value = useMemo(() => ({ ready, mode, products: state.products, quizzes: state.quizzes, configurators: state.configurators, events: state.events, settings: state.settings, error, saveProduct, importProducts, deleteProduct, saveQuiz, createQuiz, deleteQuiz, saveConfigurator, createConfigurator, deleteConfigurator, saveSettings, recordEvent, resetDemo }), [ready, mode, state, error, saveProduct, importProducts, deleteProduct, saveQuiz, createQuiz, deleteQuiz, saveConfigurator, createConfigurator, deleteConfigurator, saveSettings, recordEvent, resetDemo]);
+  const value = useMemo(() => ({ ready, mode, products: state.products, quizzes: state.quizzes, configurators: state.configurators, events: state.events, settings: state.settings, error, saveProduct, importProducts, deleteProduct, saveQuiz, createQuiz, deleteQuiz, saveConfigurator, createConfigurator, deleteConfigurator, saveSettings, recordEvent, recordPreviewEvent, resetDemo }), [ready, mode, state, error, saveProduct, importProducts, deleteProduct, saveQuiz, createQuiz, deleteQuiz, saveConfigurator, createConfigurator, deleteConfigurator, saveSettings, recordEvent, recordPreviewEvent, resetDemo]);
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
 }
 

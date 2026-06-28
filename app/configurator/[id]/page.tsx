@@ -12,7 +12,7 @@ import { buildPublicExperienceCopy, normalizeWidgetSettings } from "@/lib/public
 import type { Configurator, ConfiguratorOption, Product, WidgetSettings } from "@/lib/types";
 import { describeConfiguratorSelection, formatCurrency, getConfiguratorProducts, getConfiguratorProgress, getConfiguratorTotal, optionConflictsWithSelection, updateConfiguratorSelection } from "@/lib/utils";
 
-type ConfiguratorData = { configurator: Configurator; products: Product[]; settings: WidgetSettings };
+type ConfiguratorData = { configurator: Configurator; products: Product[]; settings: WidgetSettings; source: "local" | "public" };
 type ConfiguratorRuntimeResult = {
   valid: boolean;
   errors: string[];
@@ -49,13 +49,13 @@ export default function ConfiguratorPage() {
     if (!store.ready) return;
     const localConfigurator = store.configurators.find((configurator) => configurator.id === id || configurator.slug === id);
     if (localConfigurator) {
-      setData({ configurator: localConfigurator, products: store.products, settings: normalizeWidgetSettings(store.settings) });
+      setData({ configurator: localConfigurator, products: store.products, settings: normalizeWidgetSettings(store.settings), source: "local" });
       setLoading(false);
       return;
     }
     fetch(`/api/public/configurator/${id}`)
       .then((response) => response.ok ? response.json() : Promise.reject(new Error("Configurator not found.")))
-      .then((payload) => setData({ ...payload, settings: normalizeWidgetSettings(payload.settings) }))
+      .then((payload) => setData({ ...payload, source: "public", settings: normalizeWidgetSettings(payload.settings) }))
       .catch((err) => setError(err instanceof Error ? err.message : "Configurator not found."))
       .finally(() => setLoading(false));
   }, [id, store.ready, store.configurators, store.products, store.settings]);
@@ -68,6 +68,7 @@ export default function ConfiguratorPage() {
       experience_id: data.configurator.id,
       experience_name: data.configurator.name,
       experience_slug: data.configurator.slug,
+      runtime_source: data.source,
       ...getSessionMetadata(),
       selections: selectionOverride,
       selected_options: summary.selected.map((option) => ({ id: option.id, step_id: option.step_id, label: option.label, price_delta: option.price_delta, product_id: option.product_id, tags: option.tags })),
@@ -79,7 +80,7 @@ export default function ConfiguratorPage() {
     };
     setSavingEvent(true);
     try {
-      if (store.mode === "demo") await store.recordEvent(eventType, data.configurator.id, productId, metadata);
+      if (data.source === "local") await store.recordPreviewEvent(eventType, data.configurator.id, productId, metadata);
       else await fetch("/api/events", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ eventType, quizId: data.configurator.id, productId, metadata }) });
     } finally {
       setSavingEvent(false);
@@ -142,7 +143,7 @@ export default function ConfiguratorPage() {
     }
     setValidationError("");
 
-    if (store.mode !== "demo") {
+    if (data.source !== "local") {
       setValidatingBundle(true);
       try {
         const response = await fetch(`/api/public/configurator/${encodeURIComponent(configurator.slug || configurator.id)}`, {

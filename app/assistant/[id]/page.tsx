@@ -11,7 +11,8 @@ import { buildPublicExperienceCopy, normalizeWidgetSettings } from "@/lib/public
 import type { ConversationalMatch, Product, Quiz, WidgetSettings } from "@/lib/types";
 import { formatCurrency } from "@/lib/utils";
 
-type AdvisorData = { quiz: Quiz; products: Product[]; settings: WidgetSettings };
+type RuntimeSource = "local" | "public";
+type AdvisorData = { quiz: Quiz; products: Product[]; settings: WidgetSettings; source: RuntimeSource };
 type Message = { role: "user" | "assistant"; content: string };
 type AssistantEventType = "widget_view" | "quiz_start" | "quiz_complete" | "product_recommended" | "buy_click" | "recommendation_feedback";
 type AdvisorStatus = "clarifying" | "recommendations";
@@ -38,8 +39,8 @@ export default function AssistantPage({ params }: { params: Promise<{ id: string
   useEffect(() => {
     if (!store.ready) return;
     const localQuiz = store.quizzes.find((quiz) => quiz.id === id || quiz.slug === id);
-    if (localQuiz) { setData({ quiz: localQuiz, products: store.products, settings: normalizeWidgetSettings(store.settings) }); setLoading(false); return; }
-    fetch(`/api/public/finder/${encodeURIComponent(id)}`).then(async (response) => { if (!response.ok) throw new Error((await response.json()).error || "Advisor not found."); return response.json(); }).then((result) => setData({ ...result, settings: normalizeWidgetSettings(result.settings) })).catch((err) => setError(err.message)).finally(() => setLoading(false));
+    if (localQuiz) { setData({ quiz: localQuiz, products: store.products, settings: normalizeWidgetSettings(store.settings), source: "local" }); setLoading(false); return; }
+    fetch(`/api/public/finder/${encodeURIComponent(id)}`).then(async (response) => { if (!response.ok) throw new Error((await response.json()).error || "Advisor not found."); return response.json(); }).then((result) => setData({ ...result, source: "public", settings: normalizeWidgetSettings(result.settings) })).catch((err) => setError(err.message)).finally(() => setLoading(false));
   }, [id, store.ready, store.quizzes, store.products, store.settings]);
 
   const settings = useMemo(() => normalizeWidgetSettings(data?.settings), [data?.settings]);
@@ -56,15 +57,15 @@ export default function AssistantPage({ params }: { params: Promise<{ id: string
   useEffect(() => {
     if (!data || viewed.current) return;
     viewed.current = true;
-    const metadata = { experience_type: "assistant", experience_id: data.quiz.id, experience_name: data.quiz.name, experience_slug: data.quiz.slug, ...getSessionMetadata() };
-    if (store.mode === "demo") store.recordEvent("widget_view", data.quiz.id, undefined, metadata);
+    const metadata = { experience_type: "assistant", experience_id: data.quiz.id, experience_name: data.quiz.name, experience_slug: data.quiz.slug, runtime_source: data.source, ...getSessionMetadata() };
+    if (data.source === "local") store.recordPreviewEvent("widget_view", data.quiz.id, undefined, metadata);
     else fetch("/api/events", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ eventType: "widget_view", quizId: data.quiz.id, metadata }) }).catch(() => undefined);
   }, [data, store]);
 
   async function track(eventType: AssistantEventType, productId?: string, extraMetadata: Record<string, unknown> = {}) {
     if (!data) return;
-    const metadata = { experience_type: "assistant", experience_id: data.quiz.id, experience_name: data.quiz.name, experience_slug: data.quiz.slug, ...getSessionMetadata(), ...extraMetadata };
-    if (store.mode === "demo") await store.recordEvent(eventType, data.quiz.id, productId, metadata);
+    const metadata = { experience_type: "assistant", experience_id: data.quiz.id, experience_name: data.quiz.name, experience_slug: data.quiz.slug, runtime_source: data.source, ...getSessionMetadata(), ...extraMetadata };
+    if (data.source === "local") await store.recordPreviewEvent(eventType, data.quiz.id, productId, metadata);
     else fetch("/api/events", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ eventType, quizId: data.quiz.id, productId, metadata }) }).catch(() => undefined);
   }
 
@@ -75,10 +76,10 @@ export default function AssistantPage({ params }: { params: Promise<{ id: string
     setMessages(nextMessages); setQuery(""); setSearching(true); setError(""); setClarifyingOptions([]); setRecovery(null);
     if (!started.current) { started.current = true; track("quiz_start", undefined, { query: clean }); }
     try {
-      const response = await fetch(store.mode === "demo" ? "/api/assistant" : `/api/public/assistant/${encodeURIComponent(data.quiz.slug || data.quiz.id)}`, {
+      const response = await fetch(data.source === "local" ? "/api/assistant" : `/api/public/assistant/${encodeURIComponent(data.quiz.slug || data.quiz.id)}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(store.mode === "demo" ? { query: clean, history: messages.slice(-6), products: data.products } : { query: clean, history: messages.slice(-6) }),
+        body: JSON.stringify(data.source === "local" ? { query: clean, history: messages.slice(-6), products: data.products } : { query: clean, history: messages.slice(-6) }),
       });
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error || "The advisor could not complete that search.");

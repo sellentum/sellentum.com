@@ -19,6 +19,7 @@ type SearchData = {
   products?: Product[];
   settings: WidgetSettings;
   catalog: { active_products: number };
+  source: "local" | "public";
 };
 
 type SearchEventType = "widget_view" | "quiz_start" | "product_recommended" | "buy_click" | "recommendation_feedback";
@@ -53,7 +54,7 @@ export default function PublicSearchPage({ params }: { params: Promise<{ id: str
   useEffect(() => {
     if (!store.ready) return;
     const localQuiz = store.quizzes.find((quiz) => quiz.id === id || quiz.slug === id) || demoQuiz;
-    const localData = { experience: { id: localQuiz.id, name: localQuiz.name, slug: localQuiz.slug }, products: store.products, settings: store.settings, catalog: { active_products: store.products.filter((product) => product.active).length } };
+    const localData = { experience: { id: localQuiz.id, name: localQuiz.name, slug: localQuiz.slug }, products: store.products, settings: store.settings, catalog: { active_products: store.products.filter((product) => product.active).length }, source: "local" as const };
     if (store.mode === "demo" || localQuiz.id === id || localQuiz.slug === id) {
       setData({ ...localData, settings: normalizeWidgetSettings(localData.settings) });
       setReport(withRecovery(runSemanticProductSearch({ query: starterQueries[0], products: store.products, limit: 6 })));
@@ -63,13 +64,13 @@ export default function PublicSearchPage({ params }: { params: Promise<{ id: str
     fetch(`/api/public/search/${encodeURIComponent(id)}`).then(async (response) => {
       if (!response.ok) throw new Error((await response.json()).error || "Search experience not found.");
       return response.json();
-    }).then((result) => setData({ ...result, settings: normalizeWidgetSettings(result.settings) })).catch((err) => setError(err.message)).finally(() => setLoading(false));
+    }).then((result) => setData({ ...result, source: "public", settings: normalizeWidgetSettings(result.settings) })).catch((err) => setError(err.message)).finally(() => setLoading(false));
   }, [id, store.ready, store.mode, store.quizzes, store.products, store.settings]);
 
   const track = useCallback(async (eventType: SearchEventType, productId?: string, extraMetadata: Record<string, unknown> = {}) => {
     if (!data) return;
-    const metadata = { experience_type: "search", experience_id: data.experience.id, experience_name: data.experience.name, experience_slug: data.experience.slug, ...getSessionMetadata(), ...extraMetadata };
-    if (store.mode === "demo") await store.recordEvent(eventType, data.experience.id, productId, metadata);
+    const metadata = { experience_type: "search", experience_id: data.experience.id, experience_name: data.experience.name, experience_slug: data.experience.slug, runtime_source: data.source, ...getSessionMetadata(), ...extraMetadata };
+    if (data.source === "local") await store.recordPreviewEvent(eventType, data.experience.id, productId, metadata);
     else fetch("/api/events", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ eventType, quizId: data.experience.id, productId, metadata }) }).catch(() => undefined);
   }, [data, store]);
 
@@ -81,7 +82,7 @@ export default function PublicSearchPage({ params }: { params: Promise<{ id: str
     setSearchError("");
     setSearching(true);
     try {
-      const nextReport = store.mode === "demo" && data.products
+      const nextReport = data.source === "local" && data.products
         ? withRecovery(runSemanticProductSearch({ query: nextQuery, products: data.products, limit: 6 }))
         : await fetch(`/api/public/search/${encodeURIComponent(data.experience.slug || data.experience.id)}`, {
           method: "POST",

@@ -21,6 +21,7 @@ The production build confirms both widget loader routes are present:
 Latest pushed hardening commit:
 
 - `c5a49bb` — `Harden dashboard navigation and widget loader`
+- Stage 2 local verification also passed with no `/api/events` POST during a bundled demo finder journey.
 
 ## Fixed in the first hardening stage
 
@@ -31,12 +32,19 @@ Latest pushed hardening commit:
 5. Several marketing/finder headings used raw forced line breaks. They now use block spans with readable accessible text.
 6. Landing demo toggle buttons now expose `aria-pressed`, and option buttons have cleaner accessible labels.
 
-## High-priority problems still left
+## Fixed in the second hardening stage
 
-1. Public demo telemetry can fail with `404` when Supabase env vars are configured but the page is rendering bundled demo data.
-   - Evidence: local browser test rendered `/finder/quiz_footwear`, then the dev server logged `POST /api/events 404`.
-   - Why it matters: the public demo can appear visually fine while silently failing analytics.
-   - Likely fix: explicitly mark runtime data as `demo` vs `remote` and route tracking through local demo storage when bundled demo data is used.
+1. Public demo telemetry no longer posts to `/api/events` when Supabase env vars are configured.
+   - Public finder, advisor, search, and configurator pages now carry an explicit `source: "local" | "public"` runtime flag.
+   - Local/demo-backed experiences record preview telemetry in client state instead of calling public ingestion.
+   - Public API-backed experiences still post through `/api/events`.
+   - Finder/advisor/search/configurator runtime behavior now branches from the actual data source, not from environment-variable mode.
+
+## High-priority production problems
+
+1. Public demo telemetry source split.
+   - Status: fixed in Stage 2.
+   - Remaining watch item: add automated smoke coverage so this does not regress.
 
 2. Public slug lookup is ambiguous across tenants.
    - Supabase schema only enforces `unique(user_id, slug)`, but public routes can load by plain slug.
@@ -187,4 +195,3 @@ Sellentum is visually and functionally far beyond a thin demo. The biggest remai
 - reliable telemetry,
 - real Supabase/OpenAI/storefront proof,
 - and a cleaner boundary between demo data and production data.
-
