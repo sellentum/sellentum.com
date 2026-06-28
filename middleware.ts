@@ -1,9 +1,17 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+const DEFAULT_WORKSPACE_BRAND = "Your brand";
+
+function isDefaultWorkspaceBrand(value: string | null | undefined) {
+  const brand = value?.trim().toLowerCase();
+  return !brand || brand === DEFAULT_WORKSPACE_BRAND.toLowerCase();
+}
+
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request });
   const isDashboard = request.nextUrl.pathname.startsWith("/dashboard");
+  const isOnboarding = request.nextUrl.pathname.startsWith("/dashboard/onboarding");
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
@@ -35,6 +43,22 @@ export async function middleware(request: NextRequest) {
     loginUrl.searchParams.set("next", request.nextUrl.pathname);
     return NextResponse.redirect(loginUrl);
   }
+
+  if (isDashboard && user && !isOnboarding) {
+    const { data: settings } = await supabase
+      .from("widget_settings")
+      .select("brand_name")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (isDefaultWorkspaceBrand(settings?.brand_name)) {
+      const onboardingUrl = request.nextUrl.clone();
+      onboardingUrl.pathname = "/dashboard/onboarding";
+      onboardingUrl.searchParams.set("next", request.nextUrl.pathname);
+      return NextResponse.redirect(onboardingUrl);
+    }
+  }
+
   return response;
 }
 
