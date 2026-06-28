@@ -26,7 +26,6 @@ const nav = [
   { href: "/dashboard/operations", label: "Runtime Ops", icon: RadioTower },
   { href: "/dashboard/release-center", label: "Release Center", icon: GitPullRequestArrow },
   { href: "/dashboard/production", label: "Production Verification", icon: MonitorCheck },
-  { href: "/dashboard/mvp-audit", label: "MVP Audit", icon: ClipboardCheck },
   { href: "/dashboard/trust-center", label: "AI Trust Center", icon: ShieldCheck },
   { href: "/dashboard/grounding", label: "Grounding Center", icon: BrainCircuit },
   { href: "/dashboard/knowledge-graph", label: "Knowledge Graph", icon: Network },
