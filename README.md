@@ -70,6 +70,7 @@ Findly is a compact guided-selling SaaS product for ecommerce brands. A merchant
 - Public runtime guardrails with bounded JSON bodies, shared rate-limit responses and sanitized analytics metadata for embedded finder, advisor, search, configurator and event APIs
 - Analytics for sessions, journey replay, real period-over-period trends, funnel diagnosis, views, starts, completions, recommendations, buy clicks, selected answers, search/advisor themes, matched intent signals, product demand and zero-party opportunity suggestions
 - Shopper-facing recommendation feedback on finder, advisor, search and configurator result cards, with a Feedback Center for product-quality lanes, negative themes, tuning actions and copyable feedback packets
+- Sales Content Studio that converts catalog proof, zero-party intent, product demand and recommendation feedback into grounded PDP, collection, email and support copy blocks with a copyable content packet
 - Shopper Persona Studio that turns zero-party answers, search/advisor terms, configurator choices, recommendations and buy clicks into deterministic buyer segments, product affinities and activation actions
 - Audience Capture Center that converts anonymous guided-selling sessions into zero-party segments, capture prompts, consent guardrails, safe export fields and copyable audience handoff packets
 - Widget attribution analytics for source, medium, campaign, placement, page URL, page title and referrer so merchants can compare storefront launches and campaigns
@@ -181,6 +182,7 @@ Import the repository into Vercel, add the variables from `.env.example`, and de
 - `lib/attribution.ts` — widget/source attribution metadata capture and campaign/placement performance reporting
 - `lib/analytics-quality.ts` — event-contract QA for required metadata, session linkage, event ordering and product attribution
 - `lib/recommendation-feedback.ts`, `components/recommendation-feedback.tsx` and `app/dashboard/feedback` — shopper recommendation-quality feedback capture, product feedback lanes, themes and deterministic tuning packets
+- `lib/content-studio.ts` and `app/dashboard/content` — grounded sales-content generation from catalog facts, zero-party intent, demand and feedback with deterministic AI-claim boundaries
 - `lib/commercial-impact.ts` — deterministic assisted-revenue and ROI-opportunity reporting from product recommendation and buy-click events
 - `lib/returns-intelligence.ts` and `app/dashboard/returns` — return-prevention intelligence from fit-language gaps, product friction, compatibility rules, question guardrails and support-safe scripts
 - `lib/conversion-playbook.ts` — deterministic merchant optimization actions from funnel, catalog, QA and zero-party intent signals

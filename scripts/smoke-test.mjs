@@ -31,6 +31,13 @@ async function assertWidgetScript() {
   assert(text.indexOf("function open(){ensureFrame()") > text.indexOf("function ensureFrame()"), "Modal widget should lazy-load the iframe only when opened");
 }
 
+function assertSystemFontStack() {
+  const layout = readFileSync("app/layout.tsx", "utf8");
+  const css = readFileSync("app/globals.css", "utf8");
+  assert(!layout.includes("next/font/google"), "App layout should avoid Google font dependency for the simple system-font direction");
+  assert(css.includes("Helvetica") && css.includes("Poppins") && css.includes("SF Pro"), "Global CSS should include Helvetica, Poppins and SF Pro in the simple font stack");
+}
+
 function assertPublishedAdvisorRuntime() {
   const route = readFileSync("app/api/public/assistant/[id]/route.ts", "utf8");
   const engine = readFileSync("lib/assistant-engine.ts", "utf8");
@@ -271,6 +278,26 @@ function assertRecommendationFeedbackWorkflow() {
   assert(schema.includes("recommendation_feedback") && migration.includes("recommendation_feedback"), "Supabase schema and migration should allow recommendation_feedback events");
   assert(eventRoute.includes("recommendation_feedback"), "Public analytics route should accept recommendation_feedback events");
   assert(analyticsQuality.includes("recommendation_feedback") && analyticsQuality.includes("feedback"), "Analytics QA should validate recommendation feedback metadata");
+}
+
+function assertContentStudioWorkflow() {
+  const page = readFileSync("app/dashboard/content/page.tsx", "utf8");
+  const helper = readFileSync("lib/content-studio.ts", "utf8");
+  const shell = readFileSync("components/dashboard-shell.tsx", "utf8");
+  const overview = readFileSync("app/dashboard/page.tsx", "utf8");
+  const readme = readFileSync("README.md", "utf8");
+  const marketing = readFileSync("lib/marketing-pages.ts", "utf8");
+  assert(helper.includes("buildContentStudioReport"), "Sales Content Studio helper should expose a reusable report builder");
+  assert(helper.includes("Findly Sales Content Studio packet"), "Sales Content Studio should generate a copyable content packet");
+  assert(helper.includes("Grounding boundary"), "Sales Content Studio should document the grounding boundary");
+  assert(helper.includes("Product selection remains deterministic"), "Sales Content Studio should preserve deterministic selection boundaries");
+  assert(page.includes("Sales Content Studio"), "Sales Content Studio page should expose the dashboard title");
+  assert(page.includes("Grounded content assets"), "Sales Content Studio page should show generated content assets");
+  assert(page.includes("Copy content packet"), "Sales Content Studio page should let merchants copy the packet");
+  assert(shell.includes("/dashboard/content"), "Dashboard navigation should expose Content Studio");
+  assert(overview.includes("/dashboard/content"), "Dashboard overview should expose Content Studio");
+  assert(readme.includes("Sales Content Studio"), "README should document Sales Content Studio");
+  assert(marketing.includes("sales-content-studio"), "Platform marketing pages should include Sales Content Studio");
 }
 
 function assertMerchandisingStudioWorkflow() {
@@ -1266,6 +1293,13 @@ async function assertDeterministicLogic() {
   writeFileSync(compiledRecommendationFeedback, readFileSync(compiledRecommendationFeedback, "utf8")
     .replace('from "./analytics";', 'from "./analytics.js";')
     .replace('from "./utils";', 'from "./utils.js";'));
+  const compiledContentStudio = `${compileDir}/lib/content-studio.js`;
+  writeFileSync(compiledContentStudio, readFileSync(compiledContentStudio, "utf8")
+    .replace('from "./analytics";', 'from "./analytics.js";')
+    .replace('from "./discovery-gaps";', 'from "./discovery-gaps.js";')
+    .replace('from "./insights";', 'from "./insights.js";')
+    .replace('from "./recommendation-feedback";', 'from "./recommendation-feedback.js";')
+    .replace('from "./utils";', 'from "./utils.js";'));
   const compiledMerchandisingStudio = `${compileDir}/lib/merchandising-studio.js`;
   writeFileSync(compiledMerchandisingStudio, readFileSync(compiledMerchandisingStudio, "utf8")
     .replace('from "./insights";', 'from "./insights.js";'));
@@ -1384,6 +1418,7 @@ async function assertDeterministicLogic() {
   const personaStudio = await import(pathToFileURL(`${compileDir}/lib/persona-studio.js`));
   const audienceCapture = await import(pathToFileURL(`${compileDir}/lib/audience-capture.js`));
   const recommendationFeedback = await import(pathToFileURL(`${compileDir}/lib/recommendation-feedback.js`));
+  const contentStudio = await import(pathToFileURL(`${compileDir}/lib/content-studio.js`));
   const merchandisingStudio = await import(pathToFileURL(`${compileDir}/lib/merchandising-studio.js`));
   const catalogPipeline = await import(pathToFileURL(`${compileDir}/lib/catalog-pipeline.js`));
   const availabilityGuard = await import(pathToFileURL(`${compileDir}/lib/availability-guard.js`));
@@ -1599,6 +1634,12 @@ async function assertDeterministicLogic() {
   assert(feedbackReport.packet.includes("Shopper feedback does not select products"), "Expected Recommendation Feedback packet to preserve deterministic selection boundary");
   const emptyFeedbackReport = recommendationFeedback.buildRecommendationFeedbackReport([], demo.demoProducts);
   assert(emptyFeedbackReport.status === "empty" && emptyFeedbackReport.actions.some((action) => action.id === "capture-first-feedback"), "Expected empty Recommendation Feedback report to guide first feedback capture");
+  const contentReport = contentStudio.buildContentStudioReport({ products: demo.demoProducts, events: demo.demoEvents });
+  assert(contentReport.assets.length && contentReport.summary.readyAssets > 0, "Expected Content Studio to generate grounded content assets from demo catalog and events");
+  assert(contentReport.assets.some((asset) => asset.blocks.faq.length && asset.guardrail.includes("Use only listed product facts")), "Expected Content Studio assets to include FAQs and grounding guardrails");
+  assert(contentReport.packet.includes("Findly Sales Content Studio packet") && contentReport.packet.includes("Product selection remains deterministic"), "Expected Content Studio to generate grounded packet with deterministic boundary");
+  const emptyContentReport = contentStudio.buildContentStudioReport({ products: [], events: [] });
+  assert(emptyContentReport.status === "empty" && emptyContentReport.actions.some((action) => action.id === "fix-catalog-proof"), "Expected empty Content Studio report to guide catalog proof setup");
   const gapReport = discoveryGaps.buildDiscoveryGapReport([
     { id: "g1", user_id: "demo-user", quiz_id: "quiz_footwear", event_type: "quiz_start", metadata: { session_id: "g1", experience_type: "search", query: "orthopedic office shoe under 90", terms: ["orthopedic", "office"], result_count: 0 }, created_at: "2026-06-25T10:01:00Z" },
     { id: "g2", user_id: "demo-user", quiz_id: "quiz_footwear", event_type: "quiz_complete", metadata: { session_id: "g2", experience_type: "finder", result_count: 1, recovery_status: "thin-results", answer_summary: ["Office comfort"] }, created_at: "2026-06-25T10:02:00Z" },
@@ -2026,6 +2067,7 @@ async function main() {
   await assertPage("/platform/compatibility-matrix", "Model dependency rules");
   await assertPage("/platform/merchandising-controls", "Tune recommendation pressure");
   await assertPage("/platform/recommendation-feedback", "Let shoppers tell you");
+  await assertPage("/platform/sales-content-studio", "Turn product-discovery intelligence");
   await assertPage("/platform/shopper-personas", "Turn zero-party signals");
   await assertPage("/platform/audience-capture", "Turn guided-selling sessions");
   await assertPage("/platform/widget-studio", "Launch every guided experience");
@@ -2041,6 +2083,7 @@ async function main() {
   await assertPage("/configurator/config_trail_kit", "Loading configurator");
   await assertPage("/api/preflight", "Authentication required", 401);
   await assertWidgetScript();
+  assertSystemFontStack();
   assertPublishedAdvisorRuntime();
   assertPublishedFinderRuntime();
   assertPublishedConfiguratorRuntime();
@@ -2050,6 +2093,7 @@ async function main() {
   assertPersonaStudioWorkflow();
   assertAudienceCaptureWorkflow();
   assertRecommendationFeedbackWorkflow();
+  assertContentStudioWorkflow();
   assertMerchandisingStudioWorkflow();
   assertPublicRuntimeGuardrails();
   assertLaunchStudioWorkflow();

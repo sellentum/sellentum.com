@@ -9,6 +9,8 @@
   --line: #dde1da;
   --lime: #d9ff61;
   --forest: #22352a;
+  --font-body: "Helvetica Neue", Helvetica, "Poppins", "SF Pro Text", "SF Pro Display", -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+  --font-display: "Helvetica Neue", Helvetica, "Poppins", "SF Pro Display", "SF Pro Text", -apple-system, BlinkMacSystemFont, Arial, sans-serif;
 }
 
 * { box-sizing: border-box; }
@@ -17,14 +19,14 @@ body {
   margin: 0;
   color: var(--ink);
   background: var(--canvas);
-  font-family: var(--font-body), Arial, sans-serif;
+  font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
 }
 button, input, textarea, select { font: inherit; }
 button, a { -webkit-tap-highlight-color: transparent; }
 ::selection { background: var(--lime); color: var(--ink); }
 
-.display { font-family: var(--font-display), Georgia, serif; letter-spacing: -0.04em; }
+.display { font-family: var(--font-display); font-weight: 800; letter-spacing: -0.055em; }
 .eyebrow { font-size: 0.7rem; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; }
 .focus-ring { @apply focus:outline-none focus:ring-4 focus:ring-lime/50; }
 

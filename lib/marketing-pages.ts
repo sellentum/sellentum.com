@@ -150,6 +150,16 @@ export const platformPages = [
     demoLabel: "Open Feedback Center",
   },
   {
+    slug: "sales-content-studio",
+    eyebrow: "Sales Content Studio",
+    title: "Turn product-discovery intelligence into grounded sales content.",
+    description: "Findly turns catalog facts, zero-party intent, product demand and recommendation feedback into PDP, collection, email and support copy blocks that stay tied to validated product evidence.",
+    points: ["Grounded PDP copy blocks", "Collection buying-guide modules", "Feedback-aware support snippets", "Copyable content packet"],
+    proof: ["Copy is generated from catalog and journey evidence, not unsupported claims", "Product selection remains deterministic; content only packages proof", "Merchants get guardrails before publishing across storefront or campaign surfaces"],
+    demoHref: "/dashboard/content",
+    demoLabel: "Open Content Studio",
+  },
+  {
     slug: "merchandising-controls",
     eyebrow: "Merchandising controls",
     title: "Tune recommendation pressure without giving up determinism.",
