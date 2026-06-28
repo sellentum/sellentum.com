@@ -2,7 +2,7 @@
 
 Last updated: 2026-06-28  
 Current repo branch: `main`  
-Current production-hardening commit: `260a373 Route workspace analytics through server`
+Current production-hardening commit: `f8d57ef Add Supabase shared rate limiting`
 
 ## Purpose
 
@@ -51,6 +51,7 @@ What is real now:
 - Basic analytics exists.
 - OpenAI-backed explanation/enrichment paths exist with fallbacks.
 - Vercel deployment and custom domain exist.
+- Supabase-backed shared rate-limit code exists with safe in-memory fallback.
 - Several production hardening stages have already been pushed.
 
 What is not production-proven yet:
@@ -60,7 +61,7 @@ What is not production-proven yet:
 - Real storefront widget installation.
 - All analytics events from a real storefront session.
 - Live OpenAI quality/cost verification on real product data.
-- Production-grade shared rate limiting.
+- Production Supabase proof for the shared rate-limit migration/RPC.
 - Password reset flow.
 - Shopify integration.
 - Customer proof/case study.
@@ -76,12 +77,26 @@ What is not production-proven yet:
 | 4 | Done / Needs production proof | `d82bfdf` | Added widget storefront-domain allowlist and analytics origin validation. |
 | 5 | Done | `6042c3f` | Standardized generated public URLs/snippets/API handoffs on globally unique experience IDs. |
 | 6 | Done | `260a373` | Routed authenticated workspace analytics writes through a server endpoint instead of browser Supabase inserts. |
+| 7 | Done / Needs production proof | `f8d57ef` | Added Supabase-backed shared rate-limit buckets/RPC, async public guardrail responses, local fallback and migration docs. |
+
+## Latest verification notes
+
+Stage 7 local verification:
+
+- `npm run lint` passed.
+- `npm run typecheck` passed.
+- `npm run build` passed.
+
+Additional smoke-test note:
+
+- `npm run smoke` now reaches source/runtime assertions when the built app is running, but it currently fails on a pre-existing dashboard overview contract: the overview does not link to every production center expected by `scripts/smoke-test.mjs`.
+- This is not part of Stage 7 acceptance, but it should be cleaned up in Stage 14 or Stage 19 before claiming a fully green production verification suite.
 
 ## Immediate next stages
 
 ### Stage 7 — Production shared rate limiting
 
-Status: Next
+Status: Done / Needs production proof
 
 Problem:
 
@@ -93,13 +108,20 @@ Add a production-ready shared rate-limit abstraction, preferably Supabase-backed
 
 Acceptance criteria:
 
-- Add persistent rate-limit storage or RPC.
-- Keep safe local in-memory fallback for development.
-- Update all public/workspace API rate-limit calls to use the shared limiter.
-- Return consistent `429` responses with retry headers.
-- Add schema/migration docs.
-- Verify `npm run lint`, `npm run typecheck`, `npm run build`.
-- Commit and push.
+- Add persistent rate-limit storage or RPC. — Done in `supabase/migrations/009_shared_rate_limits.sql`.
+- Keep safe local in-memory fallback for development. — Done in `lib/rate-limit.ts`.
+- Update all public/workspace API rate-limit calls to use the shared limiter. — Done through `publicRateLimit`.
+- Return consistent `429` responses with retry headers. — Done, including `Retry-After`, limit, remaining, reset and limiter-store headers.
+- Add schema/migration docs. — Done in `supabase/schema.sql` and `README.md`.
+- Verify `npm run lint`, `npm run typecheck`, `npm run build`. — Passed locally.
+- Commit and push. — Committed as `f8d57ef`; pushed with this roadmap update.
+
+Production proof still needed:
+
+- Apply `supabase/migrations/009_shared_rate_limits.sql` to production Supabase.
+- Confirm `public.rate_limit_buckets` exists with RLS enabled.
+- Confirm `public.check_rate_limit(text, integer, integer)` exists and is executable by `service_role`.
+- Confirm one production public endpoint returns shared limiter headers after throttling.
 
 Suggested implementation:
 
@@ -129,6 +151,8 @@ Acceptance criteria:
 
 - Confirm all migrations exist in production.
 - Confirm `widget_settings.allowed_domains`.
+- Confirm `rate_limit_buckets`.
+- Confirm `check_rate_limit`.
 - Confirm transactional RPCs:
   - `save_quiz_with_children`
   - `save_configurator_with_children`
@@ -222,7 +246,7 @@ Goal: make the current product safe enough to run with real users.
 | 4 | Done / Needs production proof | Widget domain allowlist. |
 | 5 | Done | Stable public experience IDs. |
 | 6 | Done | Server-side authenticated analytics writes. |
-| 7 | Next | Shared production rate limiting. |
+| 7 | Done / Needs production proof | Shared production rate limiting. |
 | 8 | Next | Production Supabase schema/RLS verification. |
 | 9 | Next | Auth reset/recovery polish. |
 
@@ -345,7 +369,7 @@ Goal: mature Sellentum into a platform with deeper enterprise credibility.
 | 2 | Done | Public slug lookup ambiguous across tenants | Fixed in Stage 5. |
 | 3 | Done / Needs production proof | Quiz/configurator saves not transactional | Fixed in Stage 3; verify production Supabase. |
 | 4 | Done | Browser analytics insert conflicts with RLS | Fixed in Stage 6. |
-| 5 | Next | Rate limiting is in-memory | Stage 7. |
+| 5 | Done / Needs production proof | Rate limiting is in-memory | Fixed in Stage 7; apply and verify production Supabase migration. |
 | 6 | Done / Watch | Public analytics has no domain allowlist | Fixed in Stage 4; signed tokens later. |
 | 7 | Backlog | Dependency audit vulnerabilities | Plan controlled Next.js/dependency upgrade. |
 | 8 | Next | Production proof incomplete | Stage 11. |
@@ -414,4 +438,5 @@ Sellentum should not be considered serious production SaaS until all of these ar
 | 2026-06-28 | `d82bfdf` | Stage 4 widget domain allowlist. |
 | 2026-06-28 | `6042c3f` | Stage 5 stable public experience IDs. |
 | 2026-06-28 | `260a373` | Stage 6 server-side workspace analytics writes. |
+| 2026-06-28 | `f8d57ef` | Stage 7 Supabase-backed shared rate limiting. |
 | 2026-06-28 | Roadmap tracker | Added this production roadmap tracker as the source of truth for future stages. |
