@@ -140,6 +140,16 @@ export const platformPages = [
     demoLabel: "Open Production Verification",
   },
   {
+    slug: "mvp-audit",
+    eyebrow: "MVP Completion Audit",
+    title: "Track exactly what is done and what still needs proof.",
+    description: "Findly maps the original guided-selling MVP scope to current workspace evidence, separating built features from items that still need production, Supabase, OpenAI, widget or analytics verification.",
+    points: ["Done vs pending task list", "Requirement evidence matrix", "Production completion boundary", "Copyable audit packet"],
+    proof: ["The audit preserves the full Zoovu-like objective instead of shrinking the definition of done", "Demo-mode proof is separated from production launch evidence", "Next tasks stay tied to concrete dashboard workspaces"],
+    demoHref: "/dashboard/mvp-audit",
+    demoLabel: "Open MVP Audit",
+  },
+  {
     slug: "grounding-center",
     eyebrow: "Grounding Center",
     title: "Give AI a safe product-fact map before it explains anything.",
