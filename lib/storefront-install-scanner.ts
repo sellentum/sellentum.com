@@ -56,6 +56,8 @@ const privateHostPatterns = [
 
 const validExperiences = new Set(["finder", "assistant", "search", "configurator"]);
 const validModes = new Set(["modal", "inline"]);
+const widgetScriptPattern = /\/(?:api\/)?widget\.js(?:\?|$)/i;
+const widgetHintPattern = /sellentum|data-sellentum|Sellentum|(?:api\/)?widget\.js/g;
 
 function stripQuotes(value = "") {
   return value.trim().replace(/^['"]|['"]$/g, "");
@@ -104,7 +106,7 @@ export function extractSellentumSnippets(html: string): StorefrontInstallSnippet
   return scripts
     .flatMap((tag): StorefrontInstallSnippet[] => {
       const scriptSrc = attr(tag, "src");
-      if (!scriptSrc || !/\/api\/widget\.js(?:\?|$)/i.test(scriptSrc)) return [];
+      if (!scriptSrc || !widgetScriptPattern.test(scriptSrc)) return [];
       const experience = attr(tag, "data-experience");
       const mode = attr(tag, "data-mode");
       return [{
@@ -123,7 +125,7 @@ export function extractSellentumSnippets(html: string): StorefrontInstallSnippet
 function buildChecks({ url, html, snippets, appOrigin }: { url: URL; html: string; snippets: StorefrontInstallSnippet[]; appOrigin?: string }) {
   const normalized = normalizeHtml(html);
   const sellentumFrames = (html.match(/<iframe\b[^>]*(finder|assistant|search|configurator)\//gi) || []).length;
-  const modalHints = (normalized.match(/sellentum|data-sellentum|Sellentum|api\/widget\.js/g) || []).length;
+  const modalHints = (normalized.match(widgetHintPattern) || []).length;
   const first = snippets[0];
   const attributionLabels = snippets.reduce((sum, snippet) => sum + [snippet.source, snippet.campaign, snippet.placement].filter(Boolean).length, 0);
   const scriptOrigin = first?.scriptSrc ? (() => {
@@ -134,7 +136,7 @@ function buildChecks({ url, html, snippets, appOrigin }: { url: URL; html: strin
     check("url", "Storefront URL", "pass", `${url.origin} is eligible for server-side install scanning.`, url.href),
     snippets.length
       ? check("script", "Sellentum widget script", "pass", `${snippets.length} Sellentum widget script${snippets.length === 1 ? "" : "s"} found.`, snippets.map((snippet) => snippet.scriptSrc).join(", "))
-      : check("script", "Sellentum widget script", "fail", "No script using /api/widget.js was found in the storefront HTML.", "Missing <script src=\".../api/widget.js\">"),
+      : check("script", "Sellentum widget script", "fail", "No script using /api/widget.js or /widget.js was found in the storefront HTML.", "Missing <script src=\".../api/widget.js\">"),
     first?.experience
       ? check("experience", "Experience type", "pass", `Installed experience is ${first.experience}.`, first.experience)
       : check("experience", "Experience type", snippets.length ? "fail" : "warn", "The widget script should include data-experience=\"finder|assistant|search|configurator\".", first?.scriptSrc || "No Sellentum script found."),
@@ -214,7 +216,7 @@ export function analyzeStorefrontInstall({
   const blockers = checks.filter((item) => item.status === "fail").length;
   const warnings = checks.filter((item) => item.status === "warn").length;
   const inlineFrames = (html.match(/<iframe\b/gi) || []).length;
-  const modalHints = (html.match(/sellentum|api\/widget\.js/gi) || []).length;
+  const modalHints = (html.match(/sellentum|(?:api\/)?widget\.js/gi) || []).length;
   const attributionLabels = snippets.reduce((sum, snippet) => sum + [snippet.source, snippet.campaign, snippet.placement].filter(Boolean).length, 0);
   const baseReport: Omit<StorefrontInstallScanReport, "packet"> = {
     status: statusFromChecks(checks),

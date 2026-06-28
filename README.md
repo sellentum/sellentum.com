@@ -173,6 +173,8 @@ Publish a finder or configurator, then copy the generated snippet from **Brand &
 
 Set `data-experience` to `finder`, `assistant`, `search`, or `configurator`. Search uses a published finder ID as the catalog context. Set `data-mode` to `modal` for a floating launcher that lazy-loads the iframe only when opened, or `inline` to embed the iframe directly where the script is placed. The widget has no framework dependency and can be used on any HTML storefront.
 
+The canonical production loader is `/api/widget.js`. `/widget.js` is kept as a compatibility alias for older snippets, but new installs should use the generated `/api/widget.js` URL from the dashboard.
+
 For attribution, the widget automatically passes the storefront page URL, page title, referrer, launcher position and inferred host source into the iframe. Add optional labels such as `data-source`, `data-medium`, `data-campaign`, `data-placement`, `data-content`, or `data-term` when you want Analytics to compare specific launches.
 
 The public runtime normalizes the saved widget settings before rendering, so brand name, primary colour, widget title, welcome message and button copy are shared across all embedded experiences with safe defaults if a setting is missing.

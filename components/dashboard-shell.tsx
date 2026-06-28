@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Archive, BarChart3, BookOpenCheck, Bot, Boxes, Braces, BrainCircuit, ChevronDown, ClipboardCheck, Code2, CreditCard, Database, ExternalLink, FileText, FlaskConical, GalleryVerticalEnd, GitBranch, GitPullRequestArrow, Globe2, Handshake, HeartPulse, HelpCircle, Layers3, LayoutDashboard, LayoutTemplate, LogOut, Megaphone, Menu, MessageCircle, MonitorCheck, Network, PackagePlus, RadioTower, Rocket, Search, Settings, ShieldCheck, SlidersHorizontal, Sparkles, Target, ThumbsUp, UsersRound, X } from "lucide-react";
+import { Archive, BarChart3, BookOpenCheck, Bot, Boxes, Braces, BrainCircuit, ChevronDown, ClipboardCheck, Code2, CreditCard, Database, ExternalLink, FileText, FlaskConical, GalleryVerticalEnd, GitBranch, GitPullRequestArrow, Globe2, Handshake, HeartPulse, HelpCircle, Layers3, LayoutDashboard, LayoutTemplate, LogOut, Megaphone, Menu, MessageCircle, MonitorCheck, Network, PackagePlus, RadioTower, Rocket, Search, Settings, ShieldCheck, SlidersHorizontal, Sparkles, Target, ThumbsUp, UsersRound, X, type LucideIcon } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { LoadingState } from "@/components/loading-state";
 import { Logo } from "@/components/logo";
@@ -11,53 +11,104 @@ import { cn } from "@/lib/utils";
 import { useStore } from "@/lib/store";
 import { isWorkspaceOnboarded } from "@/lib/workspace-onboarding";
 
-const nav = [
-  { href: "/dashboard", label: "Overview", icon: LayoutDashboard, exact: true },
-  { href: "/dashboard/launch", label: "Launch Studio", icon: Rocket },
-  { href: "/dashboard/widget-studio", label: "Widget Studio", icon: Code2 },
-  { href: "/dashboard/api-center", label: "API Center", icon: Braces },
-  { href: "/dashboard/data-contract", label: "Data Contract", icon: Database },
-  { href: "/dashboard/ai-readiness", label: "AI Readiness", icon: Sparkles },
-  { href: "/dashboard/experiences", label: "Experience Registry", icon: GalleryVerticalEnd },
-  { href: "/dashboard/channels", label: "Launch channels", icon: Megaphone },
-  { href: "/dashboard/syndication", label: "Syndication", icon: Handshake },
-  { href: "/dashboard/storefront-sandbox", label: "Storefront QA", icon: Globe2 },
-  { href: "/dashboard/install-scanner", label: "Install Scanner", icon: Search },
-  { href: "/dashboard/operations", label: "Runtime Ops", icon: RadioTower },
-  { href: "/dashboard/release-center", label: "Release Center", icon: GitPullRequestArrow },
-  { href: "/dashboard/production", label: "Production Verification", icon: MonitorCheck },
-  { href: "/dashboard/trust-center", label: "AI Trust Center", icon: ShieldCheck },
-  { href: "/dashboard/grounding", label: "Grounding Center", icon: BrainCircuit },
-  { href: "/dashboard/knowledge-graph", label: "Knowledge Graph", icon: Network },
-  { href: "/dashboard/workspace-snapshot", label: "Workspace snapshot", icon: Archive },
-  { href: "/dashboard/usage", label: "Usage & plan", icon: CreditCard },
-  { href: "/dashboard/experiments", label: "Experiments", icon: Target },
-  { href: "/dashboard/templates", label: "Templates", icon: LayoutTemplate },
-  { href: "/dashboard/products", label: "Products", icon: Boxes },
-  { href: "/dashboard/availability", label: "Availability guard", icon: ShieldCheck },
-  { href: "/dashboard/catalog-pipeline", label: "Catalog pipeline", icon: Database },
-  { href: "/dashboard/attributes", label: "Attribute Studio", icon: Layers3 },
-  { href: "/dashboard/ontology", label: "Ontology map", icon: Network },
-  { href: "/dashboard/vocabulary", label: "Vocabulary Studio", icon: MessageCircle },
-  { href: "/dashboard/decision-graph", label: "Decision graph", icon: BrainCircuit },
-  { href: "/dashboard/flow-studio", label: "Flow Studio", icon: GitBranch },
-  { href: "/dashboard/quizzes", label: "Product finders", icon: BookOpenCheck },
-  { href: "/dashboard/configurators", label: "Configurators", icon: PackagePlus },
-  { href: "/dashboard/compatibility", label: "Compatibility matrix", icon: Network },
-  { href: "/dashboard/bundles", label: "Bundle Studio", icon: PackagePlus },
-  { href: "/dashboard/lab", label: "Recommendation lab", icon: FlaskConical },
-  { href: "/dashboard/merchandising", label: "Merchandising", icon: SlidersHorizontal },
-  { href: "/dashboard/advisor", label: "Advisor Studio", icon: Bot },
-  { href: "/dashboard/search", label: "Search lab", icon: Search },
-  { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
-  { href: "/dashboard/feedback", label: "Feedback Center", icon: ThumbsUp },
-  { href: "/dashboard/content", label: "Content Studio", icon: FileText },
-  { href: "/dashboard/returns", label: "Returns & fit", icon: HeartPulse },
-  { href: "/dashboard/personas", label: "Persona Studio", icon: UsersRound },
-  { href: "/dashboard/audience", label: "Audience Capture", icon: UsersRound },
-  { href: "/dashboard/settings", label: "Brand & embed", icon: Settings },
-  { href: "/dashboard/preflight", label: "Launch preflight", icon: ClipboardCheck },
+type NavItem = {
+  href: string;
+  label: string;
+  icon: LucideIcon;
+  exact?: boolean;
+};
+
+type NavSection = {
+  label: string;
+  items: NavItem[];
+};
+
+const primaryNavSections: NavSection[] = [
+  {
+    label: "Launch workflow",
+    items: [
+      { href: "/dashboard", label: "Overview", icon: LayoutDashboard, exact: true },
+      { href: "/dashboard/products", label: "Products", icon: Boxes },
+      { href: "/dashboard/quizzes", label: "Product finders", icon: BookOpenCheck },
+      { href: "/dashboard/configurators", label: "Configurators", icon: PackagePlus },
+      { href: "/dashboard/settings", label: "Brand & embed", icon: Settings },
+      { href: "/dashboard/launch", label: "Launch Studio", icon: Rocket },
+      { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
+    ],
+  },
+  {
+    label: "Grow & improve",
+    items: [
+      { href: "/dashboard/advisor", label: "Advisor Studio", icon: Bot },
+      { href: "/dashboard/search", label: "Search lab", icon: Search },
+      { href: "/dashboard/templates", label: "Templates", icon: LayoutTemplate },
+      { href: "/dashboard/feedback", label: "Feedback Center", icon: ThumbsUp },
+      { href: "/dashboard/usage", label: "Usage & plan", icon: CreditCard },
+    ],
+  },
 ];
+
+const advancedNavSections: NavSection[] = [
+  {
+    label: "Storefront QA",
+    items: [
+      { href: "/dashboard/widget-studio", label: "Widget Studio", icon: Code2 },
+      { href: "/dashboard/storefront-sandbox", label: "Storefront QA", icon: Globe2 },
+      { href: "/dashboard/install-scanner", label: "Install Scanner", icon: Search },
+      { href: "/dashboard/channels", label: "Launch channels", icon: Megaphone },
+      { href: "/dashboard/preflight", label: "Launch preflight", icon: ClipboardCheck },
+    ],
+  },
+  {
+    label: "Catalog intelligence",
+    items: [
+      { href: "/dashboard/availability", label: "Availability guard", icon: ShieldCheck },
+      { href: "/dashboard/catalog-pipeline", label: "Catalog pipeline", icon: Database },
+      { href: "/dashboard/attributes", label: "Attribute Studio", icon: Layers3 },
+      { href: "/dashboard/ontology", label: "Ontology map", icon: Network },
+      { href: "/dashboard/vocabulary", label: "Vocabulary Studio", icon: MessageCircle },
+      { href: "/dashboard/decision-graph", label: "Decision graph", icon: BrainCircuit },
+      { href: "/dashboard/flow-studio", label: "Flow Studio", icon: GitBranch },
+      { href: "/dashboard/lab", label: "Recommendation lab", icon: FlaskConical },
+      { href: "/dashboard/merchandising", label: "Merchandising", icon: SlidersHorizontal },
+      { href: "/dashboard/bundles", label: "Bundle Studio", icon: PackagePlus },
+      { href: "/dashboard/compatibility", label: "Compatibility matrix", icon: Network },
+    ],
+  },
+  {
+    label: "AI, content & audiences",
+    items: [
+      { href: "/dashboard/ai-readiness", label: "AI Readiness", icon: Sparkles },
+      { href: "/dashboard/trust-center", label: "AI Trust Center", icon: ShieldCheck },
+      { href: "/dashboard/grounding", label: "Grounding Center", icon: BrainCircuit },
+      { href: "/dashboard/knowledge-graph", label: "Knowledge Graph", icon: Network },
+      { href: "/dashboard/content", label: "Content Studio", icon: FileText },
+      { href: "/dashboard/returns", label: "Returns & fit", icon: HeartPulse },
+      { href: "/dashboard/personas", label: "Persona Studio", icon: UsersRound },
+      { href: "/dashboard/audience", label: "Audience Capture", icon: UsersRound },
+    ],
+  },
+  {
+    label: "Operations",
+    items: [
+      { href: "/dashboard/experiences", label: "Experience Registry", icon: GalleryVerticalEnd },
+      { href: "/dashboard/api-center", label: "API Center", icon: Braces },
+      { href: "/dashboard/data-contract", label: "Data Contract", icon: Database },
+      { href: "/dashboard/operations", label: "Runtime Ops", icon: RadioTower },
+      { href: "/dashboard/release-center", label: "Release Center", icon: GitPullRequestArrow },
+      { href: "/dashboard/production", label: "Production Verification", icon: MonitorCheck },
+      { href: "/dashboard/workspace-snapshot", label: "Workspace snapshot", icon: Archive },
+      { href: "/dashboard/experiments", label: "Experiments", icon: Target },
+      { href: "/dashboard/syndication", label: "Syndication", icon: Handshake },
+    ],
+  },
+];
+
+const advancedItems = advancedNavSections.flatMap((section) => section.items);
+
+function isNavItemActive(pathname: string, item: NavItem) {
+  return item.exact ? pathname === item.href : pathname.startsWith(item.href);
+}
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -67,12 +118,14 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const [accountOpen, setAccountOpen] = useState(false);
   const [accountEmail, setAccountEmail] = useState("");
   const [accountName, setAccountName] = useState("");
+  const [advancedExpanded, setAdvancedExpanded] = useState(false);
   const previewQuiz = quizzes.find((quiz) => quiz.published) || quizzes[0];
   const previewConfigurator = configurators.find((configurator) => configurator.published) || configurators[0];
   const onboardingComplete = mode === "demo" || isWorkspaceOnboarded(settings);
   const isOnboardingPath = pathname.startsWith("/dashboard/onboarding");
   const shouldForceOnboarding = ready && mode === "supabase" && !onboardingComplete && !isOnboardingPath;
   const workspaceInitial = (settings.brand_name.trim()[0] || "S").toUpperCase();
+  const advancedPathActive = advancedItems.some((item) => isNavItemActive(pathname, item));
   const accountInitials = useMemo(() => {
     const source = accountName || accountEmail || settings.brand_name || "Sellentum";
     return source
@@ -87,6 +140,10 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     if (!ready || mode !== "supabase") return;
     if (shouldForceOnboarding) router.replace("/dashboard/onboarding");
   }, [mode, ready, router, shouldForceOnboarding]);
+
+  useEffect(() => {
+    if (advancedPathActive) setAdvancedExpanded(true);
+  }, [advancedPathActive]);
 
   useEffect(() => {
     setAccountOpen(false);
@@ -110,6 +167,26 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     router.push("/login"); router.refresh();
   }
 
+  function renderNavLink(item: NavItem, compact = false) {
+    const Icon = item.icon;
+    const active = isNavItemActive(pathname, item);
+    return (
+      <Link
+        onClick={() => setMobileOpen(false)}
+        key={item.href}
+        href={item.href}
+        className={cn(
+          "flex items-center gap-3 rounded-xl font-bold transition",
+          compact ? "px-3 py-2 text-xs" : "px-3 py-2.5 text-sm",
+          active ? "bg-ink text-white shadow-sm" : "text-black/55 hover:bg-white hover:text-ink",
+        )}
+      >
+        <Icon size={compact ? 15 : 17} className={active ? "text-lime" : "text-black/35"} />
+        <span className="truncate">{item.label}</span>
+      </Link>
+    );
+  }
+
   const sidebar = (
     <div className="flex h-full flex-col">
       <div className="flex h-[76px] items-center justify-between px-5"><Logo href="/dashboard" /><button onClick={() => setMobileOpen(false)} className="md:hidden"><X size={19} /></button></div>
@@ -119,12 +196,28 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           <span className="min-w-0 flex-1"><span className="block truncate text-xs font-extrabold">{settings.brand_name}</span><span className="block text-xs text-black/35">Starter workspace</span></span><ChevronDown size={14} className="text-black/30" />
         </Link>
       </div>
-      <nav className="space-y-1 px-3">
-        <p className="mb-2 px-3 text-xs font-extrabold uppercase tracking-[.18em] text-black/30">Workspace</p>
-        {nav.map(({ href, label, icon: Icon, exact }) => {
-          const active = exact ? pathname === href : pathname.startsWith(href);
-          return <Link onClick={() => setMobileOpen(false)} key={href} href={href} className={cn("flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition", active ? "bg-ink text-white shadow-sm" : "text-black/55 hover:bg-white hover:text-ink")}><Icon size={17} className={active ? "text-lime" : "text-black/35"} />{label}</Link>;
-        })}
+      <nav className="flex-1 space-y-5 overflow-y-auto px-3 pb-4">
+        {primaryNavSections.map((section) => (
+          <section key={section.label} className="space-y-1">
+            <p className="mb-2 px-3 text-xs font-extrabold uppercase tracking-[.18em] text-black/30">{section.label}</p>
+            {section.items.map((item) => renderNavLink(item))}
+          </section>
+        ))}
+
+        <details className="group rounded-2xl border border-black/[0.06] bg-white/45 p-2" open={advancedPathActive || advancedExpanded} onToggle={(event) => setAdvancedExpanded(event.currentTarget.open)}>
+          <summary className="flex cursor-pointer list-none items-center justify-between rounded-xl px-3 py-2 text-xs font-extrabold uppercase tracking-[.16em] text-black/35 transition hover:bg-white hover:text-ink">
+            Advanced tools
+            <ChevronDown size={14} className="transition group-open:rotate-180" />
+          </summary>
+          <div className="mt-3 space-y-4">
+            {advancedNavSections.map((section) => (
+              <section key={section.label} className="space-y-1">
+                <p className="px-3 text-[0.65rem] font-extrabold uppercase tracking-[.16em] text-black/25">{section.label}</p>
+                {section.items.map((item) => renderNavLink(item, true))}
+              </section>
+            ))}
+          </div>
+        </details>
       </nav>
       <div className="mt-auto p-3">
         <div className="mb-3 rounded-2xl bg-ink p-4 text-white">
