@@ -58,7 +58,7 @@ export default function LaunchChannelsPage() {
         <section className="rounded-[28px] border border-black/[0.07] bg-ink p-6 text-white">
           <div className="flex items-center justify-between">
             <span className="grid h-11 w-11 place-items-center rounded-2xl bg-lime text-ink"><Megaphone size={20} /></span>
-            <span className={cn("rounded-full px-3 py-1.5 text-[9px] font-extrabold uppercase", statusTone[report.status])}>{report.status}</span>
+            <span className={cn("rounded-full px-3 py-1.5 text-xs font-extrabold uppercase", statusTone[report.status])}>{report.status}</span>
           </div>
           <p className="display mt-8 text-6xl">{report.score}%</p>
           <p className="mt-2 text-sm font-bold leading-6 text-white/45">Channel readiness across install-ready snippets, attributed traffic and early conversion proof.</p>
@@ -78,7 +78,7 @@ export default function LaunchChannelsPage() {
             <article key={String(label)} className="rounded-[24px] border border-black/[0.07] bg-white p-5">
               <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#eef1e8] text-moss"><MetricIcon size={18} /></span>
               <p className="display mt-5 text-4xl">{String(value)}</p>
-              <p className="mt-1 text-[9px] font-extrabold uppercase tracking-wider text-black/30">{String(label)}</p>
+              <p className="mt-1 text-xs font-extrabold uppercase tracking-wider text-black/30">{String(label)}</p>
             </article>
           ); })}
         </section>
@@ -97,10 +97,10 @@ export default function LaunchChannelsPage() {
               >
                 <div className="flex items-start justify-between gap-4">
                   <span className={cn("grid h-10 w-10 place-items-center rounded-xl", active ? "bg-lime text-ink" : "bg-[#eef1e8] text-moss")}><Icon size={18} /></span>
-                  <span className={cn("rounded-full px-2.5 py-1 text-[8px] font-extrabold uppercase", active ? "bg-white/10 text-white/50" : statusTone[channel.status])}>{channel.statusLabel}</span>
+                  <span className={cn("rounded-full px-2.5 py-1 text-xs font-extrabold uppercase", active ? "bg-white/10 text-white/50" : statusTone[channel.status])}>{channel.statusLabel}</span>
                 </div>
                 <h2 className="mt-4 text-sm font-extrabold">{channel.name}</h2>
-                <p className={cn("mt-1 text-[10px] font-bold", active ? "text-white/35" : "text-black/35")}>{channel.targetPages}</p>
+                <p className={cn("mt-1 text-xs font-bold", active ? "text-white/35" : "text-black/35")}>{channel.targetPages}</p>
                 <p className={cn("mt-3 text-xs leading-5", active ? "text-white/55" : "text-black/45")}>{channel.reason}</p>
                 <div className={cn("mt-4 grid grid-cols-3 gap-2 text-center text-xs", active ? "text-white" : "text-ink")}>
                   <span className={cn("rounded-xl p-2", active ? "bg-white/[0.06]" : "bg-canvas")}><b className="block">{channel.metrics.views}</b><small className={active ? "text-white/35" : "text-black/35"}>Views</small></span>
@@ -116,7 +116,7 @@ export default function LaunchChannelsPage() {
           <div className="border-b border-black/[0.06] bg-[radial-gradient(circle_at_85%_10%,rgba(217,255,97,.75),transparent_30%),linear-gradient(135deg,#f8f8f4,#ffffff)] p-8">
             <div className="flex items-start justify-between gap-8">
               <div>
-                <span className={cn("inline-flex rounded-full px-3 py-1.5 text-[9px] font-extrabold uppercase tracking-wider", statusTone[selected.status])}>{selected.statusLabel}</span>
+                <span className={cn("inline-flex rounded-full px-3 py-1.5 text-xs font-extrabold uppercase tracking-wider", statusTone[selected.status])}>{selected.statusLabel}</span>
                 <h2 className="display mt-5 text-4xl">{selected.name}</h2>
                 <p className="mt-3 max-w-2xl text-sm leading-6 text-black/45">{selected.objective}</p>
               </div>
@@ -131,7 +131,7 @@ export default function LaunchChannelsPage() {
                   <div><h3 className="text-sm font-extrabold">Install snippet</h3><p className="mt-1 text-xs text-black/35">Attribution labels are pre-filled for this channel.</p></div>
                   <a href={selected.publicUrl} target="_blank" className="inline-flex items-center gap-1 text-xs font-extrabold text-moss">Preview <ExternalLink size={12} /></a>
                 </div>
-                <pre className="mt-5 max-h-[360px] overflow-auto rounded-2xl bg-ink p-5 text-[10px] leading-5 text-lime/80"><code>{selected.snippet}</code></pre>
+                <pre className="mt-5 max-h-[360px] overflow-auto rounded-2xl bg-ink p-5 text-xs leading-5 text-lime/80"><code>{selected.snippet}</code></pre>
               </section>
 
               <section className="rounded-2xl border border-black/[0.07] p-5">
@@ -144,7 +144,7 @@ export default function LaunchChannelsPage() {
                     [selected.metrics.recommendations, "Recs"],
                     [selected.metrics.clicks, "Clicks"],
                     [`${selected.metrics.clickRate}%`, "Click rate"],
-                  ].map(([value, label]) => <div key={String(label)} className="rounded-2xl bg-canvas p-3"><p className="text-lg font-extrabold">{String(value)}</p><p className="mt-1 text-[8px] font-bold text-black/30">{String(label)}</p></div>)}
+                  ].map(([value, label]) => <div key={String(label)} className="rounded-2xl bg-canvas p-3"><p className="text-lg font-extrabold">{String(value)}</p><p className="mt-1 text-xs font-bold text-black/30">{String(label)}</p></div>)}
                 </div>
               </section>
 
@@ -156,7 +156,7 @@ export default function LaunchChannelsPage() {
                     ["Target pages", selected.targetPages],
                     ["Experience", `${selected.experience} · ${selected.mode}`],
                     ["Attribution", `source=${selected.source}, campaign=${selected.campaign}, placement=${selected.placement}`],
-                  ].map(([label, detail]) => <div key={label} className="rounded-2xl bg-canvas p-4"><p className="text-[9px] font-extrabold uppercase tracking-wider text-black/30">{label}</p><p className="mt-2 text-xs font-bold leading-5 text-black/55">{detail}</p></div>)}
+                  ].map(([label, detail]) => <div key={label} className="rounded-2xl bg-canvas p-4"><p className="text-xs font-extrabold uppercase tracking-wider text-black/30">{label}</p><p className="mt-2 text-xs font-bold leading-5 text-black/55">{detail}</p></div>)}
                 </div>
               </section>
             </div>
@@ -164,7 +164,7 @@ export default function LaunchChannelsPage() {
             <div className="space-y-6">
               <section className="rounded-2xl border border-black/[0.07] bg-ink p-5 text-white">
                 <h3 className="flex items-center gap-2 text-sm font-extrabold"><Rocket size={16} className="text-lime" /> Next channel action</h3>
-                <span className={cn("mt-4 inline-flex rounded-full px-2.5 py-1 text-[8px] font-extrabold uppercase", selected.nextAction.priority === "critical" || selected.nextAction.priority === "high" ? "bg-red-400/20 text-red-100" : selected.nextAction.priority === "medium" ? "bg-amber-300/20 text-amber-100" : "bg-lime text-ink")}>{selected.nextAction.priority}</span>
+                <span className={cn("mt-4 inline-flex rounded-full px-2.5 py-1 text-xs font-extrabold uppercase", selected.nextAction.priority === "critical" || selected.nextAction.priority === "high" ? "bg-red-400/20 text-red-100" : selected.nextAction.priority === "medium" ? "bg-amber-300/20 text-amber-100" : "bg-lime text-ink")}>{selected.nextAction.priority}</span>
                 <h4 className="mt-4 text-lg font-extrabold leading-tight">{selected.nextAction.title}</h4>
                 <p className="mt-2 text-xs leading-5 text-white/45">{selected.nextAction.detail}</p>
                 <Link href={selected.nextAction.href} className="mt-5 inline-flex items-center gap-2 text-xs font-extrabold text-lime">{selected.nextAction.label} <ArrowRight size={12} /></Link>
@@ -177,7 +177,7 @@ export default function LaunchChannelsPage() {
                     <div key={item.id} className={cn("rounded-xl p-3", item.status === "pass" ? "bg-lime/15" : item.status === "warn" ? "bg-amber-50" : "bg-red-50")}>
                       <div className="flex items-start gap-2">
                         <span className={cn("mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full", item.status === "pass" ? "bg-lime text-ink" : item.status === "warn" ? "bg-amber-200 text-amber-800" : "bg-red-100 text-red-600")}>{item.status === "pass" ? <Check size={11} /> : "!"}</span>
-                        <span><span className="block text-[10px] font-extrabold">{item.label}</span><span className="mt-0.5 block text-[8px] font-bold leading-3 text-black/40">{item.detail}</span></span>
+                        <span><span className="block text-xs font-extrabold">{item.label}</span><span className="mt-0.5 block text-xs font-bold leading-3 text-black/40">{item.detail}</span></span>
                       </div>
                     </div>
                   ))}

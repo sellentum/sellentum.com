@@ -66,14 +66,14 @@ export default function RuntimeOperationsPage() {
         <section className="rounded-[30px] border border-black/[0.07] bg-ink p-7 text-white">
           <div className="flex items-center justify-between">
             <span className="grid h-12 w-12 place-items-center rounded-2xl bg-lime text-ink"><RadioTower size={22} /></span>
-            <span className={cn("rounded-full px-3 py-1.5 text-[9px] font-extrabold uppercase", statusTone[report.status])}>{report.status}</span>
+            <span className={cn("rounded-full px-3 py-1.5 text-xs font-extrabold uppercase", statusTone[report.status])}>{report.status}</span>
           </div>
           <p className="display mt-8 text-7xl">{report.score}%</p>
           <p className="mt-3 text-sm font-bold leading-6 text-white/45">{report.headline}</p>
           <div className="mt-6 grid grid-cols-3 gap-2 text-center">
-            <div className="rounded-2xl bg-white/[0.06] p-3"><p className="text-xl font-extrabold">{report.summary.passingChecks}</p><p className="mt-1 text-[8px] text-white/35">Pass</p></div>
-            <div className="rounded-2xl bg-white/[0.06] p-3"><p className="text-xl font-extrabold">{report.summary.warningChecks}</p><p className="mt-1 text-[8px] text-white/35">Review</p></div>
-            <div className="rounded-2xl bg-white/[0.06] p-3"><p className="text-xl font-extrabold">{report.summary.blockingChecks}</p><p className="mt-1 text-[8px] text-white/35">Blockers</p></div>
+            <div className="rounded-2xl bg-white/[0.06] p-3"><p className="text-xl font-extrabold">{report.summary.passingChecks}</p><p className="mt-1 text-xs text-white/35">Pass</p></div>
+            <div className="rounded-2xl bg-white/[0.06] p-3"><p className="text-xl font-extrabold">{report.summary.warningChecks}</p><p className="mt-1 text-xs text-white/35">Review</p></div>
+            <div className="rounded-2xl bg-white/[0.06] p-3"><p className="text-xl font-extrabold">{report.summary.blockingChecks}</p><p className="mt-1 text-xs text-white/35">Blockers</p></div>
           </div>
         </section>
 
@@ -89,7 +89,7 @@ export default function RuntimeOperationsPage() {
               <article key={String(label)} className="rounded-[24px] border border-black/[0.07] bg-white p-5">
                 <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#eef1e8] text-moss"><MetricIcon size={18} /></span>
                 <p className="display mt-5 text-4xl">{metricValue(Number(value), String(label))}</p>
-                <p className="mt-1 text-[9px] font-extrabold uppercase tracking-wider text-black/30">{String(label)}</p>
+                <p className="mt-1 text-xs font-extrabold uppercase tracking-wider text-black/30">{String(label)}</p>
               </article>
             );
           })}
@@ -114,12 +114,12 @@ export default function RuntimeOperationsPage() {
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex items-center gap-3">
                         <span className={cn("grid h-10 w-10 place-items-center rounded-xl", checkTone[check.status])}><Icon size={17} /></span>
-                        <div><h3 className="text-xs font-extrabold">{check.label}</h3><p className="mt-1 text-[9px] font-extrabold uppercase text-black/30">{check.score}% · {check.status}</p></div>
+                        <div><h3 className="text-xs font-extrabold">{check.label}</h3><p className="mt-1 text-xs font-extrabold uppercase text-black/30">{check.score}% · {check.status}</p></div>
                       </div>
                       <ArrowRight size={14} className="text-black/25" />
                     </div>
-                    <p className="mt-3 text-[10px] leading-4 text-black/45">{check.detail}</p>
-                    <p className="mt-3 rounded-xl bg-canvas px-3 py-2 text-[9px] font-bold leading-4 text-black/40">{check.evidence}</p>
+                    <p className="mt-3 text-xs leading-4 text-black/45">{check.detail}</p>
+                    <p className="mt-3 rounded-xl bg-canvas px-3 py-2 text-xs font-bold leading-4 text-black/40">{check.evidence}</p>
                   </Link>
                 );
               })}
@@ -134,14 +134,14 @@ export default function RuntimeOperationsPage() {
                 <article key={endpoint.id} className="rounded-2xl border border-black/[0.07] bg-canvas p-4">
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      <div className="flex flex-wrap items-center gap-2"><h3 className="text-xs font-extrabold">{endpoint.label}</h3><span className="rounded-full bg-white px-2 py-1 text-[8px] font-extrabold text-black/35">{endpoint.method}</span><span className="rounded-full bg-lime/25 px-2 py-1 text-[8px] font-extrabold text-moss">{endpoint.owner}</span></div>
-                      <p className="mt-2 text-[10px] leading-4 text-black/45">{endpoint.purpose}</p>
+                      <div className="flex flex-wrap items-center gap-2"><h3 className="text-xs font-extrabold">{endpoint.label}</h3><span className="rounded-full bg-white px-2 py-1 text-xs font-extrabold text-black/35">{endpoint.method}</span><span className="rounded-full bg-lime/25 px-2 py-1 text-xs font-extrabold text-moss">{endpoint.owner}</span></div>
+                      <p className="mt-2 text-xs leading-4 text-black/45">{endpoint.purpose}</p>
                     </div>
-                    <a href={endpoint.path.includes("[id]") ? undefined : endpoint.path} target="_blank" className={cn("shrink-0 rounded-full border border-black/10 px-3 py-2 text-[10px] font-extrabold text-black/50", endpoint.path.includes("[id]") && "pointer-events-none opacity-35")}>Open <ExternalLink size={10} className="inline" /></a>
+                    <a href={endpoint.path.includes("[id]") ? undefined : endpoint.path} target="_blank" className={cn("shrink-0 rounded-full border border-black/10 px-3 py-2 text-xs font-extrabold text-black/50", endpoint.path.includes("[id]") && "pointer-events-none opacity-35")}>Open <ExternalLink size={10} className="inline" /></a>
                   </div>
-                  <code className="mt-3 block rounded-xl bg-white px-3 py-2 text-[10px] font-bold text-black/45">{endpoint.path}</code>
+                  <code className="mt-3 block rounded-xl bg-white px-3 py-2 text-xs font-bold text-black/45">{endpoint.path}</code>
                   <div className="mt-3 flex flex-wrap gap-1.5">
-                    {endpoint.guardrails.map((guardrail) => <span key={`${endpoint.id}-${guardrail}`} className="rounded-full bg-white px-2 py-1 text-[8px] font-extrabold text-black/35">{guardrail}</span>)}
+                    {endpoint.guardrails.map((guardrail) => <span key={`${endpoint.id}-${guardrail}`} className="rounded-full bg-white px-2 py-1 text-xs font-extrabold text-black/35">{guardrail}</span>)}
                   </div>
                 </article>
               ))}
@@ -155,8 +155,8 @@ export default function RuntimeOperationsPage() {
               {report.guardrails.map((guardrail) => (
                 <article key={guardrail.label} className="rounded-2xl bg-canvas p-4">
                   <h3 className="flex items-center gap-2 text-xs font-extrabold"><ShieldCheck size={14} className="text-moss" /> {guardrail.label}</h3>
-                  <p className="mt-2 text-[10px] leading-4 text-black/45">{guardrail.detail}</p>
-                  <p className="mt-3 rounded-xl bg-white px-3 py-2 text-[9px] font-bold leading-4 text-black/40">{guardrail.proof}</p>
+                  <p className="mt-2 text-xs leading-4 text-black/45">{guardrail.detail}</p>
+                  <p className="mt-3 rounded-xl bg-white px-3 py-2 text-xs font-bold leading-4 text-black/40">{guardrail.proof}</p>
                 </article>
               ))}
             </div>
@@ -169,11 +169,11 @@ export default function RuntimeOperationsPage() {
             <div className="mt-4 space-y-3">
               {report.actions.map((action) => (
                 <Link key={action.id} href={action.href} className="block rounded-2xl bg-canvas p-4 transition hover:bg-white">
-                  <span className={cn("rounded-full px-2.5 py-1 text-[8px] font-extrabold uppercase", action.priority === "critical" ? "bg-red-50 text-red-700" : action.priority === "high" ? "bg-amber-50 text-amber-700" : "bg-lime/35 text-moss")}>{action.priority}</span>
+                  <span className={cn("rounded-full px-2.5 py-1 text-xs font-extrabold uppercase", action.priority === "critical" ? "bg-red-50 text-red-700" : action.priority === "high" ? "bg-amber-50 text-amber-700" : "bg-lime/35 text-moss")}>{action.priority}</span>
                   <h3 className="mt-3 text-xs font-extrabold leading-5">{action.title}</h3>
-                  <p className="mt-2 text-[10px] leading-4 text-black/45">{action.detail}</p>
-                  <p className="mt-3 rounded-xl bg-white px-3 py-2 text-[9px] font-bold leading-4 text-black/45">{action.evidence}</p>
-                  <span className="mt-3 inline-flex items-center gap-1 text-[10px] font-extrabold text-moss">{action.label} <ArrowRight size={10} /></span>
+                  <p className="mt-2 text-xs leading-4 text-black/45">{action.detail}</p>
+                  <p className="mt-3 rounded-xl bg-white px-3 py-2 text-xs font-bold leading-4 text-black/45">{action.evidence}</p>
+                  <span className="mt-3 inline-flex items-center gap-1 text-xs font-extrabold text-moss">{action.label} <ArrowRight size={10} /></span>
                 </Link>
               ))}
             </div>
@@ -188,10 +188,10 @@ export default function RuntimeOperationsPage() {
           <section className="rounded-[28px] border border-black/[0.07] bg-white p-5">
             <h2 className="text-sm font-extrabold">Operations evidence</h2>
             <div className="mt-4 grid grid-cols-2 gap-2 text-center">
-              <div className="rounded-2xl bg-canvas p-4"><p className="text-2xl font-extrabold">{report.summary.surfaces}</p><p className="mt-1 text-[8px] font-bold text-black/30">Surfaces</p></div>
-              <div className="rounded-2xl bg-canvas p-4"><p className="text-2xl font-extrabold">{report.summary.totalViews}</p><p className="mt-1 text-[8px] font-bold text-black/30">Views</p></div>
-              <div className="rounded-2xl bg-canvas p-4"><p className="text-2xl font-extrabold">{report.summary.totalClicks}</p><p className="mt-1 text-[8px] font-bold text-black/30">Clicks</p></div>
-              <div className="rounded-2xl bg-canvas p-4"><p className="text-2xl font-extrabold">{report.summary.endpoints}</p><p className="mt-1 text-[8px] font-bold text-black/30">Endpoints</p></div>
+              <div className="rounded-2xl bg-canvas p-4"><p className="text-2xl font-extrabold">{report.summary.surfaces}</p><p className="mt-1 text-xs font-bold text-black/30">Surfaces</p></div>
+              <div className="rounded-2xl bg-canvas p-4"><p className="text-2xl font-extrabold">{report.summary.totalViews}</p><p className="mt-1 text-xs font-bold text-black/30">Views</p></div>
+              <div className="rounded-2xl bg-canvas p-4"><p className="text-2xl font-extrabold">{report.summary.totalClicks}</p><p className="mt-1 text-xs font-bold text-black/30">Clicks</p></div>
+              <div className="rounded-2xl bg-canvas p-4"><p className="text-2xl font-extrabold">{report.summary.endpoints}</p><p className="mt-1 text-xs font-bold text-black/30">Endpoints</p></div>
             </div>
           </section>
 
@@ -206,7 +206,7 @@ export default function RuntimeOperationsPage() {
                 const Icon = item.icon;
                 return <Link key={item.href} href={item.href} className="flex items-start gap-3 rounded-2xl bg-canvas p-4 transition hover:bg-white">
                   <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-lime/35 text-moss"><Icon size={16} /></span>
-                  <span><span className="block text-xs font-extrabold">{item.label}</span><span className="mt-1 block text-[10px] leading-4 text-black/40">{item.detail}</span></span>
+                  <span><span className="block text-xs font-extrabold">{item.label}</span><span className="mt-1 block text-xs leading-4 text-black/40">{item.detail}</span></span>
                 </Link>;
               })}
             </div>

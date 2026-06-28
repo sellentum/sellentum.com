@@ -51,7 +51,7 @@ export default function StorefrontSandboxPage() {
         <section className="rounded-[28px] border border-black/[0.07] bg-ink p-6 text-white">
           <div className="flex items-center justify-between">
             <span className="grid h-11 w-11 place-items-center rounded-2xl bg-lime text-ink"><MonitorCheck size={20} /></span>
-            <span className={cn("rounded-full px-3 py-1.5 text-[9px] font-extrabold uppercase", report.status === "verified" ? "bg-lime text-ink" : report.status === "blocked" ? "bg-red-500/20 text-red-100" : "bg-white/10 text-white/50")}>{report.status}</span>
+            <span className={cn("rounded-full px-3 py-1.5 text-xs font-extrabold uppercase", report.status === "verified" ? "bg-lime text-ink" : report.status === "blocked" ? "bg-red-500/20 text-red-100" : "bg-white/10 text-white/50")}>{report.status}</span>
           </div>
           <p className="display mt-8 text-6xl">{report.score}%</p>
           <p className="mt-2 text-sm font-bold leading-6 text-white/45">Sandbox confidence across install-ready snippets, QA cases and captured telemetry proof.</p>
@@ -71,7 +71,7 @@ export default function StorefrontSandboxPage() {
             <article key={String(label)} className="rounded-[24px] border border-black/[0.07] bg-white p-5">
               <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#eef1e8] text-moss"><MetricIcon size={18} /></span>
               <p className="display mt-5 text-4xl">{String(value)}</p>
-              <p className="mt-1 text-[9px] font-extrabold uppercase tracking-wider text-black/30">{String(label)}</p>
+              <p className="mt-1 text-xs font-extrabold uppercase tracking-wider text-black/30">{String(label)}</p>
             </article>
           ); })}
         </section>
@@ -89,10 +89,10 @@ export default function StorefrontSandboxPage() {
               >
                 <div className="flex items-start justify-between gap-3">
                   <span className={cn("grid h-10 w-10 place-items-center rounded-xl", active ? "bg-lime text-ink" : "bg-[#eef1e8] text-moss")}><Globe2 size={18} /></span>
-                  <span className={cn("rounded-full px-2.5 py-1 text-[8px] font-extrabold uppercase", active ? "bg-white/10 text-white/45" : statusTone[item.status])}>{item.statusLabel}</span>
+                  <span className={cn("rounded-full px-2.5 py-1 text-xs font-extrabold uppercase", active ? "bg-white/10 text-white/45" : statusTone[item.status])}>{item.statusLabel}</span>
                 </div>
                 <h2 className="mt-4 text-sm font-extrabold">{item.title}</h2>
-                <p className={cn("mt-1 text-[10px] font-bold", active ? "text-white/35" : "text-black/35")}>{item.experienceLabel} · {item.mode}</p>
+                <p className={cn("mt-1 text-xs font-bold", active ? "text-white/35" : "text-black/35")}>{item.experienceLabel} · {item.mode}</p>
                 <p className={cn("mt-3 text-xs leading-5", active ? "text-white/55" : "text-black/45")}>{item.shopperPrompt}</p>
                 <div className={cn("mt-4 grid grid-cols-3 gap-2 text-center", active ? "text-white" : "text-ink")}>
                   <span className={cn("rounded-xl p-2", active ? "bg-white/[0.06]" : "bg-canvas")}><b className="block text-sm">{item.telemetry.views}</b><small className={active ? "text-white/35" : "text-black/35"}>Views</small></span>
@@ -108,7 +108,7 @@ export default function StorefrontSandboxPage() {
           <div className="border-b border-black/[0.06] bg-[radial-gradient(circle_at_85%_10%,rgba(217,255,97,.75),transparent_30%),linear-gradient(135deg,#f8f8f4,#ffffff)] p-8">
             <div className="flex items-start justify-between gap-8">
               <div>
-                <span className={cn("inline-flex rounded-full px-3 py-1.5 text-[9px] font-extrabold uppercase tracking-wider", statusTone[selected.status])}>{selected.statusLabel}</span>
+                <span className={cn("inline-flex rounded-full px-3 py-1.5 text-xs font-extrabold uppercase tracking-wider", statusTone[selected.status])}>{selected.statusLabel}</span>
                 <h2 className="display mt-5 text-4xl">{selected.title}</h2>
                 <p className="mt-3 max-w-2xl text-sm leading-6 text-black/45">{selected.storefrontArea} · {selected.experienceLabel} · suggested prompt: “{selected.shopperPrompt}”</p>
               </div>
@@ -123,13 +123,13 @@ export default function StorefrontSandboxPage() {
                   <i className="h-2.5 w-2.5 rounded-full bg-red-300" />
                   <i className="h-2.5 w-2.5 rounded-full bg-yellow-300" />
                   <i className="h-2.5 w-2.5 rounded-full bg-green-300" />
-                  <span className="mx-auto rounded-full bg-white px-4 py-1 text-[9px] font-bold text-black/35">staging-store.example/{selected.placement}</span>
+                  <span className="mx-auto rounded-full bg-white px-4 py-1 text-xs font-bold text-black/35">staging-store.example/{selected.placement}</span>
                 </div>
                 <div className="relative min-h-[560px] bg-[#f2f3ee] p-7">
                   <div className="rounded-[26px] bg-white p-7 shadow-sm">
                     <div className="flex items-center justify-between border-b border-black/[0.06] pb-5">
-                      <div><p className="text-xs font-extrabold">{settings.brand_name}</p><p className="mt-1 text-[9px] text-black/35">Desktop storefront QA preview</p></div>
-                      <div className="flex gap-5 text-[10px] font-extrabold text-black/35"><span>Shop</span><span>Guides</span><span>Support</span></div>
+                      <div><p className="text-xs font-extrabold">{settings.brand_name}</p><p className="mt-1 text-xs text-black/35">Desktop storefront QA preview</p></div>
+                      <div className="flex gap-5 text-xs font-extrabold text-black/35"><span>Shop</span><span>Guides</span><span>Support</span></div>
                     </div>
                     <div className="mt-7 grid gap-7 xl:grid-cols-[1fr_360px]">
                       <div>
@@ -137,7 +137,7 @@ export default function StorefrontSandboxPage() {
                         <h3 className="display mt-3 text-4xl">Find the product that fits before you buy.</h3>
                         <p className="mt-3 max-w-md text-sm leading-6 text-black/45">This sandbox shows where Findly appears, how the shopper opens it, and which events must arrive in Analytics.</p>
                         <div className="mt-6 grid grid-cols-3 gap-3">
-                          {["Product card", "Buying guide", "Reviews"].map((label) => <div key={label} className="h-28 rounded-2xl bg-canvas p-4"><p className="text-[10px] font-extrabold text-black/40">{label}</p></div>)}
+                          {["Product card", "Buying guide", "Reviews"].map((label) => <div key={label} className="h-28 rounded-2xl bg-canvas p-4"><p className="text-xs font-extrabold text-black/40">{label}</p></div>)}
                         </div>
                       </div>
                       <div className="rounded-[24px] border border-black/[0.07] bg-[#f8f8f4] p-4">
@@ -148,7 +148,7 @@ export default function StorefrontSandboxPage() {
                             <div>
                               <span className="mx-auto grid h-12 w-12 place-items-center rounded-2xl text-white" style={{ background: settings.primary_color }}><Sparkles size={20} /></span>
                               <h4 className="mt-4 text-sm font-extrabold">Modal launcher preview</h4>
-                              <p className="mx-auto mt-2 max-w-xs text-[10px] leading-4 text-black/40">Clicking the storefront launcher should lazy-load this Findly iframe and record a widget_view with channel labels.</p>
+                              <p className="mx-auto mt-2 max-w-xs text-xs leading-4 text-black/40">Clicking the storefront launcher should lazy-load this Findly iframe and record a widget_view with channel labels.</p>
                               <a href={selected.publicUrl} target="_blank" className="mt-5 inline-flex items-center gap-2 rounded-full px-4 py-3 text-xs font-extrabold text-white" style={{ background: settings.primary_color }}>Open {selected.experienceLabel}<ExternalLink size={12} /></a>
                             </div>
                           </div>
@@ -165,7 +165,7 @@ export default function StorefrontSandboxPage() {
                   <div><h3 className="flex items-center gap-2 text-sm font-extrabold"><Code2 size={16} className="text-moss" /> Exact snippet</h3><p className="mt-1 text-xs text-black/35">Paste into a staging storefront slot matching this placement.</p></div>
                   <button onClick={() => copy(selected.snippet, selected.id)} className="inline-flex items-center gap-2 text-xs font-extrabold text-moss">{copied === selected.id ? <Check size={13} /> : <Clipboard size={13} />}{copied === selected.id ? "Copied" : "Copy"}</button>
                 </div>
-                <pre className="mt-5 max-h-[320px] overflow-auto rounded-2xl bg-ink p-5 text-[10px] leading-5 text-lime/80"><code>{selected.snippet}</code></pre>
+                <pre className="mt-5 max-h-[320px] overflow-auto rounded-2xl bg-ink p-5 text-xs leading-5 text-lime/80"><code>{selected.snippet}</code></pre>
               </section>
             </div>
 
@@ -176,7 +176,7 @@ export default function StorefrontSandboxPage() {
                   {selected.expectedEvents.map((event) => (
                     <div key={event.event} className="rounded-xl bg-white/[0.06] p-3">
                       <p className="text-xs font-extrabold">{event.event}</p>
-                      <p className="mt-1 text-[9px] leading-4 text-white/35">{event.purpose}</p>
+                      <p className="mt-1 text-xs leading-4 text-white/35">{event.purpose}</p>
                     </div>
                   ))}
                 </div>
@@ -185,16 +185,16 @@ export default function StorefrontSandboxPage() {
               <section className="rounded-2xl border border-black/[0.07] p-5">
                 <h3 className="flex items-center gap-2 text-sm font-extrabold"><PlayCircle size={16} className="text-moss" /> QA steps</h3>
                 <div className="mt-4 space-y-2">
-                  {selected.qaSteps.map((step, index) => <p key={step} className="flex gap-3 rounded-xl bg-canvas p-3 text-[10px] font-bold leading-4 text-black/45"><span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-lime text-[10px] font-extrabold text-ink">{index + 1}</span>{step}</p>)}
+                  {selected.qaSteps.map((step, index) => <p key={step} className="flex gap-3 rounded-xl bg-canvas p-3 text-xs font-bold leading-4 text-black/45"><span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-lime text-xs font-extrabold text-ink">{index + 1}</span>{step}</p>)}
                 </div>
               </section>
 
               <section className="rounded-2xl border border-black/[0.07] p-5">
                 <h3 className="flex items-center gap-2 text-sm font-extrabold"><ShieldCheck size={16} className="text-moss" /> Acceptance criteria</h3>
                 <div className="mt-4 space-y-2">
-                  {selected.acceptanceCriteria.map((criterion) => <p key={criterion} className="flex gap-2 text-[10px] font-bold leading-4 text-black/45"><Check size={13} className="mt-0.5 shrink-0 text-moss" />{criterion}</p>)}
+                  {selected.acceptanceCriteria.map((criterion) => <p key={criterion} className="flex gap-2 text-xs font-bold leading-4 text-black/45"><Check size={13} className="mt-0.5 shrink-0 text-moss" />{criterion}</p>)}
                 </div>
-                {selected.risks.length ? <div className="mt-4 space-y-2">{selected.risks.map((risk) => <p key={risk} className="rounded-xl bg-amber-50 p-3 text-[10px] font-bold leading-4 text-amber-700">{risk}</p>)}</div> : <p className="mt-4 rounded-xl bg-lime/15 p-3 text-[10px] font-bold leading-4 text-moss">No sandbox risks detected for this placement.</p>}
+                {selected.risks.length ? <div className="mt-4 space-y-2">{selected.risks.map((risk) => <p key={risk} className="rounded-xl bg-amber-50 p-3 text-xs font-bold leading-4 text-amber-700">{risk}</p>)}</div> : <p className="mt-4 rounded-xl bg-lime/15 p-3 text-xs font-bold leading-4 text-moss">No sandbox risks detected for this placement.</p>}
               </section>
             </div>
           </div>

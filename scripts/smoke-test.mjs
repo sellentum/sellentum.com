@@ -42,6 +42,20 @@ function assertSystemFontStack() {
   assert(css.includes(".text-\\[11px\\]") && css.includes(".text-\\[15px\\]"), "Global CSS should normalize small intermediate arbitrary text sizes");
 }
 
+function assertDesktopTypographyScale() {
+  const files = execFileSync("git", ["ls-files", "app", "components"], { encoding: "utf8" })
+    .split("\n")
+    .filter((file) => /\.(tsx|ts)$/.test(file));
+  const tinyClassPattern = /!?text-\[(?:7|8|9|10|11)px\]/g;
+  const offenders = files
+    .map((file) => {
+      const matches = readFileSync(file, "utf8").match(tinyClassPattern);
+      return matches?.length ? `${file} (${[...new Set(matches)].join(", ")})` : "";
+    })
+    .filter(Boolean);
+  assert(!offenders.length, `Desktop app/component source should use standard text-xs/text-sm scale instead of tiny arbitrary font classes: ${offenders.join("; ")}`);
+}
+
 function assertPublishedAdvisorRuntime() {
   const route = readFileSync("app/api/public/assistant/[id]/route.ts", "utf8");
   const engine = readFileSync("lib/assistant-engine.ts", "utf8");
@@ -2167,6 +2181,7 @@ async function main() {
   await assertPage("/api/preflight", "Authentication required", 401);
   await assertWidgetScript();
   assertSystemFontStack();
+  assertDesktopTypographyScale();
   assertPublishedAdvisorRuntime();
   assertPublishedFinderRuntime();
   assertPublishedConfiguratorRuntime();

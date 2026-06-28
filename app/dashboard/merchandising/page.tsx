@@ -79,14 +79,14 @@ export default function MerchandisingStudioPage() {
         <section className="rounded-[30px] border border-black/[0.07] bg-ink p-7 text-white">
           <div className="flex items-center justify-between">
             <span className="grid h-12 w-12 place-items-center rounded-2xl bg-lime text-ink"><SlidersHorizontal size={22} /></span>
-            <span className={cn("rounded-full px-3 py-1.5 text-[9px] font-extrabold uppercase", statusTone[report.status])}>{report.status.replace("-", " ")}</span>
+            <span className={cn("rounded-full px-3 py-1.5 text-xs font-extrabold uppercase", statusTone[report.status])}>{report.status.replace("-", " ")}</span>
           </div>
           <p className="display mt-8 text-7xl">{report.score}%</p>
           <p className="mt-3 text-sm font-bold leading-6 text-white/45">{report.headline}</p>
           <div className="mt-6 grid grid-cols-3 gap-2 text-center">
-            <div className="rounded-2xl bg-white/[0.06] p-3"><p className="text-xl font-extrabold">{report.summary.controls}</p><p className="mt-1 text-[8px] text-white/35">Controls</p></div>
-            <div className="rounded-2xl bg-white/[0.06] p-3"><p className="text-xl font-extrabold">{report.summary.productsWithDemand}</p><p className="mt-1 text-[8px] text-white/35">Demand</p></div>
-            <div className="rounded-2xl bg-white/[0.06] p-3"><p className="text-xl font-extrabold">{report.summary.staleControls}</p><p className="mt-1 text-[8px] text-white/35">Stale</p></div>
+            <div className="rounded-2xl bg-white/[0.06] p-3"><p className="text-xl font-extrabold">{report.summary.controls}</p><p className="mt-1 text-xs text-white/35">Controls</p></div>
+            <div className="rounded-2xl bg-white/[0.06] p-3"><p className="text-xl font-extrabold">{report.summary.productsWithDemand}</p><p className="mt-1 text-xs text-white/35">Demand</p></div>
+            <div className="rounded-2xl bg-white/[0.06] p-3"><p className="text-xl font-extrabold">{report.summary.staleControls}</p><p className="mt-1 text-xs text-white/35">Stale</p></div>
           </div>
         </section>
 
@@ -102,7 +102,7 @@ export default function MerchandisingStudioPage() {
               <article key={String(label)} className="rounded-[24px] border border-black/[0.07] bg-white p-5">
                 <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#eef1e8] text-moss"><MetricIcon size={18} /></span>
                 <p className="display mt-5 text-4xl">{String(value)}</p>
-                <p className="mt-1 text-[9px] font-extrabold uppercase tracking-wider text-black/30">{String(label)}</p>
+                <p className="mt-1 text-xs font-extrabold uppercase tracking-wider text-black/30">{String(label)}</p>
               </article>
             );
           })}
@@ -130,13 +130,13 @@ export default function MerchandisingStudioPage() {
                         <span className="grid h-10 w-10 place-items-center rounded-xl bg-white text-moss"><Icon size={17} /></span>
                         <div>
                           <h3 className="text-xs font-extrabold">{control.action.toUpperCase()} · {control.productName}</h3>
-                          <p className="mt-1 text-[9px] font-bold text-black/35">{control.finderName} · {control.action === "exclude" ? "Hard exclusion" : control.action === "pin" ? "Top priority" : `+${control.weight} points`}</p>
+                          <p className="mt-1 text-xs font-bold text-black/35">{control.finderName} · {control.action === "exclude" ? "Hard exclusion" : control.action === "pin" ? "Top priority" : `+${control.weight} points`}</p>
                         </div>
                       </div>
-                      <span className={cn("rounded-full px-2.5 py-1 text-[8px] font-extrabold uppercase", controlTone[control.status])}>{control.status}</span>
+                      <span className={cn("rounded-full px-2.5 py-1 text-xs font-extrabold uppercase", controlTone[control.status])}>{control.status}</span>
                     </div>
-                    <p className="mt-3 text-[10px] leading-4 text-black/45">{control.evidence}</p>
-                    {control.note && <p className="mt-3 rounded-xl bg-white px-3 py-2 text-[9px] font-bold leading-4 text-black/40">Note: {control.note}</p>}
+                    <p className="mt-3 text-xs leading-4 text-black/45">{control.evidence}</p>
+                    {control.note && <p className="mt-3 rounded-xl bg-white px-3 py-2 text-xs font-bold leading-4 text-black/40">Note: {control.note}</p>}
                   </article>
                 );
               })}
@@ -161,14 +161,14 @@ export default function MerchandisingStudioPage() {
                         <span className="grid h-10 w-10 place-items-center rounded-xl bg-white text-moss"><Icon size={17} /></span>
                         <div>
                           <h3 className="text-xs font-extrabold">{lane.productName}</h3>
-                          <p className="mt-1 text-[9px] font-bold text-black/35">{lane.recommended} recommended · {lane.clicks} clicks · {lane.clickRate}% CTR</p>
+                          <p className="mt-1 text-xs font-bold text-black/35">{lane.recommended} recommended · {lane.clicks} clicks · {lane.clickRate}% CTR</p>
                         </div>
                       </div>
-                      <span className={cn("rounded-full px-2.5 py-1 text-[8px] font-extrabold uppercase", laneTone[lane.status])}>{lane.label}</span>
+                      <span className={cn("rounded-full px-2.5 py-1 text-xs font-extrabold uppercase", laneTone[lane.status])}>{lane.label}</span>
                     </div>
-                    <p className="mt-3 text-[10px] leading-4 text-black/45">{lane.evidence}</p>
-                    <p className="mt-3 rounded-xl bg-white px-3 py-2 text-[9px] font-bold leading-4 text-black/45">{lane.recommendation}</p>
-                    {lane.controls.length > 0 && <div className="mt-3 flex flex-wrap gap-1.5">{lane.controls.map((control) => <span key={`${lane.id}-${control}`} className="rounded-full bg-white px-2 py-1 text-[8px] font-extrabold text-black/35">{control}</span>)}</div>}
+                    <p className="mt-3 text-xs leading-4 text-black/45">{lane.evidence}</p>
+                    <p className="mt-3 rounded-xl bg-white px-3 py-2 text-xs font-bold leading-4 text-black/45">{lane.recommendation}</p>
+                    {lane.controls.length > 0 && <div className="mt-3 flex flex-wrap gap-1.5">{lane.controls.map((control) => <span key={`${lane.id}-${control}`} className="rounded-full bg-white px-2 py-1 text-xs font-extrabold text-black/35">{control}</span>)}</div>}
                   </article>
                 );
               })}
@@ -182,8 +182,8 @@ export default function MerchandisingStudioPage() {
               {report.guardrails.map((guardrail) => (
                 <article key={guardrail.label} className="rounded-2xl bg-canvas p-4">
                   <h3 className="flex items-center gap-2 text-xs font-extrabold"><ShieldCheck size={14} className="text-moss" /> {guardrail.label}</h3>
-                  <p className="mt-2 text-[10px] leading-4 text-black/45">{guardrail.detail}</p>
-                  <p className="mt-3 rounded-xl bg-white px-3 py-2 text-[9px] font-bold leading-4 text-black/40">{guardrail.proof}</p>
+                  <p className="mt-2 text-xs leading-4 text-black/45">{guardrail.detail}</p>
+                  <p className="mt-3 rounded-xl bg-white px-3 py-2 text-xs font-bold leading-4 text-black/40">{guardrail.proof}</p>
                 </article>
               ))}
             </div>
@@ -196,12 +196,12 @@ export default function MerchandisingStudioPage() {
             <div className="mt-4 space-y-3">
               {report.opportunities.map((item) => (
                 <Link key={item.id} href={item.href} className="block rounded-2xl bg-canvas p-4 transition hover:bg-white">
-                  <span className={cn("rounded-full px-2.5 py-1 text-[8px] font-extrabold uppercase", priorityTone[item.priority])}>{item.priority}</span>
+                  <span className={cn("rounded-full px-2.5 py-1 text-xs font-extrabold uppercase", priorityTone[item.priority])}>{item.priority}</span>
                   <h3 className="mt-3 text-xs font-extrabold leading-5">{item.title}</h3>
-                  <p className="mt-2 text-[10px] leading-4 text-black/45">{item.detail}</p>
-                  <p className="mt-3 rounded-xl bg-white px-3 py-2 text-[9px] font-bold leading-4 text-black/45">{item.evidence}</p>
-                  <p className="mt-3 text-[10px] font-bold leading-4 text-moss">{item.recommendation}</p>
-                  <span className="mt-3 inline-flex items-center gap-1 text-[10px] font-extrabold text-moss">{item.label} <ArrowRight size={10} /></span>
+                  <p className="mt-2 text-xs leading-4 text-black/45">{item.detail}</p>
+                  <p className="mt-3 rounded-xl bg-white px-3 py-2 text-xs font-bold leading-4 text-black/45">{item.evidence}</p>
+                  <p className="mt-3 text-xs font-bold leading-4 text-moss">{item.recommendation}</p>
+                  <span className="mt-3 inline-flex items-center gap-1 text-xs font-extrabold text-moss">{item.label} <ArrowRight size={10} /></span>
                 </Link>
               ))}
             </div>
@@ -216,10 +216,10 @@ export default function MerchandisingStudioPage() {
           <section className="rounded-[28px] border border-black/[0.07] bg-white p-5">
             <h2 className="text-sm font-extrabold">Demand proof</h2>
             <div className="mt-4 grid grid-cols-2 gap-2 text-center">
-              <div className="rounded-2xl bg-canvas p-4"><Sparkles className="mx-auto text-moss" size={16} /><p className="mt-3 text-2xl font-extrabold">{report.summary.publishedFinders}</p><p className="mt-1 text-[8px] font-bold text-black/30">Live finders</p></div>
-              <div className="rounded-2xl bg-canvas p-4"><BarChart3 className="mx-auto text-moss" size={16} /><p className="mt-3 text-2xl font-extrabold">{report.summary.productsWithDemand}</p><p className="mt-1 text-[8px] font-bold text-black/30">Demand products</p></div>
-              <div className="rounded-2xl bg-canvas p-4"><MousePointerClick className="mx-auto text-moss" size={16} /><p className="mt-3 text-2xl font-extrabold">{report.lanes.reduce((sum, lane) => sum + lane.clicks, 0)}</p><p className="mt-1 text-[8px] font-bold text-black/30">Buy clicks</p></div>
-              <div className="rounded-2xl bg-canvas p-4"><Target className="mx-auto text-moss" size={16} /><p className="mt-3 text-2xl font-extrabold">{report.opportunities.length}</p><p className="mt-1 text-[8px] font-bold text-black/30">Actions</p></div>
+              <div className="rounded-2xl bg-canvas p-4"><Sparkles className="mx-auto text-moss" size={16} /><p className="mt-3 text-2xl font-extrabold">{report.summary.publishedFinders}</p><p className="mt-1 text-xs font-bold text-black/30">Live finders</p></div>
+              <div className="rounded-2xl bg-canvas p-4"><BarChart3 className="mx-auto text-moss" size={16} /><p className="mt-3 text-2xl font-extrabold">{report.summary.productsWithDemand}</p><p className="mt-1 text-xs font-bold text-black/30">Demand products</p></div>
+              <div className="rounded-2xl bg-canvas p-4"><MousePointerClick className="mx-auto text-moss" size={16} /><p className="mt-3 text-2xl font-extrabold">{report.lanes.reduce((sum, lane) => sum + lane.clicks, 0)}</p><p className="mt-1 text-xs font-bold text-black/30">Buy clicks</p></div>
+              <div className="rounded-2xl bg-canvas p-4"><Target className="mx-auto text-moss" size={16} /><p className="mt-3 text-2xl font-extrabold">{report.opportunities.length}</p><p className="mt-1 text-xs font-bold text-black/30">Actions</p></div>
             </div>
           </section>
 
@@ -234,7 +234,7 @@ export default function MerchandisingStudioPage() {
                 const Icon = item.icon;
                 return <Link key={item.href} href={item.href} className="flex items-start gap-3 rounded-2xl bg-canvas p-4 transition hover:bg-white">
                   <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-lime/35 text-moss"><Icon size={16} /></span>
-                  <span><span className="block text-xs font-extrabold">{item.label}</span><span className="mt-1 block text-[10px] leading-4 text-black/40">{item.detail}</span></span>
+                  <span><span className="block text-xs font-extrabold">{item.label}</span><span className="mt-1 block text-xs leading-4 text-black/40">{item.detail}</span></span>
                 </Link>;
               })}
             </div>

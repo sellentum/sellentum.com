@@ -22,11 +22,11 @@ export default function PlatformOverviewPage() {
         <div className="mx-auto grid max-w-[1280px] gap-4 lg:grid-cols-3">
           {platformPages.map((page, index) => (
             <Link key={page.slug} href={`/platform/${page.slug}`} className="group rounded-[28px] border border-black/10 bg-white p-7 transition hover:-translate-y-1 hover:shadow-xl">
-              <div className="flex items-start justify-between"><span className="text-[10px] font-extrabold tracking-[.16em] text-moss">{String(index + 1).padStart(2, "0")}</span><span className="grid h-11 w-11 place-items-center rounded-2xl bg-lime/50 transition group-hover:bg-lime"><Sparkles size={18} /></span></div>
+              <div className="flex items-start justify-between"><span className="text-xs font-extrabold tracking-[.16em] text-moss">{String(index + 1).padStart(2, "0")}</span><span className="grid h-11 w-11 place-items-center rounded-2xl bg-lime/50 transition group-hover:bg-lime"><Sparkles size={18} /></span></div>
               <p className="eyebrow mt-12 text-moss">{page.eyebrow}</p>
               <h2 className="mt-3 text-2xl font-extrabold leading-tight tracking-[-.045em]">{page.title}</h2>
               <p className="mt-4 text-xs leading-5 text-black/45">{page.description}</p>
-              <div className="mt-6 grid gap-2">{page.points.slice(0, 3).map((point) => <span key={point} className="flex items-center gap-2 text-[10px] font-extrabold text-black/55"><Check size={12} className="text-moss" />{point}</span>)}</div>
+              <div className="mt-6 grid gap-2">{page.points.slice(0, 3).map((point) => <span key={point} className="flex items-center gap-2 text-xs font-extrabold text-black/55"><Check size={12} className="text-moss" />{point}</span>)}</div>
               <span className="mt-7 inline-flex items-center gap-2 text-xs font-extrabold text-moss">Explore <ArrowRight size={13} /></span>
             </Link>
           ))}
@@ -40,7 +40,7 @@ export default function PlatformOverviewPage() {
         </div>
       </section>
 
-      <footer className="border-t border-black/10 px-6 py-10 lg:px-10"><div className="mx-auto flex max-w-[1280px] items-center justify-between text-[10px] font-bold text-black/35"><Logo /><span>© 2026 Findly</span></div></footer>
+      <footer className="border-t border-black/10 px-6 py-10 lg:px-10"><div className="mx-auto flex max-w-[1280px] items-center justify-between text-xs font-bold text-black/35"><Logo /><span>© 2026 Findly</span></div></footer>
     </main>
   );
 }

@@ -53,7 +53,7 @@ export function LandingNav() {
 
   return (
     <header className="sticky top-0 z-50 bg-white">
-      <div className="bg-ink px-5 py-2.5 text-center text-[11px] font-bold text-white">
+      <div className="bg-ink px-5 py-2.5 text-center text-xs font-bold text-white">
         <span className="text-lime">✦ New</span>
         <span className="mx-2 text-white/35">·</span>
         Turn product knowledge into a guided buying experience in one afternoon.
@@ -98,7 +98,7 @@ export function LandingNav() {
               {menus[open].items.map(({ title, copy, icon: Icon, href }) => (
                 <Link key={title} href={href} onClick={() => setOpen(null)} className="group flex gap-4 rounded-2xl p-4 transition hover:bg-[#f6f7f3]">
                   <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-lime/45 text-moss transition group-hover:bg-lime"><Icon size={17} /></span>
-                  <span><span className="block text-sm font-extrabold">{title}</span><span className="mt-1 block text-[11px] leading-4 text-black/40">{copy}</span></span>
+                  <span><span className="block text-sm font-extrabold">{title}</span><span className="mt-1 block text-xs leading-4 text-black/40">{copy}</span></span>
                 </Link>
               ))}
             </div>

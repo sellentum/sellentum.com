@@ -292,14 +292,14 @@ export default function LaunchStudioPage() {
           <div className="relative rounded-[30px] border border-white/10 bg-white/[.06] p-6 backdrop-blur">
             <div className="flex items-center justify-between">
               <span className="grid h-12 w-12 place-items-center rounded-2xl bg-lime text-ink"><Gauge size={22} /></span>
-              <span className="rounded-full bg-white/10 px-3 py-1.5 text-[9px] font-extrabold text-white/55">{launchScore}/3 core steps ready</span>
+              <span className="rounded-full bg-white/10 px-3 py-1.5 text-xs font-extrabold text-white/55">{launchScore}/3 core steps ready</span>
             </div>
             <h2 className="display mt-7 text-4xl">{hasLaunchableFinder ? "Finder is live" : hasLaunchableCatalog ? "Catalog is launchable" : "Catalog first"}</h2>
             <p className="mt-2 text-xs leading-5 text-white/45">{hasLaunchableFinder ? "You can preview, copy the widget, and run preflight." : hasLaunchableCatalog ? "You have enough products. Enrichment will improve semantic matching, then generation can publish the finder." : "Add at least two active products before generating a meaningful finder."}</p>
             <div className="mt-6 grid grid-cols-3 gap-2 text-center">
-              <div className="rounded-2xl bg-white/[.07] p-4"><p className="text-2xl font-extrabold">{activeProducts.length}</p><p className="mt-1 text-[8px] font-bold text-white/35">Active SKUs</p></div>
-              <div className="rounded-2xl bg-white/[.07] p-4"><p className="text-2xl font-extrabold">{enrichedPercent}%</p><p className="mt-1 text-[8px] font-bold text-white/35">Enriched</p></div>
-              <div className="rounded-2xl bg-white/[.07] p-4"><p className="text-2xl font-extrabold">{quizzes.filter((quiz) => quiz.published).length}</p><p className="mt-1 text-[8px] font-bold text-white/35">Live finders</p></div>
+              <div className="rounded-2xl bg-white/[.07] p-4"><p className="text-2xl font-extrabold">{activeProducts.length}</p><p className="mt-1 text-xs font-bold text-white/35">Active SKUs</p></div>
+              <div className="rounded-2xl bg-white/[.07] p-4"><p className="text-2xl font-extrabold">{enrichedPercent}%</p><p className="mt-1 text-xs font-bold text-white/35">Enriched</p></div>
+              <div className="rounded-2xl bg-white/[.07] p-4"><p className="text-2xl font-extrabold">{quizzes.filter((quiz) => quiz.published).length}</p><p className="mt-1 text-xs font-bold text-white/35">Live finders</p></div>
             </div>
           </div>
         </div>
@@ -310,9 +310,9 @@ export default function LaunchStudioPage() {
           <div className="flex items-start justify-between gap-4">
             <div>
               <h2 className="text-sm font-extrabold">Launch path</h2>
-              <p className="mt-1 text-[10px] text-black/35">A self-serve version of the guided-selling setup sequence.</p>
+              <p className="mt-1 text-xs text-black/35">A self-serve version of the guided-selling setup sequence.</p>
             </div>
-            {source && <span className="rounded-full bg-lime/30 px-3 py-1.5 text-[9px] font-extrabold text-moss">Last AI path: {source}</span>}
+            {source && <span className="rounded-full bg-lime/30 px-3 py-1.5 text-xs font-extrabold text-moss">Last AI path: {source}</span>}
           </div>
           <div className="mt-6 space-y-3">
             {[
@@ -327,9 +327,9 @@ export default function LaunchStudioPage() {
                   <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl ${item.done ? "bg-lime text-moss" : "bg-white text-black/25"}`}>{item.done ? <Check size={16} /> : <Icon size={16} />}</span>
                   <div className="min-w-0 flex-1">
                     <p className="text-xs font-extrabold">{index + 1}. {item.label}</p>
-                    <p className="mt-1 text-[10px] leading-4 text-black/40">{item.detail}</p>
+                    <p className="mt-1 text-xs leading-4 text-black/40">{item.detail}</p>
                   </div>
-                  <Link href={item.href} className="shrink-0 text-[9px] font-extrabold text-moss">Open <ArrowRight size={10} className="inline" /></Link>
+                  <Link href={item.href} className="shrink-0 text-xs font-extrabold text-moss">Open <ArrowRight size={10} className="inline" /></Link>
                 </div>
               </article>;
             })}
@@ -339,36 +339,36 @@ export default function LaunchStudioPage() {
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="flex items-center gap-2 text-xs font-extrabold"><BrainCircuit size={14} className="text-lime" /> AI quiz blueprint</p>
-                <p className="mt-1.5 text-[10px] leading-4 text-white/45">Preview the ontology-derived question plan before one-click generation publishes it.</p>
+                <p className="mt-1.5 text-xs leading-4 text-white/45">Preview the ontology-derived question plan before one-click generation publishes it.</p>
               </div>
-              <span className={`rounded-full px-3 py-1.5 text-[8px] font-extrabold uppercase ${quizBlueprint.status === "ready" ? "bg-lime text-ink" : quizBlueprint.status === "needs-review" ? "bg-amber-300/20 text-amber-100" : "bg-red-400/15 text-red-100"}`}>{blueprintStatusLabel} · {quizBlueprint.score}%</span>
+              <span className={`rounded-full px-3 py-1.5 text-xs font-extrabold uppercase ${quizBlueprint.status === "ready" ? "bg-lime text-ink" : quizBlueprint.status === "needs-review" ? "bg-amber-300/20 text-amber-100" : "bg-red-400/15 text-red-100"}`}>{blueprintStatusLabel} · {quizBlueprint.score}%</span>
             </div>
             <div className="mt-4 grid grid-cols-3 gap-2 text-center">
-              <div className="rounded-2xl bg-white/[.07] p-3"><p className="text-lg font-extrabold">{quizBlueprint.questions.length}</p><p className="mt-1 text-[8px] font-bold text-white/35">Questions</p></div>
-              <div className="rounded-2xl bg-white/[.07] p-3"><p className="text-lg font-extrabold">{quizBlueprint.topSignals.length}</p><p className="mt-1 text-[8px] font-bold text-white/35">Signals</p></div>
-              <div className="rounded-2xl bg-white/[.07] p-3"><p className="text-lg font-extrabold capitalize">{quizBlueprint.source}</p><p className="mt-1 text-[8px] font-bold text-white/35">Source</p></div>
+              <div className="rounded-2xl bg-white/[.07] p-3"><p className="text-lg font-extrabold">{quizBlueprint.questions.length}</p><p className="mt-1 text-xs font-bold text-white/35">Questions</p></div>
+              <div className="rounded-2xl bg-white/[.07] p-3"><p className="text-lg font-extrabold">{quizBlueprint.topSignals.length}</p><p className="mt-1 text-xs font-bold text-white/35">Signals</p></div>
+              <div className="rounded-2xl bg-white/[.07] p-3"><p className="text-lg font-extrabold capitalize">{quizBlueprint.source}</p><p className="mt-1 text-xs font-bold text-white/35">Source</p></div>
             </div>
             <div className="mt-4 space-y-3">
               {quizBlueprint.questions.slice(0, 3).map((question, index) => <article key={question.title} className="rounded-2xl bg-white/[.07] p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-[9px] font-extrabold uppercase tracking-wider text-lime">Question {index + 1}</p>
+                    <p className="text-xs font-extrabold uppercase tracking-wider text-lime">Question {index + 1}</p>
                     <h3 className="mt-1 text-xs font-extrabold">{question.title}</h3>
-                    <p className="mt-1 text-[9px] leading-4 text-white/40">{question.coverageSummary}</p>
+                    <p className="mt-1 text-xs leading-4 text-white/40">{question.coverageSummary}</p>
                   </div>
-                  <span className="rounded-full bg-white/10 px-2 py-1 text-[8px] font-extrabold text-white/35">{question.options.length} answers</span>
+                  <span className="rounded-full bg-white/10 px-2 py-1 text-xs font-extrabold text-white/35">{question.options.length} answers</span>
                 </div>
                 <div className="mt-3 flex flex-wrap gap-1.5">
                   {question.options.slice(0, 5).map((option) => {
                     const tone = option.status === "matched" ? "bg-lime/15 text-lime" : option.status === "preference" ? "bg-blue-400/15 text-blue-100" : "bg-red-400/15 text-red-100";
-                    return <span key={`${question.title}-${option.label}`} className={`rounded-full px-2.5 py-1 text-[8px] font-extrabold ${tone}`}>{option.label} · {option.status === "preference" ? "preference" : `${option.productCount} SKUs`}</span>;
+                    return <span key={`${question.title}-${option.label}`} className={`rounded-full px-2.5 py-1 text-xs font-extrabold ${tone}`}>{option.label} · {option.status === "preference" ? "preference" : `${option.productCount} SKUs`}</span>;
                   })}
                 </div>
               </article>)}
             </div>
             <div className="mt-4 space-y-2">
-              {quizBlueprint.risks.slice(0, 2).map((risk) => <p key={risk} className="flex items-start gap-2 rounded-2xl bg-amber-300/10 p-3 text-[9px] font-bold leading-4 text-amber-100"><AlertTriangle size={12} className="mt-0.5 shrink-0" />{risk}</p>)}
-              {!quizBlueprint.risks.length && <p className="rounded-2xl bg-lime/10 p-3 text-[9px] font-bold leading-4 text-lime">Blueprint looks strong: enough catalog structure exists for a useful generated finder.</p>}
+              {quizBlueprint.risks.slice(0, 2).map((risk) => <p key={risk} className="flex items-start gap-2 rounded-2xl bg-amber-300/10 p-3 text-xs font-bold leading-4 text-amber-100"><AlertTriangle size={12} className="mt-0.5 shrink-0" />{risk}</p>)}
+              {!quizBlueprint.risks.length && <p className="rounded-2xl bg-lime/10 p-3 text-xs font-bold leading-4 text-lime">Blueprint looks strong: enough catalog structure exists for a useful generated finder.</p>}
             </div>
           </div>
         </section>
@@ -377,7 +377,7 @@ export default function LaunchStudioPage() {
           <div className="flex items-start justify-between gap-4 border-b border-black/[0.07] p-5 sm:p-6">
             <div>
               <h2 className="text-sm font-extrabold">Install widget</h2>
-              <p className="mt-1 text-[10px] text-black/35">Choose a published discovery surface, then paste the snippet into any storefront.</p>
+              <p className="mt-1 text-xs text-black/35">Choose a published discovery surface, then paste the snippet into any storefront.</p>
             </div>
             <button onClick={copySnippet} disabled={selectedLaunchExperience.status !== "ready" || busy !== null} className="btn-secondary !px-3 !py-2 text-xs">{busy === "copy" ? <LoaderCircle size={13} className="animate-spin" /> : copied ? <Check size={13} /> : <Clipboard size={13} />}{copied ? "Copied" : "Copy"}</button>
           </div>
@@ -387,27 +387,27 @@ export default function LaunchStudioPage() {
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="text-xs font-extrabold">{card.label}</p>
-                    <p className="mt-1 text-[9px] leading-4 text-black/40">{card.purpose}</p>
+                    <p className="mt-1 text-xs leading-4 text-black/40">{card.purpose}</p>
                   </div>
-                  <span className={`rounded-full px-2 py-1 text-[8px] font-extrabold uppercase ${card.status === "ready" ? "bg-lime/35 text-moss" : card.status === "draft" ? "bg-amber-50 text-amber-700" : "bg-red-50 text-red-600"}`}>{card.statusLabel}</span>
+                  <span className={`rounded-full px-2 py-1 text-xs font-extrabold uppercase ${card.status === "ready" ? "bg-lime/35 text-moss" : card.status === "draft" ? "bg-amber-50 text-amber-700" : "bg-red-50 text-red-600"}`}>{card.statusLabel}</span>
                 </div>
-                <div className="mt-3 flex items-center justify-between gap-3 text-[8px] font-bold text-black/35">
+                <div className="mt-3 flex items-center justify-between gap-3 text-xs font-bold text-black/35">
                   <span className="truncate">{card.name || "No source selected"}</span>
                   <span>{card.id || "Missing ID"}</span>
                 </div>
               </button>
             ))}
           </div>
-          <pre className="min-h-[220px] overflow-x-auto bg-ink p-5 text-[10px] leading-5 text-lime/80"><code>{snippet}</code></pre>
+          <pre className="min-h-[220px] overflow-x-auto bg-ink p-5 text-xs leading-5 text-lime/80"><code>{snippet}</code></pre>
           <div className="border-t border-black/[0.06] bg-[#f8f8f4] p-5">
             <div className="flex items-center justify-between gap-3">
               <p className="text-xs font-extrabold">Embed QA checklist</p>
-              <span className={`rounded-full px-2.5 py-1 text-[8px] font-extrabold uppercase ${installReport.canInstall ? "bg-lime/35 text-moss" : "bg-amber-50 text-amber-700"}`}>{installReport.canInstall ? "Ready" : "Needs attention"}</span>
+              <span className={`rounded-full px-2.5 py-1 text-xs font-extrabold uppercase ${installReport.canInstall ? "bg-lime/35 text-moss" : "bg-amber-50 text-amber-700"}`}>{installReport.canInstall ? "Ready" : "Needs attention"}</span>
             </div>
             <div className="mt-3 grid gap-2 sm:grid-cols-2">
               {installReport.checks.slice(0, 4).map((item) => <div key={item.id} className={`rounded-xl px-3 py-2 ${item.severity === "pass" ? "bg-lime/20" : item.severity === "warning" ? "bg-amber-50" : "bg-red-50"}`}>
-                <p className="text-[9px] font-extrabold">{item.label}</p>
-                <p className="mt-0.5 text-[8px] font-bold leading-3 text-black/35">{item.detail}</p>
+                <p className="text-xs font-extrabold">{item.label}</p>
+                <p className="mt-0.5 text-xs font-bold leading-3 text-black/35">{item.detail}</p>
               </div>)}
             </div>
           </div>
@@ -415,46 +415,46 @@ export default function LaunchStudioPage() {
             <div className="flex items-start justify-between gap-4">
               <div>
                 <h2 className="flex items-center gap-2 text-sm font-extrabold"><FileText size={15} className="text-moss" /> Developer handoff</h2>
-                <p className="mt-1 text-[10px] leading-4 text-black/35">Copy a launch packet with the preview URL, embed snippet, install QA status and analytics contract.</p>
+                <p className="mt-1 text-xs leading-4 text-black/35">Copy a launch packet with the preview URL, embed snippet, install QA status and analytics contract.</p>
               </div>
               <button onClick={copyLaunchPacket} disabled={busy !== null} className="btn-secondary shrink-0 !px-3 !py-2 text-xs">{busy === "packet" ? <LoaderCircle size={13} className="animate-spin" /> : packetCopied ? <Check size={13} /> : <Clipboard size={13} />}{packetCopied ? "Copied" : "Copy packet"}</button>
             </div>
             <div className="mt-4 grid gap-3 sm:grid-cols-3">
-              <div className="rounded-2xl bg-canvas p-3"><p className="text-[9px] font-extrabold uppercase tracking-wide text-black/30">Preview URL</p><p className="mt-1 truncate text-[10px] font-bold text-black/55">{publicUrl}</p></div>
-              <div className="rounded-2xl bg-canvas p-3"><p className="text-[9px] font-extrabold uppercase tracking-wide text-black/30">Stable embed ID</p><p className="mt-1 truncate text-[10px] font-bold text-black/55">{selectedLaunchExperience.id || "YOUR_EXPERIENCE_ID"}</p></div>
-              <div className="rounded-2xl bg-canvas p-3"><p className="text-[9px] font-extrabold uppercase tracking-wide text-black/30">Analytics contract</p><p className="mt-1 text-[10px] font-bold text-black/55">5 tracked events</p></div>
+              <div className="rounded-2xl bg-canvas p-3"><p className="text-xs font-extrabold uppercase tracking-wide text-black/30">Preview URL</p><p className="mt-1 truncate text-xs font-bold text-black/55">{publicUrl}</p></div>
+              <div className="rounded-2xl bg-canvas p-3"><p className="text-xs font-extrabold uppercase tracking-wide text-black/30">Stable embed ID</p><p className="mt-1 truncate text-xs font-bold text-black/55">{selectedLaunchExperience.id || "YOUR_EXPERIENCE_ID"}</p></div>
+              <div className="rounded-2xl bg-canvas p-3"><p className="text-xs font-extrabold uppercase tracking-wide text-black/30">Analytics contract</p><p className="mt-1 text-xs font-bold text-black/55">5 tracked events</p></div>
             </div>
-            <pre className="mt-4 max-h-40 overflow-hidden rounded-2xl border border-black/[0.07] bg-[#f8f8f4] p-4 text-[9px] leading-4 text-black/45"><code>{launchPacket.split("\n").slice(0, 20).join("\n")}</code></pre>
+            <pre className="mt-4 max-h-40 overflow-hidden rounded-2xl border border-black/[0.07] bg-[#f8f8f4] p-4 text-xs leading-4 text-black/45"><code>{launchPacket.split("\n").slice(0, 20).join("\n")}</code></pre>
           </div>
           <div className="border-t border-black/[0.06] bg-[#f8f8f4] p-5">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <h2 className="flex items-center gap-2 text-sm font-extrabold"><ShieldCheck size={15} className="text-moss" /> Launch contract</h2>
-                <p className="mt-1 text-[10px] leading-4 text-black/35">A stricter implementation spec with endpoints, widget attributes, analytics payload requirements, QA checks and troubleshooting.</p>
+                <p className="mt-1 text-xs leading-4 text-black/35">A stricter implementation spec with endpoints, widget attributes, analytics payload requirements, QA checks and troubleshooting.</p>
               </div>
               <button onClick={copyLaunchContract} disabled={busy !== null} className="btn-secondary shrink-0 !px-3 !py-2 text-xs">{busy === "contract" ? <LoaderCircle size={13} className="animate-spin" /> : contractCopied ? <Check size={13} /> : <Clipboard size={13} />}{contractCopied ? "Copied" : "Copy contract"}</button>
             </div>
             <div className="mt-4 grid gap-3 sm:grid-cols-3">
-              <div className="rounded-2xl bg-white p-3"><p className="text-lg font-extrabold">{launchContract.apiEndpoints.length}</p><p className="text-[8px] font-bold text-black/30">Runtime endpoints</p></div>
-              <div className="rounded-2xl bg-white p-3"><p className="text-lg font-extrabold">{launchContract.events.length}</p><p className="text-[8px] font-bold text-black/30">Tracked events</p></div>
-              <div className="rounded-2xl bg-white p-3"><p className="text-lg font-extrabold">{launchContract.checks.filter((item) => item.status === "ready").length}/{launchContract.checks.length}</p><p className="text-[8px] font-bold text-black/30">Checks ready</p></div>
+              <div className="rounded-2xl bg-white p-3"><p className="text-lg font-extrabold">{launchContract.apiEndpoints.length}</p><p className="text-xs font-bold text-black/30">Runtime endpoints</p></div>
+              <div className="rounded-2xl bg-white p-3"><p className="text-lg font-extrabold">{launchContract.events.length}</p><p className="text-xs font-bold text-black/30">Tracked events</p></div>
+              <div className="rounded-2xl bg-white p-3"><p className="text-lg font-extrabold">{launchContract.checks.filter((item) => item.status === "ready").length}/{launchContract.checks.length}</p><p className="text-xs font-bold text-black/30">Checks ready</p></div>
             </div>
-            <pre className="mt-4 max-h-48 overflow-hidden rounded-2xl border border-black/[0.07] bg-white p-4 text-[9px] leading-4 text-black/45"><code>{launchContractText.split("\n").slice(0, 28).join("\n")}</code></pre>
+            <pre className="mt-4 max-h-48 overflow-hidden rounded-2xl border border-black/[0.07] bg-white p-4 text-xs leading-4 text-black/45"><code>{launchContractText.split("\n").slice(0, 28).join("\n")}</code></pre>
           </div>
           <div className="border-t border-black/[0.06] bg-white p-5">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <h2 className="flex items-center gap-2 text-sm font-extrabold"><BookOpenCheck size={15} className="text-moss" /> Storefront QA runbook</h2>
-                <p className="mt-1 text-[10px] leading-4 text-black/35">A manual go-live script for staging install, shopper journey, telemetry proof, recovery paths and rollback.</p>
+                <p className="mt-1 text-xs leading-4 text-black/35">A manual go-live script for staging install, shopper journey, telemetry proof, recovery paths and rollback.</p>
               </div>
               <button onClick={copyStorefrontQaRunbook} disabled={busy !== null} className="btn-secondary shrink-0 !px-3 !py-2 text-xs">{busy === "runbook" ? <LoaderCircle size={13} className="animate-spin" /> : runbookCopied ? <Check size={13} /> : <Clipboard size={13} />}{runbookCopied ? "Copied" : "Copy runbook"}</button>
             </div>
             <div className="mt-4 grid gap-3 sm:grid-cols-3">
-              <div className="rounded-2xl bg-canvas p-3"><p className="text-lg font-extrabold">{storefrontQaRunbook.steps.length}</p><p className="text-[8px] font-bold text-black/30">Manual QA steps</p></div>
-              <div className="rounded-2xl bg-canvas p-3"><p className="text-lg font-extrabold">{storefrontQaRunbook.analyticsEvents.length}</p><p className="text-[8px] font-bold text-black/30">Events to prove</p></div>
-              <div className="rounded-2xl bg-canvas p-3"><p className="text-lg font-extrabold capitalize">{storefrontQaRunbook.status}</p><p className="text-[8px] font-bold text-black/30">QA status</p></div>
+              <div className="rounded-2xl bg-canvas p-3"><p className="text-lg font-extrabold">{storefrontQaRunbook.steps.length}</p><p className="text-xs font-bold text-black/30">Manual QA steps</p></div>
+              <div className="rounded-2xl bg-canvas p-3"><p className="text-lg font-extrabold">{storefrontQaRunbook.analyticsEvents.length}</p><p className="text-xs font-bold text-black/30">Events to prove</p></div>
+              <div className="rounded-2xl bg-canvas p-3"><p className="text-lg font-extrabold capitalize">{storefrontQaRunbook.status}</p><p className="text-xs font-bold text-black/30">QA status</p></div>
             </div>
-            <pre className="mt-4 max-h-48 overflow-hidden rounded-2xl border border-black/[0.07] bg-[#f8f8f4] p-4 text-[9px] leading-4 text-black/45"><code>{storefrontQaRunbookText.split("\n").slice(0, 28).join("\n")}</code></pre>
+            <pre className="mt-4 max-h-48 overflow-hidden rounded-2xl border border-black/[0.07] bg-[#f8f8f4] p-4 text-xs leading-4 text-black/45"><code>{storefrontQaRunbookText.split("\n").slice(0, 28).join("\n")}</code></pre>
           </div>
           <div className="grid gap-3 p-5 sm:grid-cols-3">
             {selectedLaunchExperience.id && <Link href={selectedLaunchExperience.publicUrl.replace(originBase, "")} target="_blank" className="btn-primary justify-center !px-3 !py-2.5 text-xs"><ExternalLink size={13} /> Preview {selectedLaunchExperience.experience}</Link>}

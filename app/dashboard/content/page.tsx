@@ -75,7 +75,7 @@ export default function SalesContentStudioPage() {
           <div className="w-[360px] shrink-0 rounded-[26px] border border-white/10 bg-white/[0.06] p-5">
             <div className="flex items-center justify-between">
               <span className="grid h-12 w-12 place-items-center rounded-2xl bg-lime text-ink"><FileText size={22} /></span>
-              <span className={cn("rounded-full px-3 py-1.5 text-[9px] font-extrabold uppercase", statusTone[report.status])}>{report.status.replace("-", " ")}</span>
+              <span className={cn("rounded-full px-3 py-1.5 text-xs font-extrabold uppercase", statusTone[report.status])}>{report.status.replace("-", " ")}</span>
             </div>
             <p className="display mt-8 text-6xl">{report.score}%</p>
             <p className="mt-2 text-xs font-bold leading-5 text-white/45">{report.headline}</p>
@@ -94,7 +94,7 @@ export default function SalesContentStudioPage() {
             [report.summary.demandProducts, "Demand products", Megaphone],
           ].map(([value, label, Icon]) => {
             const MetricIcon = Icon as typeof FileText;
-            return <div key={String(label)} className="rounded-2xl bg-white/[0.06] p-4"><MetricIcon size={15} className="text-lime" /><p className="mt-5 text-2xl font-extrabold">{String(value)}</p><p className="mt-1 text-[8px] font-bold uppercase tracking-wider text-white/35">{String(label)}</p></div>;
+            return <div key={String(label)} className="rounded-2xl bg-white/[0.06] p-4"><MetricIcon size={15} className="text-lime" /><p className="mt-5 text-2xl font-extrabold">{String(value)}</p><p className="mt-1 text-xs font-bold uppercase tracking-wider text-white/35">{String(label)}</p></div>;
           })}
         </div>
       </section>
@@ -111,26 +111,26 @@ export default function SalesContentStudioPage() {
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className={cn("rounded-full px-3 py-1.5 text-[8px] font-extrabold uppercase", assetTone[asset.status])}>{asset.status}</span>
-                      <span className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1.5 text-[8px] font-extrabold text-black/35"><SurfaceIcon surface={asset.surface} /> {surfaceLabel[asset.surface]}</span>
+                      <span className={cn("rounded-full px-3 py-1.5 text-xs font-extrabold uppercase", assetTone[asset.status])}>{asset.status}</span>
+                      <span className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1.5 text-xs font-extrabold text-black/35"><SurfaceIcon surface={asset.surface} /> {surfaceLabel[asset.surface]}</span>
                     </div>
                     <h3 className="mt-4 text-xl font-extrabold tracking-[-.045em]">{asset.title}</h3>
-                    <p className="mt-1 text-[10px] font-bold text-black/35">{asset.productName} · {asset.category}</p>
+                    <p className="mt-1 text-xs font-bold text-black/35">{asset.productName} · {asset.category}</p>
                   </div>
                   <div className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-white text-center"><span className="text-lg font-extrabold">{asset.score}%</span></div>
                 </div>
                 <div className="mt-5 rounded-2xl bg-white p-4">
-                  <p className="text-[9px] font-extrabold uppercase tracking-wider text-moss">{asset.blocks.eyebrow}</p>
+                  <p className="text-xs font-extrabold uppercase tracking-wider text-moss">{asset.blocks.eyebrow}</p>
                   <h4 className="mt-2 text-sm font-extrabold leading-5">{asset.blocks.headline}</h4>
-                  <p className="mt-2 text-[10px] font-bold leading-4 text-black/45">{asset.blocks.body}</p>
+                  <p className="mt-2 text-xs font-bold leading-4 text-black/45">{asset.blocks.body}</p>
                 </div>
                 <div className="mt-4 flex flex-wrap gap-1.5">
-                  {asset.blocks.bullets.slice(0, 4).map((bullet) => <span key={`${asset.id}-${bullet}`} className="rounded-full bg-white px-2 py-1 text-[8px] font-extrabold text-black/35">{bullet}</span>)}
+                  {asset.blocks.bullets.slice(0, 4).map((bullet) => <span key={`${asset.id}-${bullet}`} className="rounded-full bg-white px-2 py-1 text-xs font-extrabold text-black/35">{bullet}</span>)}
                 </div>
                 <div className="mt-4 rounded-2xl border border-black/[0.06] bg-white p-4">
-                  <p className="text-[9px] font-extrabold text-black/30">Evidence</p>
-                  <p className="mt-2 text-[10px] font-bold leading-4 text-black/45">{asset.evidence}</p>
-                  <p className="mt-3 text-[9px] font-bold leading-4 text-black/30">{asset.guardrail}</p>
+                  <p className="text-xs font-extrabold text-black/30">Evidence</p>
+                  <p className="mt-2 text-xs font-bold leading-4 text-black/45">{asset.evidence}</p>
+                  <p className="mt-3 text-xs font-bold leading-4 text-black/30">{asset.guardrail}</p>
                 </div>
               </article>
             ))}
@@ -145,7 +145,7 @@ export default function SalesContentStudioPage() {
               {report.actions.map((action) => (
                 <Link key={action.id} href={action.href} className="flex items-start gap-3 rounded-2xl border border-black/[0.06] p-4 hover:bg-canvas">
                   <span className={cn("mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-xl", priorityTone[action.priority])}><PriorityIcon priority={action.priority} /></span>
-                  <span className="min-w-0 flex-1"><span className="block text-xs font-extrabold">{action.title}</span><span className="mt-1 block text-[10px] leading-4 text-black/40">{action.detail}</span><span className="mt-2 block text-[9px] font-bold text-black/30">{action.evidence}</span></span>
+                  <span className="min-w-0 flex-1"><span className="block text-xs font-extrabold">{action.title}</span><span className="mt-1 block text-xs leading-4 text-black/40">{action.detail}</span><span className="mt-2 block text-xs font-bold text-black/30">{action.evidence}</span></span>
                   <ArrowRight size={13} className="mt-2 text-black/25" />
                 </Link>
               ))}
@@ -168,14 +168,14 @@ export default function SalesContentStudioPage() {
             {report.plays.map((play) => (
               <article key={play.id} className="rounded-2xl border border-black/[0.07] bg-canvas p-4">
                 <div className="flex items-start justify-between gap-4">
-                  <div><span className={cn("rounded-full px-2.5 py-1 text-[8px] font-extrabold uppercase", priorityTone[play.priority])}>{play.priority}</span><h3 className="mt-3 text-sm font-extrabold">{play.title}</h3><p className="mt-1 text-[10px] leading-4 text-black/45">{play.detail}</p></div>
-                  <span className="rounded-full bg-white px-3 py-1.5 text-[8px] font-extrabold text-black/35">{play.channel}</span>
+                  <div><span className={cn("rounded-full px-2.5 py-1 text-xs font-extrabold uppercase", priorityTone[play.priority])}>{play.priority}</span><h3 className="mt-3 text-sm font-extrabold">{play.title}</h3><p className="mt-1 text-xs leading-4 text-black/45">{play.detail}</p></div>
+                  <span className="rounded-full bg-white px-3 py-1.5 text-xs font-extrabold text-black/35">{play.channel}</span>
                 </div>
-                <p className="mt-3 rounded-xl bg-white p-3 text-[9px] font-bold leading-4 text-black/40">{play.evidence}</p>
-                <p className="mt-3 text-[10px] font-extrabold text-moss">{play.nextStep}</p>
+                <p className="mt-3 rounded-xl bg-white p-3 text-xs font-bold leading-4 text-black/40">{play.evidence}</p>
+                <p className="mt-3 text-xs font-extrabold text-moss">{play.nextStep}</p>
               </article>
             ))}
-            {!report.plays.length && <div className="rounded-2xl border border-dashed border-black/10 p-8 text-center"><p className="text-xs font-extrabold">No launch plays yet</p><p className="mt-1 text-[10px] text-black/35">Create recommendation demand or feedback events to prioritize content placements.</p></div>}
+            {!report.plays.length && <div className="rounded-2xl border border-dashed border-black/10 p-8 text-center"><p className="text-xs font-extrabold">No launch plays yet</p><p className="mt-1 text-xs text-black/35">Create recommendation demand or feedback events to prioritize content placements.</p></div>}
           </div>
         </section>
 
@@ -184,10 +184,10 @@ export default function SalesContentStudioPage() {
           <div className="mt-5 grid gap-3 xl:grid-cols-2">
             {report.checks.map((check) => (
               <article key={check.id} className="rounded-2xl border border-black/[0.07] bg-canvas p-4">
-                <span className={cn("rounded-full px-2.5 py-1 text-[8px] font-extrabold uppercase", check.status === "pass" ? "bg-lime/35 text-moss" : check.status === "warn" ? "bg-amber-50 text-amber-700" : "bg-red-50 text-red-700")}>{check.status}</span>
+                <span className={cn("rounded-full px-2.5 py-1 text-xs font-extrabold uppercase", check.status === "pass" ? "bg-lime/35 text-moss" : check.status === "warn" ? "bg-amber-50 text-amber-700" : "bg-red-50 text-red-700")}>{check.status}</span>
                 <h3 className="mt-4 text-xs font-extrabold">{check.label}</h3>
-                <p className="mt-2 text-[10px] leading-4 text-black/45">{check.detail}</p>
-                <p className="mt-3 rounded-xl bg-white p-3 text-[9px] font-bold leading-4 text-black/40">{check.recommendation}</p>
+                <p className="mt-2 text-xs leading-4 text-black/45">{check.detail}</p>
+                <p className="mt-3 rounded-xl bg-white p-3 text-xs font-bold leading-4 text-black/40">{check.recommendation}</p>
               </article>
             ))}
           </div>

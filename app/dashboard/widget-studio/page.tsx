@@ -63,14 +63,14 @@ export default function WidgetStudioPage() {
         <section className="rounded-[30px] border border-black/[0.07] bg-ink p-7 text-white">
           <div className="flex items-center justify-between">
             <span className="grid h-12 w-12 place-items-center rounded-2xl bg-lime text-ink"><Code2 size={22} /></span>
-            <span className={cn("rounded-full px-3 py-1.5 text-[9px] font-extrabold uppercase", report.status === "ready" ? "bg-lime text-ink" : report.status === "watch" ? "bg-amber-300/20 text-amber-100" : "bg-red-500/20 text-red-100")}>{report.status}</span>
+            <span className={cn("rounded-full px-3 py-1.5 text-xs font-extrabold uppercase", report.status === "ready" ? "bg-lime text-ink" : report.status === "watch" ? "bg-amber-300/20 text-amber-100" : "bg-red-500/20 text-red-100")}>{report.status}</span>
           </div>
           <p className="display mt-8 text-7xl">{report.score}%</p>
           <p className="mt-3 text-sm font-bold leading-6 text-white/45">Widget readiness across published IDs, modal/inline snippets, attribution, branding and storefront telemetry proof.</p>
           <div className="mt-6 grid grid-cols-3 gap-2 text-center">
-            <div className="rounded-2xl bg-white/[0.06] p-3"><p className="text-xl font-extrabold">{report.summary.installable}</p><p className="mt-1 text-[8px] text-white/35">Installable</p></div>
-            <div className="rounded-2xl bg-white/[0.06] p-3"><p className="text-xl font-extrabold">{report.summary.modalSnippets}</p><p className="mt-1 text-[8px] text-white/35">Modal</p></div>
-            <div className="rounded-2xl bg-white/[0.06] p-3"><p className="text-xl font-extrabold">{report.summary.inlineSnippets}</p><p className="mt-1 text-[8px] text-white/35">Inline</p></div>
+            <div className="rounded-2xl bg-white/[0.06] p-3"><p className="text-xl font-extrabold">{report.summary.installable}</p><p className="mt-1 text-xs text-white/35">Installable</p></div>
+            <div className="rounded-2xl bg-white/[0.06] p-3"><p className="text-xl font-extrabold">{report.summary.modalSnippets}</p><p className="mt-1 text-xs text-white/35">Modal</p></div>
+            <div className="rounded-2xl bg-white/[0.06] p-3"><p className="text-xl font-extrabold">{report.summary.inlineSnippets}</p><p className="mt-1 text-xs text-white/35">Inline</p></div>
           </div>
         </section>
 
@@ -86,7 +86,7 @@ export default function WidgetStudioPage() {
               <article key={String(label)} className="rounded-[24px] border border-black/[0.07] bg-white p-5">
                 <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#eef1e8] text-moss"><MetricIcon size={18} /></span>
                 <p className="display mt-5 text-4xl">{String(value)}</p>
-                <p className="mt-1 text-[9px] font-extrabold uppercase tracking-wider text-black/30">{String(label)}</p>
+                <p className="mt-1 text-xs font-extrabold uppercase tracking-wider text-black/30">{String(label)}</p>
               </article>
             );
           })}
@@ -117,7 +117,7 @@ export default function WidgetStudioPage() {
                 <h2 className="text-sm font-extrabold">Embeddable experiences</h2>
                 <p className="mt-1 text-xs text-black/35">Each surface gets a modal launcher and inline iframe snippet from the same install contract.</p>
               </div>
-              <span className="rounded-full bg-lime/35 px-3 py-1.5 text-[9px] font-extrabold text-moss">{report.summary.experiences} surfaces</span>
+              <span className="rounded-full bg-lime/35 px-3 py-1.5 text-xs font-extrabold text-moss">{report.summary.experiences} surfaces</span>
             </div>
             <div className="mt-5 space-y-4">
               {report.experiences.map((experience) => (
@@ -126,12 +126,12 @@ export default function WidgetStudioPage() {
                     <div>
                       <div className="flex flex-wrap items-center gap-2">
                         <h3 className="text-sm font-extrabold">{experience.label}</h3>
-                        <span className={cn("rounded-full px-2.5 py-1 text-[8px] font-extrabold uppercase", statusTone[experience.readiness])}>{experience.readinessLabel}</span>
+                        <span className={cn("rounded-full px-2.5 py-1 text-xs font-extrabold uppercase", statusTone[experience.readiness])}>{experience.readinessLabel}</span>
                       </div>
                       <p className="mt-1 text-xs font-bold text-black/35">{experience.name} · {experience.targetPath}</p>
-                      <p className="mt-2 max-w-3xl text-[10px] leading-4 text-black/45">{experience.purpose}</p>
+                      <p className="mt-2 max-w-3xl text-xs leading-4 text-black/45">{experience.purpose}</p>
                     </div>
-                    <Link href={experience.publicUrl} target="_blank" className="shrink-0 rounded-full border border-black/10 bg-white px-3 py-2 text-[10px] font-extrabold text-black/50">Preview <ExternalLink size={10} className="inline" /></Link>
+                    <Link href={experience.publicUrl} target="_blank" className="shrink-0 rounded-full border border-black/10 bg-white px-3 py-2 text-xs font-extrabold text-black/50">Preview <ExternalLink size={10} className="inline" /></Link>
                   </div>
 
                   <div className="mt-5 grid gap-3 xl:grid-cols-6">
@@ -145,7 +145,7 @@ export default function WidgetStudioPage() {
                     ].map(([value, label]) => (
                       <div key={`${experience.id}-${label}`} className="rounded-2xl bg-white p-4 text-center">
                         <p className="text-xl font-extrabold">{String(value)}</p>
-                        <p className="mt-1 text-[8px] font-bold uppercase tracking-wider text-black/30">{String(label)}</p>
+                        <p className="mt-1 text-xs font-bold uppercase tracking-wider text-black/30">{String(label)}</p>
                       </div>
                     ))}
                   </div>
@@ -154,24 +154,24 @@ export default function WidgetStudioPage() {
                     <div className="rounded-2xl bg-ink p-4 text-white">
                       <div className="flex items-center justify-between">
                         <p className="flex items-center gap-2 text-xs font-extrabold"><Code2 size={14} className="text-lime" /> Modal snippet</p>
-                        <button onClick={() => copy(experience.modalSnippet, `${experience.id}-modal`)} className="rounded-full bg-lime px-3 py-1.5 text-[9px] font-extrabold text-ink">{copied === `${experience.id}-modal` ? "Copied" : "Copy"}</button>
+                        <button onClick={() => copy(experience.modalSnippet, `${experience.id}-modal`)} className="rounded-full bg-lime px-3 py-1.5 text-xs font-extrabold text-ink">{copied === `${experience.id}-modal` ? "Copied" : "Copy"}</button>
                       </div>
-                      <pre className="mt-3 max-h-44 overflow-auto whitespace-pre-wrap break-all rounded-xl bg-black/20 p-3 text-[9px] leading-4 text-white/55">{experience.modalSnippet}</pre>
+                      <pre className="mt-3 max-h-44 overflow-auto whitespace-pre-wrap break-all rounded-xl bg-black/20 p-3 text-xs leading-4 text-white/55">{experience.modalSnippet}</pre>
                     </div>
                     <div className="rounded-2xl bg-white p-4">
                       <div className="flex items-center justify-between">
                         <p className="flex items-center gap-2 text-xs font-extrabold"><Code2 size={14} className="text-moss" /> Inline snippet</p>
-                        <button onClick={() => copy(experience.inlineSnippet, `${experience.id}-inline`)} className="rounded-full bg-ink px-3 py-1.5 text-[9px] font-extrabold text-white">{copied === `${experience.id}-inline` ? "Copied" : "Copy"}</button>
+                        <button onClick={() => copy(experience.inlineSnippet, `${experience.id}-inline`)} className="rounded-full bg-ink px-3 py-1.5 text-xs font-extrabold text-white">{copied === `${experience.id}-inline` ? "Copied" : "Copy"}</button>
                       </div>
-                      <pre className="mt-3 max-h-44 overflow-auto whitespace-pre-wrap break-all rounded-xl bg-canvas p-3 text-[9px] leading-4 text-black/45">{experience.inlineSnippet}</pre>
+                      <pre className="mt-3 max-h-44 overflow-auto whitespace-pre-wrap break-all rounded-xl bg-canvas p-3 text-xs leading-4 text-black/45">{experience.inlineSnippet}</pre>
                     </div>
                   </div>
 
                   <div className="mt-5 grid gap-2 xl:grid-cols-4">
                     {experience.qa.map((item) => (
                       <div key={`${experience.id}-${item.id}`} className={cn("rounded-2xl p-3", checkTone[item.status])}>
-                        <p className="text-[10px] font-extrabold">{item.label}</p>
-                        <p className="mt-1 text-[9px] leading-4 opacity-70">{item.detail}</p>
+                        <p className="text-xs font-extrabold">{item.label}</p>
+                        <p className="mt-1 text-xs leading-4 opacity-70">{item.detail}</p>
                       </div>
                     ))}
                   </div>
@@ -192,11 +192,11 @@ export default function WidgetStudioPage() {
               {report.installContract.map((field) => (
                 <div key={field.attribute} className="rounded-2xl bg-canvas p-4">
                   <div className="flex items-center justify-between gap-3">
-                    <p className="text-[10px] font-extrabold">{field.attribute}</p>
-                    <span className={cn("rounded-full px-2 py-1 text-[8px] font-extrabold uppercase", field.required ? "bg-ink text-white" : "bg-white text-black/35")}>{field.required ? "required" : "optional"}</span>
+                    <p className="text-xs font-extrabold">{field.attribute}</p>
+                    <span className={cn("rounded-full px-2 py-1 text-xs font-extrabold uppercase", field.required ? "bg-ink text-white" : "bg-white text-black/35")}>{field.required ? "required" : "optional"}</span>
                   </div>
-                  <p className="mt-2 text-[9px] font-bold text-moss">{field.example}</p>
-                  <p className="mt-2 text-[9px] leading-4 text-black/40">{field.detail}</p>
+                  <p className="mt-2 text-xs font-bold text-moss">{field.example}</p>
+                  <p className="mt-2 text-xs leading-4 text-black/40">{field.detail}</p>
                 </div>
               ))}
             </div>
@@ -210,7 +210,7 @@ export default function WidgetStudioPage() {
               {report.qaChecks.map((item) => (
                 <div key={item.id} className={cn("rounded-2xl p-4", checkTone[item.status])}>
                   <p className="text-xs font-extrabold">{item.label}</p>
-                  <p className="mt-1 text-[10px] leading-4 opacity-70">{item.detail}</p>
+                  <p className="mt-1 text-xs leading-4 opacity-70">{item.detail}</p>
                 </div>
               ))}
             </div>
@@ -221,10 +221,10 @@ export default function WidgetStudioPage() {
             <div className="mt-4 space-y-2">
               {report.actions.map((action) => (
                 <Link key={action.id} href={action.href} className="block rounded-2xl bg-white/[0.06] p-4 transition hover:bg-white/[0.1]">
-                  <span className={cn("rounded-full px-2.5 py-1 text-[8px] font-extrabold uppercase", priorityTone[action.priority])}>{action.priority}</span>
+                  <span className={cn("rounded-full px-2.5 py-1 text-xs font-extrabold uppercase", priorityTone[action.priority])}>{action.priority}</span>
                   <h3 className="mt-4 text-xs font-extrabold leading-5">{action.title}</h3>
-                  <p className="mt-1 text-[10px] leading-4 text-white/45">{action.detail}</p>
-                  <span className="mt-3 inline-flex items-center gap-1 text-[9px] font-extrabold text-lime">{action.label}<ArrowRight size={10} /></span>
+                  <p className="mt-1 text-xs leading-4 text-white/45">{action.detail}</p>
+                  <span className="mt-3 inline-flex items-center gap-1 text-xs font-extrabold text-lime">{action.label}<ArrowRight size={10} /></span>
                 </Link>
               ))}
             </div>
@@ -236,8 +236,8 @@ export default function WidgetStudioPage() {
               {report.eventContract.map((event) => (
                 <div key={event.event} className="rounded-2xl bg-canvas p-4">
                   <p className="text-xs font-extrabold">{event.event}</p>
-                  <p className="mt-1 text-[10px] leading-4 text-black/40">{event.when}</p>
-                  <p className="mt-2 text-[9px] font-bold text-moss">{event.requiredMetadata.join(" · ")}</p>
+                  <p className="mt-1 text-xs leading-4 text-black/40">{event.when}</p>
+                  <p className="mt-2 text-xs font-bold text-moss">{event.requiredMetadata.join(" · ")}</p>
                 </div>
               ))}
             </div>
@@ -254,7 +254,7 @@ export default function WidgetStudioPage() {
                 const Icon = item.icon;
                 return <Link key={item.href} href={item.href} className="flex items-start gap-3 rounded-2xl bg-canvas p-4 transition hover:bg-white">
                   <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-lime/35 text-moss"><Icon size={16} /></span>
-                  <span><span className="block text-xs font-extrabold">{item.label}</span><span className="mt-1 block text-[10px] leading-4 text-black/40">{item.detail}</span></span>
+                  <span><span className="block text-xs font-extrabold">{item.label}</span><span className="mt-1 block text-xs leading-4 text-black/40">{item.detail}</span></span>
                 </Link>;
               })}
             </div>

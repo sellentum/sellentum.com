@@ -135,7 +135,7 @@ const priorityCopy: Record<LaunchReportAction["priority"], string> = {
 function StatusPill({ status }: { status: CheckStatus }) {
   const copy = statusCopy[status];
   const Icon = copy.icon;
-  return <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[9px] font-extrabold ${copy.className}`}><Icon size={11} />{copy.label}</span>;
+  return <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-extrabold ${copy.className}`}><Icon size={11} />{copy.label}</span>;
 }
 
 export default function PreflightPage() {
@@ -212,9 +212,9 @@ export default function PreflightPage() {
             <h2 className="display mt-7 text-4xl">{payload.overall === "pass" ? "Ready to embed" : payload.overall === "warn" ? "Almost launchable" : "Fix blockers first"}</h2>
             <p className="mt-2 text-xs leading-5 text-white/45">{payload.mode === "demo" ? "Demo workspace checks use seeded data. Connect Supabase before production launch." : "Supabase workspace checks are using your authenticated account."}</p>
             <div className="mt-6 grid grid-cols-3 gap-2 text-center">
-              <div className="rounded-2xl bg-white/[.07] p-4"><p className="text-2xl font-extrabold">{totals.ready}</p><p className="mt-1 text-[8px] font-bold text-white/35">Ready</p></div>
-              <div className="rounded-2xl bg-white/[.07] p-4"><p className="text-2xl font-extrabold">{totals.warn}</p><p className="mt-1 text-[8px] font-bold text-white/35">Review</p></div>
-              <div className="rounded-2xl bg-white/[.07] p-4"><p className="text-2xl font-extrabold">{totals.fail}</p><p className="mt-1 text-[8px] font-bold text-white/35">Blocked</p></div>
+              <div className="rounded-2xl bg-white/[.07] p-4"><p className="text-2xl font-extrabold">{totals.ready}</p><p className="mt-1 text-xs font-bold text-white/35">Ready</p></div>
+              <div className="rounded-2xl bg-white/[.07] p-4"><p className="text-2xl font-extrabold">{totals.warn}</p><p className="mt-1 text-xs font-bold text-white/35">Review</p></div>
+              <div className="rounded-2xl bg-white/[.07] p-4"><p className="text-2xl font-extrabold">{totals.fail}</p><p className="mt-1 text-xs font-bold text-white/35">Blocked</p></div>
             </div>
           </div>
         </div>
@@ -227,15 +227,15 @@ export default function PreflightPage() {
               <p className="eyebrow text-moss">Launch readiness score</p>
               <h2 className="mt-3 text-5xl font-extrabold tracking-[-.07em]">{payload.launch_report.score}%</h2>
             </div>
-            <span className={`rounded-full px-3 py-1 text-[9px] font-extrabold uppercase tracking-wider ${payload.launch_report.status === "blocked" ? "bg-red-50 text-red-700" : payload.launch_report.status === "review" ? "bg-amber-50 text-amber-700" : "bg-lime/35 text-moss"}`}>{payload.launch_report.status}</span>
+            <span className={`rounded-full px-3 py-1 text-xs font-extrabold uppercase tracking-wider ${payload.launch_report.status === "blocked" ? "bg-red-50 text-red-700" : payload.launch_report.status === "review" ? "bg-amber-50 text-amber-700" : "bg-lime/35 text-moss"}`}>{payload.launch_report.status}</span>
           </div>
           <h3 className="mt-6 text-2xl font-extrabold tracking-[-.05em]">{payload.launch_report.headline}</h3>
           <p className="mt-3 text-xs leading-5 text-black/45">{payload.launch_report.narrative}</p>
           <div className="mt-5 grid grid-cols-4 gap-2 text-center">
-            <div className="rounded-2xl bg-[#f8f8f4] p-3"><p className="text-xl font-extrabold">{payload.launch_report.counts.passed}</p><p className="mt-1 text-[8px] font-bold text-black/30">Pass</p></div>
-            <div className="rounded-2xl bg-[#f8f8f4] p-3"><p className="text-xl font-extrabold">{payload.launch_report.counts.warnings}</p><p className="mt-1 text-[8px] font-bold text-black/30">Warn</p></div>
-            <div className="rounded-2xl bg-[#f8f8f4] p-3"><p className="text-xl font-extrabold">{payload.launch_report.counts.blockers}</p><p className="mt-1 text-[8px] font-bold text-black/30">Block</p></div>
-            <div className="rounded-2xl bg-[#f8f8f4] p-3"><p className="text-xl font-extrabold capitalize">{payload.launch_report.confidence}</p><p className="mt-1 text-[8px] font-bold text-black/30">Confidence</p></div>
+            <div className="rounded-2xl bg-[#f8f8f4] p-3"><p className="text-xl font-extrabold">{payload.launch_report.counts.passed}</p><p className="mt-1 text-xs font-bold text-black/30">Pass</p></div>
+            <div className="rounded-2xl bg-[#f8f8f4] p-3"><p className="text-xl font-extrabold">{payload.launch_report.counts.warnings}</p><p className="mt-1 text-xs font-bold text-black/30">Warn</p></div>
+            <div className="rounded-2xl bg-[#f8f8f4] p-3"><p className="text-xl font-extrabold">{payload.launch_report.counts.blockers}</p><p className="mt-1 text-xs font-bold text-black/30">Block</p></div>
+            <div className="rounded-2xl bg-[#f8f8f4] p-3"><p className="text-xl font-extrabold capitalize">{payload.launch_report.confidence}</p><p className="mt-1 text-xs font-bold text-black/30">Confidence</p></div>
           </div>
         </div>
 
@@ -245,7 +245,7 @@ export default function PreflightPage() {
               <p className="eyebrow text-moss">Priority launch plan</p>
               <h2 className="mt-2 text-2xl font-extrabold tracking-[-.05em]">{payload.launch_report.nextActions.length ? "Fix these in order." : "No priority fixes right now."}</h2>
             </div>
-            <Link href="/dashboard/launch" className="hidden items-center gap-1 text-[10px] font-extrabold text-moss xl:flex">Open Launch Studio <ArrowRight size={11} /></Link>
+            <Link href="/dashboard/launch" className="hidden items-center gap-1 text-xs font-extrabold text-moss xl:flex">Open Launch Studio <ArrowRight size={11} /></Link>
           </div>
 
           {payload.launch_report.nextActions.length ? (
@@ -253,15 +253,15 @@ export default function PreflightPage() {
               {payload.launch_report.nextActions.slice(0, 4).map((action) => (
                 <article key={action.id} className="rounded-2xl border border-black/[0.06] bg-[#f8f8f4] p-4">
                   <div className="flex items-start justify-between gap-3">
-                    <span className={`rounded-full px-2.5 py-1 text-[8px] font-extrabold uppercase tracking-wider ${priorityCopy[action.priority]}`}>{action.priority}</span>
-                    <span className="rounded-full bg-white px-2.5 py-1 text-[8px] font-extrabold uppercase tracking-wider text-black/35">{action.effort}</span>
+                    <span className={`rounded-full px-2.5 py-1 text-xs font-extrabold uppercase tracking-wider ${priorityCopy[action.priority]}`}>{action.priority}</span>
+                    <span className="rounded-full bg-white px-2.5 py-1 text-xs font-extrabold uppercase tracking-wider text-black/35">{action.effort}</span>
                   </div>
                   <h3 className="mt-3 text-sm font-extrabold">{action.title}</h3>
-                  <p className="mt-2 text-[10px] leading-4 text-black/40">{action.detail}</p>
-                  <p className="mt-3 rounded-xl bg-white px-3 py-2 text-[10px] font-bold leading-4 text-black/50">{action.evidence}</p>
+                  <p className="mt-2 text-xs leading-4 text-black/40">{action.detail}</p>
+                  <p className="mt-3 rounded-xl bg-white px-3 py-2 text-xs font-bold leading-4 text-black/50">{action.evidence}</p>
                   <div className="mt-3 flex items-center justify-between gap-3">
-                    <p className="text-[9px] font-bold uppercase tracking-wider text-black/30">{action.owner} · {action.impact}</p>
-                    {action.actionHref && action.actionLabel && <Link href={action.actionHref} className="shrink-0 text-[9px] font-extrabold text-moss">{action.actionLabel}</Link>}
+                    <p className="text-xs font-bold uppercase tracking-wider text-black/30">{action.owner} · {action.impact}</p>
+                    {action.actionHref && action.actionLabel && <Link href={action.actionHref} className="shrink-0 text-xs font-extrabold text-moss">{action.actionLabel}</Link>}
                   </div>
                 </article>
               ))}
@@ -281,13 +281,13 @@ export default function PreflightPage() {
             {payload.launch_report.coverage.map((item) => (
               <div key={item.id} className="rounded-2xl border border-black/[0.06] bg-white p-3">
                 <div className="flex items-center justify-between gap-2">
-                  <p className="truncate text-[9px] font-extrabold text-black/55">{item.label}</p>
+                  <p className="truncate text-xs font-extrabold text-black/55">{item.label}</p>
                   <StatusPill status={item.status} />
                 </div>
                 <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-black/[0.06]">
                   <div className={`h-full rounded-full ${item.status === "fail" ? "bg-red-400" : item.status === "warn" ? "bg-amber-400" : "bg-moss"}`} style={{ width: `${item.score}%` }} />
                 </div>
-                <p className="mt-2 text-[9px] font-bold text-black/35">{item.score}% · {item.passed}/{item.checks} checks ready</p>
+                <p className="mt-2 text-xs font-bold text-black/35">{item.score}% · {item.passed}/{item.checks} checks ready</p>
               </div>
             ))}
           </div>
@@ -337,7 +337,7 @@ export default function PreflightPage() {
         ].map(([value, label]) => (
           <div key={String(label)} className="rounded-2xl border border-black/[0.07] bg-white p-4">
             <p className="text-2xl font-extrabold tracking-[-.05em]">{String(value)}</p>
-            <p className="mt-1 text-[9px] font-bold uppercase tracking-wider text-black/30">{String(label)}</p>
+            <p className="mt-1 text-xs font-bold uppercase tracking-wider text-black/30">{String(label)}</p>
           </div>
         ))}
       </div>
@@ -348,7 +348,7 @@ export default function PreflightPage() {
             <div className="flex items-start justify-between gap-4">
               <div>
                 <h2 className="flex items-center gap-2 text-sm font-extrabold"><ClipboardCheck size={16} className="text-moss" />{section.label}</h2>
-                <p className="mt-1 text-[10px] leading-4 text-black/35">{section.description}</p>
+                <p className="mt-1 text-xs leading-4 text-black/35">{section.description}</p>
               </div>
               <StatusPill status={section.status} />
             </div>
@@ -364,11 +364,11 @@ export default function PreflightPage() {
                       <div className="min-w-0 flex-1">
                         <div className="flex items-start justify-between gap-3">
                           <h3 className="text-xs font-extrabold">{item.label}</h3>
-                          {item.actionHref && item.actionLabel && <Link href={item.actionHref} className="hidden shrink-0 items-center gap-1 text-[9px] font-extrabold text-moss sm:flex">{item.actionLabel}<ArrowRight size={10} /></Link>}
+                          {item.actionHref && item.actionLabel && <Link href={item.actionHref} className="hidden shrink-0 items-center gap-1 text-xs font-extrabold text-moss sm:flex">{item.actionLabel}<ArrowRight size={10} /></Link>}
                         </div>
-                        <p className="mt-1 text-[10px] leading-4 text-black/40">{item.description}</p>
-                        <p className="mt-2 rounded-xl bg-white px-3 py-2 text-[10px] font-bold leading-4 text-black/50">{item.detail}</p>
-                        {item.actionHref && item.actionLabel && <Link href={item.actionHref} className="mt-3 inline-flex items-center gap-1 text-[10px] font-extrabold text-moss sm:hidden">{item.actionLabel}<ArrowRight size={10} /></Link>}
+                        <p className="mt-1 text-xs leading-4 text-black/40">{item.description}</p>
+                        <p className="mt-2 rounded-xl bg-white px-3 py-2 text-xs font-bold leading-4 text-black/50">{item.detail}</p>
+                        {item.actionHref && item.actionLabel && <Link href={item.actionHref} className="mt-3 inline-flex items-center gap-1 text-xs font-extrabold text-moss sm:hidden">{item.actionLabel}<ArrowRight size={10} /></Link>}
                       </div>
                     </div>
                   </article>

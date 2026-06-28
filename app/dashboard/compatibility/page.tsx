@@ -59,14 +59,14 @@ export default function CompatibilityMatrixPage() {
         <section className="rounded-[30px] border border-black/[0.07] bg-ink p-7 text-white">
           <div className="flex items-center justify-between">
             <span className="grid h-12 w-12 place-items-center rounded-2xl bg-lime text-ink"><Network size={22} /></span>
-            <span className={cn("rounded-full px-3 py-1.5 text-[9px] font-extrabold uppercase", report.status === "ready" ? "bg-lime text-ink" : report.status === "watch" ? "bg-amber-300/20 text-amber-100" : report.status === "needs-attention" ? "bg-red-500/20 text-red-100" : "bg-white/10 text-white/50")}>{report.status.replace("-", " ")}</span>
+            <span className={cn("rounded-full px-3 py-1.5 text-xs font-extrabold uppercase", report.status === "ready" ? "bg-lime text-ink" : report.status === "watch" ? "bg-amber-300/20 text-amber-100" : report.status === "needs-attention" ? "bg-red-500/20 text-red-100" : "bg-white/10 text-white/50")}>{report.status.replace("-", " ")}</span>
           </div>
           <p className="display mt-8 text-7xl">{report.score}%</p>
           <p className="mt-3 text-sm font-bold leading-6 text-white/45">{report.headline}</p>
           <div className="mt-6 grid grid-cols-3 gap-2 text-center">
-            <div className="rounded-2xl bg-white/[0.06] p-3"><p className="text-xl font-extrabold">{report.summary.blockedPairs}</p><p className="mt-1 text-[8px] text-white/35">Pairs</p></div>
-            <div className="rounded-2xl bg-white/[0.06] p-3"><p className="text-xl font-extrabold">{report.summary.staleRules}</p><p className="mt-1 text-[8px] text-white/35">Stale</p></div>
-            <div className="rounded-2xl bg-white/[0.06] p-3"><p className="text-xl font-extrabold">{report.summary.qaScore}%</p><p className="mt-1 text-[8px] text-white/35">QA</p></div>
+            <div className="rounded-2xl bg-white/[0.06] p-3"><p className="text-xl font-extrabold">{report.summary.blockedPairs}</p><p className="mt-1 text-xs text-white/35">Pairs</p></div>
+            <div className="rounded-2xl bg-white/[0.06] p-3"><p className="text-xl font-extrabold">{report.summary.staleRules}</p><p className="mt-1 text-xs text-white/35">Stale</p></div>
+            <div className="rounded-2xl bg-white/[0.06] p-3"><p className="text-xl font-extrabold">{report.summary.qaScore}%</p><p className="mt-1 text-xs text-white/35">QA</p></div>
           </div>
         </section>
 
@@ -82,7 +82,7 @@ export default function CompatibilityMatrixPage() {
               <article key={String(label)} className="rounded-[24px] border border-black/[0.07] bg-white p-5">
                 <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#eef1e8] text-moss"><MetricIcon size={18} /></span>
                 <p className="display mt-5 text-4xl">{String(value)}</p>
-                <p className="mt-1 text-[9px] font-extrabold uppercase tracking-wider text-black/30">{String(label)}</p>
+                <p className="mt-1 text-xs font-extrabold uppercase tracking-wider text-black/30">{String(label)}</p>
               </article>
             );
           })}
@@ -97,11 +97,11 @@ export default function CompatibilityMatrixPage() {
                 <h2 className="text-sm font-extrabold">Dependency rule matrix</h2>
                 <p className="mt-1 text-xs text-black/35">Each row is a deterministic blocked pair used by the configurator runtime before checkout.</p>
               </div>
-              <span className={cn("rounded-full px-3 py-1.5 text-[9px] font-extrabold uppercase", statusTone[report.status])}>{report.summary.compatibilityRules} rules</span>
+              <span className={cn("rounded-full px-3 py-1.5 text-xs font-extrabold uppercase", statusTone[report.status])}>{report.summary.compatibilityRules} rules</span>
             </div>
 
             <div className="mt-5 overflow-hidden rounded-2xl border border-black/[0.07]">
-              <div className="grid grid-cols-[1fr_1fr_120px_120px] bg-canvas px-4 py-3 text-[9px] font-extrabold uppercase tracking-wider text-black/35">
+              <div className="grid grid-cols-[1fr_1fr_120px_120px] bg-canvas px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-black/35">
                 <span>Selected option</span>
                 <span>Blocked option</span>
                 <span>Status</span>
@@ -111,15 +111,15 @@ export default function CompatibilityMatrixPage() {
                 <div key={rule.id} className="grid grid-cols-[1fr_1fr_120px_120px] gap-3 border-t border-black/[0.06] px-4 py-4 text-xs">
                   <div>
                     <p className="font-extrabold">{rule.sourceOptionLabel}</p>
-                    <p className="mt-1 text-[10px] text-black/35">{rule.sourceStepTitle}{rule.sourceProductName ? ` · ${rule.sourceProductName}` : ""}</p>
+                    <p className="mt-1 text-xs text-black/35">{rule.sourceStepTitle}{rule.sourceProductName ? ` · ${rule.sourceProductName}` : ""}</p>
                   </div>
                   <div>
                     <p className="font-extrabold">{rule.targetOptionLabel}</p>
-                    <p className="mt-1 text-[10px] text-black/35">{rule.targetStepTitle || "Missing option"}{rule.targetProductName ? ` · ${rule.targetProductName}` : ""}</p>
+                    <p className="mt-1 text-xs text-black/35">{rule.targetStepTitle || "Missing option"}{rule.targetProductName ? ` · ${rule.targetProductName}` : ""}</p>
                   </div>
-                  <div><span className={cn("rounded-full px-2.5 py-1 text-[8px] font-extrabold uppercase", ruleTone[rule.status])}>{rule.status}</span></div>
-                  <div><span className="rounded-full bg-black/[0.04] px-2.5 py-1 text-[8px] font-extrabold uppercase text-black/35">{rule.reciprocal ? "two-way" : "one-way"}</span></div>
-                  <p className="col-span-4 rounded-xl bg-canvas px-3 py-2 text-[10px] font-bold leading-4 text-black/45">{rule.evidence}</p>
+                  <div><span className={cn("rounded-full px-2.5 py-1 text-xs font-extrabold uppercase", ruleTone[rule.status])}>{rule.status}</span></div>
+                  <div><span className="rounded-full bg-black/[0.04] px-2.5 py-1 text-xs font-extrabold uppercase text-black/35">{rule.reciprocal ? "two-way" : "one-way"}</span></div>
+                  <p className="col-span-4 rounded-xl bg-canvas px-3 py-2 text-xs font-bold leading-4 text-black/45">{rule.evidence}</p>
                 </div>
               ))}
               {!report.rules.length && <div className="p-5 text-xs font-bold leading-5 text-black/45">No compatibility rules yet. Add incompatibility references in Configurators to generate the matrix.</div>}
@@ -140,13 +140,13 @@ export default function CompatibilityMatrixPage() {
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className="text-xs font-extrabold">{option.label}</p>
-                      <p className="mt-1 text-[10px] text-black/35">{option.configuratorName} · {option.stepTitle}</p>
+                      <p className="mt-1 text-xs text-black/35">{option.configuratorName} · {option.stepTitle}</p>
                     </div>
-                    <span className={cn("rounded-full px-2 py-1 text-[8px] font-extrabold uppercase", option.activeProduct ? "bg-lime/25 text-moss" : "bg-red-50 text-red-700")}>{option.activeProduct ? "available" : "unavailable"}</span>
+                    <span className={cn("rounded-full px-2 py-1 text-xs font-extrabold uppercase", option.activeProduct ? "bg-lime/25 text-moss" : "bg-red-50 text-red-700")}>{option.activeProduct ? "available" : "unavailable"}</span>
                   </div>
                   <div className="mt-4 grid grid-cols-2 gap-2">
-                    <span className="rounded-xl bg-white px-3 py-2 text-[9px] font-bold text-black/40">{option.ruleCount} rules</span>
-                    <span className="rounded-xl bg-white px-3 py-2 text-[9px] font-bold text-black/40">{option.productName || "No product link"}</span>
+                    <span className="rounded-xl bg-white px-3 py-2 text-xs font-bold text-black/40">{option.ruleCount} rules</span>
+                    <span className="rounded-xl bg-white px-3 py-2 text-xs font-bold text-black/40">{option.productName || "No product link"}</span>
                   </div>
                 </article>
               ))}
@@ -166,10 +166,10 @@ export default function CompatibilityMatrixPage() {
                 <div key={check.id} className={cn("rounded-2xl p-4", ruleTone[check.status])}>
                   <div className="flex items-start justify-between gap-3">
                     <h3 className="text-xs font-extrabold">{check.label}</h3>
-                    <span className="rounded-full bg-white/70 px-2 py-1 text-[8px] font-extrabold uppercase opacity-80">{check.status}</span>
+                    <span className="rounded-full bg-white/70 px-2 py-1 text-xs font-extrabold uppercase opacity-80">{check.status}</span>
                   </div>
-                  <p className="mt-2 text-[10px] leading-4 opacity-70">{check.detail}</p>
-                  <p className="mt-3 rounded-xl bg-white/70 px-3 py-2 text-[9px] font-bold leading-4 opacity-80">{check.evidence}</p>
+                  <p className="mt-2 text-xs leading-4 opacity-70">{check.detail}</p>
+                  <p className="mt-3 rounded-xl bg-white/70 px-3 py-2 text-xs font-bold leading-4 opacity-80">{check.evidence}</p>
                 </div>
               ))}
             </div>
@@ -182,11 +182,11 @@ export default function CompatibilityMatrixPage() {
             <div className="mt-4 space-y-2">
               {report.actions.map((action) => (
                 <Link key={action.id} href={action.actionHref} className="block rounded-2xl bg-white/[0.06] p-4 transition hover:bg-white/[0.1]">
-                  <span className={cn("rounded-full px-2.5 py-1 text-[8px] font-extrabold uppercase", priorityTone[action.priority])}>{action.priority}</span>
+                  <span className={cn("rounded-full px-2.5 py-1 text-xs font-extrabold uppercase", priorityTone[action.priority])}>{action.priority}</span>
                   <h3 className="mt-4 text-xs font-extrabold leading-5">{action.title}</h3>
-                  <p className="mt-1 text-[10px] leading-4 text-white/45">{action.detail}</p>
-                  <p className="mt-3 rounded-xl bg-white/[0.06] px-3 py-2 text-[9px] font-bold leading-4 text-white/45">{action.evidence}</p>
-                  <span className="mt-3 inline-flex items-center gap-1 text-[9px] font-extrabold text-lime">{action.actionLabel}<ArrowRight size={10} /></span>
+                  <p className="mt-1 text-xs leading-4 text-white/45">{action.detail}</p>
+                  <p className="mt-3 rounded-xl bg-white/[0.06] px-3 py-2 text-xs font-bold leading-4 text-white/45">{action.evidence}</p>
+                  <span className="mt-3 inline-flex items-center gap-1 text-xs font-extrabold text-lime">{action.actionLabel}<ArrowRight size={10} /></span>
                 </Link>
               ))}
             </div>

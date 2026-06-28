@@ -61,10 +61,10 @@ export default function DashboardTemplatesPage() {
               >
                 <div className="flex items-start justify-between gap-3">
                   <span className="grid h-10 w-10 place-items-center rounded-xl" style={{ background: active ? kit.accent : `${kit.accent}55`, color: active ? "#142118" : "#22352a" }}><LayoutTemplate size={18} /></span>
-                  <span className={cn("rounded-full px-2.5 py-1 text-[9px] font-extrabold uppercase", active ? "bg-white/10 text-white/50" : "bg-lime/35 text-moss")}>{kitReadiness.score}% ready</span>
+                  <span className={cn("rounded-full px-2.5 py-1 text-xs font-extrabold uppercase", active ? "bg-white/10 text-white/50" : "bg-lime/35 text-moss")}>{kitReadiness.score}% ready</span>
                 </div>
                 <h2 className="mt-4 text-sm font-extrabold">{kit.title}</h2>
-                <p className={cn("mt-1 text-[10px] font-bold", active ? "text-white/40" : "text-black/35")}>{kit.industry}</p>
+                <p className={cn("mt-1 text-xs font-bold", active ? "text-white/40" : "text-black/35")}>{kit.industry}</p>
                 <p className={cn("mt-3 text-xs leading-5", active ? "text-white/55" : "text-black/45")}>{kit.description}</p>
                 <div className="mt-4 grid grid-cols-3 gap-2 text-center">
                   <span className={cn("rounded-xl p-2", active ? "bg-white/[0.06]" : "bg-canvas")}><b className="block text-sm">{kit.products.length}</b><small className={active ? "text-white/35" : "text-black/35"}>Products</small></span>
@@ -80,12 +80,12 @@ export default function DashboardTemplatesPage() {
           <div className="relative border-b border-black/[0.06] bg-[radial-gradient(circle_at_85%_15%,rgba(217,255,97,.65),transparent_30%),linear-gradient(135deg,#f8f8f4,#ffffff)] p-8">
             <div className="flex items-start justify-between gap-8">
               <div>
-                <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-[9px] font-extrabold uppercase tracking-wider text-moss shadow-sm"><Sparkles size={11} /> {selectedKit.useCase}</span>
+                <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs font-extrabold uppercase tracking-wider text-moss shadow-sm"><Sparkles size={11} /> {selectedKit.useCase}</span>
                 <h2 className="display mt-5 max-w-3xl text-4xl">{selectedKit.title}</h2>
                 <p className="mt-3 max-w-2xl text-sm leading-6 text-black/45">{selectedKit.audience}</p>
               </div>
               <div className="w-[280px] rounded-2xl bg-ink p-5 text-white shadow-xl">
-                <div className="flex items-center justify-between"><span className="grid h-9 w-9 place-items-center rounded-xl bg-lime text-ink"><ShieldCheck size={17} /></span><span className="rounded-full bg-white/10 px-2 py-1 text-[9px] font-extrabold text-white/45">{readiness.status}</span></div>
+                <div className="flex items-center justify-between"><span className="grid h-9 w-9 place-items-center rounded-xl bg-lime text-ink"><ShieldCheck size={17} /></span><span className="rounded-full bg-white/10 px-2 py-1 text-xs font-extrabold text-white/45">{readiness.status}</span></div>
                 <p className="display mt-5 text-4xl">{readiness.score}%</p>
                 <p className="mt-1 text-xs font-bold text-white/45">Starter readiness before merchant edits.</p>
                 <button onClick={installStarterKit} disabled={installing || readiness.status === "blocked"} className="mt-5 flex w-full items-center justify-center gap-2 rounded-full bg-lime px-4 py-3 text-xs font-extrabold text-ink disabled:cursor-not-allowed disabled:opacity-60">
@@ -101,9 +101,9 @@ export default function DashboardTemplatesPage() {
                 <div className="flex items-center justify-between gap-5">
                   <div><p className="text-sm font-extrabold">Starter kit installed as editable drafts.</p><p className="mt-1 text-xs">{installed.productCount} products, one finder and one configurator were added to this workspace.</p></div>
                   <div className="flex gap-2">
-                    <Link href="/dashboard/products" className="rounded-full bg-white px-3 py-2 text-[10px] font-extrabold text-moss">Review products</Link>
-                    <Link href="/dashboard/quizzes" className="rounded-full bg-white px-3 py-2 text-[10px] font-extrabold text-moss">Edit finder</Link>
-                    <Link href="/dashboard/configurators" className="rounded-full bg-white px-3 py-2 text-[10px] font-extrabold text-moss">Edit configurator</Link>
+                    <Link href="/dashboard/products" className="rounded-full bg-white px-3 py-2 text-xs font-extrabold text-moss">Review products</Link>
+                    <Link href="/dashboard/quizzes" className="rounded-full bg-white px-3 py-2 text-xs font-extrabold text-moss">Edit finder</Link>
+                    <Link href="/dashboard/configurators" className="rounded-full bg-white px-3 py-2 text-xs font-extrabold text-moss">Edit configurator</Link>
                   </div>
                 </div>
               ) : <p className="text-xs font-bold">{installError || error}</p>}
@@ -119,10 +119,10 @@ export default function DashboardTemplatesPage() {
                     <article key={product.key} className="overflow-hidden rounded-2xl border border-black/[0.07] bg-canvas">
                       <div className="h-40 overflow-hidden bg-[#eceee9]">{product.image_url ? <img src={product.image_url} alt="" className="h-full w-full object-cover" /> : <div className="grid h-full place-items-center text-black/20"><Boxes size={20} /></div>}</div>
                       <div className="p-4">
-                        <p className="text-[9px] font-extrabold uppercase tracking-wider text-moss">{product.category}</p>
+                        <p className="text-xs font-extrabold uppercase tracking-wider text-moss">{product.category}</p>
                         <h4 className="mt-2 text-xs font-extrabold leading-5">{product.name}</h4>
                         <p className="mt-1 text-xs font-extrabold">{formatCurrency(product.price)}</p>
-                        <div className="mt-3 flex flex-wrap gap-1">{[...(product.buyer_needs || []), ...product.tags].slice(0, 3).map((tag) => <span key={tag} className="rounded-full bg-white px-2 py-1 text-[8px] font-bold text-black/40">{tag}</span>)}</div>
+                        <div className="mt-3 flex flex-wrap gap-1">{[...(product.buyer_needs || []), ...product.tags].slice(0, 3).map((tag) => <span key={tag} className="rounded-full bg-white px-2 py-1 text-xs font-bold text-black/40">{tag}</span>)}</div>
                       </div>
                     </article>
                   ))}
@@ -134,7 +134,7 @@ export default function DashboardTemplatesPage() {
                 <div className="mt-5 space-y-3">
                   {selectedKit.quiz.questions.map((question, index) => (
                     <div key={question.key} className="rounded-2xl bg-canvas p-4">
-                      <div className="flex items-start gap-3"><span className="grid h-8 w-8 place-items-center rounded-xl bg-white text-xs font-extrabold text-moss">{index + 1}</span><div className="min-w-0 flex-1"><p className="text-xs font-extrabold">{question.title}</p><p className="mt-1 text-[10px] leading-4 text-black/35">{question.helper_text}</p><div className="mt-3 flex flex-wrap gap-2">{question.options.map((option) => <span key={option.key} className="rounded-full bg-white px-2.5 py-1.5 text-[9px] font-bold text-black/45">{option.label} · {option.match_type === "none" ? "preference" : option.match_value}</span>)}</div></div></div>
+                      <div className="flex items-start gap-3"><span className="grid h-8 w-8 place-items-center rounded-xl bg-white text-xs font-extrabold text-moss">{index + 1}</span><div className="min-w-0 flex-1"><p className="text-xs font-extrabold">{question.title}</p><p className="mt-1 text-xs leading-4 text-black/35">{question.helper_text}</p><div className="mt-3 flex flex-wrap gap-2">{question.options.map((option) => <span key={option.key} className="rounded-full bg-white px-2.5 py-1.5 text-xs font-bold text-black/45">{option.label} · {option.match_type === "none" ? "preference" : option.match_value}</span>)}</div></div></div>
                     </div>
                   ))}
                 </div>
@@ -148,9 +148,9 @@ export default function DashboardTemplatesPage() {
                 <div className="mt-5 space-y-3">
                   {selectedKit.configurator.steps.map((step, index) => (
                     <div key={step.key} className="rounded-2xl bg-white/[0.06] p-4">
-                      <div className="flex items-center justify-between"><p className="text-xs font-extrabold">{index + 1}. {step.title}</p><span className="rounded-full bg-white/10 px-2 py-1 text-[8px] font-extrabold uppercase text-white/35">{step.selection_type}</span></div>
-                      <p className="mt-1 text-[10px] leading-4 text-white/35">{step.helper_text}</p>
-                      <div className="mt-3 space-y-1.5">{step.options.map((option) => <div key={option.key} className="flex items-center justify-between rounded-xl bg-white/[0.06] px-3 py-2"><span className="text-[10px] font-bold text-white/70">{option.label}</span><span className="text-[9px] font-extrabold text-lime">{option.price_delta ? formatCurrency(option.price_delta) : "Included"}</span></div>)}</div>
+                      <div className="flex items-center justify-between"><p className="text-xs font-extrabold">{index + 1}. {step.title}</p><span className="rounded-full bg-white/10 px-2 py-1 text-xs font-extrabold uppercase text-white/35">{step.selection_type}</span></div>
+                      <p className="mt-1 text-xs leading-4 text-white/35">{step.helper_text}</p>
+                      <div className="mt-3 space-y-1.5">{step.options.map((option) => <div key={option.key} className="flex items-center justify-between rounded-xl bg-white/[0.06] px-3 py-2"><span className="text-xs font-bold text-white/70">{option.label}</span><span className="text-xs font-extrabold text-lime">{option.price_delta ? formatCurrency(option.price_delta) : "Included"}</span></div>)}</div>
                     </div>
                   ))}
                 </div>
@@ -162,7 +162,7 @@ export default function DashboardTemplatesPage() {
                   {readiness.checks.map((check) => (
                     <div key={check.id} className="flex items-start gap-3 rounded-xl bg-canvas p-3">
                       <span className={cn("mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full", check.status === "pass" ? "bg-lime text-ink" : check.status === "warn" ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-700")}><Check size={11} /></span>
-                      <div><p className="text-xs font-extrabold">{check.label}</p><p className="mt-1 text-[10px] leading-4 text-black/40">{check.detail}</p></div>
+                      <div><p className="text-xs font-extrabold">{check.label}</p><p className="mt-1 text-xs leading-4 text-black/40">{check.detail}</p></div>
                     </div>
                   ))}
                 </div>

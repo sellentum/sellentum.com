@@ -53,7 +53,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
       {error && <p className="rounded-xl bg-red-50 px-3 py-2 text-xs font-semibold text-red-700">{error}</p>}
       {notice && <p className="rounded-xl bg-lime/30 px-3 py-2 text-xs font-semibold text-moss">{notice}</p>}
       <button className="btn-primary !mt-6 w-full !py-3.5" disabled={loading}>{loading ? <LoaderCircle className="animate-spin" size={17} /> : <>{mode === "login" ? "Log in to Findly" : "Create my workspace"}<ArrowRight size={16} /></>}</button>
-      {!isSupabaseConfigured() && <p className="rounded-xl border border-lime/60 bg-lime/20 px-3 py-2.5 text-center text-[11px] font-semibold text-moss">Demo mode is active—any credentials will work.</p>}
+      {!isSupabaseConfigured() && <p className="rounded-xl border border-lime/60 bg-lime/20 px-3 py-2.5 text-center text-xs font-semibold text-moss">Demo mode is active—any credentials will work.</p>}
       <p className="pt-2 text-center text-sm text-black/45">{mode === "login" ? "New to Findly?" : "Already have an account?"} <Link className="font-extrabold text-ink" href={mode === "login" ? "/signup" : "/login"}>{mode === "login" ? "Create an account" : "Log in"}</Link></p>
     </form>
   );

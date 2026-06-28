@@ -48,7 +48,7 @@ export default function ReleaseCenterPage() {
         <section className="rounded-[28px] border border-black/[0.07] bg-ink p-6 text-white">
           <div className="flex items-center justify-between">
             <span className="grid h-11 w-11 place-items-center rounded-2xl bg-lime text-ink"><GitPullRequestArrow size={20} /></span>
-            <span className={cn("rounded-full px-3 py-1.5 text-[9px] font-extrabold uppercase", candidate.decision === "go" ? "bg-lime text-ink" : candidate.decision === "review" ? "bg-amber-300/20 text-amber-100" : "bg-red-500/20 text-red-100")}>{candidate.decision}</span>
+            <span className={cn("rounded-full px-3 py-1.5 text-xs font-extrabold uppercase", candidate.decision === "go" ? "bg-lime text-ink" : candidate.decision === "review" ? "bg-amber-300/20 text-amber-100" : "bg-red-500/20 text-red-100")}>{candidate.decision}</span>
           </div>
           <p className="display mt-8 text-6xl">{candidate.score}%</p>
           <p className="mt-2 text-sm font-bold leading-6 text-white/45">{candidate.title} · {candidate.id}</p>
@@ -67,7 +67,7 @@ export default function ReleaseCenterPage() {
             <article key={String(label)} className="rounded-[24px] border border-black/[0.07] bg-white p-5">
               <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#eef1e8] text-moss"><Rocket size={18} /></span>
               <p className="display mt-5 text-4xl">{String(value)}</p>
-              <p className="mt-1 text-[9px] font-extrabold uppercase tracking-wider text-black/30">{String(label)}</p>
+              <p className="mt-1 text-xs font-extrabold uppercase tracking-wider text-black/30">{String(label)}</p>
             </article>
           ))}
         </section>
@@ -81,12 +81,12 @@ export default function ReleaseCenterPage() {
                 <h2 className="text-sm font-extrabold">Release scope</h2>
                 <p className="mt-1 text-xs text-black/35">What will be included if this candidate ships.</p>
               </div>
-              <span className="rounded-full bg-black/[0.04] px-3 py-1.5 text-[9px] font-extrabold text-black/35">{new Date(candidate.generatedAt).toLocaleString()}</span>
+              <span className="rounded-full bg-black/[0.04] px-3 py-1.5 text-xs font-extrabold text-black/35">{new Date(candidate.generatedAt).toLocaleString()}</span>
             </div>
             <div className="mt-5 grid gap-3 xl:grid-cols-2">
               {candidate.scope.map((item) => (
                 <article key={item.label} className="rounded-2xl bg-canvas p-4">
-                  <p className="text-[9px] font-extrabold uppercase tracking-wider text-black/30">{item.label}</p>
+                  <p className="text-xs font-extrabold uppercase tracking-wider text-black/30">{item.label}</p>
                   <h3 className="mt-2 text-sm font-extrabold">{item.value}</h3>
                   <p className="mt-2 text-xs leading-5 text-black/45">{item.detail}</p>
                 </article>
@@ -100,11 +100,11 @@ export default function ReleaseCenterPage() {
               {candidate.gates.map((gate) => (
                 <article key={gate.id} className="rounded-2xl border border-black/[0.07] p-4">
                   <div className="flex items-start justify-between gap-3">
-                    <div><h3 className="text-xs font-extrabold">{gate.label}</h3><p className="mt-1 text-[9px] font-bold text-black/30">{gate.owner}</p></div>
-                    <span className={cn("rounded-full px-2.5 py-1 text-[8px] font-extrabold uppercase", gateTone[gate.status])}>{gate.status}</span>
+                    <div><h3 className="text-xs font-extrabold">{gate.label}</h3><p className="mt-1 text-xs font-bold text-black/30">{gate.owner}</p></div>
+                    <span className={cn("rounded-full px-2.5 py-1 text-xs font-extrabold uppercase", gateTone[gate.status])}>{gate.status}</span>
                   </div>
-                  <p className="mt-3 text-[10px] leading-4 text-black/45">{gate.detail}</p>
-                  <Link href={gate.href} className="mt-3 inline-flex items-center gap-1 text-[10px] font-extrabold text-moss">{gate.action} <ArrowRight size={10} /></Link>
+                  <p className="mt-3 text-xs leading-4 text-black/45">{gate.detail}</p>
+                  <Link href={gate.href} className="mt-3 inline-flex items-center gap-1 text-xs font-extrabold text-moss">{gate.action} <ArrowRight size={10} /></Link>
                 </article>
               ))}
             </div>
@@ -117,10 +117,10 @@ export default function ReleaseCenterPage() {
             <div className="mt-4 space-y-3">
               {candidate.actions.map((action) => (
                 <Link key={action.id} href={action.href} className="block rounded-2xl bg-canvas p-4 transition hover:bg-white">
-                  <span className={cn("rounded-full px-2.5 py-1 text-[8px] font-extrabold uppercase", action.priority === "critical" ? "bg-red-50 text-red-700" : action.priority === "high" ? "bg-amber-50 text-amber-700" : "bg-lime/35 text-moss")}>{action.priority}</span>
+                  <span className={cn("rounded-full px-2.5 py-1 text-xs font-extrabold uppercase", action.priority === "critical" ? "bg-red-50 text-red-700" : action.priority === "high" ? "bg-amber-50 text-amber-700" : "bg-lime/35 text-moss")}>{action.priority}</span>
                   <h3 className="mt-3 text-xs font-extrabold leading-5">{action.title}</h3>
-                  <p className="mt-2 text-[10px] leading-4 text-black/45">{action.detail}</p>
-                  <span className="mt-3 inline-flex items-center gap-1 text-[10px] font-extrabold text-moss">{action.label} <ArrowRight size={10} /></span>
+                  <p className="mt-2 text-xs leading-4 text-black/45">{action.detail}</p>
+                  <span className="mt-3 inline-flex items-center gap-1 text-xs font-extrabold text-moss">{action.label} <ArrowRight size={10} /></span>
                 </Link>
               ))}
             </div>
@@ -130,7 +130,7 @@ export default function ReleaseCenterPage() {
             <h2 className="flex items-center gap-2 text-sm font-extrabold"><Undo2 size={16} className="text-lime" /> Rollback plan</h2>
             <div className="mt-4 space-y-2">
               {candidate.rollbackPlan.map((item, index) => (
-                <p key={item} className="flex gap-3 rounded-xl bg-white/[0.06] p-3 text-[10px] font-bold leading-4 text-white/50"><span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-lime text-[10px] font-extrabold text-ink">{index + 1}</span>{item}</p>
+                <p key={item} className="flex gap-3 rounded-xl bg-white/[0.06] p-3 text-xs font-bold leading-4 text-white/50"><span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-lime text-xs font-extrabold text-ink">{index + 1}</span>{item}</p>
               ))}
             </div>
           </section>
@@ -138,8 +138,8 @@ export default function ReleaseCenterPage() {
           <section className="rounded-[28px] border border-black/[0.07] bg-white p-5">
             <h2 className="text-sm font-extrabold">Release strengths</h2>
             <div className="mt-4 space-y-2">
-              {candidate.strengths.slice(0, 5).map((strength) => <p key={strength} className="flex gap-2 text-[10px] font-bold leading-4 text-black/45"><Check size={13} className="mt-0.5 shrink-0 text-moss" />{strength}</p>)}
-              {!candidate.strengths.length && <p className="rounded-xl bg-amber-50 p-3 text-[10px] font-bold leading-4 text-amber-700">No passing release gates yet. Start with Preflight and Storefront QA.</p>}
+              {candidate.strengths.slice(0, 5).map((strength) => <p key={strength} className="flex gap-2 text-xs font-bold leading-4 text-black/45"><Check size={13} className="mt-0.5 shrink-0 text-moss" />{strength}</p>)}
+              {!candidate.strengths.length && <p className="rounded-xl bg-amber-50 p-3 text-xs font-bold leading-4 text-amber-700">No passing release gates yet. Start with Preflight and Storefront QA.</p>}
             </div>
           </section>
         </aside>

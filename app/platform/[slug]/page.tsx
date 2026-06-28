@@ -43,7 +43,7 @@ export default async function PlatformDetailPage({ params }: { params: Promise<{
         <div className="mx-auto grid max-w-[1280px] gap-8 lg:grid-cols-[.78fr_1.22fr]">
           <div><p className="eyebrow text-moss">Why it matters</p><h2 className="mt-4 text-5xl font-extrabold tracking-[-.065em]">Built for the real MVP, not imaginary enterprise complexity.</h2></div>
           <div className="grid gap-3">
-            {page.proof.map((item, index) => <article key={item} className="rounded-2xl border border-black/10 bg-white p-6"><span className="text-[10px] font-extrabold text-moss">{String(index + 1).padStart(2, "0")}</span><p className="mt-5 text-xl font-extrabold tracking-[-.04em]">{item}</p></article>)}
+            {page.proof.map((item, index) => <article key={item} className="rounded-2xl border border-black/10 bg-white p-6"><span className="text-xs font-extrabold text-moss">{String(index + 1).padStart(2, "0")}</span><p className="mt-5 text-xl font-extrabold tracking-[-.04em]">{item}</p></article>)}
           </div>
         </div>
       </section>
@@ -55,7 +55,7 @@ export default async function PlatformDetailPage({ params }: { params: Promise<{
         </div>
       </section>
 
-      <footer className="border-t border-black/10 px-6 py-10 lg:px-10"><div className="mx-auto flex max-w-[1280px] items-center justify-between text-[10px] font-bold text-black/35"><Logo /><span>© 2026 Findly</span></div></footer>
+      <footer className="border-t border-black/10 px-6 py-10 lg:px-10"><div className="mx-auto flex max-w-[1280px] items-center justify-between text-xs font-bold text-black/35"><Logo /><span>© 2026 Findly</span></div></footer>
     </main>
   );
 }

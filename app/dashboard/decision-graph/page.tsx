@@ -66,7 +66,7 @@ export default function DecisionGraphPage() {
         <section className="rounded-[28px] border border-black/[0.07] bg-ink p-6 text-white">
           <div className="flex items-center justify-between">
             <span className="grid h-11 w-11 place-items-center rounded-2xl bg-lime text-ink"><Workflow size={20} /></span>
-            <span className={cn("rounded-full px-3 py-1.5 text-[9px] font-extrabold uppercase", report.status === "healthy" ? "bg-lime text-ink" : report.status === "blocked" ? "bg-red-500/20 text-red-100" : "bg-white/10 text-white/55")}>{report.status.replace("-", " ")}</span>
+            <span className={cn("rounded-full px-3 py-1.5 text-xs font-extrabold uppercase", report.status === "healthy" ? "bg-lime text-ink" : report.status === "blocked" ? "bg-red-500/20 text-red-100" : "bg-white/10 text-white/55")}>{report.status.replace("-", " ")}</span>
           </div>
           <p className="display mt-8 text-6xl">{report.score}%</p>
           <p className="mt-2 text-sm font-bold leading-6 text-white/45">Graph confidence across catalog structure, finder rules, configurator links and observed shopper language.</p>
@@ -76,7 +76,7 @@ export default function DecisionGraphPage() {
               [report.summary.signals, "Signals"],
               [report.summary.edges, "Edges"],
               [report.summary.unresolvedLanguageTerms, "Unresolved terms"],
-            ].map(([value, label]) => <div key={String(label)} className="rounded-2xl bg-white/[0.07] p-4"><p className="text-2xl font-extrabold">{String(value)}</p><p className="mt-1 text-[9px] font-bold text-white/35">{String(label)}</p></div>)}
+            ].map(([value, label]) => <div key={String(label)} className="rounded-2xl bg-white/[0.07] p-4"><p className="text-2xl font-extrabold">{String(value)}</p><p className="mt-1 text-xs font-bold text-white/35">{String(label)}</p></div>)}
           </div>
         </section>
 
@@ -87,11 +87,11 @@ export default function DecisionGraphPage() {
               <article key={lane.id} className="rounded-[24px] border border-black/[0.07] bg-white p-5">
                 <div className="flex items-center justify-between">
                   <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#eef1e8] text-moss"><LaneIcon size={18} /></span>
-                  <span className={cn("rounded-full px-2.5 py-1 text-[8px] font-extrabold uppercase", lane.status === "ready" ? "bg-lime/35 text-moss" : lane.status === "blocked" ? "bg-red-50 text-red-700" : "bg-amber-50 text-amber-700")}>{lane.status}</span>
+                  <span className={cn("rounded-full px-2.5 py-1 text-xs font-extrabold uppercase", lane.status === "ready" ? "bg-lime/35 text-moss" : lane.status === "blocked" ? "bg-red-50 text-red-700" : "bg-amber-50 text-amber-700")}>{lane.status}</span>
                 </div>
                 <p className="display mt-5 text-4xl">{lane.score}%</p>
                 <h2 className="mt-2 text-xs font-extrabold">{lane.label}</h2>
-                <p className="mt-2 text-[10px] leading-4 text-black/40">{lane.detail}</p>
+                <p className="mt-2 text-xs leading-4 text-black/40">{lane.detail}</p>
               </article>
             );
           })}
@@ -106,20 +106,20 @@ export default function DecisionGraphPage() {
                 <h2 className="flex items-center gap-2 text-sm font-extrabold"><BrainCircuit size={16} className="text-moss" /> Graph hotspots</h2>
                 <p className="mt-1 text-xs text-black/35">Signals and shopper terms with the most influence or launch risk.</p>
               </div>
-              <span className="rounded-full bg-black/5 px-3 py-1.5 text-[9px] font-extrabold text-black/35">{report.nodes.length} nodes · {report.edges.length} relationships</span>
+              <span className="rounded-full bg-black/5 px-3 py-1.5 text-xs font-extrabold text-black/35">{report.nodes.length} nodes · {report.edges.length} relationships</span>
             </div>
             <div className="mt-5 grid gap-3 xl:grid-cols-2">
               {report.hotspots.map((node) => (
                 <article key={node.id} className="rounded-2xl border border-black/[0.07] bg-canvas/60 p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <span className={cn("rounded-full px-2 py-1 text-[8px] font-extrabold uppercase", nodeTone[node.type])}>{node.type.replace("_", " ")}</span>
+                      <span className={cn("rounded-full px-2 py-1 text-xs font-extrabold uppercase", nodeTone[node.type])}>{node.type.replace("_", " ")}</span>
                       <h3 className="mt-3 text-sm font-extrabold">{node.label}</h3>
                     </div>
-                    <span className={cn("rounded-full px-2 py-1 text-[8px] font-extrabold uppercase", statusTone[node.status])}>{node.status}</span>
+                    <span className={cn("rounded-full px-2 py-1 text-xs font-extrabold uppercase", statusTone[node.status])}>{node.status}</span>
                   </div>
-                  <p className="mt-2 text-[10px] leading-4 text-black/40">{node.detail}</p>
-                  <p className="mt-3 text-[8px] font-extrabold uppercase tracking-wider text-black/25">Weight {node.weight}</p>
+                  <p className="mt-2 text-xs leading-4 text-black/40">{node.detail}</p>
+                  <p className="mt-3 text-xs font-extrabold uppercase tracking-wider text-black/25">Weight {node.weight}</p>
                 </article>
               ))}
             </div>
@@ -135,14 +135,14 @@ export default function DecisionGraphPage() {
             </div>
             <div className="mt-5 overflow-hidden rounded-2xl border border-black/[0.06]">
               <table className="w-full min-w-[900px] text-left">
-                <thead className="bg-canvas text-[9px] font-extrabold uppercase tracking-wider text-black/30"><tr><th className="px-4 py-3">Question</th><th className="px-4 py-3">Answer rule</th><th className="px-4 py-3">Products</th><th className="px-4 py-3">Status</th></tr></thead>
+                <thead className="bg-canvas text-xs font-extrabold uppercase tracking-wider text-black/30"><tr><th className="px-4 py-3">Question</th><th className="px-4 py-3">Answer rule</th><th className="px-4 py-3">Products</th><th className="px-4 py-3">Status</th></tr></thead>
                 <tbody>
                   {report.ruleAudits.slice(0, 12).map((audit) => (
                     <tr key={audit.id} className="border-t border-black/[0.05]">
-                      <td className="px-4 py-3"><p className="text-xs font-extrabold">{audit.questionTitle}</p><p className="mt-1 text-[9px] text-black/35">{audit.quizName}</p></td>
-                      <td className="px-4 py-3"><p className="text-xs font-bold">{audit.answerLabel}</p><p className="mt-1 text-[9px] text-black/35">{audit.matchType}:{audit.matchValue || "preference"}</p></td>
-                      <td className="px-4 py-3"><p className="max-w-[280px] truncate text-[10px] font-bold text-black/45">{audit.linkedProducts.slice(0, 3).join(", ") || audit.detail}</p></td>
-                      <td className="px-4 py-3"><span className={cn("rounded-full px-2 py-1 text-[8px] font-extrabold uppercase", statusTone[audit.status])}>{audit.status}</span></td>
+                      <td className="px-4 py-3"><p className="text-xs font-extrabold">{audit.questionTitle}</p><p className="mt-1 text-xs text-black/35">{audit.quizName}</p></td>
+                      <td className="px-4 py-3"><p className="text-xs font-bold">{audit.answerLabel}</p><p className="mt-1 text-xs text-black/35">{audit.matchType}:{audit.matchValue || "preference"}</p></td>
+                      <td className="px-4 py-3"><p className="max-w-[280px] truncate text-xs font-bold text-black/45">{audit.linkedProducts.slice(0, 3).join(", ") || audit.detail}</p></td>
+                      <td className="px-4 py-3"><span className={cn("rounded-full px-2 py-1 text-xs font-extrabold uppercase", statusTone[audit.status])}>{audit.status}</span></td>
                     </tr>
                   ))}
                 </tbody>
@@ -162,11 +162,11 @@ export default function DecisionGraphPage() {
               {report.configuratorAudits.slice(0, 8).map((audit) => (
                 <article key={audit.id} className="rounded-2xl bg-canvas p-4">
                   <div className="flex items-start justify-between gap-3">
-                    <div><p className="text-xs font-extrabold">{audit.optionLabel}</p><p className="mt-1 text-[9px] text-black/35">{audit.configuratorName}</p></div>
-                    <span className={cn("rounded-full px-2 py-1 text-[8px] font-extrabold uppercase", statusTone[audit.status])}>{audit.status}</span>
+                    <div><p className="text-xs font-extrabold">{audit.optionLabel}</p><p className="mt-1 text-xs text-black/35">{audit.configuratorName}</p></div>
+                    <span className={cn("rounded-full px-2 py-1 text-xs font-extrabold uppercase", statusTone[audit.status])}>{audit.status}</span>
                   </div>
-                  <p className="mt-3 text-[10px] leading-4 text-black/45">{audit.detail}</p>
-                  {audit.incompatibleOptions.length ? <p className="mt-3 rounded-xl bg-white px-3 py-2 text-[9px] font-bold text-black/40">Conflicts: {audit.incompatibleOptions.slice(0, 3).join(", ")}</p> : null}
+                  <p className="mt-3 text-xs leading-4 text-black/45">{audit.detail}</p>
+                  {audit.incompatibleOptions.length ? <p className="mt-3 rounded-xl bg-white px-3 py-2 text-xs font-bold text-black/40">Conflicts: {audit.incompatibleOptions.slice(0, 3).join(", ")}</p> : null}
                 </article>
               ))}
             </div>
@@ -181,12 +181,12 @@ export default function DecisionGraphPage() {
               {report.actions.map((action) => (
                 <Link key={action.id} href={action.href} className="block rounded-2xl border border-black/[0.07] bg-canvas/70 p-4 transition hover:bg-white">
                   <div className="flex items-center justify-between gap-3">
-                    <span className={cn("rounded-full px-2 py-1 text-[8px] font-extrabold uppercase", action.severity === "critical" || action.severity === "high" ? "bg-red-50 text-red-700" : action.severity === "medium" ? "bg-amber-50 text-amber-700" : "bg-lime/35 text-moss")}>{action.severity}</span>
-                    <span className="text-[8px] font-extrabold text-moss">{action.label}</span>
+                    <span className={cn("rounded-full px-2 py-1 text-xs font-extrabold uppercase", action.severity === "critical" || action.severity === "high" ? "bg-red-50 text-red-700" : action.severity === "medium" ? "bg-amber-50 text-amber-700" : "bg-lime/35 text-moss")}>{action.severity}</span>
+                    <span className="text-xs font-extrabold text-moss">{action.label}</span>
                   </div>
                   <h3 className="mt-3 text-xs font-extrabold leading-5">{action.title}</h3>
-                  <p className="mt-2 text-[10px] leading-4 text-black/40">{action.detail}</p>
-                  <p className="mt-3 rounded-xl bg-white px-3 py-2 text-[9px] font-bold leading-4 text-black/45">{action.evidence}</p>
+                  <p className="mt-2 text-xs leading-4 text-black/40">{action.detail}</p>
+                  <p className="mt-3 rounded-xl bg-white px-3 py-2 text-xs font-bold leading-4 text-black/45">{action.evidence}</p>
                 </Link>
               ))}
             </div>
@@ -200,13 +200,13 @@ export default function DecisionGraphPage() {
                 <div key={audit.term} className="rounded-2xl bg-white/[0.06] p-3">
                   <div className="flex items-center justify-between gap-3">
                     <p className="text-xs font-extrabold">{audit.term}</p>
-                    <span className={cn("rounded-full px-2 py-1 text-[8px] font-extrabold uppercase", audit.status === "pass" ? "bg-lime text-ink" : audit.status === "warn" ? "bg-amber-300/20 text-amber-100" : "bg-red-400/20 text-red-100")}>{audit.status}</span>
+                    <span className={cn("rounded-full px-2 py-1 text-xs font-extrabold uppercase", audit.status === "pass" ? "bg-lime text-ink" : audit.status === "warn" ? "bg-amber-300/20 text-amber-100" : "bg-red-400/20 text-red-100")}>{audit.status}</span>
                   </div>
-                  <p className="mt-1 text-[9px] leading-4 text-white/35">{audit.detail}</p>
-                  {audit.examples[0] ? <p className="mt-2 text-[8px] font-bold text-white/25">“{audit.examples[0]}”</p> : null}
+                  <p className="mt-1 text-xs leading-4 text-white/35">{audit.detail}</p>
+                  {audit.examples[0] ? <p className="mt-2 text-xs font-bold text-white/25">“{audit.examples[0]}”</p> : null}
                 </div>
               ))}
-              {!report.termAudits.length && <p className="rounded-2xl bg-white/[0.06] p-4 text-[10px] font-bold leading-5 text-white/40">No observed shopper terms yet. Run Search Lab or publish an embed to collect language.</p>}
+              {!report.termAudits.length && <p className="rounded-2xl bg-white/[0.06] p-4 text-xs font-bold leading-5 text-white/40">No observed shopper terms yet. Run Search Lab or publish an embed to collect language.</p>}
             </div>
           </section>
 
@@ -220,7 +220,7 @@ export default function DecisionGraphPage() {
               ].map(([title, detail], index) => (
                 <div key={title} className="flex gap-3 rounded-2xl bg-canvas p-3">
                   <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-lime text-ink">{index === 1 ? <XCircle size={11} /> : <CheckCircle2 size={11} />}</span>
-                  <div><p className="text-xs font-extrabold">{title}</p><p className="mt-1 text-[10px] leading-4 text-black/40">{detail}</p></div>
+                  <div><p className="text-xs font-extrabold">{title}</p><p className="mt-1 text-xs leading-4 text-black/40">{detail}</p></div>
                 </div>
               ))}
             </div>

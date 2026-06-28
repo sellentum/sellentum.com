@@ -70,14 +70,14 @@ export default function UsageCenterPage() {
         <section className="rounded-[30px] border border-black/[0.07] bg-ink p-7 text-white">
           <div className="flex items-center justify-between">
             <span className="grid h-12 w-12 place-items-center rounded-2xl bg-lime text-ink"><CreditCard size={22} /></span>
-            <span className={cn("rounded-full px-3 py-1.5 text-[9px] font-extrabold uppercase", report.status === "ready" ? "bg-lime text-ink" : report.status === "watch" ? "bg-amber-300/20 text-amber-100" : report.status === "needs-upgrade" ? "bg-red-500/20 text-red-100" : "bg-white/10 text-white/50")}>{report.status.replace("-", " ")}</span>
+            <span className={cn("rounded-full px-3 py-1.5 text-xs font-extrabold uppercase", report.status === "ready" ? "bg-lime text-ink" : report.status === "watch" ? "bg-amber-300/20 text-amber-100" : report.status === "needs-upgrade" ? "bg-red-500/20 text-red-100" : "bg-white/10 text-white/50")}>{report.status.replace("-", " ")}</span>
           </div>
           <p className="display mt-8 text-7xl">{report.score}%</p>
           <p className="mt-3 text-sm font-bold leading-6 text-white/45">{report.headline}</p>
           <div className="mt-6 grid grid-cols-3 gap-2 text-center">
-            <div className="rounded-2xl bg-white/[0.06] p-3"><p className="text-xl font-extrabold">{report.summary.sessions}</p><p className="mt-1 text-[8px] text-white/35">Sessions</p></div>
-            <div className="rounded-2xl bg-white/[0.06] p-3"><p className="text-xl font-extrabold">{report.summary.publishedExperiences}</p><p className="mt-1 text-[8px] text-white/35">Surfaces</p></div>
-            <div className="rounded-2xl bg-white/[0.06] p-3"><p className="text-xl font-extrabold">{report.recommendedPlan.name}</p><p className="mt-1 text-[8px] text-white/35">Plan fit</p></div>
+            <div className="rounded-2xl bg-white/[0.06] p-3"><p className="text-xl font-extrabold">{report.summary.sessions}</p><p className="mt-1 text-xs text-white/35">Sessions</p></div>
+            <div className="rounded-2xl bg-white/[0.06] p-3"><p className="text-xl font-extrabold">{report.summary.publishedExperiences}</p><p className="mt-1 text-xs text-white/35">Surfaces</p></div>
+            <div className="rounded-2xl bg-white/[0.06] p-3"><p className="text-xl font-extrabold">{report.recommendedPlan.name}</p><p className="mt-1 text-xs text-white/35">Plan fit</p></div>
           </div>
         </section>
 
@@ -93,7 +93,7 @@ export default function UsageCenterPage() {
               <article key={String(label)} className="rounded-[24px] border border-black/[0.07] bg-white p-5">
                 <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#eef1e8] text-moss"><MetricIcon size={18} /></span>
                 <p className="display mt-5 text-4xl">{String(value)}</p>
-                <p className="mt-1 text-[9px] font-extrabold uppercase tracking-wider text-black/30">{String(label)}</p>
+                <p className="mt-1 text-xs font-extrabold uppercase tracking-wider text-black/30">{String(label)}</p>
               </article>
             );
           })}
@@ -108,7 +108,7 @@ export default function UsageCenterPage() {
                 <h2 className="text-sm font-extrabold">Current 30-day usage meters</h2>
                 <p className="mt-1 text-xs text-black/35">Starter placeholder limits are deliberately visible so a merchant can understand what will eventually drive pricing.</p>
               </div>
-              <span className={cn("rounded-full px-3 py-1.5 text-[9px] font-extrabold uppercase", statusTone[report.status])}>{report.currentPlan.name} placeholder</span>
+              <span className={cn("rounded-full px-3 py-1.5 text-xs font-extrabold uppercase", statusTone[report.status])}>{report.currentPlan.name} placeholder</span>
             </div>
 
             <div className="mt-5 space-y-3">
@@ -118,9 +118,9 @@ export default function UsageCenterPage() {
                     <div>
                       <div className="flex items-center gap-2">
                         <h3 className="text-xs font-extrabold">{meter.label}</h3>
-                        <span className={cn("rounded-full px-2.5 py-1 text-[8px] font-extrabold uppercase", meterTone[meter.status])}>{meter.status}</span>
+                        <span className={cn("rounded-full px-2.5 py-1 text-xs font-extrabold uppercase", meterTone[meter.status])}>{meter.status}</span>
                       </div>
-                      <p className="mt-1 text-[10px] font-bold text-black/35">{meter.detail}</p>
+                      <p className="mt-1 text-xs font-bold text-black/35">{meter.detail}</p>
                     </div>
                     <p className="shrink-0 text-right text-xs font-extrabold text-black/40"><span className="display block text-3xl text-ink">{Math.round(meter.percent)}%</span>{meter.used.toLocaleString("en-GB")} / {meter.limit.toLocaleString("en-GB")}</p>
                   </div>
@@ -150,19 +150,19 @@ export default function UsageCenterPage() {
                         <p className={cn("text-xs font-extrabold", selected ? "text-lime" : "text-moss")}>{plan.name}</p>
                         <p className="display mt-2 text-3xl">{plan.priceLabel}</p>
                       </div>
-                      {selected && <span className="rounded-full bg-lime px-2.5 py-1 text-[8px] font-extrabold uppercase text-ink">Recommended</span>}
+                      {selected && <span className="rounded-full bg-lime px-2.5 py-1 text-xs font-extrabold uppercase text-ink">Recommended</span>}
                     </div>
-                    <p className={cn("mt-3 text-[10px] leading-4", selected ? "text-white/45" : "text-black/40")}>{plan.description}</p>
-                    <div className="mt-4 grid grid-cols-2 gap-2 text-[9px] font-bold">
+                    <p className={cn("mt-3 text-xs leading-4", selected ? "text-white/45" : "text-black/40")}>{plan.description}</p>
+                    <div className="mt-4 grid grid-cols-2 gap-2 text-xs font-bold">
                       <span className={cn("rounded-xl px-3 py-2", selected ? "bg-white/[0.06] text-white/55" : "bg-white text-black/40")}>{plan.limits.sessions.toLocaleString("en-GB")} sessions</span>
                       <span className={cn("rounded-xl px-3 py-2", selected ? "bg-white/[0.06] text-white/55" : "bg-white text-black/40")}>{plan.limits.products.toLocaleString("en-GB")} products</span>
                       <span className={cn("rounded-xl px-3 py-2", selected ? "bg-white/[0.06] text-white/55" : "bg-white text-black/40")}>{plan.limits.experiences} surfaces</span>
                       <span className={cn("rounded-xl px-3 py-2", selected ? "bg-white/[0.06] text-white/55" : "bg-white text-black/40")}>{plan.limits.aiCredits.toLocaleString("en-GB")} credits</span>
                     </div>
                     <div className="mt-4 space-y-2">
-                      {plan.includes.slice(0, 3).map((item) => <p key={item} className={cn("flex gap-2 text-[9px] font-bold leading-4", selected ? "text-white/45" : "text-black/40")}><CheckCircle2 size={12} className={cn("mt-0.5 shrink-0", selected ? "text-lime" : "text-moss")} />{item}</p>)}
+                      {plan.includes.slice(0, 3).map((item) => <p key={item} className={cn("flex gap-2 text-xs font-bold leading-4", selected ? "text-white/45" : "text-black/40")}><CheckCircle2 size={12} className={cn("mt-0.5 shrink-0", selected ? "text-lime" : "text-moss")} />{item}</p>)}
                     </div>
-                    <code className={cn("mt-4 block truncate rounded-xl px-3 py-2 text-[9px] font-bold", selected ? "bg-white/[0.06] text-white/35" : "bg-white text-black/35")}>{plan.stripePlaceholder}</code>
+                    <code className={cn("mt-4 block truncate rounded-xl px-3 py-2 text-xs font-bold", selected ? "bg-white/[0.06] text-white/35" : "bg-white text-black/35")}>{plan.stripePlaceholder}</code>
                   </article>
                 );
               })}
@@ -182,10 +182,10 @@ export default function UsageCenterPage() {
                 <div key={check.id} className={cn("rounded-2xl p-4", checkTone[check.status])}>
                   <div className="flex items-start justify-between gap-3">
                     <h3 className="text-xs font-extrabold">{check.label}</h3>
-                    <span className="rounded-full bg-white/70 px-2 py-1 text-[8px] font-extrabold uppercase opacity-80">{check.status}</span>
+                    <span className="rounded-full bg-white/70 px-2 py-1 text-xs font-extrabold uppercase opacity-80">{check.status}</span>
                   </div>
-                  <p className="mt-2 text-[10px] leading-4 opacity-70">{check.detail}</p>
-                  <p className="mt-3 rounded-xl bg-white/70 px-3 py-2 text-[9px] font-bold leading-4 opacity-80">{check.evidence}</p>
+                  <p className="mt-2 text-xs leading-4 opacity-70">{check.detail}</p>
+                  <p className="mt-3 rounded-xl bg-white/70 px-3 py-2 text-xs font-bold leading-4 opacity-80">{check.evidence}</p>
                 </div>
               ))}
             </div>
@@ -198,11 +198,11 @@ export default function UsageCenterPage() {
             <div className="mt-4 space-y-2">
               {report.actions.map((action) => (
                 <Link key={action.id} href={action.actionHref} className="block rounded-2xl bg-white/[0.06] p-4 transition hover:bg-white/[0.1]">
-                  <span className={cn("rounded-full px-2.5 py-1 text-[8px] font-extrabold uppercase", priorityTone[action.priority])}>{action.priority}</span>
+                  <span className={cn("rounded-full px-2.5 py-1 text-xs font-extrabold uppercase", priorityTone[action.priority])}>{action.priority}</span>
                   <h3 className="mt-4 text-xs font-extrabold leading-5">{action.title}</h3>
-                  <p className="mt-1 text-[10px] leading-4 text-white/45">{action.detail}</p>
-                  <p className="mt-3 rounded-xl bg-white/[0.06] px-3 py-2 text-[9px] font-bold leading-4 text-white/45">{action.evidence}</p>
-                  <span className="mt-3 inline-flex items-center gap-1 text-[9px] font-extrabold text-lime">{action.actionLabel}<ArrowRight size={10} /></span>
+                  <p className="mt-1 text-xs leading-4 text-white/45">{action.detail}</p>
+                  <p className="mt-3 rounded-xl bg-white/[0.06] px-3 py-2 text-xs font-bold leading-4 text-white/45">{action.evidence}</p>
+                  <span className="mt-3 inline-flex items-center gap-1 text-xs font-extrabold text-lime">{action.actionLabel}<ArrowRight size={10} /></span>
                 </Link>
               ))}
             </div>
@@ -217,8 +217,8 @@ export default function UsageCenterPage() {
           <section className="rounded-[28px] border border-black/[0.07] bg-white p-5">
             <h2 className="flex items-center gap-2 text-sm font-extrabold"><RadioTower size={16} className="text-moss" /> Conversion value context</h2>
             <div className="mt-4 grid grid-cols-2 gap-2">
-              <div className="rounded-2xl bg-canvas p-3"><p className="text-lg font-extrabold">{Math.round(report.summary.completionRate)}%</p><p className="mt-1 text-[8px] font-bold uppercase tracking-wider text-black/30">Completion rate</p></div>
-              <div className="rounded-2xl bg-canvas p-3"><p className="text-lg font-extrabold">{Math.round(report.summary.clickRate)}%</p><p className="mt-1 text-[8px] font-bold uppercase tracking-wider text-black/30">Click rate</p></div>
+              <div className="rounded-2xl bg-canvas p-3"><p className="text-lg font-extrabold">{Math.round(report.summary.completionRate)}%</p><p className="mt-1 text-xs font-bold uppercase tracking-wider text-black/30">Completion rate</p></div>
+              <div className="rounded-2xl bg-canvas p-3"><p className="text-lg font-extrabold">{Math.round(report.summary.clickRate)}%</p><p className="mt-1 text-xs font-bold uppercase tracking-wider text-black/30">Click rate</p></div>
             </div>
             <p className="mt-4 text-xs leading-5 text-black/45">Usage pricing should stay connected to customer value: sessions, completions, buy-clicks and assisted product value are shown beside the plan meters.</p>
           </section>

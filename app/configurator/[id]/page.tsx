@@ -198,7 +198,7 @@ export default function ConfiguratorPage() {
           <div className="relative flex min-h-full flex-col">
             <div className="flex items-center justify-between">
               <span className="flex items-center gap-2 text-xs font-extrabold"><span className="grid h-9 w-9 place-items-center rounded-xl text-white" style={{ background: accent }}><Sparkles size={15} /></span>{configuratorCopy.brandName}</span>
-              <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-[9px] font-extrabold text-lime">{configuratorCopy.eyebrow}</span>
+              <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-extrabold text-lime">{configuratorCopy.eyebrow}</span>
             </div>
 
             <div className="my-auto py-16">
@@ -212,12 +212,12 @@ export default function ConfiguratorPage() {
                     {(displayPrimaryProduct?.image_url || displaySelectedOptions.find((option) => option.image_url)?.image_url) ? <img src={displayPrimaryProduct?.image_url || displaySelectedOptions.find((option) => option.image_url)?.image_url} alt="" className="h-full w-full object-cover" /> : <div className="grid h-full place-items-center text-lime"><ShoppingBag size={34} /></div>}
                   </div>
                   <div className="flex flex-col">
-                    <p className="text-[9px] font-extrabold uppercase tracking-wider text-lime">{complete ? "Configured result" : "Current setup"}</p>
+                    <p className="text-xs font-extrabold uppercase tracking-wider text-lime">{complete ? "Configured result" : "Current setup"}</p>
                     <h2 className="mt-2 text-2xl font-extrabold tracking-[-.04em]">{displayPrimaryProduct?.name || "Your kit is taking shape"}</h2>
                     <p className="mt-3 text-xs leading-5 text-white/50">{explanation}</p>
                     <div className="mt-auto flex items-end justify-between">
-                      <div><p className="text-[9px] text-white/35">Estimated total</p><p className="text-3xl font-extrabold tracking-[-.06em]">{formatCurrency(displayTotal)}</p></div>
-                      <span className="rounded-full px-3 py-1.5 text-[9px] font-extrabold text-white" style={{ background: accent }}>{displayProgress}% ready</span>
+                      <div><p className="text-xs text-white/35">Estimated total</p><p className="text-3xl font-extrabold tracking-[-.06em]">{formatCurrency(displayTotal)}</p></div>
+                      <span className="rounded-full px-3 py-1.5 text-xs font-extrabold text-white" style={{ background: accent }}>{displayProgress}% ready</span>
                     </div>
                   </div>
                 </div>
@@ -225,7 +225,7 @@ export default function ConfiguratorPage() {
             </div>
 
             <div className="grid grid-cols-3 gap-3">
-              {["Compatible choices only", "Live price updates", "Product-linked checkout"].map((item) => <div key={item} className="rounded-2xl border border-white/10 bg-white/[.06] p-4 text-[10px] font-extrabold text-white/65"><ShieldCheck className="mb-3 text-lime" size={16} />{item}</div>)}
+              {["Compatible choices only", "Live price updates", "Product-linked checkout"].map((item) => <div key={item} className="rounded-2xl border border-white/10 bg-white/[.06] p-4 text-xs font-extrabold text-white/65"><ShieldCheck className="mb-3 text-lime" size={16} />{item}</div>)}
             </div>
           </div>
         </section>
@@ -233,7 +233,7 @@ export default function ConfiguratorPage() {
         <section className="flex min-h-screen flex-col bg-[#f8f8f4]">
           <header className="flex items-center justify-between border-b border-black/[0.07] bg-white px-6 py-4">
             <div><p className="eyebrow text-moss">{complete ? "Your configured bundle" : `Step ${Math.min(stepIndex + 1, configurator.steps.length)} of ${configurator.steps.length}`}</p><h2 className="mt-1 text-xl font-extrabold tracking-[-.04em]">{complete ? "Ready to review" : currentStep?.title}</h2></div>
-            <div className="text-right"><p className="text-[9px] font-bold text-black/30">Total</p><p className="text-lg font-extrabold">{formatCurrency(displayTotal)}</p></div>
+            <div className="text-right"><p className="text-xs font-bold text-black/30">Total</p><p className="text-lg font-extrabold">{formatCurrency(displayTotal)}</p></div>
           </header>
 
           <div className="h-1.5 bg-black/[0.04]"><div className="h-full rounded-r-full transition-all duration-500" style={{ width: `${complete ? 100 : progress}%`, background: accent }} /></div>
@@ -256,17 +256,17 @@ export default function ConfiguratorPage() {
                           {option.image_url ? <img src={option.image_url} alt="" className="h-full w-full object-cover" /> : <div className="grid h-full place-items-center"><Sparkles size={18} className={selected ? "text-lime" : "text-moss"} /></div>}
                         </div>
                         <span>
-                          <span className="flex items-center gap-2"><span className={`grid h-7 w-7 place-items-center rounded-full border text-[10px] font-extrabold ${selected ? "border-lime bg-lime text-ink" : "border-black/10 bg-canvas text-black/40"}`}>{selected ? <Check size={12} /> : String.fromCharCode(65 + index)}</span><span className="font-extrabold">{option.label}</span></span>
+                          <span className="flex items-center gap-2"><span className={`grid h-7 w-7 place-items-center rounded-full border text-xs font-extrabold ${selected ? "border-lime bg-lime text-ink" : "border-black/10 bg-canvas text-black/40"}`}>{selected ? <Check size={12} /> : String.fromCharCode(65 + index)}</span><span className="font-extrabold">{option.label}</span></span>
                           <span className={`mt-2 block text-xs leading-5 ${selected ? "text-white/55" : "text-black/45"}`}>{option.description}</span>
-                          <span className="mt-3 flex flex-wrap gap-1.5">{option.tags.slice(0, 4).map((tag) => <span key={tag} className={`rounded-full px-2 py-1 text-[8px] font-bold ${selected ? "bg-white/10 text-lime" : "bg-lime/30 text-moss"}`}>{tag}</span>)}</span>
-                          {disabled && guidance && <span className="mt-3 block rounded-xl bg-red-50 px-3 py-2 text-[9px] font-bold leading-4 text-red-600">
+                          <span className="mt-3 flex flex-wrap gap-1.5">{option.tags.slice(0, 4).map((tag) => <span key={tag} className={`rounded-full px-2 py-1 text-xs font-bold ${selected ? "bg-white/10 text-lime" : "bg-lime/30 text-moss"}`}>{tag}</span>)}</span>
+                          {disabled && guidance && <span className="mt-3 block rounded-xl bg-red-50 px-3 py-2 text-xs font-bold leading-4 text-red-600">
                             {guidance.explanation}
                             {alternativeLabels.length ? ` Try ${alternativeLabels.slice(0, 2).join(" or ")} instead.` : " Go back and change the conflicting choice to unlock it."}
                           </span>}
                         </span>
                         <span className="text-right">
                           <span className="block text-sm font-extrabold">{option.price_delta ? formatCurrency(option.price_delta) : "Included"}</span>
-                          {disabled && <span className="mt-1 block text-[8px] font-bold text-red-500">Not compatible</span>}
+                          {disabled && <span className="mt-1 block text-xs font-bold text-red-500">Not compatible</span>}
                         </span>
                       </button>
                     );
@@ -287,21 +287,21 @@ export default function ConfiguratorPage() {
                   <div className="mt-8 grid gap-3 lg:grid-cols-2">
                     {displaySelectedOptions.map((option) => {
                       const linkedProduct = option.product_id ? displaySelectedProducts.find((product) => product.id === option.product_id) || products.find((product) => product.id === option.product_id) : undefined;
-                      return <div key={option.id} className="flex gap-3 rounded-2xl bg-[#f1f3ed] p-3"><div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-white">{(linkedProduct?.image_url || option.image_url) && <img src={linkedProduct?.image_url || option.image_url} alt="" className="h-full w-full object-cover" />}</div><div><p className="text-xs font-extrabold">{option.label}</p><p className="mt-1 text-[10px] leading-4 text-black/45">{option.description}</p><p className="mt-1 text-[10px] font-extrabold text-moss">{option.price_delta ? formatCurrency(option.price_delta) : "Included"}</p></div></div>;
+                      return <div key={option.id} className="flex gap-3 rounded-2xl bg-[#f1f3ed] p-3"><div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-white">{(linkedProduct?.image_url || option.image_url) && <img src={linkedProduct?.image_url || option.image_url} alt="" className="h-full w-full object-cover" />}</div><div><p className="text-xs font-extrabold">{option.label}</p><p className="mt-1 text-xs leading-4 text-black/45">{option.description}</p><p className="mt-1 text-xs font-extrabold text-moss">{option.price_delta ? formatCurrency(option.price_delta) : "Included"}</p></div></div>;
                     })}
                   </div>
                   {compatibilityGuidance && <div className="mt-6 rounded-2xl border border-black/[0.06] bg-[#f7f8f4] p-4">
                     <div className="flex items-start justify-between gap-4">
                       <div>
                         <p className="text-xs font-extrabold">Compatibility guidance</p>
-                        <p className="mt-1 text-[10px] leading-4 text-black/40">{compatibilityGuidance.summary}</p>
+                        <p className="mt-1 text-xs leading-4 text-black/40">{compatibilityGuidance.summary}</p>
                       </div>
-                      <span className="rounded-full bg-lime/35 px-3 py-1 text-[9px] font-extrabold text-moss">{compatibilityGuidance.availableOptions.length} safe options</span>
+                      <span className="rounded-full bg-lime/35 px-3 py-1 text-xs font-extrabold text-moss">{compatibilityGuidance.availableOptions.length} safe options</span>
                     </div>
                     {compatibilityGuidance.blockedOptions.length ? <div className="mt-3 grid gap-2 lg:grid-cols-2">
                       {compatibilityGuidance.blockedOptions.slice(0, 4).map((item) => <div key={item.optionId} className="rounded-xl bg-white p-3">
-                        <p className="text-[10px] font-extrabold">{item.explanation}</p>
-                        <p className="mt-1 text-[9px] leading-4 text-black/40">{item.suggestion}</p>
+                        <p className="text-xs font-extrabold">{item.explanation}</p>
+                        <p className="mt-1 text-xs leading-4 text-black/40">{item.suggestion}</p>
                       </div>)}
                     </div> : null}
                   </div>}
@@ -318,8 +318,8 @@ export default function ConfiguratorPage() {
           <footer className="flex items-center justify-between border-t border-black/[0.07] bg-white px-6 py-4">
             <button onClick={() => complete ? setComplete(false) : stepIndex > 0 ? setStepIndex(stepIndex - 1) : restart()} className="inline-flex items-center gap-2 text-xs font-extrabold text-black/45 hover:text-ink"><ArrowLeft size={14} />{complete ? "Edit choices" : stepIndex > 0 ? "Back" : "Reset"}</button>
             <div className="flex items-center gap-3">
-              {validationError && <span className="max-w-[360px] rounded-full bg-red-50 px-3 py-2 text-[9px] font-extrabold text-red-600">{validationError}</span>}
-              {savingEvent && <span className="hidden items-center gap-1 text-[9px] font-bold text-black/25 lg:flex"><LoaderCircle className="animate-spin" size={11} />Syncing analytics</span>}
+              {validationError && <span className="max-w-[360px] rounded-full bg-red-50 px-3 py-2 text-xs font-extrabold text-red-600">{validationError}</span>}
+              {savingEvent && <span className="hidden items-center gap-1 text-xs font-bold text-black/25 lg:flex"><LoaderCircle className="animate-spin" size={11} />Syncing analytics</span>}
               {!complete && <button onClick={next} disabled={!stepComplete || validatingBundle} className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-xs font-extrabold text-white disabled:opacity-40" style={{ background: accent }}>{validatingBundle ? <LoaderCircle className="animate-spin" size={14} /> : stepIndex === configurator.steps.length - 1 ? "Review bundle" : "Continue"} {!validatingBundle && <ArrowRight size={14} />}</button>}
               {complete && <button onClick={restart} className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-xs font-extrabold"><X size={13} /> Clear</button>}
             </div>

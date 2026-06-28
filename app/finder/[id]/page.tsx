@@ -144,10 +144,10 @@ export default function FinderPage({ params }: { params: Promise<{ id: string }>
   return <main className="noise relative min-h-screen overflow-hidden bg-[#e8eadf] p-3 sm:p-6 lg:p-10" style={{ "--finder-accent": accent } as React.CSSProperties}>
     <div className="dot-grid absolute inset-0 opacity-35" /><div className="absolute -right-20 -top-20 h-80 w-80 rounded-full bg-lime/40 blur-3xl" />
     <section className="relative mx-auto flex min-h-[calc(100vh-24px)] max-w-6xl flex-col overflow-hidden rounded-[28px] border border-white/80 bg-white shadow-soft sm:min-h-[calc(100vh-48px)] lg:min-h-[700px] lg:max-h-[800px]">
-      <header className="flex items-center justify-between border-b border-black/[0.06] px-5 py-4 sm:px-8"><div className="flex items-center gap-2.5 text-sm font-extrabold"><span className="grid h-8 w-8 place-items-center rounded-xl text-white" style={{ background: accent }}><Sparkles size={14} /></span>{finderCopy.brandName}</div><div className="flex items-center gap-3"><span className="hidden items-center gap-1.5 text-[10px] font-bold text-black/35 sm:flex"><ShieldCheck size={13} /> {finderCopy.trustLabel}</span>{step >= 0 && <button onClick={restart} className="grid h-8 w-8 place-items-center rounded-full bg-black/5 text-black/35" aria-label="Restart"><RefreshCcw size={13} /></button>}</div></header>
+      <header className="flex items-center justify-between border-b border-black/[0.06] px-5 py-4 sm:px-8"><div className="flex items-center gap-2.5 text-sm font-extrabold"><span className="grid h-8 w-8 place-items-center rounded-xl text-white" style={{ background: accent }}><Sparkles size={14} /></span>{finderCopy.brandName}</div><div className="flex items-center gap-3"><span className="hidden items-center gap-1.5 text-xs font-bold text-black/35 sm:flex"><ShieldCheck size={13} /> {finderCopy.trustLabel}</span>{step >= 0 && <button onClick={restart} className="grid h-8 w-8 place-items-center rounded-full bg-black/5 text-black/35" aria-label="Restart"><RefreshCcw size={13} /></button>}</div></header>
       {step >= 0 && step < quiz.questions.length && <div className="h-1 bg-black/[0.04]"><div className="h-full rounded-r-full transition-all duration-500" style={{ width: `${progress}%`, background: accent }} /></div>}
 
-      {step === -1 && <div className="grid flex-1 lg:grid-cols-[1.05fr_.95fr]"><div className="flex flex-col justify-center px-7 py-14 sm:px-14 lg:px-20"><p className="eyebrow text-moss">{finderCopy.eyebrow}</p><h1 className="display mt-4 max-w-2xl text-5xl leading-[.95] sm:text-7xl">{finderCopy.title}</h1><p className="mt-6 max-w-lg text-base leading-7 text-black/50">{finderCopy.description}</p><button onClick={start} className="mt-8 inline-flex w-fit items-center gap-2 rounded-full px-6 py-3.5 text-sm font-extrabold text-white transition hover:-translate-y-0.5" style={{ background: accent }}>{finderCopy.ctaLabel}<ArrowRight size={16} /></button><p className="mt-4 text-[10px] font-bold text-black/30">{quiz.questions.length} quick questions · About 60 seconds</p></div><div className="relative hidden overflow-hidden bg-[#d9ff61] lg:block"><div className="dot-grid absolute inset-0 opacity-30" /><div className="absolute left-1/2 top-1/2 w-[78%] -translate-x-1/2 -translate-y-1/2 rotate-3 rounded-[28px] bg-white p-7 shadow-2xl"><div className="flex items-center justify-between"><span className="rounded-full bg-lime/40 px-3 py-1.5 text-[9px] font-extrabold uppercase tracking-wider">Made for you</span><div className="flex text-[#f0a746]">{Array.from({ length: 5 }).map((_, i) => <Star key={i} size={11} fill="currentColor" />)}</div></div><p className="display mt-8 text-4xl leading-none">A short path to<br /><span className="italic">the right choice.</span></p><div className="mt-7 space-y-2">{["Tell us what matters", "We compare the details", "Meet your best matches"].map((item, i) => <div className="flex items-center gap-3 rounded-xl bg-canvas px-3 py-3 text-xs font-extrabold" key={item}><span className="grid h-6 w-6 place-items-center rounded-full bg-ink text-[9px] text-lime">{i + 1}</span>{item}</div>)}</div></div></div></div>}
+      {step === -1 && <div className="grid flex-1 lg:grid-cols-[1.05fr_.95fr]"><div className="flex flex-col justify-center px-7 py-14 sm:px-14 lg:px-20"><p className="eyebrow text-moss">{finderCopy.eyebrow}</p><h1 className="display mt-4 max-w-2xl text-5xl leading-[.95] sm:text-7xl">{finderCopy.title}</h1><p className="mt-6 max-w-lg text-base leading-7 text-black/50">{finderCopy.description}</p><button onClick={start} className="mt-8 inline-flex w-fit items-center gap-2 rounded-full px-6 py-3.5 text-sm font-extrabold text-white transition hover:-translate-y-0.5" style={{ background: accent }}>{finderCopy.ctaLabel}<ArrowRight size={16} /></button><p className="mt-4 text-xs font-bold text-black/30">{quiz.questions.length} quick questions · About 60 seconds</p></div><div className="relative hidden overflow-hidden bg-[#d9ff61] lg:block"><div className="dot-grid absolute inset-0 opacity-30" /><div className="absolute left-1/2 top-1/2 w-[78%] -translate-x-1/2 -translate-y-1/2 rotate-3 rounded-[28px] bg-white p-7 shadow-2xl"><div className="flex items-center justify-between"><span className="rounded-full bg-lime/40 px-3 py-1.5 text-xs font-extrabold uppercase tracking-wider">Made for you</span><div className="flex text-[#f0a746]">{Array.from({ length: 5 }).map((_, i) => <Star key={i} size={11} fill="currentColor" />)}</div></div><p className="display mt-8 text-4xl leading-none">A short path to<br /><span className="italic">the right choice.</span></p><div className="mt-7 space-y-2">{["Tell us what matters", "We compare the details", "Meet your best matches"].map((item, i) => <div className="flex items-center gap-3 rounded-xl bg-canvas px-3 py-3 text-xs font-extrabold" key={item}><span className="grid h-6 w-6 place-items-center rounded-full bg-ink text-xs text-lime">{i + 1}</span>{item}</div>)}</div></div></div></div>}
 
       {step >= 0 && step < quiz.questions.length && (() => {
         const question = quiz.questions[step];
@@ -164,7 +164,7 @@ export default function FinderPage({ params }: { params: Promise<{ id: string }>
           setStep(-1);
           setVisitedStepIndexes([]);
         };
-        return <div className="flex flex-1 flex-col justify-center px-5 py-10 sm:px-12 lg:px-24"><div className="mx-auto w-full max-w-3xl"><div className="flex items-center justify-between"><p className="eyebrow text-moss">Question {pathPosition} of up to {quiz.questions.length}</p><span className="text-[10px] font-bold text-black/25">{Math.round(progress)}% complete</span></div><h1 className="display mt-4 text-4xl leading-none sm:text-6xl">{question.title}</h1>{question.helper_text && <p className="mt-4 text-sm text-black/45">{question.helper_text}</p>}<div className="mt-8 grid gap-3 sm:grid-cols-2">{question.options.map((option, index) => { const chosen = prior?.optionId === option.id; return <button key={option.id} onClick={() => choose(index)} className={`group flex min-h-[72px] items-center justify-between rounded-2xl border p-4 text-left text-sm font-extrabold transition hover:-translate-y-0.5 hover:border-black/30 hover:shadow-md ${chosen ? "border-ink bg-ink text-white" : "border-black/10 bg-white"}`}><span className="flex items-center gap-3"><span className={`grid h-8 w-8 shrink-0 place-items-center rounded-full border text-[10px] ${chosen ? "border-lime bg-lime text-ink" : "border-black/10 bg-canvas group-hover:bg-lime/40"}`}>{chosen ? <Check size={14} /> : String.fromCharCode(65 + index)}</span>{option.label}</span><ChevronRightIcon chosen={chosen} /></button>; })}</div><div className="mt-8 flex items-center justify-between"><button onClick={goBack} className="flex items-center gap-2 text-xs font-extrabold text-black/40 hover:text-ink"><ArrowLeft size={14} /> {pathIndex > 0 ? "Back" : "Welcome"}</button><p className="text-[10px] text-black/25">Choose one answer to continue</p></div></div></div>;
+        return <div className="flex flex-1 flex-col justify-center px-5 py-10 sm:px-12 lg:px-24"><div className="mx-auto w-full max-w-3xl"><div className="flex items-center justify-between"><p className="eyebrow text-moss">Question {pathPosition} of up to {quiz.questions.length}</p><span className="text-xs font-bold text-black/25">{Math.round(progress)}% complete</span></div><h1 className="display mt-4 text-4xl leading-none sm:text-6xl">{question.title}</h1>{question.helper_text && <p className="mt-4 text-sm text-black/45">{question.helper_text}</p>}<div className="mt-8 grid gap-3 sm:grid-cols-2">{question.options.map((option, index) => { const chosen = prior?.optionId === option.id; return <button key={option.id} onClick={() => choose(index)} className={`group flex min-h-[72px] items-center justify-between rounded-2xl border p-4 text-left text-sm font-extrabold transition hover:-translate-y-0.5 hover:border-black/30 hover:shadow-md ${chosen ? "border-ink bg-ink text-white" : "border-black/10 bg-white"}`}><span className="flex items-center gap-3"><span className={`grid h-8 w-8 shrink-0 place-items-center rounded-full border text-xs ${chosen ? "border-lime bg-lime text-ink" : "border-black/10 bg-canvas group-hover:bg-lime/40"}`}>{chosen ? <Check size={14} /> : String.fromCharCode(65 + index)}</span>{option.label}</span><ChevronRightIcon chosen={chosen} /></button>; })}</div><div className="mt-8 flex items-center justify-between"><button onClick={goBack} className="flex items-center gap-2 text-xs font-extrabold text-black/40 hover:text-ink"><ArrowLeft size={14} /> {pathIndex > 0 ? "Back" : "Welcome"}</button><p className="text-xs text-black/25">Choose one answer to continue</p></div></div></div>;
       })()}
 
       {step === quiz.questions.length && (
@@ -188,19 +188,19 @@ export default function FinderPage({ params }: { params: Promise<{ id: string }>
                 <div className="mt-9 grid gap-4 lg:grid-cols-3">
                   {recommendations.map((recommendation, index) => (
                     <article key={recommendation.product.id} className={`relative overflow-hidden rounded-2xl border bg-white ${index === 0 ? "border-ink shadow-lg" : "border-black/10"}`}>
-                      {index === 0 && <span className="absolute left-3 top-3 z-10 rounded-full bg-lime px-2.5 py-1 text-[9px] font-extrabold uppercase tracking-wider">Best match</span>}
+                      {index === 0 && <span className="absolute left-3 top-3 z-10 rounded-full bg-lime px-2.5 py-1 text-xs font-extrabold uppercase tracking-wider">Best match</span>}
                       <div className="h-44 overflow-hidden bg-canvas">
                         {recommendation.product.image_url ? <img src={recommendation.product.image_url} alt={recommendation.product.name} className="h-full w-full object-cover transition duration-500 hover:scale-105" /> : <div className="grid h-full place-items-center text-black/20"><Sparkles /></div>}
                       </div>
                       <div className="p-5">
-                        <p className="text-[9px] font-extrabold uppercase tracking-wider text-moss">{recommendation.product.category}</p>
+                        <p className="text-xs font-extrabold uppercase tracking-wider text-moss">{recommendation.product.category}</p>
                         <div className="mt-2 flex items-start justify-between gap-3">
                           <h2 className="text-base font-extrabold leading-tight">{recommendation.product.name}</h2>
                           <span className="shrink-0 text-sm font-extrabold">{formatCurrency(recommendation.product.price)}</span>
                         </div>
                         <div className="mt-4 min-h-[58px] rounded-xl bg-canvas p-3">
-                          <p className="flex items-center gap-1.5 text-[9px] font-extrabold text-moss"><Sparkles size={11} /> Why it fits</p>
-                          {recommendation.explanation ? <p className="mt-1.5 text-[10px] leading-4 text-black/55">{recommendation.explanation}</p> : <div className="mt-2 space-y-1.5"><div className="h-2 w-full animate-pulse rounded bg-black/5" /><div className="h-2 w-3/4 animate-pulse rounded bg-black/5" /></div>}
+                          <p className="flex items-center gap-1.5 text-xs font-extrabold text-moss"><Sparkles size={11} /> Why it fits</p>
+                          {recommendation.explanation ? <p className="mt-1.5 text-xs leading-4 text-black/55">{recommendation.explanation}</p> : <div className="mt-2 space-y-1.5"><div className="h-2 w-full animate-pulse rounded bg-black/5" /><div className="h-2 w-3/4 animate-pulse rounded bg-black/5" /></div>}
                         </div>
                         <div className="mt-4">
                           <RecommendationFeedback productId={recommendation.product.id} productName={recommendation.product.name} compact onFeedback={(feedback, feedbackReason) => track("recommendation_feedback", recommendation.product.id, { answers: serializeAnswers(answers), feedback, feedback_reason: feedbackReason, rank: index + 1, score: recommendation.score, matched_reasons: recommendation.matchedReasons, product_name: recommendation.product.name, explanation_present: Boolean(recommendation.explanation), feedback_surface: "finder_result_card" })} />
@@ -218,10 +218,10 @@ export default function FinderPage({ params }: { params: Promise<{ id: string }>
                         <p className="eyebrow text-moss">Compare your matches</p>
                         <h2 className="mt-1 text-base font-extrabold">Why these options differ</h2>
                       </div>
-                      <span className="rounded-full border border-black/10 bg-white px-3 py-1.5 text-[9px] font-extrabold uppercase tracking-wider text-black/45">Deterministic comparison</span>
+                      <span className="rounded-full border border-black/10 bg-white px-3 py-1.5 text-xs font-extrabold uppercase tracking-wider text-black/45">Deterministic comparison</span>
                     </div>
                     <table className="w-full min-w-[860px] border-collapse text-sm">
-                      <thead className="bg-white text-[9px] uppercase tracking-wider text-black/35">
+                      <thead className="bg-white text-xs uppercase tracking-wider text-black/35">
                         <tr>
                           <th className="w-[20%] px-5 py-3 text-left font-extrabold">Product</th>
                           <th className="w-[18%] px-5 py-3 text-left font-extrabold">Best for</th>
@@ -238,14 +238,14 @@ export default function FinderPage({ params }: { params: Promise<{ id: string }>
                             <tr key={row.productId} className={index === 0 ? "bg-lime/10" : "bg-white"}>
                               <td className="px-5 py-4 align-top">
                                 <p className="text-xs font-extrabold text-ink">{product.name}</p>
-                                <p className="mt-1 text-[10px] font-bold text-black/35">{formatCurrency(product.price)}</p>
+                                <p className="mt-1 text-xs font-bold text-black/35">{formatCurrency(product.price)}</p>
                               </td>
                               <td className="px-5 py-4 align-top text-xs font-bold leading-5 text-black/65">{row.bestFor}</td>
                               <td className="px-5 py-4 align-top text-xs font-bold leading-5 text-black/65">{row.standout}</td>
                               <td className="px-5 py-4 align-top text-xs leading-5 text-black/55">{row.tradeoff}</td>
                               <td className="px-5 py-4 align-top">
                                 <div className="flex flex-wrap gap-1.5">
-                                  {row.proofPoints.map((point) => <span key={point} className="rounded-full bg-black/[0.04] px-2.5 py-1 text-[10px] font-bold text-black/45">{point}</span>)}
+                                  {row.proofPoints.map((point) => <span key={point} className="rounded-full bg-black/[0.04] px-2.5 py-1 text-xs font-bold text-black/45">{point}</span>)}
                                 </div>
                               </td>
                             </tr>
@@ -264,10 +264,10 @@ export default function FinderPage({ params }: { params: Promise<{ id: string }>
                         <h2 className="mt-1 text-sm font-extrabold text-amber-950">{recovery.primaryAction}</h2>
                         <p className="mt-1 text-xs leading-5 text-amber-900/65">{recovery.summary}</p>
                       </div>
-                      <button onClick={restart} className="shrink-0 rounded-full bg-white px-3 py-2 text-[10px] font-extrabold text-amber-800">Adjust answers</button>
+                      <button onClick={restart} className="shrink-0 rounded-full bg-white px-3 py-2 text-xs font-extrabold text-amber-800">Adjust answers</button>
                     </div>
                     <div className="mt-3 grid gap-2 md:grid-cols-2">
-                      {recovery.suggestions.slice(0, 2).map((suggestion) => <div key={suggestion.id} className="rounded-xl bg-white/80 p-3"><p className="text-[10px] font-extrabold text-amber-950">{suggestion.title}</p><p className="mt-1 text-[9px] leading-4 text-amber-900/55">{suggestion.detail}</p></div>)}
+                      {recovery.suggestions.slice(0, 2).map((suggestion) => <div key={suggestion.id} className="rounded-xl bg-white/80 p-3"><p className="text-xs font-extrabold text-amber-950">{suggestion.title}</p><p className="mt-1 text-xs leading-4 text-amber-900/55">{suggestion.detail}</p></div>)}
                     </div>
                   </section>
                 )}
@@ -280,22 +280,22 @@ export default function FinderPage({ params }: { params: Promise<{ id: string }>
                   <div className="mt-6 text-left">
                     {recovery.suggestions.length > 0 && (
                       <div className="grid gap-2 md:grid-cols-2">
-                        {recovery.suggestions.map((suggestion) => <div key={suggestion.id} className="rounded-2xl bg-lime/15 p-4"><p className="text-[10px] font-extrabold text-moss">{suggestion.title}</p><p className="mt-1 text-[9px] leading-4 text-black/45">{suggestion.detail}</p></div>)}
+                        {recovery.suggestions.map((suggestion) => <div key={suggestion.id} className="rounded-2xl bg-lime/15 p-4"><p className="text-xs font-extrabold text-moss">{suggestion.title}</p><p className="mt-1 text-xs leading-4 text-black/45">{suggestion.detail}</p></div>)}
                       </div>
                     )}
                     {recovery.blockers.length > 0 && (
                       <div className="mt-4 rounded-2xl bg-canvas p-4">
-                        <p className="text-[9px] font-extrabold uppercase tracking-wider text-black/35">What blocked the match</p>
+                        <p className="text-xs font-extrabold uppercase tracking-wider text-black/35">What blocked the match</p>
                         <div className="mt-2 flex flex-wrap gap-1.5">
-                          {recovery.blockers.slice(0, 3).map((blocker) => <span key={blocker.reason} className="rounded-full bg-white px-2.5 py-1 text-[9px] font-bold text-black/45">{blocker.reason} · {blocker.count}</span>)}
+                          {recovery.blockers.slice(0, 3).map((blocker) => <span key={blocker.reason} className="rounded-full bg-white px-2.5 py-1 text-xs font-bold text-black/45">{blocker.reason} · {blocker.count}</span>)}
                         </div>
                       </div>
                     )}
                     {recovery.closestProducts.length > 0 && (
                       <div className="mt-4 rounded-2xl border border-black/[0.06] p-4">
-                        <p className="text-[9px] font-extrabold uppercase tracking-wider text-black/35">Closest catalog options</p>
+                        <p className="text-xs font-extrabold uppercase tracking-wider text-black/35">Closest catalog options</p>
                         <div className="mt-3 grid gap-2">
-                          {recovery.closestProducts.slice(0, 3).map((product) => <div key={product.productId} className="flex items-center justify-between gap-3 rounded-xl bg-canvas px-3 py-2.5"><span><span className="block text-[10px] font-extrabold">{product.name}</span><span className="mt-0.5 block text-[8px] text-black/35">{product.blockedReason || product.strongestSignals.join(", ") || product.category}</span></span><span className="shrink-0 text-[10px] font-extrabold text-black/45">{formatCurrency(product.price)}</span></div>)}
+                          {recovery.closestProducts.slice(0, 3).map((product) => <div key={product.productId} className="flex items-center justify-between gap-3 rounded-xl bg-canvas px-3 py-2.5"><span><span className="block text-xs font-extrabold">{product.name}</span><span className="mt-0.5 block text-xs text-black/35">{product.blockedReason || product.strongestSignals.join(", ") || product.category}</span></span><span className="shrink-0 text-xs font-extrabold text-black/45">{formatCurrency(product.price)}</span></div>)}
                         </div>
                       </div>
                     )}
@@ -310,7 +310,7 @@ export default function FinderPage({ params }: { params: Promise<{ id: string }>
           </div>
         </div>
       )}
-      <footer className="flex items-center justify-between border-t border-black/[0.05] px-5 py-3 text-[9px] font-bold text-black/25 sm:px-8"><span>Powered by <b className="text-black/45">findly</b></span><span>Your answers are used only for this recommendation</span></footer>
+      <footer className="flex items-center justify-between border-t border-black/[0.05] px-5 py-3 text-xs font-bold text-black/25 sm:px-8"><span>Powered by <b className="text-black/45">findly</b></span><span>Your answers are used only for this recommendation</span></footer>
     </section>
   </main>;
 }

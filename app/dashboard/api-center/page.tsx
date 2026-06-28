@@ -71,14 +71,14 @@ export default function ApiCenterPage() {
         <section className="rounded-[30px] border border-black/[0.07] bg-ink p-7 text-white">
           <div className="flex items-center justify-between">
             <span className="grid h-12 w-12 place-items-center rounded-2xl bg-lime text-ink"><Braces size={22} /></span>
-            <span className={cn("rounded-full px-3 py-1.5 text-[9px] font-extrabold uppercase", report.status === "ready" ? "bg-lime text-ink" : report.status === "watch" ? "bg-amber-300/20 text-amber-100" : "bg-red-500/20 text-red-100")}>{report.status}</span>
+            <span className={cn("rounded-full px-3 py-1.5 text-xs font-extrabold uppercase", report.status === "ready" ? "bg-lime text-ink" : report.status === "watch" ? "bg-amber-300/20 text-amber-100" : "bg-red-500/20 text-red-100")}>{report.status}</span>
           </div>
           <p className="display mt-8 text-7xl">{report.score}%</p>
           <p className="mt-3 text-sm font-bold leading-6 text-white/45">{report.headline}</p>
           <div className="mt-6 grid grid-cols-3 gap-2 text-center">
-            <div className="rounded-2xl bg-white/[0.06] p-3"><p className="text-xl font-extrabold">{report.summary.readyEndpoints}</p><p className="mt-1 text-[8px] text-white/35">Ready</p></div>
-            <div className="rounded-2xl bg-white/[0.06] p-3"><p className="text-xl font-extrabold">{report.summary.endpoints}</p><p className="mt-1 text-[8px] text-white/35">Endpoints</p></div>
-            <div className="rounded-2xl bg-white/[0.06] p-3"><p className="text-xl font-extrabold">{report.summary.blockedEndpoints}</p><p className="mt-1 text-[8px] text-white/35">Blocked</p></div>
+            <div className="rounded-2xl bg-white/[0.06] p-3"><p className="text-xl font-extrabold">{report.summary.readyEndpoints}</p><p className="mt-1 text-xs text-white/35">Ready</p></div>
+            <div className="rounded-2xl bg-white/[0.06] p-3"><p className="text-xl font-extrabold">{report.summary.endpoints}</p><p className="mt-1 text-xs text-white/35">Endpoints</p></div>
+            <div className="rounded-2xl bg-white/[0.06] p-3"><p className="text-xl font-extrabold">{report.summary.blockedEndpoints}</p><p className="mt-1 text-xs text-white/35">Blocked</p></div>
           </div>
         </section>
 
@@ -94,7 +94,7 @@ export default function ApiCenterPage() {
               <article key={String(label)} className="rounded-[24px] border border-black/[0.07] bg-white p-5">
                 <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#eef1e8] text-moss"><MetricIcon size={18} /></span>
                 <p className="display mt-5 text-4xl">{String(value)}{label === "Analytics QA" ? "%" : ""}</p>
-                <p className="mt-1 text-[9px] font-extrabold uppercase tracking-wider text-black/30">{String(label)}</p>
+                <p className="mt-1 text-xs font-extrabold uppercase tracking-wider text-black/30">{String(label)}</p>
               </article>
             );
           })}
@@ -109,7 +109,7 @@ export default function ApiCenterPage() {
                 <h2 className="text-sm font-extrabold">API endpoint catalog</h2>
                 <p className="mt-1 text-xs text-black/35">Public runtime endpoints for custom storefronts. These are the same services behind the widget and shopper pages.</p>
               </div>
-              <span className={cn("rounded-full px-3 py-1.5 text-[9px] font-extrabold uppercase", statusTone[report.status])}>{report.status}</span>
+              <span className={cn("rounded-full px-3 py-1.5 text-xs font-extrabold uppercase", statusTone[report.status])}>{report.status}</span>
             </div>
 
             <div className="mt-5 grid gap-3 xl:grid-cols-2">
@@ -119,13 +119,13 @@ export default function ApiCenterPage() {
                     <div>
                       <div className="flex flex-wrap items-center gap-2">
                         <h3 className="text-xs font-extrabold">{endpoint.label}</h3>
-                        <span className={cn("rounded-full px-2 py-1 text-[8px] font-extrabold uppercase", selectedEndpoint.id === endpoint.id ? "bg-white/10 text-lime" : endpointTone[endpoint.status])}>{endpoint.statusLabel}</span>
+                        <span className={cn("rounded-full px-2 py-1 text-xs font-extrabold uppercase", selectedEndpoint.id === endpoint.id ? "bg-white/10 text-lime" : endpointTone[endpoint.status])}>{endpoint.statusLabel}</span>
                       </div>
-                      <p className={cn("mt-2 text-[10px] leading-4", selectedEndpoint.id === endpoint.id ? "text-white/45" : "text-black/40")}>{endpoint.purpose}</p>
+                      <p className={cn("mt-2 text-xs leading-4", selectedEndpoint.id === endpoint.id ? "text-white/45" : "text-black/40")}>{endpoint.purpose}</p>
                     </div>
-                    <span className={cn("shrink-0 rounded-full px-2 py-1 text-[8px] font-extrabold", selectedEndpoint.id === endpoint.id ? "bg-lime text-ink" : "bg-white text-black/35")}>{endpoint.method}</span>
+                    <span className={cn("shrink-0 rounded-full px-2 py-1 text-xs font-extrabold", selectedEndpoint.id === endpoint.id ? "bg-lime text-ink" : "bg-white text-black/35")}>{endpoint.method}</span>
                   </div>
-                  <code className={cn("mt-3 block truncate rounded-xl px-3 py-2 text-[9px] font-bold", selectedEndpoint.id === endpoint.id ? "bg-white/[0.06] text-white/45" : "bg-white text-black/45")}>{endpoint.path}</code>
+                  <code className={cn("mt-3 block truncate rounded-xl px-3 py-2 text-xs font-bold", selectedEndpoint.id === endpoint.id ? "bg-white/[0.06] text-white/45" : "bg-white text-black/45")}>{endpoint.path}</code>
                 </button>
               ))}
             </div>
@@ -146,27 +146,27 @@ export default function ApiCenterPage() {
                 <div className="rounded-2xl bg-ink p-4 text-white">
                   <div className="flex items-center justify-between">
                     <p className="flex items-center gap-2 text-xs font-extrabold"><TerminalSquare size={14} className="text-lime" /> Fetch snippet</p>
-                    <button onClick={() => copy(selectedEndpoint.clientSnippet, `${selectedEndpoint.id}-snippet`)} className="rounded-full bg-lime px-3 py-1.5 text-[9px] font-extrabold text-ink">{copied === `${selectedEndpoint.id}-snippet` ? "Copied" : "Copy"}</button>
+                    <button onClick={() => copy(selectedEndpoint.clientSnippet, `${selectedEndpoint.id}-snippet`)} className="rounded-full bg-lime px-3 py-1.5 text-xs font-extrabold text-ink">{copied === `${selectedEndpoint.id}-snippet` ? "Copied" : "Copy"}</button>
                   </div>
-                  <pre className="mt-3 max-h-64 overflow-auto whitespace-pre-wrap break-all rounded-xl bg-black/20 p-3 text-[9px] leading-4 text-white/55">{selectedEndpoint.clientSnippet}</pre>
+                  <pre className="mt-3 max-h-64 overflow-auto whitespace-pre-wrap break-all rounded-xl bg-black/20 p-3 text-xs leading-4 text-white/55">{selectedEndpoint.clientSnippet}</pre>
                 </div>
                 <div className="rounded-2xl bg-canvas p-4">
                   <div className="flex items-center justify-between">
                     <p className="flex items-center gap-2 text-xs font-extrabold"><Code2 size={14} className="text-moss" /> Request body</p>
-                    <button onClick={() => copy(selectedEndpoint.requestExample, `${selectedEndpoint.id}-body`)} className="rounded-full bg-ink px-3 py-1.5 text-[9px] font-extrabold text-white">{copied === `${selectedEndpoint.id}-body` ? "Copied" : "Copy"}</button>
+                    <button onClick={() => copy(selectedEndpoint.requestExample, `${selectedEndpoint.id}-body`)} className="rounded-full bg-ink px-3 py-1.5 text-xs font-extrabold text-white">{copied === `${selectedEndpoint.id}-body` ? "Copied" : "Copy"}</button>
                   </div>
-                  <pre className="mt-3 max-h-64 overflow-auto whitespace-pre-wrap break-all rounded-xl bg-white p-3 text-[9px] leading-4 text-black/45">{selectedEndpoint.requestExample}</pre>
+                  <pre className="mt-3 max-h-64 overflow-auto whitespace-pre-wrap break-all rounded-xl bg-white p-3 text-xs leading-4 text-black/45">{selectedEndpoint.requestExample}</pre>
                 </div>
               </div>
 
               <div className="mt-5 grid gap-4 xl:grid-cols-2">
                 <div className="rounded-2xl bg-canvas p-4">
                   <p className="text-xs font-extrabold">Response fields</p>
-                  <div className="mt-3 flex flex-wrap gap-2">{selectedEndpoint.responseFields.map((field) => <span key={field} className="rounded-full bg-white px-3 py-1.5 text-[9px] font-extrabold text-black/40">{field}</span>)}</div>
+                  <div className="mt-3 flex flex-wrap gap-2">{selectedEndpoint.responseFields.map((field) => <span key={field} className="rounded-full bg-white px-3 py-1.5 text-xs font-extrabold text-black/40">{field}</span>)}</div>
                 </div>
                 <div className="rounded-2xl bg-canvas p-4">
                   <p className="text-xs font-extrabold">Runtime guardrails</p>
-                  <div className="mt-3 space-y-2">{selectedEndpoint.guardrails.map((guardrail) => <p key={guardrail} className="rounded-xl bg-white px-3 py-2 text-[9px] font-bold leading-4 text-black/45">{guardrail}</p>)}</div>
+                  <div className="mt-3 space-y-2">{selectedEndpoint.guardrails.map((guardrail) => <p key={guardrail} className="rounded-xl bg-white px-3 py-2 text-xs font-bold leading-4 text-black/45">{guardrail}</p>)}</div>
                 </div>
               </div>
             </section>
@@ -180,8 +180,8 @@ export default function ApiCenterPage() {
               {report.checks.map((check) => (
                 <Link key={check.id} href={check.href} className={cn("block rounded-2xl p-4 transition hover:-translate-y-0.5", checkTone[check.status])}>
                   <p className="text-xs font-extrabold">{check.label}</p>
-                  <p className="mt-1 text-[10px] leading-4 opacity-70">{check.detail}</p>
-                  <p className="mt-2 rounded-xl bg-white/70 px-3 py-2 text-[9px] font-bold leading-4 opacity-80">{check.evidence}</p>
+                  <p className="mt-1 text-xs leading-4 opacity-70">{check.detail}</p>
+                  <p className="mt-2 rounded-xl bg-white/70 px-3 py-2 text-xs font-bold leading-4 opacity-80">{check.evidence}</p>
                 </Link>
               ))}
             </div>
@@ -192,11 +192,11 @@ export default function ApiCenterPage() {
             <div className="mt-4 space-y-2">
               {report.actions.map((action) => (
                 <Link key={action.id} href={action.href} className="block rounded-2xl bg-white/[0.06] p-4 transition hover:bg-white/[0.1]">
-                  <span className={cn("rounded-full px-2.5 py-1 text-[8px] font-extrabold uppercase", priorityTone[action.priority])}>{action.priority}</span>
+                  <span className={cn("rounded-full px-2.5 py-1 text-xs font-extrabold uppercase", priorityTone[action.priority])}>{action.priority}</span>
                   <h3 className="mt-4 text-xs font-extrabold leading-5">{action.title}</h3>
-                  <p className="mt-1 text-[10px] leading-4 text-white/45">{action.detail}</p>
-                  <p className="mt-3 rounded-xl bg-white/[0.06] px-3 py-2 text-[9px] font-bold leading-4 text-white/45">{action.evidence}</p>
-                  <span className="mt-3 inline-flex items-center gap-1 text-[9px] font-extrabold text-lime">{action.label}<ArrowRight size={10} /></span>
+                  <p className="mt-1 text-xs leading-4 text-white/45">{action.detail}</p>
+                  <p className="mt-3 rounded-xl bg-white/[0.06] px-3 py-2 text-xs font-bold leading-4 text-white/45">{action.evidence}</p>
+                  <span className="mt-3 inline-flex items-center gap-1 text-xs font-extrabold text-lime">{action.label}<ArrowRight size={10} /></span>
                 </Link>
               ))}
             </div>
@@ -208,8 +208,8 @@ export default function ApiCenterPage() {
               {report.sdkNotes.map((note) => (
                 <div key={note.label} className="rounded-2xl bg-canvas p-4">
                   <p className="text-xs font-extrabold">{note.label}</p>
-                  <p className="mt-1 text-[10px] leading-4 text-black/40">{note.detail}</p>
-                  <p className="mt-3 rounded-xl bg-white px-3 py-2 text-[9px] font-bold leading-4 text-moss">{note.proof}</p>
+                  <p className="mt-1 text-xs leading-4 text-black/40">{note.detail}</p>
+                  <p className="mt-3 rounded-xl bg-white px-3 py-2 text-xs font-bold leading-4 text-moss">{note.proof}</p>
                 </div>
               ))}
             </div>

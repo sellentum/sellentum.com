@@ -29,7 +29,7 @@ export default function IndustriesPage() {
             <article key={title} className="overflow-hidden rounded-[30px] border border-black/10 bg-white">
               <div className={`relative h-56 p-8 ${index === 0 ? "bg-lime" : index === 1 ? "bg-[#ffd5b6]" : index === 2 ? "bg-[#cbd9d0]" : "bg-[#d7d4ff]"}`}>
                 <div className="absolute inset-0 dot-grid opacity-20" />
-                <div className="relative flex h-full items-start justify-between"><span className="text-[10px] font-extrabold tracking-[.16em]">0{index + 1}</span><span className="grid h-16 w-16 place-items-center rounded-2xl border border-black/10 bg-white/60"><Icon size={25} /></span></div>
+                <div className="relative flex h-full items-start justify-between"><span className="text-xs font-extrabold tracking-[.16em]">0{index + 1}</span><span className="grid h-16 w-16 place-items-center rounded-2xl border border-black/10 bg-white/60"><Icon size={25} /></span></div>
               </div>
               <div className="p-8">
                 <h2 className="text-3xl font-extrabold tracking-[-.055em]">{title}</h2>
@@ -49,7 +49,7 @@ export default function IndustriesPage() {
         </div>
       </section>
 
-      <footer className="border-t border-black/10 px-6 py-10 lg:px-10"><div className="mx-auto flex max-w-[1280px] items-center justify-between text-[10px] font-bold text-black/35"><Logo /><span>© 2026 Findly</span></div></footer>
+      <footer className="border-t border-black/10 px-6 py-10 lg:px-10"><div className="mx-auto flex max-w-[1280px] items-center justify-between text-xs font-bold text-black/35"><Logo /><span>© 2026 Findly</span></div></footer>
     </main>
   );
 }

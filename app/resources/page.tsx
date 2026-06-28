@@ -42,12 +42,12 @@ export default function ResourcesPage() {
         <div className="mx-auto max-w-[1280px] rounded-[32px] bg-ink p-10 text-white">
           <p className="eyebrow text-lime">Suggested test path</p>
           <div className="mt-7 grid gap-3 lg:grid-cols-4">
-            {["Open Launch Studio", "Enrich products", "Generate and publish a finder", "Copy the widget snippet"].map((step, index) => <div key={step} className="rounded-2xl bg-white/[.06] p-5"><span className="text-[10px] font-extrabold text-lime">0{index + 1}</span><p className="mt-8 text-xl font-extrabold tracking-[-.04em]">{step}</p></div>)}
+            {["Open Launch Studio", "Enrich products", "Generate and publish a finder", "Copy the widget snippet"].map((step, index) => <div key={step} className="rounded-2xl bg-white/[.06] p-5"><span className="text-xs font-extrabold text-lime">0{index + 1}</span><p className="mt-8 text-xl font-extrabold tracking-[-.04em]">{step}</p></div>)}
           </div>
         </div>
       </section>
 
-      <footer className="border-t border-black/10 px-6 py-10 lg:px-10"><div className="mx-auto flex max-w-[1280px] items-center justify-between text-[10px] font-bold text-black/35"><Logo /><span>© 2026 Findly</span></div></footer>
+      <footer className="border-t border-black/10 px-6 py-10 lg:px-10"><div className="mx-auto flex max-w-[1280px] items-center justify-between text-xs font-bold text-black/35"><Logo /><span>© 2026 Findly</span></div></footer>
     </main>
   );
 }

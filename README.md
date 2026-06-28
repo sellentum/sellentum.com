@@ -30,7 +30,7 @@ Findly is a compact guided-selling SaaS product for ecommerce brands. A merchant
 - Runtime Operations Center that monitors public endpoint contracts, guardrails, analytics quality, release gates and telemetry proof
 - Release Center that rolls catalog, experience, channel, sandbox, analytics and optimization gates into a go/no-go release candidate with rollback notes
 - Production Verification Center that packages Vercel deployment gates, Supabase/demo mode evidence, required route/API contracts, desktop QA scenarios, final verification commands and copyable production handoff packets
-- System typography guardrails using a simple Helvetica/Poppins/SF Pro stack, a 16px base and readable minimum sizes for dense dashboard labels
+- System typography guardrails using a simple Helvetica/Poppins/SF Pro stack, a 16px base, readable line/word spacing and a desktop source sweep that keeps app/component UI on standard `text-xs`/`text-sm` scales instead of tiny arbitrary font sizes
 - Workspace Snapshot exporter that packages products, finder rules, configurators, brand settings, install snippets, release state and redacted analytics into copyable JSON/CSV/handoff files
 - Usage & Plan Center that meters sessions, guided interactions, catalog scale, published experiences and AI-assist credits against Stripe-placeholder plan tiers
 - Copyable launch contract with runtime endpoints, widget data attributes, analytics payload requirements, QA checks and troubleshooting guidance for storefront handoff

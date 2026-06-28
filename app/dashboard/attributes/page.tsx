@@ -66,14 +66,14 @@ export default function AttributeStudioPage() {
         <section className="rounded-[30px] border border-black/[0.07] bg-ink p-7 text-white">
           <div className="flex items-center justify-between">
             <span className="grid h-12 w-12 place-items-center rounded-2xl bg-lime text-ink"><Layers3 size={22} /></span>
-            <span className={cn("rounded-full px-3 py-1.5 text-[9px] font-extrabold uppercase", report.status === "ready" ? "bg-lime text-ink" : report.status === "review" ? "bg-amber-300/20 text-amber-100" : "bg-red-500/20 text-red-100")}>{report.status}</span>
+            <span className={cn("rounded-full px-3 py-1.5 text-xs font-extrabold uppercase", report.status === "ready" ? "bg-lime text-ink" : report.status === "review" ? "bg-amber-300/20 text-amber-100" : "bg-red-500/20 text-red-100")}>{report.status}</span>
           </div>
           <p className="display mt-8 text-7xl">{report.score}%</p>
           <p className="mt-3 text-sm font-bold leading-6 text-white/45">{report.headline}</p>
           <div className="mt-6 grid grid-cols-3 gap-2 text-center">
-            <div className="rounded-2xl bg-white/[0.06] p-3"><p className="text-xl font-extrabold">{report.summary.approvedAttributes}</p><p className="mt-1 text-[8px] text-white/35">Approved</p></div>
-            <div className="rounded-2xl bg-white/[0.06] p-3"><p className="text-xl font-extrabold">{report.summary.reviewAttributes}</p><p className="mt-1 text-[8px] text-white/35">Review</p></div>
-            <div className="rounded-2xl bg-white/[0.06] p-3"><p className="text-xl font-extrabold">{report.summary.missingProductTasks}</p><p className="mt-1 text-[8px] text-white/35">Missing</p></div>
+            <div className="rounded-2xl bg-white/[0.06] p-3"><p className="text-xl font-extrabold">{report.summary.approvedAttributes}</p><p className="mt-1 text-xs text-white/35">Approved</p></div>
+            <div className="rounded-2xl bg-white/[0.06] p-3"><p className="text-xl font-extrabold">{report.summary.reviewAttributes}</p><p className="mt-1 text-xs text-white/35">Review</p></div>
+            <div className="rounded-2xl bg-white/[0.06] p-3"><p className="text-xl font-extrabold">{report.summary.missingProductTasks}</p><p className="mt-1 text-xs text-white/35">Missing</p></div>
           </div>
         </section>
 
@@ -89,7 +89,7 @@ export default function AttributeStudioPage() {
               <article key={String(label)} className="rounded-[24px] border border-black/[0.07] bg-white p-5">
                 <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#eef1e8] text-moss"><MetricIcon size={18} /></span>
                 <p className="display mt-5 text-4xl">{String(value)}</p>
-                <p className="mt-1 text-[9px] font-extrabold uppercase tracking-wider text-black/30">{String(label)}</p>
+                <p className="mt-1 text-xs font-extrabold uppercase tracking-wider text-black/30">{String(label)}</p>
               </article>
             );
           })}
@@ -112,19 +112,19 @@ export default function AttributeStudioPage() {
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <h3 className="text-xs font-extrabold">{attribute.label}</h3>
-                      <p className="mt-1 text-[9px] font-bold text-black/30">{attribute.canonicalValue}</p>
+                      <p className="mt-1 text-xs font-bold text-black/30">{attribute.canonicalValue}</p>
                     </div>
-                    <span className={cn("rounded-full px-2.5 py-1 text-[8px] font-extrabold uppercase", statusTone[attribute.status])}>{attribute.status}</span>
+                    <span className={cn("rounded-full px-2.5 py-1 text-xs font-extrabold uppercase", statusTone[attribute.status])}>{attribute.status}</span>
                   </div>
-                  <p className="mt-3 text-[10px] leading-4 text-black/45">{attribute.shopperBenefit}</p>
-                  <p className="mt-3 rounded-xl bg-canvas px-3 py-2 text-[9px] font-bold leading-4 text-black/45">Ask: {attribute.suggestedQuestion}</p>
+                  <p className="mt-3 text-xs leading-4 text-black/45">{attribute.shopperBenefit}</p>
+                  <p className="mt-3 rounded-xl bg-canvas px-3 py-2 text-xs font-bold leading-4 text-black/45">Ask: {attribute.suggestedQuestion}</p>
                   <div className="mt-3 flex flex-wrap gap-1.5">
-                    <span className={cn("rounded-full px-2 py-1 text-[8px] font-extrabold", kindTone[attribute.kind])}>{attribute.kind.replace("_", " ")}</span>
-                    <span className="rounded-full bg-canvas px-2 py-1 text-[8px] font-extrabold text-black/35">{attribute.productCount} products</span>
-                    <span className="rounded-full bg-canvas px-2 py-1 text-[8px] font-extrabold text-black/35">{attribute.confidence}% confidence</span>
+                    <span className={cn("rounded-full px-2 py-1 text-xs font-extrabold", kindTone[attribute.kind])}>{attribute.kind.replace("_", " ")}</span>
+                    <span className="rounded-full bg-canvas px-2 py-1 text-xs font-extrabold text-black/35">{attribute.productCount} products</span>
+                    <span className="rounded-full bg-canvas px-2 py-1 text-xs font-extrabold text-black/35">{attribute.confidence}% confidence</span>
                   </div>
                   <div className="mt-3 flex flex-wrap gap-1.5">
-                    {attribute.aliases.slice(0, 6).map((alias) => <span key={`${attribute.id}-${alias}`} className="rounded-full bg-[#f6f7f2] px-2 py-1 text-[8px] font-extrabold text-black/35">{alias}</span>)}
+                    {attribute.aliases.slice(0, 6).map((alias) => <span key={`${attribute.id}-${alias}`} className="rounded-full bg-[#f6f7f2] px-2 py-1 text-xs font-extrabold text-black/35">{alias}</span>)}
                   </div>
                 </article>
               ))}
@@ -140,12 +140,12 @@ export default function AttributeStudioPage() {
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <h3 className="text-xs font-extrabold">{group.label}</h3>
-                      <p className="mt-1 text-[10px] leading-4 text-black/45">{group.recommendation}</p>
+                      <p className="mt-1 text-xs leading-4 text-black/45">{group.recommendation}</p>
                     </div>
-                    <span className={cn("rounded-full px-2.5 py-1 text-[8px] font-extrabold uppercase", group.status === "warn" ? "bg-amber-200 text-amber-800" : "bg-lime/35 text-moss")}>{group.status}</span>
+                    <span className={cn("rounded-full px-2.5 py-1 text-xs font-extrabold uppercase", group.status === "warn" ? "bg-amber-200 text-amber-800" : "bg-lime/35 text-moss")}>{group.status}</span>
                   </div>
                   <div className="mt-3 flex flex-wrap gap-1.5">
-                    {group.variants.map((variant) => <span key={`${group.id}-${variant.value}`} className="rounded-full bg-white px-2 py-1 text-[8px] font-extrabold text-black/40">{variant.value} · {variant.productCount}</span>)}
+                    {group.variants.map((variant) => <span key={`${group.id}-${variant.value}`} className="rounded-full bg-white px-2 py-1 text-xs font-extrabold text-black/40">{variant.value} · {variant.productCount}</span>)}
                   </div>
                 </article>
               ))}
@@ -160,11 +160,11 @@ export default function AttributeStudioPage() {
             <div className="mt-4 space-y-3">
               {report.actions.map((action) => (
                 <Link key={action.id} href={action.href} className="block rounded-2xl bg-canvas p-4 transition hover:bg-white">
-                  <span className={cn("rounded-full px-2.5 py-1 text-[8px] font-extrabold uppercase", action.priority === "critical" ? "bg-red-50 text-red-700" : action.priority === "high" ? "bg-amber-50 text-amber-700" : "bg-lime/35 text-moss")}>{action.priority}</span>
+                  <span className={cn("rounded-full px-2.5 py-1 text-xs font-extrabold uppercase", action.priority === "critical" ? "bg-red-50 text-red-700" : action.priority === "high" ? "bg-amber-50 text-amber-700" : "bg-lime/35 text-moss")}>{action.priority}</span>
                   <h3 className="mt-3 text-xs font-extrabold leading-5">{action.title}</h3>
-                  <p className="mt-2 text-[10px] leading-4 text-black/45">{action.detail}</p>
-                  <p className="mt-3 rounded-xl bg-white px-3 py-2 text-[9px] font-bold leading-4 text-black/45">{action.evidence}</p>
-                  <span className="mt-3 inline-flex items-center gap-1 text-[10px] font-extrabold text-moss">{action.label} <ArrowRight size={10} /></span>
+                  <p className="mt-2 text-xs leading-4 text-black/45">{action.detail}</p>
+                  <p className="mt-3 rounded-xl bg-white px-3 py-2 text-xs font-bold leading-4 text-black/45">{action.evidence}</p>
+                  <span className="mt-3 inline-flex items-center gap-1 text-xs font-extrabold text-moss">{action.label} <ArrowRight size={10} /></span>
                 </Link>
               ))}
             </div>
@@ -179,17 +179,17 @@ export default function AttributeStudioPage() {
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <h3 className="text-xs font-extrabold">{task.productName}</h3>
-                      <p className="mt-1 text-[9px] font-bold text-white/35">{task.missingFields.join(", ") || "Review normalized language"}</p>
+                      <p className="mt-1 text-xs font-bold text-white/35">{task.missingFields.join(", ") || "Review normalized language"}</p>
                     </div>
-                    <span className={cn("rounded-full px-2 py-1 text-[8px] font-extrabold uppercase", statusTone[task.status])}>{task.score}%</span>
+                    <span className={cn("rounded-full px-2 py-1 text-xs font-extrabold uppercase", statusTone[task.status])}>{task.score}%</span>
                   </div>
-                  <p className="mt-3 line-clamp-3 text-[10px] font-bold leading-4 text-white/45">{task.suggestedSearchText}</p>
+                  <p className="mt-3 line-clamp-3 text-xs font-bold leading-4 text-white/45">{task.suggestedSearchText}</p>
                   <div className="mt-3 flex flex-wrap gap-1.5">
-                    {task.suggestedBuyerNeeds.slice(0, 3).map((need) => <span key={`${task.productId}-${need}`} className="rounded-full bg-lime/10 px-2 py-1 text-[8px] font-extrabold text-lime">{need}</span>)}
+                    {task.suggestedBuyerNeeds.slice(0, 3).map((need) => <span key={`${task.productId}-${need}`} className="rounded-full bg-lime/10 px-2 py-1 text-xs font-extrabold text-lime">{need}</span>)}
                   </div>
                 </Link>
               ))}
-              {!report.productTasks.length && <p className="rounded-2xl bg-lime/10 p-4 text-[10px] font-bold leading-4 text-lime">All active products have enough normalized attribute language for launch QA.</p>}
+              {!report.productTasks.length && <p className="rounded-2xl bg-lime/10 p-4 text-xs font-bold leading-4 text-lime">All active products have enough normalized attribute language for launch QA.</p>}
             </div>
           </section>
 
@@ -204,7 +204,7 @@ export default function AttributeStudioPage() {
                 const Icon = item.icon;
                 return <Link key={item.href} href={item.href} className="flex items-start gap-3 rounded-2xl bg-canvas p-4 transition hover:bg-white">
                   <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-lime/35 text-moss"><Icon size={16} /></span>
-                  <span><span className="block text-xs font-extrabold">{item.label}</span><span className="mt-1 block text-[10px] leading-4 text-black/40">{item.detail}</span></span>
+                  <span><span className="block text-xs font-extrabold">{item.label}</span><span className="mt-1 block text-xs leading-4 text-black/40">{item.detail}</span></span>
                 </Link>;
               })}
             </div>

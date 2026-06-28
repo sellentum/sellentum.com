@@ -59,7 +59,7 @@ export default function RecommendationFeedbackPage() {
           <div className="w-[360px] shrink-0 rounded-[26px] border border-white/10 bg-white/[0.06] p-5">
             <div className="flex items-center justify-between">
               <span className="grid h-12 w-12 place-items-center rounded-2xl bg-lime text-ink"><ThumbsUp size={22} /></span>
-              <span className={cn("rounded-full px-3 py-1.5 text-[9px] font-extrabold uppercase", statusTone[report.status])}>{report.status.replace("-", " ")}</span>
+              <span className={cn("rounded-full px-3 py-1.5 text-xs font-extrabold uppercase", statusTone[report.status])}>{report.status.replace("-", " ")}</span>
             </div>
             <p className="display mt-8 text-6xl">{report.score}%</p>
             <p className="mt-2 text-xs font-bold leading-5 text-white/45">{report.headline}</p>
@@ -78,7 +78,7 @@ export default function RecommendationFeedbackPage() {
             [report.summary.highRiskProducts, "Risk products", AlertTriangle],
           ].map(([value, label, Icon]) => {
             const MetricIcon = Icon as typeof Sparkles;
-            return <div key={String(label)} className="rounded-2xl bg-white/[0.06] p-4"><MetricIcon size={15} className="text-lime" /><p className="mt-5 text-2xl font-extrabold">{String(value)}</p><p className="mt-1 text-[8px] font-bold uppercase tracking-wider text-white/35">{String(label)}</p></div>;
+            return <div key={String(label)} className="rounded-2xl bg-white/[0.06] p-4"><MetricIcon size={15} className="text-lime" /><p className="mt-5 text-2xl font-extrabold">{String(value)}</p><p className="mt-1 text-xs font-bold uppercase tracking-wider text-white/35">{String(label)}</p></div>;
           })}
         </div>
       </section>
@@ -94,9 +94,9 @@ export default function RecommendationFeedbackPage() {
               <article key={product.id} className="rounded-[24px] border border-black/[0.07] bg-canvas p-5">
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <span className={cn("rounded-full px-3 py-1.5 text-[8px] font-extrabold uppercase", productTone[product.status])}>{product.status.replace("-", " ")}</span>
+                    <span className={cn("rounded-full px-3 py-1.5 text-xs font-extrabold uppercase", productTone[product.status])}>{product.status.replace("-", " ")}</span>
                     <h3 className="mt-4 text-xl font-extrabold tracking-[-.045em]">{product.productName}</h3>
-                    <p className="mt-1 text-[10px] font-bold text-black/35">{product.category}</p>
+                    <p className="mt-1 text-xs font-bold text-black/35">{product.category}</p>
                   </div>
                   <div className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-white text-center"><span className="text-lg font-extrabold">{product.score}%</span></div>
                 </div>
@@ -107,13 +107,13 @@ export default function RecommendationFeedbackPage() {
                     [product.negative, "Not right"],
                     [`${product.feedbackRate}%`, "Rate"],
                     [`${product.negativeRate}%`, "Neg"],
-                  ].map(([value, label]) => <div key={String(label)} className="rounded-xl bg-white p-3"><p className="text-lg font-extrabold">{String(value)}</p><p className="mt-1 text-[8px] font-bold text-black/30">{String(label)}</p></div>)}
+                  ].map(([value, label]) => <div key={String(label)} className="rounded-xl bg-white p-3"><p className="text-lg font-extrabold">{String(value)}</p><p className="mt-1 text-xs font-bold text-black/30">{String(label)}</p></div>)}
                 </div>
-                <p className="mt-4 rounded-2xl bg-white p-4 text-[10px] font-bold leading-4 text-black/45">{product.recommendation}</p>
-                <p className="mt-3 text-[10px] leading-4 text-black/40">{product.evidence}</p>
+                <p className="mt-4 rounded-2xl bg-white p-4 text-xs font-bold leading-4 text-black/45">{product.recommendation}</p>
+                <p className="mt-3 text-xs leading-4 text-black/40">{product.evidence}</p>
                 <div className="mt-4 flex flex-wrap gap-1.5">
-                  {product.reasons.map((reason) => <span key={`${product.id}-${reason}`} className="rounded-full bg-white px-2 py-1 text-[8px] font-extrabold text-black/35">{reason}</span>)}
-                  {!product.reasons.length && <span className="rounded-full bg-white px-2 py-1 text-[8px] font-extrabold text-black/30">No explicit reason yet</span>}
+                  {product.reasons.map((reason) => <span key={`${product.id}-${reason}`} className="rounded-full bg-white px-2 py-1 text-xs font-extrabold text-black/35">{reason}</span>)}
+                  {!product.reasons.length && <span className="rounded-full bg-white px-2 py-1 text-xs font-extrabold text-black/30">No explicit reason yet</span>}
                 </div>
               </article>
             ))}
@@ -128,7 +128,7 @@ export default function RecommendationFeedbackPage() {
               {report.actions.map((action) => (
                 <Link key={action.id} href={action.href} className="flex items-start gap-3 rounded-2xl border border-black/[0.06] p-4 hover:bg-canvas">
                   <span className={cn("mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-xl", priorityTone[action.priority])}><ActionIcon priority={action.priority} /></span>
-                  <span className="min-w-0 flex-1"><span className="block text-xs font-extrabold">{action.title}</span><span className="mt-1 block text-[10px] leading-4 text-black/40">{action.detail}</span><span className="mt-2 block text-[9px] font-bold text-black/30">{action.evidence}</span></span>
+                  <span className="min-w-0 flex-1"><span className="block text-xs font-extrabold">{action.title}</span><span className="mt-1 block text-xs leading-4 text-black/40">{action.detail}</span><span className="mt-2 block text-xs font-bold text-black/30">{action.evidence}</span></span>
                   <ArrowRight size={13} className="mt-2 text-black/25" />
                 </Link>
               ))}
@@ -151,13 +151,13 @@ export default function RecommendationFeedbackPage() {
             {report.themes.map((theme) => (
               <article key={theme.id} className="rounded-2xl border border-black/[0.07] bg-canvas p-4">
                 <div className="flex items-start justify-between gap-4">
-                  <div><span className={cn("rounded-full px-2.5 py-1 text-[8px] font-extrabold uppercase", theme.sentiment === "negative" ? "bg-red-50 text-red-700" : "bg-lime/35 text-moss")}>{theme.sentiment}</span><h3 className="mt-3 text-sm font-extrabold">{theme.label}</h3><p className="mt-1 text-[10px] leading-4 text-black/45">{theme.recommendation}</p></div>
-                  <span className="rounded-full bg-white px-3 py-1.5 text-[8px] font-extrabold text-black/35">{theme.count} events</span>
+                  <div><span className={cn("rounded-full px-2.5 py-1 text-xs font-extrabold uppercase", theme.sentiment === "negative" ? "bg-red-50 text-red-700" : "bg-lime/35 text-moss")}>{theme.sentiment}</span><h3 className="mt-3 text-sm font-extrabold">{theme.label}</h3><p className="mt-1 text-xs leading-4 text-black/45">{theme.recommendation}</p></div>
+                  <span className="rounded-full bg-white px-3 py-1.5 text-xs font-extrabold text-black/35">{theme.count} events</span>
                 </div>
-                <div className="mt-3 flex flex-wrap gap-1.5">{theme.products.map((product) => <span key={`${theme.id}-${product}`} className="rounded-full bg-white px-2 py-1 text-[8px] font-extrabold text-black/35">{product}</span>)}</div>
+                <div className="mt-3 flex flex-wrap gap-1.5">{theme.products.map((product) => <span key={`${theme.id}-${product}`} className="rounded-full bg-white px-2 py-1 text-xs font-extrabold text-black/35">{product}</span>)}</div>
               </article>
             ))}
-            {!report.themes.length && <div className="rounded-2xl border border-dashed border-black/10 p-8 text-center"><p className="text-xs font-extrabold">No themes yet</p><p className="mt-1 text-[10px] text-black/35">Themes appear after shoppers rate result cards.</p></div>}
+            {!report.themes.length && <div className="rounded-2xl border border-dashed border-black/10 p-8 text-center"><p className="text-xs font-extrabold">No themes yet</p><p className="mt-1 text-xs text-black/35">Themes appear after shoppers rate result cards.</p></div>}
           </div>
         </section>
 
@@ -166,10 +166,10 @@ export default function RecommendationFeedbackPage() {
           <div className="mt-5 grid gap-3 xl:grid-cols-2">
             {report.checks.map((check) => (
               <article key={check.id} className="rounded-2xl border border-black/[0.07] bg-canvas p-4">
-                <span className={cn("rounded-full px-2.5 py-1 text-[8px] font-extrabold uppercase", check.status === "pass" ? "bg-lime/35 text-moss" : check.status === "warn" ? "bg-amber-50 text-amber-700" : "bg-red-50 text-red-700")}>{check.status}</span>
+                <span className={cn("rounded-full px-2.5 py-1 text-xs font-extrabold uppercase", check.status === "pass" ? "bg-lime/35 text-moss" : check.status === "warn" ? "bg-amber-50 text-amber-700" : "bg-red-50 text-red-700")}>{check.status}</span>
                 <h3 className="mt-4 text-xs font-extrabold">{check.label}</h3>
-                <p className="mt-2 text-[10px] leading-4 text-black/45">{check.detail}</p>
-                <p className="mt-3 rounded-xl bg-white p-3 text-[9px] font-bold leading-4 text-black/40">{check.recommendation}</p>
+                <p className="mt-2 text-xs leading-4 text-black/45">{check.detail}</p>
+                <p className="mt-3 rounded-xl bg-white p-3 text-xs font-bold leading-4 text-black/40">{check.recommendation}</p>
               </article>
             ))}
           </div>

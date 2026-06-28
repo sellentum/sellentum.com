@@ -170,7 +170,7 @@ export default function AnalyticsPage() {
           </div>
           <div className="flex rounded-full border border-black/10 bg-white p-1">
             {experienceOptions.map(({ value, icon: Icon }) => (
-              <button key={value} onClick={() => setExperienceFilter(value)} className={`flex items-center gap-1.5 rounded-full px-3 py-2 text-[10px] font-extrabold transition ${experienceFilter === value ? "bg-ink text-white" : "text-black/45 hover:text-ink"}`}>
+              <button key={value} onClick={() => setExperienceFilter(value)} className={`flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-extrabold transition ${experienceFilter === value ? "bg-ink text-white" : "text-black/45 hover:text-ink"}`}>
                 <Icon size={12} className={experienceFilter === value ? "text-lime" : ""} />
                 {experienceLabels[value]}
               </button>
@@ -194,11 +194,11 @@ export default function AnalyticsPage() {
             <div key={String(label)} className="rounded-2xl border border-black/[0.07] bg-white p-5">
               <div className="flex items-center justify-between">
                 <span className="grid h-9 w-9 place-items-center rounded-xl bg-[#f0f2ec] text-moss"><MetricIcon size={17} /></span>
-                <span className={`flex items-center gap-1 rounded-full px-2 py-1 text-[9px] font-extrabold ${metricTrend.direction === "down" ? "bg-red-50 text-red-600" : metricTrend.direction === "flat" ? "bg-black/5 text-black/35" : "bg-lime/35 text-moss"}`}>{metricTrend.direction === "down" ? <ArrowDownRight size={10} /> : <ArrowUpRight size={10} />}{metricTrend.label}</span>
+                <span className={`flex items-center gap-1 rounded-full px-2 py-1 text-xs font-extrabold ${metricTrend.direction === "down" ? "bg-red-50 text-red-600" : metricTrend.direction === "flat" ? "bg-black/5 text-black/35" : "bg-lime/35 text-moss"}`}>{metricTrend.direction === "down" ? <ArrowDownRight size={10} /> : <ArrowUpRight size={10} />}{metricTrend.label}</span>
               </div>
               <p className="mt-6 text-xs font-bold text-black/40">{String(label)}</p>
               <p className="display mt-1 text-4xl">{String(value)}</p>
-              <p className="mt-1 text-[9px] font-bold text-black/25">Previous {range.toLowerCase()}: {metricTrend.previous}</p>
+              <p className="mt-1 text-xs font-bold text-black/25">Previous {range.toLowerCase()}: {metricTrend.previous}</p>
             </div>
           );
         })}
@@ -207,8 +207,8 @@ export default function AnalyticsPage() {
       <section className="mt-5 grid gap-5 xl:grid-cols-[.72fr_1.28fr]">
         <div className="rounded-2xl border border-black/[0.07] bg-white p-5 sm:p-7">
           <div className="flex items-center justify-between">
-            <div><h2 className="text-sm font-extrabold">Attribution command board</h2><p className="mt-1 text-[10px] text-black/35">Which storefront sources, pages and campaigns drive {activeExperienceLabel.toLowerCase()}</p></div>
-            <span className={`rounded-full px-3 py-1.5 text-[9px] font-extrabold uppercase ${attributionReport.status === "actionable" ? "bg-lime/35 text-moss" : attributionReport.status === "needs-labels" ? "bg-amber-50 text-amber-700" : "bg-black/5 text-black/35"}`}>{attributionReport.status.replace("-", " ")}</span>
+            <div><h2 className="text-sm font-extrabold">Attribution command board</h2><p className="mt-1 text-xs text-black/35">Which storefront sources, pages and campaigns drive {activeExperienceLabel.toLowerCase()}</p></div>
+            <span className={`rounded-full px-3 py-1.5 text-xs font-extrabold uppercase ${attributionReport.status === "actionable" ? "bg-lime/35 text-moss" : attributionReport.status === "needs-labels" ? "bg-amber-50 text-amber-700" : "bg-black/5 text-black/35"}`}>{attributionReport.status.replace("-", " ")}</span>
           </div>
           <div className="mt-5 grid grid-cols-4 gap-2">
             {[
@@ -218,15 +218,15 @@ export default function AnalyticsPage() {
               ["Best CVR", `${Math.round(attributionReport.summary.bestConversionRate)}%`, Trophy],
             ].map(([label, value, Icon]) => {
               const MetricIcon = Icon as typeof Globe2;
-              return <div key={String(label)} className="rounded-2xl bg-[#f7f8f4] p-3"><MetricIcon size={14} className="text-moss" /><p className="mt-3 text-lg font-extrabold">{String(value)}</p><p className="mt-1 text-[8px] font-bold text-black/30">{String(label)}</p></div>;
+              return <div key={String(label)} className="rounded-2xl bg-[#f7f8f4] p-3"><MetricIcon size={14} className="text-moss" /><p className="mt-3 text-lg font-extrabold">{String(value)}</p><p className="mt-1 text-xs font-bold text-black/30">{String(label)}</p></div>;
             })}
           </div>
           <div className="mt-5 space-y-3">
             {attributionReport.channels.slice(0, 4).map((channel) => (
               <article key={channel.id} className="rounded-2xl border border-black/[0.06] bg-[#f7f8f4] p-4">
                 <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0"><h3 className="truncate text-xs font-extrabold">{channel.label}</h3><p className="mt-1 truncate text-[9px] font-bold text-black/35">{channel.medium} · {channel.pageTitle || channel.pageUrl}</p></div>
-                  <span className="rounded-full bg-white px-2.5 py-1 text-[8px] font-extrabold text-moss">{channel.score}</span>
+                  <div className="min-w-0"><h3 className="truncate text-xs font-extrabold">{channel.label}</h3><p className="mt-1 truncate text-xs font-bold text-black/35">{channel.medium} · {channel.pageTitle || channel.pageUrl}</p></div>
+                  <span className="rounded-full bg-white px-2.5 py-1 text-xs font-extrabold text-moss">{channel.score}</span>
                 </div>
                 <div className="mt-3 grid grid-cols-4 gap-1.5 text-center">
                   {[
@@ -234,19 +234,19 @@ export default function AnalyticsPage() {
                     ["Starts", channel.starts],
                     ["Done", channel.completions],
                     ["Clicks", channel.clicks],
-                  ].map(([label, value]) => <span key={String(label)} className="rounded-xl bg-white p-2"><b className="block text-xs">{String(value)}</b><i className="not-italic text-[8px] text-black/35">{String(label)}</i></span>)}
+                  ].map(([label, value]) => <span key={String(label)} className="rounded-xl bg-white p-2"><b className="block text-xs">{String(value)}</b><i className="not-italic text-xs text-black/35">{String(label)}</i></span>)}
                 </div>
-                <p className="mt-3 text-[10px] font-bold leading-4 text-moss">{channel.recommendation}</p>
+                <p className="mt-3 text-xs font-bold leading-4 text-moss">{channel.recommendation}</p>
               </article>
             ))}
-            {!attributionReport.channels.length && <div className="rounded-2xl border border-dashed border-black/10 p-8 text-center"><p className="text-xs font-extrabold">No attributed sessions yet</p><p className="mt-1 text-[10px] leading-4 text-black/35">Install the latest widget snippet to capture source, campaign, placement and page URL automatically.</p></div>}
+            {!attributionReport.channels.length && <div className="rounded-2xl border border-dashed border-black/10 p-8 text-center"><p className="text-xs font-extrabold">No attributed sessions yet</p><p className="mt-1 text-xs leading-4 text-black/35">Install the latest widget snippet to capture source, campaign, placement and page URL automatically.</p></div>}
           </div>
         </div>
 
         <div className="rounded-2xl border border-black/[0.07] bg-ink p-6 text-white">
           <div className="flex items-center justify-between gap-4">
             <span className="grid h-11 w-11 place-items-center rounded-xl bg-lime text-ink"><Megaphone size={20} /></span>
-            <span className="rounded-full bg-white/10 px-3 py-1.5 text-[9px] font-extrabold uppercase tracking-wider text-white/55">{attributionReport.summary.bestSource}</span>
+            <span className="rounded-full bg-white/10 px-3 py-1.5 text-xs font-extrabold uppercase tracking-wider text-white/55">{attributionReport.summary.bestSource}</span>
           </div>
           <h2 className="display mt-6 text-3xl">Campaign intelligence</h2>
           <p className="mt-2 text-xs leading-5 text-white/45">Findly now records UTM-style widget labels plus page URL/referrer context with every public journey event.</p>
@@ -254,10 +254,10 @@ export default function AnalyticsPage() {
             <div className="space-y-2">
               {attributionReport.actions.slice(0, 3).map((item) => (
                 <div key={item.id} className={`rounded-2xl border p-4 ${attributionActionTone[item.severity]}`}>
-                  <div className="flex items-start justify-between gap-3"><p className="text-xs font-extrabold text-ink">{item.title}</p><span className="rounded-full bg-white/70 px-2 py-1 text-[8px] font-extrabold uppercase">{item.severity}</span></div>
-                  <p className="mt-2 text-[10px] leading-4 text-black/45">{item.detail}</p>
-                  <p className="mt-2 rounded-xl bg-white/75 px-3 py-2 text-[10px] font-bold leading-4 text-black/55">{item.evidence}</p>
-                  <p className="mt-2 text-[10px] font-bold leading-4 text-moss">{item.recommendation}</p>
+                  <div className="flex items-start justify-between gap-3"><p className="text-xs font-extrabold text-ink">{item.title}</p><span className="rounded-full bg-white/70 px-2 py-1 text-xs font-extrabold uppercase">{item.severity}</span></div>
+                  <p className="mt-2 text-xs leading-4 text-black/45">{item.detail}</p>
+                  <p className="mt-2 rounded-xl bg-white/75 px-3 py-2 text-xs font-bold leading-4 text-black/55">{item.evidence}</p>
+                  <p className="mt-2 text-xs font-bold leading-4 text-moss">{item.recommendation}</p>
                 </div>
               ))}
             </div>
@@ -266,11 +266,11 @@ export default function AnalyticsPage() {
               <div className="mt-4 space-y-2">
                 {[...attributionReport.campaigns.slice(0, 3), ...attributionReport.placements.slice(0, 2)].slice(0, 5).map((channel) => (
                   <div key={channel.id} className="rounded-xl bg-white/[.07] px-3 py-2">
-                    <div className="flex items-center justify-between gap-3"><p className="truncate text-[10px] font-extrabold">{channel.label}</p><span className="rounded-full bg-lime px-2 py-0.5 text-[8px] font-extrabold text-moss">{Math.round(channel.clickThroughRate)}%</span></div>
-                    <p className="mt-1 text-[8px] font-bold text-white/35">{channel.views} views · {channel.completions} done · {channel.clicks} clicks</p>
+                    <div className="flex items-center justify-between gap-3"><p className="truncate text-xs font-extrabold">{channel.label}</p><span className="rounded-full bg-lime px-2 py-0.5 text-xs font-extrabold text-moss">{Math.round(channel.clickThroughRate)}%</span></div>
+                    <p className="mt-1 text-xs font-bold text-white/35">{channel.views} views · {channel.completions} done · {channel.clicks} clicks</p>
                   </div>
                 ))}
-                {!attributionReport.campaigns.length && <p className="rounded-xl bg-white/[.07] px-3 py-5 text-center text-[10px] leading-4 text-white/35">Campaign labels will appear after widget traffic arrives.</p>}
+                {!attributionReport.campaigns.length && <p className="rounded-xl bg-white/[.07] px-3 py-5 text-center text-xs leading-4 text-white/35">Campaign labels will appear after widget traffic arrives.</p>}
               </div>
             </div>
           </div>
@@ -281,14 +281,14 @@ export default function AnalyticsPage() {
         <div className="rounded-2xl border border-black/[0.07] bg-ink p-6 text-white">
           <div className="flex items-center justify-between gap-4">
             <span className={`grid h-11 w-11 place-items-center rounded-xl ${commercialImpact.status === "healthy" ? "bg-lime text-ink" : commercialImpact.status === "risk" ? "bg-red-400 text-white" : "bg-white/10 text-lime"}`}><CircleDollarSign size={20} /></span>
-            <span className={`rounded-full px-3 py-1.5 text-[9px] font-extrabold uppercase ${commercialImpact.status === "healthy" ? "bg-lime text-moss" : commercialImpact.status === "risk" ? "bg-red-100 text-red-700" : "bg-white/10 text-white/55"}`}>{commercialImpact.status}</span>
+            <span className={`rounded-full px-3 py-1.5 text-xs font-extrabold uppercase ${commercialImpact.status === "healthy" ? "bg-lime text-moss" : commercialImpact.status === "risk" ? "bg-red-100 text-red-700" : "bg-white/10 text-white/55"}`}>{commercialImpact.status}</span>
           </div>
           <h2 className="display mt-6 text-3xl">Commercial impact</h2>
           <p className="mt-2 text-xs leading-5 text-white/45">{commercialImpact.headline}</p>
           <div className="mt-6 grid grid-cols-[140px_1fr] gap-4">
             <div className="rounded-2xl bg-white/[.07] p-4 text-center">
               <p className="display text-5xl">{commercialImpact.score}</p>
-              <p className="mt-1 text-[8px] font-extrabold uppercase tracking-wider text-white/35">Impact score</p>
+              <p className="mt-1 text-xs font-extrabold uppercase tracking-wider text-white/35">Impact score</p>
             </div>
             <div className="grid grid-cols-2 gap-2">
               {[
@@ -298,17 +298,17 @@ export default function AnalyticsPage() {
                 ["Demand cover", `${Math.round(commercialImpact.summary.demandCoverageRate)}%`],
               ].map(([label, value]) => <div key={String(label)} className="rounded-2xl bg-white/[.07] p-3">
                 <p className="text-lg font-extrabold">{String(value)}</p>
-                <p className="mt-1 text-[8px] font-bold text-white/35">{String(label)}</p>
+                <p className="mt-1 text-xs font-bold text-white/35">{String(label)}</p>
               </div>)}
             </div>
           </div>
-          <p className="mt-5 rounded-2xl bg-white/[.06] p-3 text-[10px] leading-4 text-white/45">{commercialImpact.confidence}</p>
+          <p className="mt-5 rounded-2xl bg-white/[.06] p-3 text-xs leading-4 text-white/45">{commercialImpact.confidence}</p>
         </div>
 
         <div className="rounded-2xl border border-black/[0.07] bg-white p-5 sm:p-7">
           <div className="flex items-center justify-between">
-            <div><h2 className="text-sm font-extrabold">ROI opportunity board</h2><p className="mt-1 text-[10px] text-black/35">Estimated product value influenced by {activeExperienceLabel.toLowerCase()} over {range.toLowerCase()}</p></div>
-            <span className={`rounded-full px-3 py-1.5 text-[9px] font-extrabold uppercase ${commercialImpactTone[commercialImpact.status]}`}>{commercialImpact.summary.buyClicks} buy clicks</span>
+            <div><h2 className="text-sm font-extrabold">ROI opportunity board</h2><p className="mt-1 text-xs text-black/35">Estimated product value influenced by {activeExperienceLabel.toLowerCase()} over {range.toLowerCase()}</p></div>
+            <span className={`rounded-full px-3 py-1.5 text-xs font-extrabold uppercase ${commercialImpactTone[commercialImpact.status]}`}>{commercialImpact.summary.buyClicks} buy clicks</span>
           </div>
           <div className="mt-6 grid gap-3 xl:grid-cols-[1fr_.8fr]">
             <div className="space-y-3">
@@ -316,13 +316,13 @@ export default function AnalyticsPage() {
                 <article key={action.id} className="rounded-2xl border border-black/[0.06] bg-[#f7f8f4] p-4">
                   <div className="flex items-start justify-between gap-3">
                     <h3 className="text-xs font-extrabold">{action.title}</h3>
-                    <span className={`rounded-full px-2 py-1 text-[8px] font-extrabold uppercase ${commercialPriorityTone[action.priority]}`}>{action.priority}</span>
+                    <span className={`rounded-full px-2 py-1 text-xs font-extrabold uppercase ${commercialPriorityTone[action.priority]}`}>{action.priority}</span>
                   </div>
-                  <p className="mt-2 text-[10px] leading-4 text-black/45">{action.detail}</p>
-                  <p className="mt-3 rounded-xl bg-white px-3 py-2 text-[10px] font-bold leading-4 text-black/55">{action.evidence}</p>
+                  <p className="mt-2 text-xs leading-4 text-black/45">{action.detail}</p>
+                  <p className="mt-3 rounded-xl bg-white px-3 py-2 text-xs font-bold leading-4 text-black/55">{action.evidence}</p>
                   <div className="mt-3 flex items-center justify-between gap-3">
-                    <p className="text-[10px] font-bold leading-4 text-moss">{action.recommendation}</p>
-                    <a href={action.actionHref} className="shrink-0 rounded-full bg-ink px-3 py-2 text-[9px] font-extrabold text-white">{action.metric}</a>
+                    <p className="text-xs font-bold leading-4 text-moss">{action.recommendation}</p>
+                    <a href={action.actionHref} className="shrink-0 rounded-full bg-ink px-3 py-2 text-xs font-extrabold text-white">{action.metric}</a>
                   </div>
                 </article>
               ))}
@@ -336,13 +336,13 @@ export default function AnalyticsPage() {
                 {commercialImpact.topProducts.slice(0, 4).map((product) => (
                   <div key={product.productId} className="rounded-xl bg-white/[.07] px-3 py-2">
                     <div className="flex items-center justify-between gap-3">
-                      <p className="truncate text-[10px] font-extrabold">{product.productName}</p>
-                      <span className="rounded-full bg-lime px-2 py-0.5 text-[8px] font-extrabold text-moss">{Math.round(product.clickRate)}%</span>
+                      <p className="truncate text-xs font-extrabold">{product.productName}</p>
+                      <span className="rounded-full bg-lime px-2 py-0.5 text-xs font-extrabold text-moss">{Math.round(product.clickRate)}%</span>
                     </div>
-                    <p className="mt-1 text-[8px] font-bold text-white/35">{product.recommended} surfaced · {product.clicks} clicks · {formatCurrency(product.influencedRevenue)}</p>
+                    <p className="mt-1 text-xs font-bold text-white/35">{product.recommended} surfaced · {product.clicks} clicks · {formatCurrency(product.influencedRevenue)}</p>
                   </div>
                 ))}
-                {!commercialImpact.topProducts.length && <p className="rounded-xl bg-white/[.07] px-3 py-5 text-center text-[10px] leading-4 text-white/35">Product value paths will appear after recommendations or buy clicks.</p>}
+                {!commercialImpact.topProducts.length && <p className="rounded-xl bg-white/[.07] px-3 py-5 text-center text-xs leading-4 text-white/35">Product value paths will appear after recommendations or buy clicks.</p>}
               </div>
             </div>
           </div>
@@ -353,14 +353,14 @@ export default function AnalyticsPage() {
         <div className="rounded-2xl border border-black/[0.07] bg-ink p-6 text-white">
           <div className="flex items-center justify-between gap-4">
             <span className={`grid h-11 w-11 place-items-center rounded-xl ${analyticsQuality.status === "healthy" ? "bg-lime text-ink" : analyticsQuality.status === "watch" ? "bg-amber-300 text-ink" : "bg-red-400 text-white"}`}>{analyticsQuality.status === "needs-attention" ? <ShieldAlert size={19} /> : <Radar size={19} />}</span>
-            <span className={`rounded-full px-3 py-1.5 text-[9px] font-extrabold uppercase ${analyticsQualityTone[analyticsQuality.status]}`}>{analyticsQuality.status.replace("-", " ")}</span>
+            <span className={`rounded-full px-3 py-1.5 text-xs font-extrabold uppercase ${analyticsQualityTone[analyticsQuality.status]}`}>{analyticsQuality.status.replace("-", " ")}</span>
           </div>
           <h2 className="display mt-6 text-3xl">Analytics QA</h2>
           <p className="mt-2 text-xs leading-5 text-white/45">Checks whether event metadata, session linkage and event order are reliable enough for launch decisions.</p>
           <div className="mt-6 grid grid-cols-[120px_1fr] gap-4">
             <div className="rounded-2xl bg-white/[.07] p-4 text-center">
               <p className="display text-5xl">{analyticsQuality.score}</p>
-              <p className="mt-1 text-[8px] font-extrabold uppercase tracking-wider text-white/35">QA score</p>
+              <p className="mt-1 text-xs font-extrabold uppercase tracking-wider text-white/35">QA score</p>
             </div>
             <div className="grid grid-cols-2 gap-2">
               {[
@@ -370,16 +370,16 @@ export default function AnalyticsPage() {
                 ["Issues", analyticsQuality.summary.missingRequiredMetadata + analyticsQuality.summary.sequenceIssues + analyticsQuality.summary.productEventsWithoutProduct],
               ].map(([label, value]) => <div key={String(label)} className="rounded-2xl bg-white/[.07] p-3">
                 <p className="text-xl font-extrabold">{String(value)}</p>
-                <p className="mt-1 text-[8px] font-bold text-white/35">{String(label)}</p>
+                <p className="mt-1 text-xs font-bold text-white/35">{String(label)}</p>
               </div>)}
             </div>
           </div>
-          <p className="mt-5 rounded-2xl bg-white/[.06] p-3 text-[10px] leading-4 text-white/45">Use this before launch with the storefront QA runbook: the goal is not just traffic volume, but trustworthy event quality.</p>
+          <p className="mt-5 rounded-2xl bg-white/[.06] p-3 text-xs leading-4 text-white/45">Use this before launch with the storefront QA runbook: the goal is not just traffic volume, but trustworthy event quality.</p>
         </div>
 
         <div className="rounded-2xl border border-black/[0.07] bg-white p-5 sm:p-7">
           <div className="flex items-center justify-between">
-            <div><h2 className="text-sm font-extrabold">Event-contract health</h2><p className="mt-1 text-[10px] text-black/35">Required metadata, session stitching, event sequence and product attribution for {activeExperienceLabel.toLowerCase()}</p></div>
+            <div><h2 className="text-sm font-extrabold">Event-contract health</h2><p className="mt-1 text-xs text-black/35">Required metadata, session stitching, event sequence and product attribution for {activeExperienceLabel.toLowerCase()}</p></div>
             <span className="grid h-9 w-9 place-items-center rounded-xl bg-[#f0f2ec] text-moss"><Radar size={16} /></span>
           </div>
           <div className="mt-5 grid gap-3 xl:grid-cols-2">
@@ -387,13 +387,13 @@ export default function AnalyticsPage() {
               <article key={check.id} className={`rounded-2xl border border-black/[0.06] p-4 ${analyticsCheckTone[check.status]}`}>
                 <div className="flex items-start justify-between gap-3">
                   <h3 className="text-xs font-extrabold text-ink">{check.label}</h3>
-                  <span className="rounded-full bg-white/75 px-2 py-1 text-[8px] font-extrabold uppercase">{check.status}</span>
+                  <span className="rounded-full bg-white/75 px-2 py-1 text-xs font-extrabold uppercase">{check.status}</span>
                 </div>
-                <p className="mt-2 text-[10px] leading-4 text-black/50">{check.detail}</p>
-                <p className="mt-3 rounded-xl bg-white/75 px-3 py-2 text-[10px] font-bold leading-4 text-black/55">{check.evidence}</p>
+                <p className="mt-2 text-xs leading-4 text-black/50">{check.detail}</p>
+                <p className="mt-3 rounded-xl bg-white/75 px-3 py-2 text-xs font-bold leading-4 text-black/55">{check.evidence}</p>
                 <div className="mt-3 flex items-center justify-between gap-3">
-                  <p className="text-[10px] font-bold leading-4 text-moss">{check.action}</p>
-                  <a href={check.actionHref} className="shrink-0 rounded-full bg-ink px-3 py-2 text-[9px] font-extrabold text-white">Open</a>
+                  <p className="text-xs font-bold leading-4 text-moss">{check.action}</p>
+                  <a href={check.actionHref} className="shrink-0 rounded-full bg-ink px-3 py-2 text-xs font-extrabold text-white">Open</a>
                 </div>
               </article>
             ))}
@@ -404,8 +404,8 @@ export default function AnalyticsPage() {
       <div className="mt-5 grid gap-5 xl:grid-cols-[1fr_.82fr]">
         <section className="rounded-2xl border border-black/[0.07] bg-white p-5 sm:p-7">
           <div className="flex items-center justify-between">
-            <div><h2 className="text-sm font-extrabold">Experience mix</h2><p className="mt-1 text-[10px] text-black/35">Breakdown across finder, advisor and configurator journeys</p></div>
-            <span className="rounded-full bg-lime/35 px-3 py-1.5 text-[9px] font-extrabold text-moss">{range}</span>
+            <div><h2 className="text-sm font-extrabold">Experience mix</h2><p className="mt-1 text-xs text-black/35">Breakdown across finder, advisor and configurator journeys</p></div>
+            <span className="rounded-full bg-lime/35 px-3 py-1.5 text-xs font-extrabold text-moss">{range}</span>
           </div>
           <div className="mt-6 grid gap-3 lg:grid-cols-3">
             {experienceStats.map((stat) => {
@@ -414,12 +414,12 @@ export default function AnalyticsPage() {
               const total = stat.views + stat.starts + stat.completions + stat.clicks;
               return (
                 <button key={stat.type} onClick={() => setExperienceFilter(stat.type)} className={`rounded-2xl border p-5 text-left transition hover:-translate-y-0.5 ${active ? "border-ink bg-ink text-white shadow-lg" : "border-black/10 bg-[#f7f8f4] hover:bg-white"}`}>
-                  <div className="flex items-center justify-between"><span className={`grid h-10 w-10 place-items-center rounded-xl ${active ? "bg-lime text-ink" : "bg-lime/45 text-moss"}`}><Icon size={18} /></span><span className={`rounded-full px-2 py-1 text-[8px] font-extrabold ${active ? "bg-white/10 text-lime" : "bg-white text-black/35"}`}>{total} events</span></div>
+                  <div className="flex items-center justify-between"><span className={`grid h-10 w-10 place-items-center rounded-xl ${active ? "bg-lime text-ink" : "bg-lime/45 text-moss"}`}><Icon size={18} /></span><span className={`rounded-full px-2 py-1 text-xs font-extrabold ${active ? "bg-white/10 text-lime" : "bg-white text-black/35"}`}>{total} events</span></div>
                   <h3 className="mt-6 text-lg font-extrabold tracking-[-.04em]">{experienceLabels[stat.type]}</h3>
                   <div className={`mt-4 grid grid-cols-3 gap-2 text-center ${active ? "text-white" : "text-ink"}`}>
-                    <span className={`rounded-xl p-2 ${active ? "bg-white/[.06]" : "bg-white"}`}><b className="block text-sm">{stat.views}</b><i className="not-italic text-[8px] opacity-45">Views</i></span>
-                    <span className={`rounded-xl p-2 ${active ? "bg-white/[.06]" : "bg-white"}`}><b className="block text-sm">{stat.completions}</b><i className="not-italic text-[8px] opacity-45">Done</i></span>
-                    <span className={`rounded-xl p-2 ${active ? "bg-white/[.06]" : "bg-white"}`}><b className="block text-sm">{stat.clicks}</b><i className="not-italic text-[8px] opacity-45">Clicks</i></span>
+                    <span className={`rounded-xl p-2 ${active ? "bg-white/[.06]" : "bg-white"}`}><b className="block text-sm">{stat.views}</b><i className="not-italic text-xs opacity-45">Views</i></span>
+                    <span className={`rounded-xl p-2 ${active ? "bg-white/[.06]" : "bg-white"}`}><b className="block text-sm">{stat.completions}</b><i className="not-italic text-xs opacity-45">Done</i></span>
+                    <span className={`rounded-xl p-2 ${active ? "bg-white/[.06]" : "bg-white"}`}><b className="block text-sm">{stat.clicks}</b><i className="not-italic text-xs opacity-45">Clicks</i></span>
                   </div>
                 </button>
               );
@@ -428,28 +428,28 @@ export default function AnalyticsPage() {
         </section>
 
         <section className="rounded-2xl border border-black/[0.07] bg-ink p-6 text-white">
-          <div className="flex items-center justify-between"><div className="grid h-10 w-10 place-items-center rounded-xl bg-lime text-ink"><Trophy size={18} /></div><span className="text-[9px] font-extrabold uppercase tracking-wider text-lime">{activeExperienceLabel}</span></div>
+          <div className="flex items-center justify-between"><div className="grid h-10 w-10 place-items-center rounded-xl bg-lime text-ink"><Trophy size={18} /></div><span className="text-xs font-extrabold uppercase tracking-wider text-lime">{activeExperienceLabel}</span></div>
           <h2 className="display mt-6 text-3xl">From curiosity to click</h2>
           <div className="mt-6 space-y-4">
             {funnelStages.map(([label, value, percent]) => (
               <div key={String(label)}>
-                <div className="flex justify-between text-[10px] font-bold"><span className="text-white/55">{String(label)}</span><span>{String(value)} <i className="ml-1 not-italic text-white/30">{Math.round(Number(percent))}%</i></span></div>
+                <div className="flex justify-between text-xs font-bold"><span className="text-white/55">{String(label)}</span><span>{String(value)} <i className="ml-1 not-italic text-white/30">{Math.round(Number(percent))}%</i></span></div>
                 <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-lime" style={{ width: `${Math.min(100, Number(percent))}%` }} /></div>
               </div>
             ))}
           </div>
           <div className={`mt-6 rounded-xl p-3 ${funnelDiagnosis.severity === "empty" ? "bg-white/[0.06]" : funnelDiagnosis.severity === "watch" ? "bg-amber-300/10" : "bg-lime/10"}`}>
-            <p className="text-[10px] font-extrabold text-white">{funnelDiagnosis.title}</p>
-            <p className="mt-1 text-[10px] leading-4 text-white/45">{funnelDiagnosis.detail}</p>
-            <p className="mt-2 text-[10px] leading-4 text-lime">{funnelDiagnosis.recommendation}</p>
+            <p className="text-xs font-extrabold text-white">{funnelDiagnosis.title}</p>
+            <p className="mt-1 text-xs leading-4 text-white/45">{funnelDiagnosis.detail}</p>
+            <p className="mt-2 text-xs leading-4 text-lime">{funnelDiagnosis.recommendation}</p>
           </div>
         </section>
       </div>
 
       <section className="mt-5 rounded-2xl border border-black/[0.07] bg-white p-5 sm:p-7">
         <div className="flex items-center justify-between">
-          <div><h2 className="text-sm font-extrabold">Activity trend</h2><p className="mt-1 text-[10px] text-black/35">Views and completed journeys for {activeExperienceLabel.toLowerCase()}</p></div>
-          <div className="flex gap-4 text-[9px] font-bold text-black/40"><span className="flex items-center gap-1.5"><i className="h-2 w-2 rounded-full bg-[#dfe6dc]" /> Views</span><span className="flex items-center gap-1.5"><i className="h-2 w-2 rounded-full bg-moss" /> Completed</span></div>
+          <div><h2 className="text-sm font-extrabold">Activity trend</h2><p className="mt-1 text-xs text-black/35">Views and completed journeys for {activeExperienceLabel.toLowerCase()}</p></div>
+          <div className="flex gap-4 text-xs font-bold text-black/40"><span className="flex items-center gap-1.5"><i className="h-2 w-2 rounded-full bg-[#dfe6dc]" /> Views</span><span className="flex items-center gap-1.5"><i className="h-2 w-2 rounded-full bg-moss" /> Completed</span></div>
         </div>
         <div className="mt-8 flex h-60 items-end gap-2">
           {byDay.map((day) => (
@@ -459,7 +459,7 @@ export default function AnalyticsPage() {
                   <div className="absolute bottom-0 w-full rounded-t bg-moss" style={{ height: `${Math.max(2, day.completions / max * 100)}%` }} />
                 </div>
               </div>
-              <span className="mt-2 hidden text-center text-[8px] font-bold text-black/25 sm:block">{day.label.split(" ")[0]}</span>
+              <span className="mt-2 hidden text-center text-xs font-bold text-black/25 sm:block">{day.label.split(" ")[0]}</span>
             </div>
           ))}
         </div>
@@ -469,14 +469,14 @@ export default function AnalyticsPage() {
         <div className="rounded-2xl border border-black/[0.07] bg-ink p-6 text-white">
           <div className="flex items-center justify-between gap-4">
             <span className={`grid h-11 w-11 place-items-center rounded-xl ${discoveryGapReport.status === "needs-attention" ? "bg-red-400 text-white" : discoveryGapReport.status === "watch" ? "bg-amber-300 text-ink" : "bg-lime text-ink"}`}>{discoveryGapReport.status === "needs-attention" ? <ShieldAlert size={19} /> : <Radar size={19} />}</span>
-            <span className="rounded-full bg-white/10 px-3 py-1.5 text-[9px] font-extrabold uppercase tracking-wider text-white/55">{discoveryGapReport.status.replace("-", " ")}</span>
+            <span className="rounded-full bg-white/10 px-3 py-1.5 text-xs font-extrabold uppercase tracking-wider text-white/55">{discoveryGapReport.status.replace("-", " ")}</span>
           </div>
           <h2 className="display mt-6 text-3xl">Discovery gap planner</h2>
           <p className="mt-2 text-xs leading-5 text-white/45">Findly turns failed paths, thin results, missing search language and stalled recommendations into deterministic fixes.</p>
           <div className="mt-6 grid grid-cols-[120px_1fr] gap-4">
             <div className="rounded-2xl bg-white/[.07] p-4 text-center">
               <p className="display text-5xl">{discoveryGapReport.score}</p>
-              <p className="mt-1 text-[8px] font-extrabold uppercase tracking-wider text-white/35">Gap score</p>
+              <p className="mt-1 text-xs font-extrabold uppercase tracking-wider text-white/35">Gap score</p>
             </div>
             <div className="grid grid-cols-2 gap-2">
               {[
@@ -486,7 +486,7 @@ export default function AnalyticsPage() {
                 ["Stalled SKUs", discoveryGapReport.summary.stalledProducts],
               ].map(([label, value]) => <div key={String(label)} className="rounded-2xl bg-white/[.07] p-3">
                 <p className="text-xl font-extrabold">{String(value)}</p>
-                <p className="mt-1 text-[8px] font-bold text-white/35">{String(label)}</p>
+                <p className="mt-1 text-xs font-bold text-white/35">{String(label)}</p>
               </div>)}
             </div>
           </div>
@@ -494,7 +494,7 @@ export default function AnalyticsPage() {
             {discoveryGapReport.strengths.slice(0, 3).map((strength) => (
               <div key={strength} className="flex items-start gap-2 rounded-2xl bg-lime/10 p-3">
                 <Check size={13} className="mt-0.5 shrink-0 text-lime" />
-                <p className="text-[10px] leading-4 text-white/55">{strength}</p>
+                <p className="text-xs leading-4 text-white/55">{strength}</p>
               </div>
             ))}
           </div>
@@ -502,7 +502,7 @@ export default function AnalyticsPage() {
 
         <div className="rounded-2xl border border-black/[0.07] bg-white p-5 sm:p-7">
           <div className="flex items-center justify-between">
-            <div><h2 className="text-sm font-extrabold">Priority discovery fixes</h2><p className="mt-1 text-[10px] text-black/35">Actionable issues from {activeExperienceLabel.toLowerCase()} over {range.toLowerCase()}</p></div>
+            <div><h2 className="text-sm font-extrabold">Priority discovery fixes</h2><p className="mt-1 text-xs text-black/35">Actionable issues from {activeExperienceLabel.toLowerCase()} over {range.toLowerCase()}</p></div>
             <span className="grid h-9 w-9 place-items-center rounded-xl bg-[#f0f2ec] text-moss"><Wrench size={16} /></span>
           </div>
           <div className="mt-6 grid gap-3 xl:grid-cols-2">
@@ -510,19 +510,19 @@ export default function AnalyticsPage() {
               <article key={action.id} className={`rounded-2xl border p-4 ${discoverySeverityTone[action.severity]}`}>
                 <div className="flex items-start justify-between gap-3">
                   <h3 className="text-xs font-extrabold text-ink">{action.title}</h3>
-                  <span className="rounded-full bg-white/70 px-2 py-1 text-[8px] font-extrabold uppercase">{action.severity}</span>
+                  <span className="rounded-full bg-white/70 px-2 py-1 text-xs font-extrabold uppercase">{action.severity}</span>
                 </div>
-                <p className="mt-2 text-[10px] leading-4 text-black/45">{action.detail}</p>
-                <p className="mt-3 rounded-xl bg-white/70 px-3 py-2 text-[10px] font-bold leading-4 text-black/55">{action.evidence}</p>
+                <p className="mt-2 text-xs leading-4 text-black/45">{action.detail}</p>
+                <p className="mt-3 rounded-xl bg-white/70 px-3 py-2 text-xs font-bold leading-4 text-black/55">{action.evidence}</p>
                 <div className="mt-3 flex items-center justify-between gap-3">
-                  <p className="text-[10px] font-bold leading-4 text-moss">{action.recommendation}</p>
-                  <a href={action.actionHref} className="shrink-0 rounded-full bg-ink px-3 py-2 text-[9px] font-extrabold text-white">{action.actionLabel}</a>
+                  <p className="text-xs font-bold leading-4 text-moss">{action.recommendation}</p>
+                  <a href={action.actionHref} className="shrink-0 rounded-full bg-ink px-3 py-2 text-xs font-extrabold text-white">{action.actionLabel}</a>
                 </div>
               </article>
             )) : (
               <div className="rounded-2xl border border-dashed border-black/10 p-8 text-center xl:col-span-2">
                 <p className="text-xs font-extrabold">No discovery gaps detected</p>
-                <p className="mt-1 text-[10px] leading-4 text-black/35">Keep collecting sessions. This planner will flag no-result paths, missing terms and stalled recommendations as they appear.</p>
+                <p className="mt-1 text-xs leading-4 text-black/35">Keep collecting sessions. This planner will flag no-result paths, missing terms and stalled recommendations as they appear.</p>
               </div>
             )}
           </div>
@@ -532,11 +532,11 @@ export default function AnalyticsPage() {
               <div className="mt-3 space-y-2">
                 {discoveryGapReport.termGaps.slice(0, 5).map((gap) => (
                   <div key={gap.term} className="rounded-xl bg-white px-3 py-2">
-                    <div className="flex items-center justify-between gap-3"><p className="text-[10px] font-extrabold">{gap.term}</p><span className={`rounded-full px-2 py-0.5 text-[8px] font-extrabold ${gap.coverage === "missing" ? "bg-red-50 text-red-700" : "bg-amber-50 text-amber-700"}`}>{gap.coverage}</span></div>
-                    <p className="mt-1 text-[8px] font-bold text-black/35">{gap.count} signals · {gap.matchingProducts} matching products · {gap.sources.join(" · ")}</p>
+                    <div className="flex items-center justify-between gap-3"><p className="text-xs font-extrabold">{gap.term}</p><span className={`rounded-full px-2 py-0.5 text-xs font-extrabold ${gap.coverage === "missing" ? "bg-red-50 text-red-700" : "bg-amber-50 text-amber-700"}`}>{gap.coverage}</span></div>
+                    <p className="mt-1 text-xs font-bold text-black/35">{gap.count} signals · {gap.matchingProducts} matching products · {gap.sources.join(" · ")}</p>
                   </div>
                 ))}
-                {!discoveryGapReport.termGaps.length && <p className="rounded-xl bg-white px-3 py-5 text-center text-[10px] text-black/35">No missing or thin shopper language in this filter.</p>}
+                {!discoveryGapReport.termGaps.length && <p className="rounded-xl bg-white px-3 py-5 text-center text-xs text-black/35">No missing or thin shopper language in this filter.</p>}
               </div>
             </div>
             <div className="rounded-2xl border border-black/[0.06] bg-[#f7f8f4] p-4">
@@ -544,11 +544,11 @@ export default function AnalyticsPage() {
               <div className="mt-3 space-y-2">
                 {discoveryGapReport.productGaps.slice(0, 5).map((gap) => (
                   <div key={gap.productId || gap.productName} className="rounded-xl bg-white px-3 py-2">
-                    <div className="flex items-center justify-between gap-3"><p className="truncate text-[10px] font-extrabold">{gap.productName}</p><span className="rounded-full bg-black/5 px-2 py-0.5 text-[8px] font-extrabold text-black/35">{Math.round(gap.clickRate)}%</span></div>
-                    <p className="mt-1 text-[8px] font-bold text-black/35">{gap.recommended} surfaced · {gap.clicks} buy clicks · {gap.sources.join(" · ")}</p>
+                    <div className="flex items-center justify-between gap-3"><p className="truncate text-xs font-extrabold">{gap.productName}</p><span className="rounded-full bg-black/5 px-2 py-0.5 text-xs font-extrabold text-black/35">{Math.round(gap.clickRate)}%</span></div>
+                    <p className="mt-1 text-xs font-bold text-black/35">{gap.recommended} surfaced · {gap.clicks} buy clicks · {gap.sources.join(" · ")}</p>
                   </div>
                 ))}
-                {!discoveryGapReport.productGaps.length && <p className="rounded-xl bg-white px-3 py-5 text-center text-[10px] text-black/35">No repeatedly surfaced product is under-clicked yet.</p>}
+                {!discoveryGapReport.productGaps.length && <p className="rounded-xl bg-white px-3 py-5 text-center text-xs text-black/35">No repeatedly surfaced product is under-clicked yet.</p>}
               </div>
             </div>
           </div>
@@ -559,7 +559,7 @@ export default function AnalyticsPage() {
         <div className="rounded-2xl border border-black/[0.07] bg-ink p-6 text-white">
           <div className="flex items-center justify-between gap-4">
             <div className="grid h-10 w-10 place-items-center rounded-xl bg-lime text-ink"><GitBranch size={18} /></div>
-            <span className="rounded-full bg-white/10 px-3 py-1.5 text-[9px] font-extrabold uppercase text-white/55">{journeyReport.summary.sessions} sessions</span>
+            <span className="rounded-full bg-white/10 px-3 py-1.5 text-xs font-extrabold uppercase text-white/55">{journeyReport.summary.sessions} sessions</span>
           </div>
           <h2 className="display mt-6 text-3xl">Shopper journey replay</h2>
           <p className="mt-2 text-xs leading-5 text-white/45">Session-level paths reconstructed from widget views, starts, completions, recommendations and buy clicks.</p>
@@ -571,7 +571,7 @@ export default function AnalyticsPage() {
               ["Avg duration", formatDuration(journeyReport.summary.averageDurationSeconds)],
             ].map(([label, value]) => <div key={String(label)} className="rounded-2xl bg-white/[.07] p-3">
               <p className="text-xl font-extrabold">{String(value)}</p>
-              <p className="mt-1 text-[8px] font-bold text-white/35">{String(label)}</p>
+              <p className="mt-1 text-xs font-bold text-white/35">{String(label)}</p>
             </div>)}
           </div>
           <div className="mt-5 space-y-2">
@@ -579,8 +579,8 @@ export default function AnalyticsPage() {
               <div className="flex items-start gap-2">
                 {dropoff.count ? <AlertTriangle size={13} className="mt-0.5 shrink-0 text-amber-100" /> : <Check size={13} className="mt-0.5 shrink-0 text-lime" />}
                 <div>
-                  <p className="text-[10px] font-extrabold">{dropoff.label} · {dropoff.count} sessions</p>
-                  <p className="mt-1 text-[9px] leading-4 text-white/45">{dropoff.count ? dropoff.recommendation : "No meaningful drop-off at this stage for the selected filter."}</p>
+                  <p className="text-xs font-extrabold">{dropoff.label} · {dropoff.count} sessions</p>
+                  <p className="mt-1 text-xs leading-4 text-white/45">{dropoff.count ? dropoff.recommendation : "No meaningful drop-off at this stage for the selected filter."}</p>
                 </div>
               </div>
             </div>)}
@@ -589,7 +589,7 @@ export default function AnalyticsPage() {
 
         <div className="rounded-2xl border border-black/[0.07] bg-white p-5 sm:p-7">
           <div className="flex items-center justify-between">
-            <div><h2 className="text-sm font-extrabold">Recent shopper paths</h2><p className="mt-1 text-[10px] text-black/35">A lightweight session replay for {activeExperienceLabel.toLowerCase()}</p></div>
+            <div><h2 className="text-sm font-extrabold">Recent shopper paths</h2><p className="mt-1 text-xs text-black/35">A lightweight session replay for {activeExperienceLabel.toLowerCase()}</p></div>
             <span className="grid h-9 w-9 place-items-center rounded-xl bg-[#f0f2ec] text-moss"><Clock3 size={16} /></span>
           </div>
           <div className="mt-5 space-y-3">
@@ -598,21 +598,21 @@ export default function AnalyticsPage() {
               return <article key={journey.sessionId} className="rounded-2xl border border-black/[0.07] bg-[#f8f8f4] p-4">
                 <div className="flex items-start justify-between gap-4">
                   <div className="min-w-0">
-                    <div className="flex items-center gap-2"><span className={`rounded-full px-2.5 py-1 text-[8px] font-extrabold uppercase ${outcomeTone}`}>{journey.outcome}</span><span className="text-[8px] font-bold text-black/25">{journey.experienceType}</span></div>
+                    <div className="flex items-center gap-2"><span className={`rounded-full px-2.5 py-1 text-xs font-extrabold uppercase ${outcomeTone}`}>{journey.outcome}</span><span className="text-xs font-bold text-black/25">{journey.experienceType}</span></div>
                     <h3 className="mt-3 truncate text-xs font-extrabold">{journey.intentSummary}</h3>
-                    <p className="mt-1 text-[9px] font-bold text-black/35">{journey.experienceName} · {journey.eventCount} events · {formatDuration(journey.durationSeconds)}</p>
+                    <p className="mt-1 text-xs font-bold text-black/35">{journey.experienceName} · {journey.eventCount} events · {formatDuration(journey.durationSeconds)}</p>
                   </div>
-                  <span className="shrink-0 text-[8px] font-bold text-black/30">{new Date(journey.lastSeenAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}</span>
+                  <span className="shrink-0 text-xs font-bold text-black/30">{new Date(journey.lastSeenAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}</span>
                 </div>
                 <div className="mt-4 grid gap-1.5 xl:grid-cols-3">
                   {journey.steps.slice(0, 6).map((step, index) => <div key={`${journey.sessionId}-${step.createdAt}-${index}`} className="rounded-xl bg-white px-2.5 py-2">
-                    <p className="truncate text-[8px] font-extrabold text-black/45">{index + 1}. {step.label}</p>
+                    <p className="truncate text-xs font-extrabold text-black/45">{index + 1}. {step.label}</p>
                   </div>)}
                 </div>
-                {(journey.recommendedProducts.length || journey.clickedProducts.length) ? <p className="mt-3 truncate text-[9px] font-bold text-black/35">Products: {[...new Set([...journey.clickedProducts, ...journey.recommendedProducts])].slice(0, 3).join(", ")}</p> : null}
+                {(journey.recommendedProducts.length || journey.clickedProducts.length) ? <p className="mt-3 truncate text-xs font-bold text-black/35">Products: {[...new Set([...journey.clickedProducts, ...journey.recommendedProducts])].slice(0, 3).join(", ")}</p> : null}
               </article>;
             })}
-            {!journeyReport.journeys.length && <div className="rounded-2xl border border-dashed border-black/10 p-10 text-center"><p className="text-xs font-extrabold">No sessions in this filter yet</p><p className="mt-1 text-[10px] text-black/35">Open a published experience to capture shopper paths.</p></div>}
+            {!journeyReport.journeys.length && <div className="rounded-2xl border border-dashed border-black/10 p-10 text-center"><p className="text-xs font-extrabold">No sessions in this filter yet</p><p className="mt-1 text-xs text-black/35">Open a published experience to capture shopper paths.</p></div>}
           </div>
         </div>
       </section>
@@ -620,8 +620,8 @@ export default function AnalyticsPage() {
       <section className="mt-5 grid gap-5 xl:grid-cols-[1fr_.9fr]">
         <div className="rounded-2xl border border-black/[0.07] bg-white p-5 sm:p-7">
           <div className="flex items-center justify-between">
-            <div><h2 className="text-sm font-extrabold">Zero-party intent hub</h2><p className="mt-1 text-[10px] text-black/35">Answers, queries and catalog signals shoppers explicitly gave you</p></div>
-            <span className="rounded-full bg-lime/35 px-3 py-1.5 text-[9px] font-extrabold text-moss">{zeroPartyInsights.summary.explicitSignals} signals</span>
+            <div><h2 className="text-sm font-extrabold">Zero-party intent hub</h2><p className="mt-1 text-xs text-black/35">Answers, queries and catalog signals shoppers explicitly gave you</p></div>
+            <span className="rounded-full bg-lime/35 px-3 py-1.5 text-xs font-extrabold text-moss">{zeroPartyInsights.summary.explicitSignals} signals</span>
           </div>
           <div className="mt-6 grid gap-3 lg:grid-cols-3">
             {[
@@ -636,11 +636,11 @@ export default function AnalyticsPage() {
                   <div className="mt-4 space-y-2">
                     {card.items.length ? card.items.map((item) => (
                       <div key={item.label} className="rounded-xl bg-white px-3 py-2">
-                        <div className="flex items-start justify-between gap-2"><p className="text-[10px] font-extrabold leading-4">{item.label}</p><span className="rounded-full bg-black/5 px-2 py-0.5 text-[8px] font-extrabold text-black/35">{item.count}</span></div>
-                        {item.detail && <p className="mt-0.5 line-clamp-1 text-[8px] font-bold text-black/30">{item.detail}</p>}
-                        <p className="mt-1 text-[8px] font-bold uppercase tracking-wide text-black/25">{item.sources.join(" · ")}{item.products.length ? ` · ${item.products.slice(0, 2).join(", ")}` : ""}</p>
+                        <div className="flex items-start justify-between gap-2"><p className="text-xs font-extrabold leading-4">{item.label}</p><span className="rounded-full bg-black/5 px-2 py-0.5 text-xs font-extrabold text-black/35">{item.count}</span></div>
+                        {item.detail && <p className="mt-0.5 line-clamp-1 text-xs font-bold text-black/30">{item.detail}</p>}
+                        <p className="mt-1 text-xs font-bold uppercase tracking-wide text-black/25">{item.sources.join(" · ")}{item.products.length ? ` · ${item.products.slice(0, 2).join(", ")}` : ""}</p>
                       </div>
-                    )) : <p className="rounded-xl bg-white px-3 py-5 text-center text-[10px] leading-4 text-black/35">{card.empty}</p>}
+                    )) : <p className="rounded-xl bg-white px-3 py-5 text-center text-xs leading-4 text-black/35">{card.empty}</p>}
                   </div>
                 </div>
               );
@@ -648,26 +648,26 @@ export default function AnalyticsPage() {
           </div>
           <div className="mt-4 grid gap-3 lg:grid-cols-3">
             <div className="rounded-2xl bg-ink p-4 text-white">
-              <p className="text-[9px] font-extrabold uppercase tracking-wider text-lime">Unique signals</p>
+              <p className="text-xs font-extrabold uppercase tracking-wider text-lime">Unique signals</p>
               <p className="display mt-3 text-4xl">{zeroPartyInsights.summary.uniqueSignals}</p>
-              <p className="mt-2 text-[10px] leading-4 text-white/45">Distinct shopper terms, answers and mapped catalog reasons in this filter.</p>
+              <p className="mt-2 text-xs leading-4 text-white/45">Distinct shopper terms, answers and mapped catalog reasons in this filter.</p>
             </div>
             <div className="rounded-2xl bg-[#f7f8f4] p-4">
-              <p className="text-[9px] font-extrabold uppercase tracking-wider text-black/35">Product demand</p>
+              <p className="text-xs font-extrabold uppercase tracking-wider text-black/35">Product demand</p>
               <p className="display mt-3 text-4xl">{zeroPartyInsights.summary.productsWithDemand}</p>
-              <p className="mt-2 text-[10px] leading-4 text-black/40">Products with recommendation or buy-click evidence.</p>
+              <p className="mt-2 text-xs leading-4 text-black/40">Products with recommendation or buy-click evidence.</p>
             </div>
             <div className="rounded-2xl bg-lime/35 p-4">
-              <p className="text-[9px] font-extrabold uppercase tracking-wider text-moss">Scoped events</p>
+              <p className="text-xs font-extrabold uppercase tracking-wider text-moss">Scoped events</p>
               <p className="display mt-3 text-4xl">{filteredEvents.length}</p>
-              <p className="mt-2 text-[10px] leading-4 text-moss/70">Filtered by {activeExperienceLabel.toLowerCase()} over {range.toLowerCase()}.</p>
+              <p className="mt-2 text-xs leading-4 text-moss/70">Filtered by {activeExperienceLabel.toLowerCase()} over {range.toLowerCase()}.</p>
             </div>
           </div>
         </div>
 
         <div className="rounded-2xl border border-black/[0.07] bg-white p-5 sm:p-7">
           <div className="flex items-center justify-between">
-            <div><h2 className="text-sm font-extrabold">Intent opportunities</h2><p className="mt-1 text-[10px] text-black/35">Deterministic next steps from your captured shopper signals</p></div>
+            <div><h2 className="text-sm font-extrabold">Intent opportunities</h2><p className="mt-1 text-xs text-black/35">Deterministic next steps from your captured shopper signals</p></div>
             <span className="grid h-9 w-9 place-items-center rounded-xl bg-[#f0f2ec] text-moss"><Sparkles size={16} /></span>
           </div>
           <div className="mt-6 space-y-3">
@@ -675,10 +675,10 @@ export default function AnalyticsPage() {
               <div key={opportunity.title} className={`rounded-2xl border p-4 ${opportunity.severity === "win" ? "border-lime/60 bg-lime/20" : opportunity.severity === "watch" ? "border-amber-200 bg-amber-50" : "border-black/[0.06] bg-[#f7f8f4]"}`}>
                 <div className="flex items-center justify-between gap-3">
                   <p className="text-xs font-extrabold">{opportunity.title}</p>
-                  <span className={`rounded-full px-2 py-1 text-[8px] font-extrabold uppercase ${opportunity.severity === "win" ? "bg-lime text-moss" : opportunity.severity === "watch" ? "bg-amber-200 text-amber-800" : "bg-white text-black/35"}`}>{opportunity.severity}</span>
+                  <span className={`rounded-full px-2 py-1 text-xs font-extrabold uppercase ${opportunity.severity === "win" ? "bg-lime text-moss" : opportunity.severity === "watch" ? "bg-amber-200 text-amber-800" : "bg-white text-black/35"}`}>{opportunity.severity}</span>
                 </div>
-                <p className="mt-2 text-[10px] leading-4 text-black/45">{opportunity.detail}</p>
-                <p className="mt-2 text-[10px] leading-4 font-bold text-moss">{opportunity.recommendation}</p>
+                <p className="mt-2 text-xs leading-4 text-black/45">{opportunity.detail}</p>
+                <p className="mt-2 text-xs leading-4 font-bold text-moss">{opportunity.recommendation}</p>
               </div>
             ))}
           </div>
@@ -692,12 +692,12 @@ export default function AnalyticsPage() {
               {zeroPartyInsights.productDemand.length ? zeroPartyInsights.productDemand.map((item) => (
                 <div key={item.productId || item.productName} className="rounded-xl bg-[#f7f8f4] px-3 py-2">
                   <div className="flex items-center justify-between gap-3">
-                    <p className="truncate text-[10px] font-extrabold">{item.productName}</p>
-                    <span className="rounded-full bg-white px-2 py-0.5 text-[8px] font-extrabold text-moss">{Math.round(item.clickRate)}%</span>
+                    <p className="truncate text-xs font-extrabold">{item.productName}</p>
+                    <span className="rounded-full bg-white px-2 py-0.5 text-xs font-extrabold text-moss">{Math.round(item.clickRate)}%</span>
                   </div>
-                  <p className="mt-1 text-[8px] font-bold text-black/35">{item.recommended} surfaced · {item.clicks} buy clicks · {item.sources.join(" · ")}</p>
+                  <p className="mt-1 text-xs font-bold text-black/35">{item.recommended} surfaced · {item.clicks} buy clicks · {item.sources.join(" · ")}</p>
                 </div>
-              )) : <p className="rounded-xl bg-[#f7f8f4] px-3 py-5 text-center text-[10px] leading-4 text-black/35">Recommendation and buy-click product demand will appear here.</p>}
+              )) : <p className="rounded-xl bg-[#f7f8f4] px-3 py-5 text-center text-xs leading-4 text-black/35">Recommendation and buy-click product demand will appear here.</p>}
             </div>
           </div>
         </div>
@@ -705,43 +705,43 @@ export default function AnalyticsPage() {
 
       <section className="mt-5 rounded-2xl border border-black/[0.07] bg-white p-5 sm:p-7">
         <div className="flex items-center justify-between">
-          <div><h2 className="text-sm font-extrabold">Recent high-intent moments</h2><p className="mt-1 text-[10px] text-black/35">Completions, recommendations and clicks with zero-party context</p></div>
+          <div><h2 className="text-sm font-extrabold">Recent high-intent moments</h2><p className="mt-1 text-xs text-black/35">Completions, recommendations and clicks with zero-party context</p></div>
           <span className="grid h-9 w-9 place-items-center rounded-xl bg-[#f0f2ec] text-moss"><Clock3 size={16} /></span>
         </div>
         <div className="mt-6 grid gap-3 xl:grid-cols-3">
           {zeroPartyInsights.recent.length ? zeroPartyInsights.recent.map((item) => (
               <div key={item.id} className="rounded-2xl border border-black/[0.06] p-4">
                 <div className="flex items-center justify-between gap-3">
-                  <span className="rounded-full bg-lime/35 px-2.5 py-1 text-[8px] font-extrabold uppercase text-moss">{item.type}</span>
-                  <span className="text-[8px] font-bold text-black/30">{item.date}</span>
+                  <span className="rounded-full bg-lime/35 px-2.5 py-1 text-xs font-extrabold uppercase text-moss">{item.type}</span>
+                  <span className="text-xs font-bold text-black/30">{item.date}</span>
                 </div>
                 <p className="mt-3 text-xs font-extrabold leading-5">{item.summary}</p>
-                <div className="mt-2 flex items-center justify-between gap-3 text-[9px] font-bold text-black/35">
+                <div className="mt-2 flex items-center justify-between gap-3 text-xs font-bold text-black/35">
                   <span>{item.eventType.replaceAll("_", " ")}</span>
                   {item.productName && <span className="truncate text-moss">{item.productName}</span>}
                 </div>
               </div>
-            )) : <div className="rounded-2xl border border-dashed border-black/10 p-8 text-center xl:col-span-3"><p className="text-xs font-extrabold">No high-intent events yet</p><p className="mt-1 text-[10px] text-black/35">Run a finder, advisor, search or configurator to populate this stream.</p></div>}
+            )) : <div className="rounded-2xl border border-dashed border-black/10 p-8 text-center xl:col-span-3"><p className="text-xs font-extrabold">No high-intent events yet</p><p className="mt-1 text-xs text-black/35">Run a finder, advisor, search or configurator to populate this stream.</p></div>}
         </div>
       </section>
 
       <section className="mt-5 overflow-hidden rounded-2xl border border-black/[0.07] bg-white">
         <div className="flex items-center justify-between border-b border-black/[0.06] px-5 py-4 sm:px-6">
-          <div><h2 className="text-sm font-extrabold">Recommended products</h2><p className="mt-1 text-[10px] text-black/35">Product-level performance for {activeExperienceLabel.toLowerCase()}</p></div>
-          <span className="text-[10px] font-bold text-black/30">{quizzes.length} finder{quizzes.length === 1 ? "" : "s"} · {configurators.length} configurator{configurators.length === 1 ? "" : "s"}</span>
+          <div><h2 className="text-sm font-extrabold">Recommended products</h2><p className="mt-1 text-xs text-black/35">Product-level performance for {activeExperienceLabel.toLowerCase()}</p></div>
+          <span className="text-xs font-bold text-black/30">{quizzes.length} finder{quizzes.length === 1 ? "" : "s"} · {configurators.length} configurator{configurators.length === 1 ? "" : "s"}</span>
         </div>
         {productStats.length ? (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[650px] text-left">
-              <thead><tr className="border-b border-black/[0.05] text-[9px] font-extrabold uppercase tracking-wider text-black/30"><th className="px-6 py-3">Product</th><th className="px-4 py-3">Price</th><th className="px-4 py-3">Recommended</th><th className="px-4 py-3">Buy clicks</th><th className="px-6 py-3">Click rate</th></tr></thead>
+              <thead><tr className="border-b border-black/[0.05] text-xs font-extrabold uppercase tracking-wider text-black/30"><th className="px-6 py-3">Product</th><th className="px-4 py-3">Price</th><th className="px-4 py-3">Recommended</th><th className="px-4 py-3">Buy clicks</th><th className="px-6 py-3">Click rate</th></tr></thead>
               <tbody>
                 {productStats.slice(0, 8).map(({ product, recommended: productRecommended, clicks: productClicks }, index) => (
                   <tr key={product.id} className="border-b border-black/[0.05] last:border-0">
-                    <td className="px-6 py-3"><div className="flex items-center gap-3"><span className="w-5 text-[10px] font-extrabold text-black/25">#{index + 1}</span><div className="h-9 w-9 overflow-hidden rounded-lg bg-canvas">{product.image_url && <img src={product.image_url} alt="" className="h-full w-full object-cover" />}</div><span className="text-xs font-extrabold">{product.name}</span></div></td>
+                    <td className="px-6 py-3"><div className="flex items-center gap-3"><span className="w-5 text-xs font-extrabold text-black/25">#{index + 1}</span><div className="h-9 w-9 overflow-hidden rounded-lg bg-canvas">{product.image_url && <img src={product.image_url} alt="" className="h-full w-full object-cover" />}</div><span className="text-xs font-extrabold">{product.name}</span></div></td>
                     <td className="px-4 py-3 text-xs font-bold text-black/50">{formatCurrency(product.price)}</td>
                     <td className="px-4 py-3 text-xs font-extrabold">{productRecommended}</td>
                     <td className="px-4 py-3 text-xs font-extrabold">{productClicks}</td>
-                    <td className="px-6 py-3"><span className="rounded-full bg-lime/35 px-2 py-1 text-[9px] font-extrabold text-moss">{productRecommended ? Math.round(productClicks / productRecommended * 100) : 0}%</span></td>
+                    <td className="px-6 py-3"><span className="rounded-full bg-lime/35 px-2 py-1 text-xs font-extrabold text-moss">{productRecommended ? Math.round(productClicks / productRecommended * 100) : 0}%</span></td>
                   </tr>
                 ))}
               </tbody>

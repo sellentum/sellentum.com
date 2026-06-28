@@ -119,7 +119,7 @@ export default function PublicSearchPage({ params }: { params: Promise<{ id: str
       <div className="dot-grid absolute inset-0 opacity-30" />
       <header className="relative flex items-center justify-between border-b border-black/[0.06] bg-white/80 px-5 py-4 backdrop-blur sm:px-8">
         <div className="flex items-center gap-2.5 text-sm font-extrabold"><span className="grid h-8 w-8 place-items-center rounded-xl text-white" style={{ background: accent }}><Search size={14} /></span>{searchCopy.brandName}</div>
-        <span className="hidden items-center gap-1.5 text-[10px] font-bold text-black/35 sm:flex"><ShieldCheck size={13} /> {searchCopy.trustLabel}</span>
+        <span className="hidden items-center gap-1.5 text-xs font-bold text-black/35 sm:flex"><ShieldCheck size={13} /> {searchCopy.trustLabel}</span>
       </header>
 
       <div className="relative grid gap-0 lg:grid-cols-[.9fr_1.1fr]">
@@ -136,13 +136,13 @@ export default function PublicSearchPage({ params }: { params: Promise<{ id: str
           </form>
 
           <div className="mt-4 flex flex-wrap gap-2">
-            {suggestions.slice(0, 4).map((suggestion) => <button key={suggestion} onClick={() => submitSearch(suggestion)} className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-1.5 text-[10px] font-extrabold text-white/55 transition hover:bg-white/10">{suggestion}</button>)}
+            {suggestions.slice(0, 4).map((suggestion) => <button key={suggestion} onClick={() => submitSearch(suggestion)} className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-1.5 text-xs font-extrabold text-white/55 transition hover:bg-white/10">{suggestion}</button>)}
           </div>
 
           <div className="mt-7 grid grid-cols-3 gap-2">
-            <div className="rounded-2xl bg-white/[0.06] p-3"><p className="text-xl font-extrabold">{data.catalog.active_products}</p><p className="mt-1 text-[8px] font-bold uppercase tracking-wider text-white/30">Active</p></div>
-            <div className="rounded-2xl bg-white/[0.06] p-3"><p className="text-xl font-extrabold">{report.intent.terms.length}</p><p className="mt-1 text-[8px] font-bold uppercase tracking-wider text-white/30">Terms</p></div>
-            <div className="rounded-2xl bg-white/[0.06] p-3"><p className="text-xl font-extrabold">{report.results.length}</p><p className="mt-1 text-[8px] font-bold uppercase tracking-wider text-white/30">Results</p></div>
+            <div className="rounded-2xl bg-white/[0.06] p-3"><p className="text-xl font-extrabold">{data.catalog.active_products}</p><p className="mt-1 text-xs font-bold uppercase tracking-wider text-white/30">Active</p></div>
+            <div className="rounded-2xl bg-white/[0.06] p-3"><p className="text-xl font-extrabold">{report.intent.terms.length}</p><p className="mt-1 text-xs font-bold uppercase tracking-wider text-white/30">Terms</p></div>
+            <div className="rounded-2xl bg-white/[0.06] p-3"><p className="text-xl font-extrabold">{report.results.length}</p><p className="mt-1 text-xs font-bold uppercase tracking-wider text-white/30">Results</p></div>
           </div>
         </aside>
 
@@ -153,37 +153,37 @@ export default function PublicSearchPage({ params }: { params: Promise<{ id: str
               <h2 className="display mt-2 text-4xl">{topResult ? topResult.product.name : "Search the catalog"}</h2>
               <p className="mt-2 text-xs leading-5 text-black/45">{topResult ? topResult.explanation : "Use natural shopper language to find matching products."}</p>
             </div>
-            {report.intent.maxBudget && <span className="shrink-0 rounded-full bg-lime/45 px-3 py-1.5 text-[9px] font-extrabold text-moss">Budget {formatCurrency(report.intent.maxBudget)}</span>}
+            {report.intent.maxBudget && <span className="shrink-0 rounded-full bg-lime/45 px-3 py-1.5 text-xs font-extrabold text-moss">Budget {formatCurrency(report.intent.maxBudget)}</span>}
           </div>
 
           {searchError && <p className="mt-5 rounded-xl bg-red-50 p-3 text-xs font-bold text-red-700">{searchError}</p>}
 
           <div className="mt-5 flex flex-wrap gap-1.5">
-            {report.intent.coverage.slice(0, 10).map((item) => <span key={item.term} className={`rounded-full px-2.5 py-1 text-[9px] font-extrabold ${item.status === "covered" ? "bg-lime/35 text-moss" : item.status === "thin" ? "bg-amber-50 text-amber-700" : "bg-canvas text-black/35"}`}>{item.term}</span>)}
+            {report.intent.coverage.slice(0, 10).map((item) => <span key={item.term} className={`rounded-full px-2.5 py-1 text-xs font-extrabold ${item.status === "covered" ? "bg-lime/35 text-moss" : item.status === "thin" ? "bg-amber-50 text-amber-700" : "bg-canvas text-black/35"}`}>{item.term}</span>)}
           </div>
 
           {recovery.status !== "healthy" && <section className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-[10px] font-extrabold uppercase tracking-wider text-amber-700">{recovery.status === "no-results" ? "No exact eligible match" : "Refine this search"}</p>
+                <p className="text-xs font-extrabold uppercase tracking-wider text-amber-700">{recovery.status === "no-results" ? "No exact eligible match" : "Refine this search"}</p>
                 <h3 className="mt-1 text-sm font-extrabold">{recovery.primaryAction}</h3>
-                <p className="mt-1 text-[10px] leading-4 text-black/45">{recovery.summary}</p>
+                <p className="mt-1 text-xs leading-4 text-black/45">{recovery.summary}</p>
               </div>
-              <button onClick={() => submitSearch(recovery.suggestions[0]?.query || report.suggestions[0] || starterQueries[0])} className="shrink-0 rounded-full bg-ink px-3 py-2 text-[9px] font-extrabold text-white">Try fix</button>
+              <button onClick={() => submitSearch(recovery.suggestions[0]?.query || report.suggestions[0] || starterQueries[0])} className="shrink-0 rounded-full bg-ink px-3 py-2 text-xs font-extrabold text-white">Try fix</button>
             </div>
             <div className="mt-3 grid gap-2 lg:grid-cols-2">
               {recovery.suggestions.slice(0, 4).map((suggestion) => <button key={suggestion.id} onClick={() => suggestion.query && submitSearch(suggestion.query)} className="rounded-xl bg-white px-3 py-2 text-left">
-                <p className="text-[10px] font-extrabold">{suggestion.title}</p>
-                <p className="mt-1 text-[9px] leading-4 text-black/40">{suggestion.detail}</p>
+                <p className="text-xs font-extrabold">{suggestion.title}</p>
+                <p className="mt-1 text-xs leading-4 text-black/40">{suggestion.detail}</p>
               </button>)}
             </div>
             {recovery.nearMisses.length ? <div className="mt-3 rounded-xl bg-white p-3">
-              <p className="text-[10px] font-extrabold text-black/55">Closest catalog options</p>
+              <p className="text-xs font-extrabold text-black/55">Closest catalog options</p>
               <div className="mt-2 grid gap-2 lg:grid-cols-3">
                 {recovery.nearMisses.map((item) => <div key={item.productId} className="rounded-xl border border-black/[0.06] p-2">
-                  <p className="truncate text-[10px] font-extrabold">{item.productName}</p>
-                  <p className="mt-1 text-[8px] font-bold text-black/35">{item.category} · {formatCurrency(item.price)}</p>
-                  <p className="mt-1 line-clamp-2 text-[8px] leading-3 text-black/35">{item.reason}</p>
+                  <p className="truncate text-xs font-extrabold">{item.productName}</p>
+                  <p className="mt-1 text-xs font-bold text-black/35">{item.category} · {formatCurrency(item.price)}</p>
+                  <p className="mt-1 line-clamp-2 text-xs leading-3 text-black/35">{item.reason}</p>
                 </div>)}
               </div>
             </div> : null}
@@ -193,25 +193,25 @@ export default function PublicSearchPage({ params }: { params: Promise<{ id: str
             {report.results.map((result, index) => <article key={result.product.id} className="grid gap-4 rounded-2xl border border-black/[0.07] bg-white p-4 shadow-sm sm:grid-cols-[120px_1fr]">
               <div className="relative h-28 overflow-hidden rounded-2xl bg-canvas">
                 {result.product.image_url ? <img src={result.product.image_url} alt={result.product.name} className="h-full w-full object-cover" /> : <Sparkles className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-black/20" />}
-                <span className="absolute left-2 top-2 rounded-full bg-lime px-2 py-1 text-[8px] font-extrabold text-moss">#{index + 1}</span>
+                <span className="absolute left-2 top-2 rounded-full bg-lime px-2 py-1 text-xs font-extrabold text-moss">#{index + 1}</span>
               </div>
               <div>
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <h3 className="text-sm font-extrabold">{result.product.name}</h3>
-                    <p className="mt-1 text-[10px] font-bold text-black/35">{result.product.category} · {formatCurrency(result.product.price)}</p>
+                    <p className="mt-1 text-xs font-bold text-black/35">{result.product.category} · {formatCurrency(result.product.price)}</p>
                   </div>
-                  <span className="rounded-full bg-canvas px-2.5 py-1 text-[9px] font-extrabold text-black/40">{result.score.toFixed(1)}</span>
+                  <span className="rounded-full bg-canvas px-2.5 py-1 text-xs font-extrabold text-black/40">{result.score.toFixed(1)}</span>
                 </div>
-                <p className="mt-3 text-[10px] leading-4 text-black/45">{result.explanation}</p>
+                <p className="mt-3 text-xs leading-4 text-black/45">{result.explanation}</p>
                 <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-black/5"><div className="h-full rounded-full bg-lime" style={{ width: `${Math.min(100, result.score / maxScore * 100)}%` }} /></div>
                 <div className="mt-3 flex flex-wrap gap-1.5">
-                  {result.matchedSignals.slice(0, 5).map((signal) => <span key={`${result.product.id}-${signal.term}-${signal.source}`} className="rounded-full bg-black/[0.04] px-2 py-1 text-[8px] font-bold text-black/40">{signal.term} · +{signal.contribution.toFixed(1)}</span>)}
+                  {result.matchedSignals.slice(0, 5).map((signal) => <span key={`${result.product.id}-${signal.term}-${signal.source}`} className="rounded-full bg-black/[0.04] px-2 py-1 text-xs font-bold text-black/40">{signal.term} · +{signal.contribution.toFixed(1)}</span>)}
                 </div>
                 <div className="mt-4 max-w-md">
                   <RecommendationFeedback productId={result.product.id} productName={result.product.name} compact onFeedback={(feedback, feedbackReason) => track("recommendation_feedback", result.product.id, { query: report.query, terms: report.intent.terms, feedback, feedback_reason: feedbackReason, rank: index + 1, score: result.score, confidence: result.confidence, matched_signals: result.matchedSignals.map((signal) => signal.term), product_name: result.product.name, explanation_present: Boolean(result.explanation), feedback_surface: "search_result_card" })} />
                 </div>
-                <a onClick={() => track("buy_click", result.product.id, { query: report.query, rank: index + 1, score: result.score, confidence: result.confidence, product_name: result.product.name })} href={result.product.product_url || "#"} target="_blank" rel="noreferrer" className="mt-4 inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-[10px] font-extrabold text-white" style={{ background: accent }}>View product <ExternalLink size={11} /></a>
+                <a onClick={() => track("buy_click", result.product.id, { query: report.query, rank: index + 1, score: result.score, confidence: result.confidence, product_name: result.product.name })} href={result.product.product_url || "#"} target="_blank" rel="noreferrer" className="mt-4 inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-xs font-extrabold text-white" style={{ background: accent }}>View product <ExternalLink size={11} /></a>
               </div>
             </article>)}
 
@@ -226,7 +226,7 @@ export default function PublicSearchPage({ params }: { params: Promise<{ id: str
         </main>
       </div>
 
-      <footer className="relative flex items-center justify-between border-t border-black/[0.05] bg-white/80 px-5 py-3 text-[9px] font-bold text-black/25 sm:px-8"><span>Powered by <b className="text-black/45">findly</b></span><span>Only active catalog products are ranked</span></footer>
+      <footer className="relative flex items-center justify-between border-t border-black/[0.05] bg-white/80 px-5 py-3 text-xs font-bold text-black/25 sm:px-8"><span>Powered by <b className="text-black/45">findly</b></span><span>Only active catalog products are ranked</span></footer>
     </section>
   </main>;
 }
