@@ -24,6 +24,7 @@ const nav = [
   { href: "/dashboard/mvp-audit", label: "MVP Audit", icon: ClipboardCheck },
   { href: "/dashboard/trust-center", label: "AI Trust Center", icon: ShieldCheck },
   { href: "/dashboard/grounding", label: "Grounding Center", icon: BrainCircuit },
+  { href: "/dashboard/knowledge-graph", label: "Knowledge Graph", icon: Network },
   { href: "/dashboard/workspace-snapshot", label: "Workspace snapshot", icon: Archive },
   { href: "/dashboard/usage", label: "Usage & plan", icon: CreditCard },
   { href: "/dashboard/experiments", label: "Experiments", icon: Target },

@@ -160,6 +160,16 @@ export const platformPages = [
     demoLabel: "Open Grounding Center",
   },
   {
+    slug: "semantic-knowledge-graph",
+    eyebrow: "Semantic Knowledge Graph",
+    title: "Connect product facts, shopper language and rules into one discovery graph.",
+    description: "Findly gives SMB ecommerce teams a practical Zoovu-style graph layer across catalog ontology, benefit mappings, approved vocabulary, deterministic finder rules, AI grounding evidence and configurator compatibility.",
+    points: ["Catalog ontology", "Decision-rule edges", "Vocabulary and benefit nodes", "Copyable semantic graph packet"],
+    proof: ["The graph informs discovery and AI prompts without letting AI select products", "Weak semantic links become dashboard actions before launch", "Configurators and guided-selling rules share one auditable knowledge layer"],
+    demoHref: "/dashboard/knowledge-graph",
+    demoLabel: "Open Knowledge Graph",
+  },
+  {
     slug: "analytics",
     eyebrow: "Journey analytics",
     title: "See where guided discovery turns into buying intent.",

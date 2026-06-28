@@ -566,6 +566,30 @@ function assertGroundingCenterWorkflow() {
   assert(marketing.includes("grounding-center"), "Platform marketing pages should include Grounding Center");
 }
 
+function assertSemanticKnowledgeGraphWorkflow() {
+  const page = readFileSync("app/dashboard/knowledge-graph/page.tsx", "utf8");
+  const helper = readFileSync("lib/semantic-knowledge-graph.ts", "utf8");
+  const shell = readFileSync("components/dashboard-shell.tsx", "utf8");
+  const overview = readFileSync("app/dashboard/page.tsx", "utf8");
+  const readme = readFileSync("README.md", "utf8");
+  const marketing = readFileSync("lib/marketing-pages.ts", "utf8");
+  assert(helper.includes("buildSemanticKnowledgeGraphReport"), "Semantic Knowledge Graph helper should expose a reusable report builder");
+  assert(helper.includes("buildCatalogOntology"), "Semantic Knowledge Graph should use catalog ontology evidence");
+  assert(helper.includes("buildDecisionGraph"), "Semantic Knowledge Graph should use decision graph evidence");
+  assert(helper.includes("buildGroundingCenterReport"), "Semantic Knowledge Graph should use grounding evidence");
+  assert(helper.includes("Findly Semantic Knowledge Graph packet"), "Semantic Knowledge Graph should generate a copyable packet");
+  assert(helper.includes("deterministic runtime logic still selects products"), "Semantic Knowledge Graph should preserve deterministic AI boundaries");
+  assert(page.includes("Semantic Knowledge Graph"), "Knowledge Graph page should expose the dashboard title");
+  assert(page.includes("Semantic graph layers"), "Knowledge Graph page should show semantic layers");
+  assert(page.includes("Weak links"), "Knowledge Graph page should show weak links");
+  assert(page.includes("Connected entities"), "Knowledge Graph page should show connected entities");
+  assert(page.includes("Copy graph packet"), "Knowledge Graph page should let merchants copy the packet");
+  assert(shell.includes("/dashboard/knowledge-graph"), "Dashboard navigation should expose Knowledge Graph");
+  assert(overview.includes("/dashboard/knowledge-graph"), "Dashboard overview should link to Knowledge Graph");
+  assert(readme.includes("Semantic Knowledge Graph Center"), "README should document Semantic Knowledge Graph Center");
+  assert(marketing.includes("semantic-knowledge-graph"), "Platform marketing pages should include Semantic Knowledge Graph");
+}
+
 function assertFlowStudioWorkflow() {
   const page = readFileSync("app/dashboard/flow-studio/page.tsx", "utf8");
   const helper = readFileSync("lib/flow-studio.ts", "utf8");
@@ -1312,6 +1336,14 @@ async function assertDeterministicLogic() {
     .replace('from "./catalog-benefits";', 'from "./catalog-benefits.js";')
     .replace('from "./explanation-grounding";', 'from "./explanation-grounding.js";')
     .replace('from "./vocabulary-studio";', 'from "./vocabulary-studio.js";'));
+  const compiledSemanticKnowledgeGraph = `${compileDir}/lib/semantic-knowledge-graph.js`;
+  writeFileSync(compiledSemanticKnowledgeGraph, readFileSync(compiledSemanticKnowledgeGraph, "utf8")
+    .replace('from "./catalog-benefits";', 'from "./catalog-benefits.js";')
+    .replace('from "./catalog-ontology";', 'from "./catalog-ontology.js";')
+    .replace('from "./compatibility-matrix";', 'from "./compatibility-matrix.js";')
+    .replace('from "./decision-graph";', 'from "./decision-graph.js";')
+    .replace('from "./grounding-center";', 'from "./grounding-center.js";')
+    .replace('from "./vocabulary-studio";', 'from "./vocabulary-studio.js";'));
   const compiledExperienceLaunch = `${compileDir}/lib/experience-launch.js`;
   writeFileSync(compiledExperienceLaunch, readFileSync(compiledExperienceLaunch, "utf8")
     .replace('from "./widget-snippet";', 'from "./widget-snippet.js";')
@@ -1500,6 +1532,7 @@ async function assertDeterministicLogic() {
   const vocabularyStudio = await import(pathToFileURL(`${compileDir}/lib/vocabulary-studio.js`));
   const trustCenter = await import(pathToFileURL(`${compileDir}/lib/trust-center.js`));
   const groundingCenter = await import(pathToFileURL(`${compileDir}/lib/grounding-center.js`));
+  const semanticKnowledgeGraph = await import(pathToFileURL(`${compileDir}/lib/semantic-knowledge-graph.js`));
   const searchRecovery = await import(pathToFileURL(`${compileDir}/lib/search-recovery.js`));
   const searchTuning = await import(pathToFileURL(`${compileDir}/lib/search-tuning.js`));
   const publicExperience = await import(pathToFileURL(`${compileDir}/lib/public-experience.js`));
@@ -1862,6 +1895,12 @@ async function assertDeterministicLogic() {
   assert(groundingReport.packet.includes("Findly Grounding Center packet") && groundingReport.packet.includes("RAG grounding boundary") && groundingReport.packet.includes("Deterministic matching selects products"), "Expected Grounding Center to generate a RAG boundary packet");
   const emptyGroundingReport = groundingCenter.buildGroundingCenterReport({ products: [], quizzes: [], events: [] });
   assert(emptyGroundingReport.status === "blocked" && emptyGroundingReport.actions.some((action) => action.id === "add-products-for-grounding"), "Expected empty Grounding Center report to block launch until products exist");
+  const semanticGraphReport = semanticKnowledgeGraph.buildSemanticKnowledgeGraphReport({ products: demo.demoProducts, quizzes: [demo.demoQuiz], configurators: [demo.demoConfigurator], events: demo.demoEvents });
+  assert(semanticGraphReport.layers.length >= 7 && semanticGraphReport.entities.length > 0 && semanticGraphReport.summary.edges > 0, "Expected Semantic Knowledge Graph to build layers, connected entities and edges");
+  assert(semanticGraphReport.layers.some((layer) => layer.id === "ontology") && semanticGraphReport.layers.some((layer) => layer.id === "grounding") && semanticGraphReport.layers.some((layer) => layer.id === "compatibility"), "Expected Semantic Knowledge Graph to include ontology, grounding and compatibility layers");
+  assert(semanticGraphReport.packet.includes("Findly Semantic Knowledge Graph packet") && semanticGraphReport.packet.includes("deterministic runtime logic still selects products"), "Expected Semantic Knowledge Graph to generate a deterministic-boundary packet");
+  const emptySemanticGraphReport = semanticKnowledgeGraph.buildSemanticKnowledgeGraphReport({ products: [], quizzes: [], configurators: [], events: [] });
+  assert(emptySemanticGraphReport.status === "blocked" && emptySemanticGraphReport.actions.some((action) => action.priority === "critical"), "Expected empty Semantic Knowledge Graph to block launch with critical actions");
   const generatedSuggestion = quizGeneration.buildOntologyQuizSuggestion(demo.demoProducts, "Help shoppers choose the right footwear");
   assert(generatedSuggestion.questions.length >= 2, "Expected ontology-guided quiz generation to produce multiple questions");
   assert(generatedSuggestion.questions.some((question) => question.options.some((option) => option.match_type === "category" || option.match_type === "tag" || option.match_type === "feature")), "Expected generated quiz to use ontology-backed catalog rules");
@@ -2203,6 +2242,7 @@ async function main() {
   await assertPage("/platform/production-verification", "Prove Findly is ready");
   await assertPage("/platform/mvp-audit", "Track exactly what is done");
   await assertPage("/platform/grounding-center", "Give AI a safe product-fact map");
+  await assertPage("/platform/semantic-knowledge-graph", "Connect product facts");
   await assertPage("/industries", "Industries");
   await assertPage("/resources", "Demo the product discovery loop");
   await assertPage("/finder/quiz_footwear", "Preparing your product guide");
@@ -2232,6 +2272,7 @@ async function main() {
   assertDecisionGraphWorkflow();
   assertTrustCenterWorkflow();
   assertGroundingCenterWorkflow();
+  assertSemanticKnowledgeGraphWorkflow();
   assertFlowStudioWorkflow();
   assertExperienceRegistryWorkflow();
   assertWidgetStudioWorkflow();
