@@ -133,7 +133,7 @@ create table if not exists public.analytics_events (
   -- configurator experience id. Server routes validate the referenced experience.
   quiz_id text not null,
   product_id text references public.products(id) on delete set null,
-  event_type text not null check (event_type in ('widget_view','quiz_start','quiz_complete','product_recommended','buy_click')),
+  event_type text not null check (event_type in ('widget_view','quiz_start','quiz_complete','product_recommended','buy_click','recommendation_feedback')),
   metadata jsonb not null default '{}',
   created_at timestamptz not null default now()
 );

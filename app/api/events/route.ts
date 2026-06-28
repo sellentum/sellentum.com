@@ -7,7 +7,7 @@ import type { ExperienceType } from "@/lib/types";
 const eventSchema = z.object({
   quizId: z.string().min(1).max(100),
   productId: z.string().max(100).optional(),
-  eventType: z.enum(["widget_view", "quiz_start", "quiz_complete", "product_recommended", "buy_click"]),
+  eventType: z.enum(["widget_view", "quiz_start", "quiz_complete", "product_recommended", "buy_click", "recommendation_feedback"]),
   metadata: z.record(z.unknown()).optional(),
 });
 

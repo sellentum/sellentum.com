@@ -2,7 +2,7 @@ import type { WidgetInstallReport, WidgetSnippetConfig } from "@/lib/widget-snip
 import { widgetPathForExperience } from "@/lib/widget-snippet";
 
 export type LaunchContractEvent = {
-  event: "widget_view" | "quiz_start" | "quiz_complete" | "product_recommended" | "buy_click";
+  event: "widget_view" | "quiz_start" | "quiz_complete" | "product_recommended" | "buy_click" | "recommendation_feedback";
   purpose: string;
   requiredMetadata: string[];
   optionalMetadata: string[];
@@ -129,6 +129,12 @@ export function buildLaunchContract({
         purpose: "Captures product CTA click-through intent.",
         requiredMetadata: ["experience_type", "experience_id", "session_id", "product_name"],
         optionalMetadata: ["rank", "score", "selected_option_names", "server_validated"],
+      },
+      {
+        event: "recommendation_feedback",
+        purpose: "Optional result-card quality signal from Helpful / Not right buttons.",
+        requiredMetadata: ["experience_type", "experience_id", "session_id", "feedback", "product_name"],
+        optionalMetadata: ["feedback_reason", "rank", "score", "matched_reasons", "matched_signals", "feedback_surface"],
       },
     ],
     checks,

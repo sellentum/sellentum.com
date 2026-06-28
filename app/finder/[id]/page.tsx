@@ -3,6 +3,7 @@
 import { use, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Check, ExternalLink, LoaderCircle, RefreshCcw, ShieldCheck, Sparkles, Star } from "lucide-react";
+import { RecommendationFeedback } from "@/components/recommendation-feedback";
 import { useStore } from "@/lib/store";
 import { getSessionMetadata } from "@/lib/session";
 import { getNextFinderQuestionIndex } from "@/lib/finder-flow";
@@ -12,7 +13,7 @@ import type { FinderAnswer, Product, Quiz, Recommendation, WidgetSettings } from
 import { auditProductMatches, compareFinderRecommendations, formatCurrency } from "@/lib/utils";
 
 type FinderData = { quiz: Quiz; products: Product[]; settings: WidgetSettings };
-type FinderEventType = "widget_view" | "quiz_start" | "quiz_complete" | "product_recommended" | "buy_click";
+type FinderEventType = "widget_view" | "quiz_start" | "quiz_complete" | "product_recommended" | "buy_click" | "recommendation_feedback";
 
 function serializeAnswers(items: FinderAnswer[]) {
   return items.map((item) => ({
@@ -200,6 +201,9 @@ export default function FinderPage({ params }: { params: Promise<{ id: string }>
                         <div className="mt-4 min-h-[58px] rounded-xl bg-canvas p-3">
                           <p className="flex items-center gap-1.5 text-[9px] font-extrabold text-moss"><Sparkles size={11} /> Why it fits</p>
                           {recommendation.explanation ? <p className="mt-1.5 text-[10px] leading-4 text-black/55">{recommendation.explanation}</p> : <div className="mt-2 space-y-1.5"><div className="h-2 w-full animate-pulse rounded bg-black/5" /><div className="h-2 w-3/4 animate-pulse rounded bg-black/5" /></div>}
+                        </div>
+                        <div className="mt-4">
+                          <RecommendationFeedback productId={recommendation.product.id} productName={recommendation.product.name} compact onFeedback={(feedback, feedbackReason) => track("recommendation_feedback", recommendation.product.id, { answers: serializeAnswers(answers), feedback, feedback_reason: feedbackReason, rank: index + 1, score: recommendation.score, matched_reasons: recommendation.matchedReasons, product_name: recommendation.product.name, explanation_present: Boolean(recommendation.explanation), feedback_surface: "finder_result_card" })} />
                         </div>
                         <a onClick={() => track("buy_click", recommendation.product.id, { answers: serializeAnswers(answers), rank: index + 1, score: recommendation.score, matched_reasons: recommendation.matchedReasons, product_name: recommendation.product.name })} href={recommendation.product.product_url || "#"} target="_blank" rel="noreferrer" className="mt-4 flex w-full items-center justify-center gap-2 rounded-full py-3 text-xs font-extrabold text-white" style={{ background: accent }}>Buy now <ExternalLink size={12} /></a>
                       </div>

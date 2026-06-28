@@ -3,6 +3,7 @@
 import { use, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, ExternalLink, LoaderCircle, Search, ShieldCheck, Sparkles } from "lucide-react";
+import { RecommendationFeedback } from "@/components/recommendation-feedback";
 import { demoQuiz } from "@/lib/demo-data";
 import { buildPublicExperienceCopy, normalizeWidgetSettings } from "@/lib/public-experience";
 import { getSessionMetadata } from "@/lib/session";
@@ -20,7 +21,7 @@ type SearchData = {
   catalog: { active_products: number };
 };
 
-type SearchEventType = "widget_view" | "quiz_start" | "product_recommended" | "buy_click";
+type SearchEventType = "widget_view" | "quiz_start" | "product_recommended" | "buy_click" | "recommendation_feedback";
 type SearchReportWithRecovery = ProductSearchReport & { recovery?: SearchRecoveryReport };
 
 const starterQueries = [
@@ -206,6 +207,9 @@ export default function PublicSearchPage({ params }: { params: Promise<{ id: str
                 <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-black/5"><div className="h-full rounded-full bg-lime" style={{ width: `${Math.min(100, result.score / maxScore * 100)}%` }} /></div>
                 <div className="mt-3 flex flex-wrap gap-1.5">
                   {result.matchedSignals.slice(0, 5).map((signal) => <span key={`${result.product.id}-${signal.term}-${signal.source}`} className="rounded-full bg-black/[0.04] px-2 py-1 text-[8px] font-bold text-black/40">{signal.term} · +{signal.contribution.toFixed(1)}</span>)}
+                </div>
+                <div className="mt-4 max-w-md">
+                  <RecommendationFeedback productId={result.product.id} productName={result.product.name} compact onFeedback={(feedback, feedbackReason) => track("recommendation_feedback", result.product.id, { query: report.query, terms: report.intent.terms, feedback, feedback_reason: feedbackReason, rank: index + 1, score: result.score, confidence: result.confidence, matched_signals: result.matchedSignals.map((signal) => signal.term), product_name: result.product.name, explanation_present: Boolean(result.explanation), feedback_surface: "search_result_card" })} />
                 </div>
                 <a onClick={() => track("buy_click", result.product.id, { query: report.query, rank: index + 1, score: result.score, confidence: result.confidence, product_name: result.product.name })} href={result.product.product_url || "#"} target="_blank" rel="noreferrer" className="mt-4 inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-[10px] font-extrabold text-white" style={{ background: accent }}>View product <ExternalLink size={11} /></a>
               </div>

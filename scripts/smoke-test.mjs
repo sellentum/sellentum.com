@@ -240,6 +240,39 @@ function assertAudienceCaptureWorkflow() {
   assert(marketing.includes("audience-capture"), "Platform marketing pages should include audience capture");
 }
 
+function assertRecommendationFeedbackWorkflow() {
+  const page = readFileSync("app/dashboard/feedback/page.tsx", "utf8");
+  const helper = readFileSync("lib/recommendation-feedback.ts", "utf8");
+  const component = readFileSync("components/recommendation-feedback.tsx", "utf8");
+  const shell = readFileSync("components/dashboard-shell.tsx", "utf8");
+  const overview = readFileSync("app/dashboard/page.tsx", "utf8");
+  const readme = readFileSync("README.md", "utf8");
+  const marketing = readFileSync("lib/marketing-pages.ts", "utf8");
+  const schema = readFileSync("supabase/schema.sql", "utf8");
+  const migration = readFileSync("supabase/migrations/006_recommendation_feedback.sql", "utf8");
+  const eventRoute = readFileSync("app/api/events/route.ts", "utf8");
+  const analyticsQuality = readFileSync("lib/analytics-quality.ts", "utf8");
+  assert(helper.includes("buildRecommendationFeedbackReport"), "Recommendation Feedback helper should expose a reusable report builder");
+  assert(helper.includes("Findly Recommendation Feedback packet"), "Recommendation Feedback should generate a copyable packet");
+  assert(helper.includes("Shopper feedback does not select products"), "Recommendation Feedback should document deterministic selection boundaries");
+  assert(component.includes("Helpful") && component.includes("Not right"), "Recommendation feedback component should expose shopper rating controls");
+  for (const file of ["app/finder/[id]/page.tsx", "app/assistant/[id]/page.tsx", "app/search/[id]/page.tsx", "app/configurator/[id]/page.tsx"]) {
+    const source = readFileSync(file, "utf8");
+    assert(source.includes("RecommendationFeedback"), `${file} should render shopper recommendation feedback controls`);
+    assert(source.includes("recommendation_feedback"), `${file} should record recommendation_feedback analytics`);
+  }
+  assert(page.includes("Recommendation Feedback Center"), "Feedback page should expose the dashboard title");
+  assert(page.includes("Product feedback lanes"), "Feedback page should show product feedback lanes");
+  assert(page.includes("Copy feedback packet"), "Feedback page should let merchants copy the packet");
+  assert(shell.includes("/dashboard/feedback"), "Dashboard navigation should expose Feedback Center");
+  assert(overview.includes("/dashboard/feedback"), "Dashboard overview should expose Feedback Center");
+  assert(readme.includes("Recommendation Feedback Center") || readme.includes("Feedback Center"), "README should document Recommendation Feedback");
+  assert(marketing.includes("recommendation-feedback"), "Platform marketing pages should include Recommendation Feedback");
+  assert(schema.includes("recommendation_feedback") && migration.includes("recommendation_feedback"), "Supabase schema and migration should allow recommendation_feedback events");
+  assert(eventRoute.includes("recommendation_feedback"), "Public analytics route should accept recommendation_feedback events");
+  assert(analyticsQuality.includes("recommendation_feedback") && analyticsQuality.includes("feedback"), "Analytics QA should validate recommendation feedback metadata");
+}
+
 function assertMerchandisingStudioWorkflow() {
   const page = readFileSync("app/dashboard/merchandising/page.tsx", "utf8");
   const helper = readFileSync("lib/merchandising-studio.ts", "utf8");
@@ -1229,6 +1262,10 @@ async function assertDeterministicLogic() {
     .replace('from "./insights";', 'from "./insights.js";')
     .replace('from "./journey-insights";', 'from "./journey-insights.js";')
     .replace('from "./utils";', 'from "./utils.js";'));
+  const compiledRecommendationFeedback = `${compileDir}/lib/recommendation-feedback.js`;
+  writeFileSync(compiledRecommendationFeedback, readFileSync(compiledRecommendationFeedback, "utf8")
+    .replace('from "./analytics";', 'from "./analytics.js";')
+    .replace('from "./utils";', 'from "./utils.js";'));
   const compiledMerchandisingStudio = `${compileDir}/lib/merchandising-studio.js`;
   writeFileSync(compiledMerchandisingStudio, readFileSync(compiledMerchandisingStudio, "utf8")
     .replace('from "./insights";', 'from "./insights.js";'));
@@ -1346,6 +1383,7 @@ async function assertDeterministicLogic() {
   const usageMetering = await import(pathToFileURL(`${compileDir}/lib/usage-metering.js`));
   const personaStudio = await import(pathToFileURL(`${compileDir}/lib/persona-studio.js`));
   const audienceCapture = await import(pathToFileURL(`${compileDir}/lib/audience-capture.js`));
+  const recommendationFeedback = await import(pathToFileURL(`${compileDir}/lib/recommendation-feedback.js`));
   const merchandisingStudio = await import(pathToFileURL(`${compileDir}/lib/merchandising-studio.js`));
   const catalogPipeline = await import(pathToFileURL(`${compileDir}/lib/catalog-pipeline.js`));
   const availabilityGuard = await import(pathToFileURL(`${compileDir}/lib/availability-guard.js`));
@@ -1555,6 +1593,12 @@ async function assertDeterministicLogic() {
   assert(audienceReport.packet.includes("Findly Audience Capture packet") && audienceReport.packet.includes("No CRM integration and no PII storage by default"), "Expected Audience Capture to generate a copyable packet with MVP privacy boundaries");
   const emptyAudienceReport = audienceCapture.buildAudienceCaptureReport({ products: [], quizzes: [], configurators: [], events: [] });
   assert(emptyAudienceReport.status === "empty" && emptyAudienceReport.actions.some((action) => action.id === "capture-first-audience-signals"), "Expected empty Audience Capture report to guide first signal capture");
+  const feedbackReport = recommendationFeedback.buildRecommendationFeedbackReport(demo.demoEvents, demo.demoProducts);
+  assert(feedbackReport.summary.feedback > 0 && feedbackReport.products.some((product) => product.feedback > 0), "Expected Recommendation Feedback to summarize seeded shopper ratings by product");
+  assert(feedbackReport.themes.some((theme) => theme.sentiment === "negative") && feedbackReport.packet.includes("Findly Recommendation Feedback packet"), "Expected Recommendation Feedback to produce negative themes and a copyable packet");
+  assert(feedbackReport.packet.includes("Shopper feedback does not select products"), "Expected Recommendation Feedback packet to preserve deterministic selection boundary");
+  const emptyFeedbackReport = recommendationFeedback.buildRecommendationFeedbackReport([], demo.demoProducts);
+  assert(emptyFeedbackReport.status === "empty" && emptyFeedbackReport.actions.some((action) => action.id === "capture-first-feedback"), "Expected empty Recommendation Feedback report to guide first feedback capture");
   const gapReport = discoveryGaps.buildDiscoveryGapReport([
     { id: "g1", user_id: "demo-user", quiz_id: "quiz_footwear", event_type: "quiz_start", metadata: { session_id: "g1", experience_type: "search", query: "orthopedic office shoe under 90", terms: ["orthopedic", "office"], result_count: 0 }, created_at: "2026-06-25T10:01:00Z" },
     { id: "g2", user_id: "demo-user", quiz_id: "quiz_footwear", event_type: "quiz_complete", metadata: { session_id: "g2", experience_type: "finder", result_count: 1, recovery_status: "thin-results", answer_summary: ["Office comfort"] }, created_at: "2026-06-25T10:02:00Z" },
@@ -1981,6 +2025,7 @@ async function main() {
   await assertPage("/platform/configurators", "Visual configurators");
   await assertPage("/platform/compatibility-matrix", "Model dependency rules");
   await assertPage("/platform/merchandising-controls", "Tune recommendation pressure");
+  await assertPage("/platform/recommendation-feedback", "Let shoppers tell you");
   await assertPage("/platform/shopper-personas", "Turn zero-party signals");
   await assertPage("/platform/audience-capture", "Turn guided-selling sessions");
   await assertPage("/platform/widget-studio", "Launch every guided experience");
@@ -2004,6 +2049,7 @@ async function main() {
   assertSessionAnalytics();
   assertPersonaStudioWorkflow();
   assertAudienceCaptureWorkflow();
+  assertRecommendationFeedbackWorkflow();
   assertMerchandisingStudioWorkflow();
   assertPublicRuntimeGuardrails();
   assertLaunchStudioWorkflow();

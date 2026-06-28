@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
-import { AlertTriangle, Archive, ArrowDownRight, ArrowRight, ArrowUpRight, BookOpenCheck, Bot, Boxes, Braces, BrainCircuit, Check, ChevronRight, CirclePlay, Code2, CreditCard, Database, Eye, GalleryVerticalEnd, GitBranch, GitPullRequestArrow, Globe2, Handshake, HeartPulse, Layers3, LayoutTemplate, Megaphone, MessageCircle, MousePointerClick, Network, PackagePlus, RadioTower, Rocket, ShieldCheck, SlidersHorizontal, Sparkles, Target, UsersRound, Wrench } from "lucide-react";
+import { AlertTriangle, Archive, ArrowDownRight, ArrowRight, ArrowUpRight, BookOpenCheck, Bot, Boxes, Braces, BrainCircuit, Check, ChevronRight, CirclePlay, Code2, CreditCard, Database, Eye, GalleryVerticalEnd, GitBranch, GitPullRequestArrow, Globe2, Handshake, HeartPulse, Layers3, LayoutTemplate, Megaphone, MessageCircle, MousePointerClick, Network, PackagePlus, RadioTower, Rocket, ShieldCheck, SlidersHorizontal, Sparkles, Target, ThumbsUp, UsersRound, Wrench } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { LoadingState } from "@/components/loading-state";
 import { buildDashboardCommandCenter } from "@/lib/dashboard-command-center";
@@ -42,6 +42,7 @@ export default function DashboardOverview() {
           <Link href="/dashboard/decision-graph" className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-xs font-extrabold text-ink shadow-sm transition hover:-translate-y-0.5"><BrainCircuit size={15} className="text-moss" /> Decision graph</Link>
           <Link href="/dashboard/flow-studio" className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-xs font-extrabold text-ink shadow-sm transition hover:-translate-y-0.5"><GitBranch size={15} className="text-moss" /> Flow Studio</Link>
           <Link href="/dashboard/advisor" className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-xs font-extrabold text-ink shadow-sm transition hover:-translate-y-0.5"><Bot size={15} className="text-moss" /> Advisor</Link>
+          <Link href="/dashboard/feedback" className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-xs font-extrabold text-ink shadow-sm transition hover:-translate-y-0.5"><ThumbsUp size={15} className="text-moss" /> Feedback</Link>
           <Link href="/dashboard/merchandising" className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-xs font-extrabold text-ink shadow-sm transition hover:-translate-y-0.5"><SlidersHorizontal size={15} className="text-moss" /> Merchandising</Link>
           <Link href="/dashboard/compatibility" className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-xs font-extrabold text-ink shadow-sm transition hover:-translate-y-0.5"><Network size={15} className="text-moss" /> Compatibility</Link>
           <Link href="/dashboard/bundles" className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-xs font-extrabold text-ink shadow-sm transition hover:-translate-y-0.5"><PackagePlus size={15} className="text-moss" /> Bundle Studio</Link>

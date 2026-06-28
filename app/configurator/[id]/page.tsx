@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import { ArrowLeft, ArrowRight, Check, ExternalLink, LoaderCircle, RefreshCcw, ShieldCheck, ShoppingBag, Sparkles, X } from "lucide-react";
 import { LoadingState } from "@/components/loading-state";
+import { RecommendationFeedback } from "@/components/recommendation-feedback";
 import { useStore } from "@/lib/store";
 import { getSessionMetadata } from "@/lib/session";
 import { buildConfiguratorOptionGuidance, buildConfiguratorSelectionGuidance } from "@/lib/configurator-guidance";
@@ -59,7 +60,7 @@ export default function ConfiguratorPage() {
       .finally(() => setLoading(false));
   }, [id, store.ready, store.configurators, store.products, store.settings]);
 
-  const track = useCallback(async (eventType: "widget_view" | "quiz_start" | "quiz_complete" | "product_recommended" | "buy_click", productId?: string, extraMetadata: Record<string, unknown> = {}, selectionOverride = selectedIds) => {
+  const track = useCallback(async (eventType: "widget_view" | "quiz_start" | "quiz_complete" | "product_recommended" | "buy_click" | "recommendation_feedback", productId?: string, extraMetadata: Record<string, unknown> = {}, selectionOverride = selectedIds) => {
     if (!data) return;
     const summary = describeConfiguratorSelection(data.configurator, selectionOverride);
     const metadata = {
@@ -304,6 +305,7 @@ export default function ConfiguratorPage() {
                       </div>)}
                     </div> : null}
                   </div>}
+                  {displayPrimaryProduct && <div className="mt-6 max-w-md"><RecommendationFeedback productId={displayPrimaryProduct.id} productName={displayPrimaryProduct.name} onFeedback={(feedback, feedbackReason) => track("recommendation_feedback", displayPrimaryProduct.id, { feedback, feedback_reason: feedbackReason, product_name: displayPrimaryProduct.name, primary_product_id: displayPrimaryProduct.id, primary_product_name: displayPrimaryProduct.name, bundle_total: displayTotal, selected_option_names: displaySelectedOptions.map((option) => option.label), server_validated: Boolean(validatedBundle), feedback_surface: "configurator_bundle_result" }, validatedBundle?.selectedIds || selectedIds)} /></div>}
                   <div className="mt-8 flex flex-wrap gap-3">
                     {displayPrimaryProduct ? <a href={displayPrimaryProduct.product_url || "#"} target="_blank" rel="noreferrer" onClick={() => track("buy_click", displayPrimaryProduct.id, { product_name: displayPrimaryProduct.name, primary_product_id: displayPrimaryProduct.id, primary_product_name: displayPrimaryProduct.name, server_validated: Boolean(validatedBundle) }, validatedBundle?.selectedIds || selectedIds)} className="inline-flex items-center gap-2 rounded-full px-6 py-3.5 text-sm font-extrabold text-white" style={{ background: accent }}>Buy configured kit <ExternalLink size={14} /></a> : <button className="btn-primary">Request quote</button>}
                     <button onClick={restart} className="btn-secondary"><RefreshCcw size={14} /> Start again</button>

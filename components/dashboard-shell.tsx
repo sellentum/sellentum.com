@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Archive, BarChart3, BookOpenCheck, Bot, Boxes, Braces, BrainCircuit, ChevronDown, ClipboardCheck, Code2, CreditCard, Database, ExternalLink, FlaskConical, GalleryVerticalEnd, GitBranch, GitPullRequestArrow, Globe2, Handshake, HeartPulse, HelpCircle, Layers3, LayoutDashboard, LayoutTemplate, LogOut, Megaphone, Menu, MessageCircle, Network, PackagePlus, RadioTower, Rocket, Search, Settings, ShieldCheck, SlidersHorizontal, Sparkles, Target, UsersRound, X } from "lucide-react";
+import { Archive, BarChart3, BookOpenCheck, Bot, Boxes, Braces, BrainCircuit, ChevronDown, ClipboardCheck, Code2, CreditCard, Database, ExternalLink, FlaskConical, GalleryVerticalEnd, GitBranch, GitPullRequestArrow, Globe2, Handshake, HeartPulse, HelpCircle, Layers3, LayoutDashboard, LayoutTemplate, LogOut, Megaphone, Menu, MessageCircle, Network, PackagePlus, RadioTower, Rocket, Search, Settings, ShieldCheck, SlidersHorizontal, Sparkles, Target, ThumbsUp, UsersRound, X } from "lucide-react";
 import { useState } from "react";
 import { Logo } from "@/components/logo";
 import { createClient } from "@/lib/supabase/client";
@@ -42,6 +42,7 @@ const nav = [
   { href: "/dashboard/advisor", label: "Advisor Studio", icon: Bot },
   { href: "/dashboard/search", label: "Search lab", icon: Search },
   { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
+  { href: "/dashboard/feedback", label: "Feedback Center", icon: ThumbsUp },
   { href: "/dashboard/returns", label: "Returns & fit", icon: HeartPulse },
   { href: "/dashboard/personas", label: "Persona Studio", icon: UsersRound },
   { href: "/dashboard/audience", label: "Audience Capture", icon: UsersRound },

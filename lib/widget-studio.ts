@@ -106,6 +106,7 @@ const eventContract: WidgetStudioEventContract[] = [
   { event: "quiz_complete", when: "A shopper reaches recommendations, search results or bundle review.", requiredMetadata: ["experience_type", "experience_id", "session_id", "result_count"] },
   { event: "product_recommended", when: "A ranked product card is shown to the shopper.", requiredMetadata: ["experience_type", "experience_id", "session_id", "rank", "product_name"] },
   { event: "buy_click", when: "The shopper clicks a product, checkout or buy button from Findly.", requiredMetadata: ["experience_type", "experience_id", "session_id", "product_name"] },
+  { event: "recommendation_feedback", when: "A shopper marks a recommended product Helpful or Not right.", requiredMetadata: ["experience_type", "experience_id", "session_id", "feedback", "product_name"] },
 ];
 
 function cleanOrigin(origin: string) {

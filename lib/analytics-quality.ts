@@ -65,6 +65,13 @@ const requiredEventFields: Record<AnalyticsEventType, Array<{ label: string; alt
     { label: "experience_id", alternatives: ["experience_id"] },
     { label: "product identity", alternatives: ["product_id", "product_name"] },
   ],
+  recommendation_feedback: [
+    { label: "session_id", alternatives: ["session_id"] },
+    { label: "experience_type", alternatives: ["experience_type"] },
+    { label: "experience_id", alternatives: ["experience_id"] },
+    { label: "feedback", alternatives: ["feedback", "feedback_sentiment"] },
+    { label: "product identity", alternatives: ["product_id", "product_name"] },
+  ],
 };
 
 function metadataValue(event: AnalyticsEvent, field: string) {
@@ -83,7 +90,7 @@ function missingRequiredGroups(event: AnalyticsEvent) {
 }
 
 function productIdentityMissing(event: AnalyticsEvent) {
-  return (event.event_type === "product_recommended" || event.event_type === "buy_click") && !hasValue(event, "product_id") && !hasValue(event, "product_name");
+  return (event.event_type === "product_recommended" || event.event_type === "buy_click" || event.event_type === "recommendation_feedback") && !hasValue(event, "product_id") && !hasValue(event, "product_name");
 }
 
 function eventsBySession(events: AnalyticsEvent[]) {
@@ -123,6 +130,9 @@ function sessionSequenceIssues(sessionEvents: AnalyticsEvent[]) {
       if (!sawResultSignal) issues.push(`${source} session clicked buy before any result event.`);
       if (!sawRecommendation) issues.push(`${source} session clicked buy without a prior product_recommended event.`);
     }
+    if (event.event_type === "recommendation_feedback" && !sawResultSignal) {
+      issues.push(`${source} session gave recommendation feedback before any result event.`);
+    }
   }
 
   return issues;
@@ -145,7 +155,7 @@ export function buildAnalyticsQualityReport(events: AnalyticsEvent[]): Analytics
   const eventsWithSession = events.filter((event) => hasValue(event, "session_id")).length;
   const eventsWithExperience = events.filter((event) => hasValue(event, "experience_type") && hasValue(event, "experience_id")).length;
   const missingRequiredMetadata = events.reduce((sum, event) => sum + missingRequiredGroups(event).length, 0);
-  const productEvents = events.filter((event) => event.event_type === "product_recommended" || event.event_type === "buy_click");
+  const productEvents = events.filter((event) => event.event_type === "product_recommended" || event.event_type === "buy_click" || event.event_type === "recommendation_feedback");
   const productEventsWithoutProduct = productEvents.filter(productIdentityMissing).length;
   const sequenceIssueList = sessions.flatMap(sessionSequenceIssues);
   const orphanProductEvents = sequenceIssueList.filter((issue) => issue.includes("product_recommended") || issue.includes("result event")).length;

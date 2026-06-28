@@ -140,6 +140,16 @@ export const platformPages = [
     demoLabel: "View analytics",
   },
   {
+    slug: "recommendation-feedback",
+    eyebrow: "Recommendation feedback",
+    title: "Let shoppers tell you when a recommendation feels right.",
+    description: "Findly adds lightweight Helpful / Not right feedback to result cards, then turns those events into deterministic product risks, explanation fixes and optimization actions.",
+    points: ["Result-card feedback capture", "Product quality lanes", "Negative-feedback themes", "Copyable tuning packet"],
+    proof: ["Feedback does not choose products; deterministic rules still rank results", "Merchants can spot weak explanations, wrong-category matches and thin catalog evidence", "The same event contract works across finder, advisor, search and configurator surfaces"],
+    demoHref: "/dashboard/feedback",
+    demoLabel: "Open Feedback Center",
+  },
+  {
     slug: "merchandising-controls",
     eyebrow: "Merchandising controls",
     title: "Tune recommendation pressure without giving up determinism.",

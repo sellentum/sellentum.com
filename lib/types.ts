@@ -108,7 +108,8 @@ export type AnalyticsEventType =
   | "quiz_start"
   | "quiz_complete"
   | "product_recommended"
-  | "buy_click";
+  | "buy_click"
+  | "recommendation_feedback";
 
 export type ExperienceType = "finder" | "assistant" | "configurator" | "search";
 

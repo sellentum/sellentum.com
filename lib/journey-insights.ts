@@ -92,6 +92,7 @@ function stepLabel(event: AnalyticsEvent, product?: string) {
   if (event.event_type === "quiz_start") return "Started journey";
   if (event.event_type === "quiz_complete") return "Completed journey";
   if (event.event_type === "product_recommended") return product ? `Recommended ${product}` : "Recommended product";
+  if (event.event_type === "recommendation_feedback") return product ? `Rated ${product}` : "Rated recommendation";
   return product ? `Clicked ${product}` : "Clicked buy CTA";
 }
 
