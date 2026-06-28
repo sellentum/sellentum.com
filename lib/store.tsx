@@ -5,6 +5,7 @@ import { demoConfigurator, demoEvents, demoProducts, demoQuiz, demoSettings, DEM
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import type { AnalyticsEvent, AnalyticsEventType, Configurator, Product, ProductInput, Quiz, WidgetSettings } from "@/lib/types";
 import { uid } from "@/lib/utils";
+import { createDefaultWorkspaceSettings } from "@/lib/workspace-onboarding";
 
 type StoreContextValue = {
   ready: boolean;
@@ -105,7 +106,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
             .map((step) => ({ ...step, options: [...(step.options || [])].sort((a, b) => a.position - b.position) })),
         })),
         events: (eventsResult.data as AnalyticsEvent[]) || [],
-        settings: (settingsResult.data as WidgetSettings) || { ...demoSettings, user_id: userId },
+        settings: (settingsResult.data as WidgetSettings) || createDefaultWorkspaceSettings(userId),
       });
       setReady(true);
     }

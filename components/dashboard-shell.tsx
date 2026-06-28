@@ -3,11 +3,13 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Archive, BarChart3, BookOpenCheck, Bot, Boxes, Braces, BrainCircuit, ChevronDown, ClipboardCheck, Code2, CreditCard, Database, ExternalLink, FileText, FlaskConical, GalleryVerticalEnd, GitBranch, GitPullRequestArrow, Globe2, Handshake, HeartPulse, HelpCircle, Layers3, LayoutDashboard, LayoutTemplate, LogOut, Megaphone, Menu, MessageCircle, MonitorCheck, Network, PackagePlus, RadioTower, Rocket, Search, Settings, ShieldCheck, SlidersHorizontal, Sparkles, Target, ThumbsUp, UsersRound, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { LoadingState } from "@/components/loading-state";
 import { Logo } from "@/components/logo";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { useStore } from "@/lib/store";
+import { isWorkspaceOnboarded } from "@/lib/workspace-onboarding";
 
 const nav = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard, exact: true },
@@ -61,10 +63,47 @@ const nav = [
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { mode, settings, quizzes, configurators } = useStore();
+  const { ready, mode, settings, quizzes, configurators } = useStore();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
+  const [accountEmail, setAccountEmail] = useState("");
+  const [accountName, setAccountName] = useState("");
   const previewQuiz = quizzes.find((quiz) => quiz.published) || quizzes[0];
   const previewConfigurator = configurators.find((configurator) => configurator.published) || configurators[0];
+  const onboardingComplete = mode === "demo" || isWorkspaceOnboarded(settings);
+  const isOnboardingPath = pathname.startsWith("/dashboard/onboarding");
+  const shouldForceOnboarding = ready && mode === "supabase" && !onboardingComplete && !isOnboardingPath;
+  const workspaceInitial = (settings.brand_name.trim()[0] || "S").toUpperCase();
+  const accountInitials = useMemo(() => {
+    const source = accountName || accountEmail || settings.brand_name || "Sellentum";
+    return source
+      .split(/[\s@._-]+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase())
+      .join("") || "ST";
+  }, [accountEmail, accountName, settings.brand_name]);
+
+  useEffect(() => {
+    if (!ready || mode !== "supabase") return;
+    if (shouldForceOnboarding) router.replace("/dashboard/onboarding");
+  }, [mode, ready, router, shouldForceOnboarding]);
+
+  useEffect(() => {
+    setAccountOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (mode !== "supabase") return;
+    let active = true;
+    createClient()?.auth.getUser().then(({ data }) => {
+      if (!active) return;
+      setAccountEmail(data.user?.email || "");
+      const fullName = typeof data.user?.user_metadata?.full_name === "string" ? data.user.user_metadata.full_name : "";
+      setAccountName(fullName);
+    });
+    return () => { active = false; };
+  }, [mode]);
 
   async function logout() {
     if (mode === "supabase") await createClient()?.auth.signOut();
@@ -76,10 +115,10 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     <div className="flex h-full flex-col">
       <div className="flex h-[76px] items-center justify-between px-5"><Logo href="/dashboard" /><button onClick={() => setMobileOpen(false)} className="md:hidden"><X size={19} /></button></div>
       <div className="mx-3 mb-5 rounded-2xl border border-black/[0.07] bg-white p-2.5">
-        <button className="flex w-full items-center gap-3 rounded-xl px-2 py-1.5 text-left">
-          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-[10px] bg-ink text-xs font-extrabold text-lime">{settings.brand_name.slice(0, 1)}</span>
+        <Link href={onboardingComplete ? "/dashboard/settings" : "/dashboard/onboarding"} className="flex w-full items-center gap-3 rounded-xl px-2 py-1.5 text-left">
+          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-[10px] bg-ink text-xs font-extrabold text-lime">{workspaceInitial}</span>
           <span className="min-w-0 flex-1"><span className="block truncate text-xs font-extrabold">{settings.brand_name}</span><span className="block text-xs text-black/35">Starter workspace</span></span><ChevronDown size={14} className="text-black/30" />
-        </button>
+        </Link>
       </div>
       <nav className="space-y-1 px-3">
         <p className="mb-2 px-3 text-xs font-extrabold uppercase tracking-[.18em] text-black/30">Workspace</p>
@@ -90,7 +129,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       </nav>
       <div className="mt-auto p-3">
         <div className="mb-3 rounded-2xl bg-ink p-4 text-white">
-          <div className="grid h-8 w-8 place-items-center rounded-xl bg-lime text-ink"><Sparkles size={15} /></div><p className="mt-3 text-xs font-extrabold">Need a hand?</p><p className="mt-1 text-xs leading-4 text-white/45">Set up your first finder with our quick-start guide.</p><a href="mailto:hello@sellentum.app" className="mt-3 inline-flex items-center gap-1 text-xs font-extrabold text-lime">Contact support <ExternalLink size={10} /></a>
+          <div className="grid h-8 w-8 place-items-center rounded-xl bg-lime text-ink"><Sparkles size={15} /></div><p className="mt-3 text-xs font-extrabold">Need a hand?</p><p className="mt-1 text-xs leading-4 text-white/45">Set up your first finder with our quick-start guide.</p><a href="mailto:hello@sellentum.com" className="mt-3 inline-flex items-center gap-1 text-xs font-extrabold text-lime">Contact support <ExternalLink size={10} /></a>
         </div>
         <button onClick={logout} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold text-black/45 hover:bg-white hover:text-ink"><LogOut size={16} /> Log out</button>
       </div>
@@ -104,9 +143,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       <div className="md:col-start-2">
         <header className="sticky top-0 z-30 flex h-[68px] items-center justify-between border-b border-black/[0.06] bg-[#f3f4ef]/90 px-4 backdrop-blur-xl sm:px-7">
           <div className="flex items-center gap-3"><button aria-label="Open navigation" onClick={() => setMobileOpen(true)} className="grid h-9 w-9 place-items-center rounded-xl border border-black/10 md:hidden"><Menu size={17} /></button><p className="text-xs font-bold text-black/35">{mode === "demo" ? "Interactive demo workspace" : "Your workspace"}</p></div>
-          <div className="flex items-center gap-3">{previewQuiz && <Link href={`/finder/${previewQuiz.slug || previewQuiz.id}`} target="_blank" className="hidden items-center gap-1.5 text-xs font-extrabold text-black/50 sm:flex">Preview finder <ExternalLink size={13} /></Link>}{previewConfigurator && <Link href={`/configurator/${previewConfigurator.slug || previewConfigurator.id}`} target="_blank" className="hidden items-center gap-1.5 text-xs font-extrabold text-black/50 xl:flex">Preview configurator <ExternalLink size={13} /></Link>}<button className="grid h-9 w-9 place-items-center rounded-full border border-black/10 bg-white text-black/40" aria-label="Help"><HelpCircle size={16} /></button><div className="grid h-9 w-9 place-items-center rounded-full bg-peach text-xs font-extrabold">AM</div></div>
+          <div className="flex items-center gap-3">{previewQuiz && <Link href={`/finder/${previewQuiz.slug || previewQuiz.id}`} target="_blank" className="hidden items-center gap-1.5 text-xs font-extrabold text-black/50 sm:flex">Preview finder <ExternalLink size={13} /></Link>}{previewConfigurator && <Link href={`/configurator/${previewConfigurator.slug || previewConfigurator.id}`} target="_blank" className="hidden items-center gap-1.5 text-xs font-extrabold text-black/50 xl:flex">Preview configurator <ExternalLink size={13} /></Link>}<a href="mailto:hello@sellentum.com" className="grid h-9 w-9 place-items-center rounded-full border border-black/10 bg-white text-black/40" aria-label="Help"><HelpCircle size={16} /></a><div className="relative"><button onClick={() => setAccountOpen((open) => !open)} className="grid h-9 w-9 place-items-center rounded-full bg-peach text-xs font-extrabold" aria-label="Open account menu" aria-expanded={accountOpen}>{accountInitials}</button>{accountOpen && <div className="absolute right-0 top-11 z-50 w-72 overflow-hidden rounded-2xl border border-black/10 bg-white shadow-2xl"><div className="border-b border-black/5 p-4"><p className="text-xs font-extrabold text-ink">{accountName || settings.brand_name}</p><p className="mt-1 truncate text-xs font-bold text-black/35">{accountEmail || (mode === "demo" ? "Demo workspace" : "Account")}</p></div><div className="p-2"><Link href="/dashboard/settings" className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold text-black/55 hover:bg-canvas hover:text-ink"><Settings size={16} className="text-black/35" /> Account & brand settings</Link><Link href="/dashboard/usage" className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold text-black/55 hover:bg-canvas hover:text-ink"><CreditCard size={16} className="text-black/35" /> Billing & plan</Link><a href="mailto:hello@sellentum.com" className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold text-black/55 hover:bg-canvas hover:text-ink"><HelpCircle size={16} className="text-black/35" /> Contact support</a><button onClick={logout} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-bold text-red-600 hover:bg-red-50"><LogOut size={16} /> Log out</button></div></div>}</div></div>
         </header>
-        <main className="mx-auto max-w-[1500px] p-4 sm:p-7 lg:p-9">{children}</main>
+        <main className="mx-auto max-w-[1500px] p-4 sm:p-7 lg:p-9">{shouldForceOnboarding ? <LoadingState label="Taking you to store setup…" /> : children}</main>
       </div>
     </div>
   );
