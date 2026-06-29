@@ -1,6 +1,6 @@
 # Sellentum Progress Report
 
-Last updated: 2026-06-28
+Last updated: 2026-06-30
 
 Project: `sellentum.com`
 
@@ -17,7 +17,7 @@ Sellentum is no longer just a small MVP shell. The main SaaS product has been bu
 What is still missing is not “more random screens.” What is missing is **production proof**:
 
 - production Supabase schema/RLS verification,
-- working forgot/reset password flow,
+- production testing of the new forgot/reset password flow,
 - hiding private recommendation logic from public payloads,
 - one real end-to-end storefront widget test,
 - real analytics events from a real shopper journey,
@@ -72,7 +72,7 @@ Still needs:
 
 ### 3. Authentication
 
-Status: **Partially production-ready**
+Status: **Built, needs production email test**
 
 Done:
 
@@ -84,15 +84,19 @@ Done:
 - Login form no longer shows fake demo credentials.
 - Account settings page added.
 - Onboarding gate added.
+- Forgot password page added.
+- Reset password page added.
+- Login now links to the reset flow.
+- Reset emails route through `/auth/callback?next=/reset-password`.
 
 Still needs:
 
-- Forgot password flow.
-- Reset password page.
+- Send a real reset email from production.
+- Click the reset email and confirm it lands on Sellentum, not localhost.
+- Confirm the new password updates successfully.
 - Final branded auth email check.
-- Confirm auth redirects on production after every Supabase setting is correct.
 
-Next planned step after Supabase verification: **auth recovery polish**.
+Next planned app-side step: **public recommendation payload privacy**.
 
 ### 4. Business dashboard
 
@@ -332,7 +336,7 @@ These are the serious hardening stages already pushed:
 These are the things stopping us from honestly calling Sellentum production-ready:
 
 1. Production Supabase verification has not been completed.
-2. Forgot/reset password is not implemented yet.
+2. Forgot/reset password is implemented, but still needs a real production email test.
 3. Public finder payload still needs a privacy pass.
 4. No real storefront widget install has been proven yet.
 5. No full real production analytics journey has been captured yet.
@@ -353,14 +357,22 @@ I fix anything that fails.
 
 ### Step 2 — Fix auth recovery
 
-Owner: **Codex**
+Owner: **Codex + You**
 
-Build:
+Code status: **Done**
+
+Built:
 
 - forgot password,
 - reset password page,
 - correct Supabase redirect handling,
 - branded auth flow.
+
+Still needs from you:
+
+- request one reset email from production,
+- click the email link,
+- confirm the password updates and login works.
 
 ### Step 3 — Hide public recommendation metadata
 
@@ -403,7 +415,7 @@ The app can already demonstrate the core idea:
 
 > A merchant can manage products, build a guided product finder, embed it, and give shoppers deterministic recommendations with AI-generated explanations.
 
-But it is not fully production-ready until we verify Supabase, auth recovery, public payload privacy, real storefront install, real analytics, and real OpenAI behavior.
+But it is not fully production-ready until we verify Supabase, test auth recovery in production, complete public payload privacy, prove a real storefront install, capture real analytics, and verify real OpenAI behavior.
 
 The next immediate action is simple:
 
