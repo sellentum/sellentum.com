@@ -5,6 +5,7 @@ import { buildAdvisorRecoveryReport, type AdvisorRecoveryReport } from "@/lib/ad
 import { expandBenefitIntentTokens } from "./catalog-benefits";
 import type { ConversationalMatch, Product } from "@/lib/types";
 
+export type AdvisorExplanationProduct = Pick<Product, "id" | "name" | "price" | "category" | "description" | "features" | "tags">;
 export type AdvisorHistoryItem = { role: "user" | "assistant"; content: string };
 export type AdvisorResult = {
   assistantMessage: string;
@@ -83,7 +84,7 @@ function cosine(a: number[], b: number[]) {
   return dot / (Math.sqrt(aa) * Math.sqrt(bb) || 1);
 }
 
-function fallbackExplanation(product: Product, signals: string[]) {
+function fallbackExplanation(product: AdvisorExplanationProduct, signals: string[]) {
   const reason = signals.slice(0, 2).join(" and ");
   return reason ? `${product.name} stands out because it matches your preference for ${reason.toLowerCase()}.` : `${product.name} is the closest overall match to what you described.`;
 }
@@ -92,7 +93,25 @@ function productSearchText(product: Product) {
   return product.search_text || `${product.name}. ${product.category}. ${product.description}. ${product.features.join(", ")}. ${product.tags.join(", ")}. ${(product.buyer_needs || []).join(", ")}`;
 }
 
-export async function runAdvisorSearch({ query, products, history = [], semanticScoresByProductId, semanticSource }: { query: string; products: Product[]; history?: AdvisorHistoryItem[]; semanticScoresByProductId?: Record<string, number>; semanticSource?: "pgvector" }): Promise<AdvisorResult> {
+export async function runAdvisorSearch({
+  query,
+  products,
+  history = [],
+  semanticScoresByProductId,
+  semanticSource,
+  buildClarifyingOptions = clarifyingOptions,
+  getExplanationProduct,
+  getExplanationSignals,
+}: {
+  query: string;
+  products: Product[];
+  history?: AdvisorHistoryItem[];
+  semanticScoresByProductId?: Record<string, number>;
+  semanticSource?: "pgvector";
+  buildClarifyingOptions?: (products: Product[]) => string[];
+  getExplanationProduct?: (product: Product) => AdvisorExplanationProduct;
+  getExplanationSignals?: (signals: string[]) => string[];
+}): Promise<AdvisorResult> {
   const intentText = buildAdvisorIntentText(query, history);
   const queryTokens = extractAdvisorTokens(intentText);
   const maxBudget = extractBudget(intentText);
@@ -112,7 +131,7 @@ export async function runAdvisorSearch({ query, products, history = [], semantic
   }
 
   if (shouldClarify(query, queryTokens, maxBudget, history)) {
-    const options = clarifyingOptions(eligible);
+    const options = buildClarifyingOptions(eligible);
     const optionCopy = options.length ? ` You can answer with one of these: ${options.slice(0, 3).join(", ")}.` : "";
     const intent = { maxBudget, terms: queryTokens };
     return {
@@ -156,7 +175,7 @@ export async function runAdvisorSearch({ query, products, history = [], semantic
     return { product, score: lexicalScore + semanticScore + budgetBonus, matchedSignals };
   }).sort((a, b) => b.score - a.score || a.product.price - b.product.price || a.product.name.localeCompare(b.product.name)).slice(0, 3);
 
-  let explanations = ranked.map((match) => fallbackExplanation(match.product, match.matchedSignals));
+  let explanations = ranked.map((match) => fallbackExplanation(getExplanationProduct ? getExplanationProduct(match.product) : match.product, getExplanationSignals ? getExplanationSignals(match.matchedSignals) : match.matchedSignals));
   let assistantMessage = `I found ${ranked.length} strong match${ranked.length === 1 ? "" : "es"} based on ${ranked[0].matchedSignals.slice(0, 2).join(" and ") || "the needs you described"}.`;
 
   if (openai) {
@@ -167,7 +186,10 @@ export async function runAdvisorSearch({ query, products, history = [], semantic
       max_tokens: 350,
       messages: [
         { role: "system", content: "You are a concise ecommerce product advisor. The products were selected deterministically. Return JSON only: {assistantMessage, explanations:[{id,text}]}. Use only supplied facts. Explain each match in one warm sentence. Do not invent specifications or say AI." },
-        { role: "user", content: JSON.stringify({ query: intentText, latestMessage: query, history, matches: ranked.map(({ product, matchedSignals }) => ({ id: product.id, name: product.name, price: product.price, category: product.category, description: product.description, features: product.features, tags: product.tags, matchedSignals })) }) },
+        { role: "user", content: JSON.stringify({ query: intentText, latestMessage: query, history, matches: ranked.map(({ product, matchedSignals }) => {
+          const explanationProduct = getExplanationProduct ? getExplanationProduct(product) : product;
+          return { id: product.id, name: explanationProduct.name, price: explanationProduct.price, category: explanationProduct.category, description: explanationProduct.description, features: explanationProduct.features, tags: explanationProduct.tags, matchedSignals: getExplanationSignals ? getExplanationSignals(matchedSignals) : matchedSignals };
+        }) }) },
       ],
     });
     const generated = JSON.parse(completion.choices[0]?.message.content || "{}");

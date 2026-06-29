@@ -3,6 +3,7 @@ import { z } from "zod";
 import { resolveFinderAnswerPath } from "@/lib/finder-flow";
 import { runFinderRecommendations } from "@/lib/finder-engine";
 import { normalizeWidgetSettings } from "@/lib/public-experience";
+import { toPublicProduct } from "@/lib/public-payload";
 import { handlePublicError, publicRateLimit, readBoundedJson } from "@/lib/public-runtime-guard";
 import type { RecommendationRecovery } from "@/lib/recommendation-recovery";
 import { getSemanticProductCandidates } from "@/lib/semantic-candidates";
@@ -76,26 +77,6 @@ function toPublicFinderAnswer(answer: FinderAnswer): PublicFinderAnswer {
     question: answer.question,
     optionId: answer.optionId,
     answer: answer.answer,
-  };
-}
-
-function toPublicProduct(product: Product): Product {
-  return {
-    id: product.id,
-    user_id: "public",
-    name: product.name,
-    price: product.price,
-    image_url: product.image_url,
-    category: product.category,
-    description: product.description,
-    features: product.features || [],
-    tags: [],
-    product_url: product.product_url,
-    active: true,
-    search_text: "",
-    buyer_needs: [],
-    created_at: "",
-    updated_at: "",
   };
 }
 

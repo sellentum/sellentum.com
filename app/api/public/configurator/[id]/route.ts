@@ -3,6 +3,7 @@ import { z } from "zod";
 import { validateConfiguratorSelection } from "@/lib/configurator-engine";
 import { buildConfiguratorSelectionGuidance } from "@/lib/configurator-guidance";
 import { normalizeWidgetSettings } from "@/lib/public-experience";
+import { linkedPublicConfiguratorProducts, toPublicConfigurator, toPublicConfiguratorValidationResult } from "@/lib/public-payload";
 import { handlePublicError, publicRateLimit, readBoundedJson } from "@/lib/public-runtime-guard";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Configurator, ConfiguratorStep, Product } from "@/lib/types";
@@ -75,8 +76,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   ]);
 
   return NextResponse.json({
-    configurator,
-    products: productsResult.data || [],
+    configurator: toPublicConfigurator(configurator),
+    products: linkedPublicConfiguratorProducts(configurator, (productsResult.data || []) as Product[]),
     settings: normalizeWidgetSettings(settingsResult.data),
   });
 }
@@ -105,8 +106,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     if (productsError) return NextResponse.json({ error: "Could not load configurator products." }, { status: 500 });
 
     const result = validateConfiguratorSelection(configurator, (products || []) as Product[], parsed.data.selectedIds);
+    const publicResult = toPublicConfiguratorValidationResult(result);
     return NextResponse.json({
-      ...result,
+      ...publicResult,
       compatibility_guidance: buildConfiguratorSelectionGuidance(configurator, parsed.data.selectedIds),
       experience: { id: configurator.id, name: configurator.name, slug: configurator.slug },
     }, { status: result.valid ? 200 : 400 });

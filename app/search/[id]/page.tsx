@@ -207,7 +207,7 @@ export default function PublicSearchPage({ params }: { params: Promise<{ id: str
                 <p className="mt-3 text-xs leading-4 text-black/45">{result.explanation}</p>
                 <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-black/5"><div className="h-full rounded-full bg-lime" style={{ width: `${Math.min(100, result.score / maxScore * 100)}%` }} /></div>
                 <div className="mt-3 flex flex-wrap gap-1.5">
-                  {result.matchedSignals.slice(0, 5).map((signal) => <span key={`${result.product.id}-${signal.term}-${signal.source}`} className="rounded-full bg-black/[0.04] px-2 py-1 text-xs font-bold text-black/40">{signal.term} · +{signal.contribution.toFixed(1)}</span>)}
+                  {result.matchedSignals.slice(0, 5).map((signal) => <span key={`${result.product.id}-${signal.term}-${signal.source}`} className="rounded-full bg-black/[0.04] px-2 py-1 text-xs font-bold text-black/40">{signal.term}{data.source === "local" ? ` · +${signal.contribution.toFixed(1)}` : ""}</span>)}
                 </div>
                 <div className="mt-4 max-w-md">
                   <RecommendationFeedback productId={result.product.id} productName={result.product.name} compact onFeedback={(feedback, feedbackReason) => track("recommendation_feedback", result.product.id, { query: report.query, terms: report.intent.terms, feedback, feedback_reason: feedbackReason, rank: index + 1, score: result.score, confidence: result.confidence, matched_signals: result.matchedSignals.map((signal) => signal.term), product_name: result.product.name, explanation_present: Boolean(result.explanation), feedback_surface: "search_result_card" })} />

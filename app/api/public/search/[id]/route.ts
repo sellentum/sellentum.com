@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { normalizeWidgetSettings } from "@/lib/public-experience";
+import { toPublicSearchReport } from "@/lib/public-payload";
 import { handlePublicError, publicRateLimit, readBoundedJson } from "@/lib/public-runtime-guard";
 import { explainSearchReport } from "@/lib/search-explanations";
 import { runSemanticProductSearch } from "@/lib/search-engine";
@@ -87,11 +88,12 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
 
     if (productsError) return NextResponse.json({ error: "Could not load search catalog." }, { status: 500 });
 
-    const report = await explainSearchReport(runSemanticProductSearch({
+    const rawReport = runSemanticProductSearch({
       query: parsed.data.query,
       products: (products || []) as Product[],
       limit: parsed.data.limit || 6,
-    }));
+    });
+    const report = await explainSearchReport(toPublicSearchReport(rawReport));
 
     return NextResponse.json({
       ...report,

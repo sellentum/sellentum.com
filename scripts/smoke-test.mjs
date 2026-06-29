@@ -73,7 +73,10 @@ function assertPublishedAdvisorRuntime() {
   const recovery = readFileSync("lib/advisor-recovery.ts", "utf8");
   const candidates = readFileSync("lib/semantic-candidates.ts", "utf8");
   const page = readFileSync("app/assistant/[id]/page.tsx", "utf8");
+  const publicPayload = readFileSync("lib/public-payload.ts", "utf8");
   assert(route.includes("runAdvisorSearch"), "Published advisor route should use the shared advisor engine");
+  assert(route.includes("toPublicAdvisorResult"), "Published advisor route should sanitize advisor matches before returning them publicly");
+  assert(route.includes("publicClarifyingOptions"), "Published advisor route should use public-safe clarifying options");
   assert(route.includes("getSemanticProductCandidates"), "Published advisor route should try pgvector semantic candidates");
   assert(route.includes("catalog_scan"), "Published advisor route should fall back to catalog scanning");
   assert(engine.includes("semanticScoresByProductId"), "Advisor engine should accept externally retrieved semantic scores");
@@ -85,7 +88,9 @@ function assertPublishedAdvisorRuntime() {
   assert(page.includes("clarifyingOptions"), "Assistant page should render clarifying quick replies");
   assert(page.includes("advisor_status"), "Assistant analytics should distinguish completed recommendation searches from clarification turns");
   assert(engine.includes("buildAdvisorRecoveryReport"), "Advisor engine should attach deterministic recovery metadata");
+  assert(engine.includes("getExplanationProduct"), "Advisor engine should support public-safe explanation product facts");
   assert(recovery.includes("buildAdvisorRecoveryReport"), "Advisor recovery helper should expose a reusable recovery builder");
+  assert(publicPayload.includes("toPublicProduct"), "Public payload helper should expose reusable product redaction");
   assert(recovery.includes("relax-budget"), "Advisor recovery should suggest budget relaxation when constraints block products");
   assert(page.includes("recovery_status"), "Assistant analytics should record advisor recovery status");
   assert(page.includes("Closest catalog options"), "Assistant page should show near-miss products when matching is weak or blocked");
@@ -149,6 +154,9 @@ function assertPublishedConfiguratorRuntime() {
   const page = readFileSync("app/configurator/[id]/page.tsx", "utf8");
   const guidance = readFileSync("lib/configurator-guidance.ts", "utf8");
   assert(route.includes("validateConfiguratorSelection"), "Published configurator route should validate bundles server-side");
+  assert(route.includes("toPublicConfigurator"), "Published configurator route should sanitize configurator config before returning it publicly");
+  assert(route.includes("linkedPublicConfiguratorProducts"), "Published configurator route should only return linked public products");
+  assert(route.includes("toPublicConfiguratorValidationResult"), "Published configurator route should sanitize validation results before returning them publicly");
   assert(route.includes("buildConfiguratorSelectionGuidance"), "Published configurator route should return compatibility guidance");
   assert(route.includes("selectedIds"), "Published configurator route should accept selected option IDs");
   assert(page.includes("/api/public/configurator/"), "Configurator page should call the published configurator runtime outside demo mode");
@@ -1065,6 +1073,7 @@ function assertSemanticSearchWorkflow() {
   assert(route.includes("buildSearchRecoveryReport"), "Search service should return deterministic search recovery guidance");
   assert(publicRoute.includes("eq(\"published\", true)"), "Published search route should validate published finder context");
   assert(publicRoute.includes("runSemanticProductSearch"), "Published search route should use the shared semantic search engine");
+  assert(publicRoute.includes("toPublicSearchReport"), "Published search route should sanitize search results before returning them publicly");
   assert(publicRoute.includes("explainSearchReport"), "Published search route should generate grounded explanations after ranking");
   assert(publicRoute.includes("buildSearchRecoveryReport"), "Published search route should return deterministic search recovery guidance");
   assert(publicRoute.includes("explanation_source"), "Published search route should expose explanation source metadata");

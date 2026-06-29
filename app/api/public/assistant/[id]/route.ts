@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { buildAdvisorIntentText, extractBudget, runAdvisorSearch } from "@/lib/assistant-engine";
+import { publicClarifyingOptions, publicMatchedSignals, toPublicAdvisorResult } from "@/lib/public-payload";
 import { handlePublicError, publicRateLimit, readBoundedJson } from "@/lib/public-runtime-guard";
 import { getSemanticProductCandidates } from "@/lib/semantic-candidates";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -83,10 +84,22 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
       history: parsed.data.history || [],
       semanticScoresByProductId: semanticCandidates.source === "pgvector" ? semanticCandidates.similarities : undefined,
       semanticSource: semanticCandidates.source === "pgvector" ? "pgvector" : undefined,
+      buildClarifyingOptions: publicClarifyingOptions,
+      getExplanationSignals: (signals) => publicMatchedSignals(signals, parsed.data.query),
+      getExplanationProduct: (product) => ({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        category: product.category,
+        description: product.description,
+        features: product.features || [],
+        tags: [],
+      }),
     });
+    const publicResult = toPublicAdvisorResult(result, parsed.data.query, products);
 
     return NextResponse.json({
-      ...result,
+      ...publicResult,
       experience: { id: quiz.id, name: quiz.name, slug: quiz.slug },
       retrieval: { source: semanticCandidates.source === "pgvector" ? "pgvector" : "catalog_scan", candidate_count: products.length },
     });
