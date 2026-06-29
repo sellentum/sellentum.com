@@ -1,422 +1,547 @@
-# Sellentum Progress Report
+# Sellentum Project Progress Report
 
 Last updated: 2026-06-30
 
-Project: `sellentum.com`
+Project: **Sellentum**
 
-Repo: `https://github.com/sellentum/sellentum.com.git`
+Website: `https://sellentum.com`
 
-Current branch: `main`
+GitHub repo: `https://github.com/sellentum/sellentum.com.git`
 
-Current status: **early production hardening**
+Main goal:
 
-## Short answer
+> Build a serious SaaS product where an ecommerce business can upload products, create a guided product finder, embed it on their store, and help shoppers choose the right product using reliable recommendations plus AI-generated explanations.
 
-Sellentum is no longer just a small MVP shell. The main SaaS product has been built: landing page, login/signup, dashboard, product catalog, finder builder, configurator, widget, customer-facing experiences, analytics, and AI explanation paths.
+---
 
-What is still missing is not “more random screens.” What is missing is **production proof**:
+## 1. Simple current status
 
-- production Supabase schema/RLS verification,
-- production testing of the new forgot/reset password flow,
-- hiding private recommendation logic from public payloads,
-- one real end-to-end storefront widget test,
-- real analytics events from a real shopper journey,
-- OpenAI verification with a real catalog.
+Sellentum is now past the “basic MVP mockup” stage.
 
-My honest current estimate:
+The main product exists in code:
 
-| Area | Status |
-|---|---|
-| Core product build | **80–85% done** |
-| Production readiness | **45–55% done** |
-| Serious paid SaaS readiness | **35–45% done** |
-| Zoovu-like enterprise maturity | **Still far away** |
+- public marketing website,
+- signup/login/logout,
+- protected dashboard,
+- product catalog,
+- CSV upload,
+- quiz/finder builder,
+- customer-facing product finder,
+- AI explanation flow,
+- embeddable widget,
+- analytics tracking,
+- settings,
+- Supabase database structure,
+- Vercel deployment setup.
 
-The product idea is proven in code. The next job is proving it safely in production.
+However, it is **not yet a fully production-proven SaaS**.
 
-## What has been completed
+The next phase is about making sure the product is safe, reliable, tested in production, and simple enough for a real business owner to use without us sitting next to them.
 
-### 1. Brand and deployment foundation
+---
 
-Status: **Done**
+## 2. Honest progress estimate
 
-We changed the project from Findly to **Sellentum** and moved the repo to the new GitHub organization.
+These percentages are not “number of files completed.” They are a practical business/product estimate.
 
-Done:
+| Area | Current progress | Meaning |
+|---|---:|---|
+| Core app features | 80–85% | The main SaaS flow is built. |
+| Production readiness | 45–55% | Needs live Supabase, auth, widget, analytics and AI proof. |
+| Paid SaaS readiness | 35–45% | Needs polish, onboarding, reliability, support pages and real usage testing. |
+| Zoovu-level maturity | 10–15% | Zoovu is an enterprise platform; Sellentum is still early-stage. |
 
-- Brand renamed to Sellentum.
-- Git remote changed to `sellentum/sellentum.com`.
-- Vercel project connected.
+Important:
+
+Sellentum does **not** need to become Zoovu immediately. The realistic target is to become a serious, focused, smaller SaaS that proves the core guided-selling value very well.
+
+---
+
+## 3. Stage-by-stage progress
+
+### Stage 1 — Brand, repo and deployment foundation
+
+Status: **Completed**
+
+What was done:
+
+- Project renamed from Findly to **Sellentum**.
+- Local folder renamed to `sellentum`.
+- GitHub remote moved to `sellentum/sellentum.com`.
+- Main branch is connected to the new repo.
+- Vercel project is connected.
 - `sellentum.com` is live.
 - Production environment variables were added in Vercel.
-- Project folder renamed locally to `sellentum`.
 
-### 2. Landing page and public website
+What is left:
 
-Status: **Mostly done**
+- Keep checking future deployments after each important push.
 
-Done:
+---
 
-- SaaS-style landing page.
-- Product/platform pages.
+### Stage 2 — Public website / landing page
+
+Status: **Mostly completed**
+
+What was done:
+
+- Premium SaaS-style homepage.
+- Product positioning around AI product finding and guided selling.
+- Feature sections.
+- Use-case sections.
+- Pricing placeholder.
 - Resources page.
-- Industry/use-case pages.
-- Desktop-focused visual style.
-- B2B ecommerce positioning.
+- B2B ecommerce visual direction.
+- Desktop-first design, as requested.
 
-Still needs:
+What is left:
 
-- Remove remaining “MVP” language from some internal/product copy.
-- Add clearer pricing/early-access messaging.
-- Add basic help/support/contact content.
+- Improve final marketing copy.
+- Add stronger pricing/early-access message.
+- Add basic support/contact/legal pages before real launch.
+- Remove any remaining wording that makes the product feel like a temporary MVP.
 
-### 3. Authentication
+---
 
-Status: **Built, needs production email test**
+### Stage 3 — Authentication
 
-Done:
+Status: **Built, needs final production test**
+
+What was done:
 
 - Signup.
 - Login.
 - Logout.
 - Protected dashboard routes.
-- Supabase email confirmation redirect fixed away from localhost.
-- Login form no longer shows fake demo credentials.
-- Account settings page added.
-- Onboarding gate added.
-- Forgot password page added.
-- Reset password page added.
-- Login now links to the reset flow.
-- Reset emails route through `/auth/callback?next=/reset-password`.
+- Supabase email confirmation flow.
+- Localhost redirect issue was addressed.
+- Login screen fake demo credentials were removed.
+- Forgot password page was added.
+- Reset password page was added.
+- Login page now links to password recovery.
 
-Still needs:
+What is left:
 
-- Send a real reset email from production.
-- Click the reset email and confirm it lands on Sellentum, not localhost.
-- Confirm the new password updates successfully.
-- Final branded auth email check.
+- Test signup on the real production domain.
+- Test email confirmation from production.
+- Test forgot password from production.
+- Confirm reset email opens `sellentum.com`, not `localhost`.
+- Confirm new password login works.
+- Confirm emails look like they are from Sellentum, not a generic Supabase identity.
 
-Next planned app-side step: **public recommendation payload privacy**.
+---
 
-### 4. Business dashboard
+### Stage 4 — Business dashboard
 
 Status: **Built, but needs simplification**
 
-Done:
+What was done:
 
 - Dashboard home.
-- Product management.
-- Product CRUD.
-- CSV import.
-- Brand/widget settings.
-- Analytics.
-- Launch tools.
-- Data Contract Center.
-- AI Readiness Center.
-- Production Verification Center.
-- Widget Studio.
-- Storefront Install Scanner.
+- Product management area.
+- Finder/quiz management.
+- Widget/settings areas.
+- Analytics area.
+- Launch/testing tools.
+- Production/developer verification tools.
 
-The dashboard is powerful, but it has become too broad for a first-time merchant. Later we need a simpler “starter mode.”
+What is left:
 
-### 5. Product catalog
+- Make dashboard easier for a normal business owner.
+- Hide or simplify advanced/internal tools.
+- Create a clearer “start here” onboarding path.
+- Reduce the feeling that the user is entering a developer control panel.
+
+---
+
+### Stage 5 — Product catalog
 
 Status: **Built**
 
-Done:
+What was done:
 
 - Add products manually.
-- Upload CSV.
-- Edit/delete products.
-- Store name, price, image URL, category, description, features, tags, product URL, active status.
-- Extra discovery fields like buyer needs and semantic search text.
-- Catalog QA/intelligence checks.
+- Upload products using CSV.
+- View products.
+- Edit products.
+- Delete products.
+- Store product name, price, image URL, category, description, features, tags and product URL.
+- Product fields were expanded for better recommendation quality.
 
-Still needs:
+What is left:
 
-- Better batch import behavior.
-- Cleaner row-level import summary.
-- Stronger warnings for missing images/product URLs.
+- Test with a real merchant catalog.
+- Improve CSV import error messages.
+- Add clearer warnings for missing product images, URLs or descriptions.
+- Improve bulk catalog cleanup workflow.
 
-### 6. Finder / quiz builder
+---
+
+### Stage 6 — Quiz / guided-selling builder
 
 Status: **Built**
 
-Done:
+What was done:
 
 - Create product finder quizzes.
 - Add questions.
 - Add answer options.
-- Connect answers to tags/categories/features/budget.
-- Add answer weights.
-- Add branching logic.
-- Save/edit quizzes.
-- Publish finders.
-- Recommendation lab and QA checks.
+- Connect answers to tags, categories, features, budget and matching logic.
+- Add answer weighting.
+- Add basic branching logic.
+- Save and edit quizzes.
+- Publish quizzes.
+- Transaction-safe saves were added so a quiz is less likely to be half-saved.
 
-Production hardening already done:
+What is left:
 
-- Builder saves are now transactional in Supabase through RPCs.
-- This prevents half-saved quizzes/configurators.
+- Prove the Supabase save functions are installed in production.
+- Test builder with a real business use case.
+- Make builder UX easier and less technical.
+- Add better empty states and guidance.
 
-Still needs:
+---
 
-- Production Supabase proof that those RPCs exist and work.
+### Stage 7 — Customer-facing product finder
 
-### 7. Customer-facing product finder
+Status: **Built, needs privacy hardening**
+
+What was done:
+
+- Customer-facing finder page.
+- Shopper answers guided questions.
+- System returns 1–3 recommended products.
+- Product image, title, price and Buy Now button are shown.
+- AI-generated recommendation explanation is shown.
+- Fallback explanations exist if AI fails.
+- Buy button clicks can be tracked.
+
+What is left:
+
+- Hide private recommendation/rule metadata from public browser payloads.
+- Test one full production shopper journey.
+- Improve final shopper experience polish.
+
+---
+
+### Stage 8 — Recommendation engine
 
 Status: **Built**
 
-Done:
+What was done:
 
-- Public finder page.
-- Customer answers guided questions.
-- Returns 1–3 recommended products.
-- Product image/title/price/explanation/Buy Now CTA.
-- AI explanation after deterministic matching.
-- Fallback explanation if OpenAI fails.
-- No-result recovery guidance.
-- Buy click tracking.
+- Product selection is deterministic and rule-based.
+- Matching uses tags, category, budget, features and product data.
+- AI is used for explanation, not for choosing products.
+- This means recommendation selection is more reliable than a fully AI-only system.
 
-Still needs:
+What is left:
 
-- Hide private rule metadata from public config payloads.
-- Real production end-to-end widget test.
+- Complete the public payload privacy pass.
+- Test recommendation quality with real products.
+- Tune matching weights after real examples.
 
-### 8. Recommendation logic
+---
 
-Status: **Built**
-
-Done:
-
-- Rule-based product selection.
-- Tags, categories, features and budget matching.
-- Active product filtering.
-- Deterministic ranking.
-- AI explains only after products are already selected.
-
-This is important: **AI does not choose the products. Rules choose. AI explains.**
-
-Still needs:
-
-- Public payload privacy pass so customers cannot inspect private matching/rule metadata.
-
-### 9. AI features
+### Stage 9 — AI features
 
 Status: **Built, needs live proof**
 
-Done:
+What was done:
 
-- AI product explanation generation.
-- AI catalog enrichment path.
-- AI quiz generation path.
-- AI configurator generation path.
-- Safe fallback behavior when OpenAI is missing or fails.
-- Grounding/trust checks.
+- AI-generated recommendation explanations.
+- AI-supported product/catalog enrichment paths.
+- AI-supported quiz/configurator generation paths.
+- Safe fallback behavior if OpenAI is unavailable.
 
-Still needs:
+What is left:
 
-- Test with a real OpenAI key in production.
-- Test with a real merchant catalog.
-- Check cost/quality.
+- Test OpenAI behavior in production with a real key.
+- Test explanations with a real product catalog.
+- Check response quality.
+- Watch cost and latency.
 
-### 10. Configurator
+---
 
-Status: **Built**
+### Stage 10 — Embeddable widget
 
-Done:
+Status: **Built, needs real storefront test**
 
-- Visual configurator builder.
-- Configurator steps/options.
-- Product-linked options.
-- Price deltas.
-- Compatibility/incompatibility rules.
-- Public customer configurator.
-- Server-side validation.
-- Configurator QA tools.
+What was done:
 
-Still needs:
-
-- Real production test with real products.
-
-### 11. Embeddable widget
-
-Status: **Built, needs real storefront proof**
-
-Done:
-
-- Copy/paste JavaScript widget.
-- Modal iframe mode.
+- JavaScript embed snippet.
+- Modal widget mode.
 - Inline iframe mode.
-- Supports finder, advisor, search and configurator.
-- Canonical loader: `/api/widget.js`.
-- Compatibility loader: `/widget.js`.
-- Storefront install scanner.
-- Domain allowlist for widget analytics.
+- Public widget loader route.
+- Widget can load customer-facing finder experiences.
+- Domain checking/allowlist work has started.
 
-Still needs:
+What is left:
 
-- Install on a real or staging storefront page.
-- Run scanner against that page.
-- Complete a real shopper journey through the embed.
+- Install widget on a real or staging ecommerce page.
+- Complete one real customer journey through the widget.
+- Confirm widget views, quiz starts, completions, recommendations and buy clicks are tracked.
 
-### 12. Analytics
+---
 
-Status: **Built, needs real event proof**
+### Stage 11 — Analytics
 
-Done:
+Status: **Built, needs production event proof**
+
+What was done:
 
 - Widget views.
 - Quiz starts.
-- Completed quizzes.
-- Product recommendations.
-- Buy clicks.
+- Quiz completions.
+- Recommended products.
+- Buy button clicks.
 - Recommendation feedback.
 - Session/journey analytics.
-- Attribution tracking.
+- Server-side analytics routes were added so browser traffic does not write directly into Supabase.
 
-Important hardening done:
+What is left:
 
-- Browser analytics no longer write directly to Supabase.
-- Workspace analytics now go through a server route.
-- Public widget analytics go through a separate public API with domain checks.
+- Generate real production analytics events.
+- Confirm events appear correctly in Supabase/dashboard.
+- Confirm domain allowlist behavior is correct.
 
-Still needs:
+---
 
-- Confirm real production analytics events from an actual storefront session.
+### Stage 12 — Supabase backend
 
-### 13. Supabase backend
+Status: **Code prepared, production verification still needed**
 
-Status: **Code ready, production verification still needed**
+What was done in the project:
 
-Done in code:
+- Database tables planned and migration files added.
+- RLS policies prepared.
+- Products, quizzes, questions, answer options, recommendation rules, analytics events and widget settings are represented.
+- Transactional save functions were added for important builder saves.
+- Verification SQL files were created.
 
-- Supabase schema.
-- RLS policies.
-- Product/finder/configurator/analytics tables.
-- Transactional save RPCs.
-- Widget domain allowlist.
-- Shared rate-limit table/RPC.
-- Production verification SQL files.
+What is left:
 
-Still needs from you:
+- Run the Supabase SQL verification in the production Supabase project.
+- Confirm all required tables exist.
+- Confirm RLS is enabled where needed.
+- Confirm policies are correct.
+- Confirm RPC/functions exist.
+- Confirm rate limiting support exists.
 
-1. Open production Supabase SQL Editor.
-2. Apply any missing migrations, especially:
+This is one of the most important remaining steps.
 
-   `supabase/migrations/009_shared_rate_limits.sql`
+---
 
-3. Run:
+## 4. What is completed vs what is not completed
 
-   `supabase/verification/production_schema_check.sql`
+### Completed in code
 
-4. If every row passes, run:
+- Landing page.
+- Auth screens.
+- Dashboard shell.
+- Product catalog.
+- CSV import.
+- Product CRUD.
+- Quiz/finder builder.
+- Customer-facing finder.
+- Rule-based recommendations.
+- AI explanation support.
+- Widget embed support.
+- Basic analytics tracking.
+- Settings page.
+- Supabase schema/migrations.
+- Vercel deployment connection.
+- Brand rename to Sellentum.
+- Password reset flow.
 
-   `supabase/verification/rate_limit_runtime_probe.sql`
+### Not fully completed yet
 
-5. Then tell me whether all rows passed.
+- Production Supabase verification.
+- Production auth/email verification.
+- Public recommendation payload privacy.
+- Real storefront widget proof.
+- Real production analytics proof.
+- Real catalog recommendation testing.
+- Dashboard simplification.
+- Final SaaS polish.
+- Full billing.
+- Full legal/support pages.
 
-## Production hardening already completed
+---
 
-These are the serious hardening stages already pushed:
+## 5. Current blockers
 
-| Stage | Status | What changed |
-|---:|---|---|
-| 1 | Done | Dashboard navigation and widget loader cleaned up. |
-| 2 | Done | Demo/local telemetry no longer wrongly posts to public analytics API. |
-| 3 | Needs production proof | Transactional Supabase saves added for finder/configurator builders. |
-| 4 | Needs production proof | Widget domain allowlist added. |
-| 5 | Done | Public URLs/snippets now use stable global IDs instead of unsafe slugs. |
-| 6 | Done | Workspace analytics writes moved to server route. |
-| 7 | Needs production proof | Supabase-backed shared rate limiting added. |
-| 8 | In progress | Supabase verification packet and SQL checks added. |
+These are the main things preventing us from honestly saying “Sellentum is production-ready.”
 
-## Current blockers
+1. **Supabase production verification is not complete yet.**
 
-These are the things stopping us from honestly calling Sellentum production-ready:
+   We need to confirm the real production database has the correct schema, RLS policies and functions.
 
-1. Production Supabase verification has not been completed.
-2. Forgot/reset password is implemented, but still needs a real production email test.
-3. Public finder payload still needs a privacy pass.
-4. No real storefront widget install has been proven yet.
-5. No full real production analytics journey has been captured yet.
-6. OpenAI has not been tested against a real production catalog yet.
-7. Smoke test has a known dashboard overview expectation failure.
-8. Dashboard is still too broad for a first-time merchant.
+2. **Auth recovery needs a real production test.**
 
-## Next steps in order
+   The forgot/reset password flow exists, but we still need to confirm the real email link works on `sellentum.com`.
 
-Do not jump randomly. This is the correct order:
+3. **Public finder payload privacy still needs to be completed.**
+
+   Shoppers should not be able to inspect private matching rules or internal scoring data in the browser.
+
+4. **The widget has not been proven on a real storefront yet.**
+
+   The widget exists, but we need one real install/test.
+
+5. **Analytics have not been proven with a real customer journey yet.**
+
+   We need real widget view, start, completion, recommendation and buy click events.
+
+6. **AI has not been tested with a real production catalog yet.**
+
+   The AI paths exist, but we need to check quality, speed and cost with real data.
+
+7. **Dashboard is too broad for a first-time merchant.**
+
+   It works, but the experience needs to feel simpler and more guided.
+
+---
+
+## 6. Next work order
+
+We should follow this order instead of randomly picking tasks.
 
 ### Step 1 — Finish Supabase production verification
 
-Owner: **You + Codex**
+Owner: **User + Codex**
 
-You run the SQL checks in Supabase.
-I fix anything that fails.
+User needs to:
 
-### Step 2 — Fix auth recovery
+- open Supabase production project,
+- run the verification SQL,
+- share any failed rows or errors.
 
-Owner: **Codex + You**
+Codex will:
 
-Code status: **Done**
+- fix schema/RLS/function problems if anything fails,
+- update the report after verification.
 
-Built:
+---
 
-- forgot password,
-- reset password page,
-- correct Supabase redirect handling,
-- branded auth flow.
+### Step 2 — Test auth recovery in production
 
-Still needs from you:
+Owner: **User + Codex**
 
-- request one reset email from production,
-- click the email link,
-- confirm the password updates and login works.
+User needs to:
 
-### Step 3 — Hide public recommendation metadata
+- request a password reset from production,
+- click the email,
+- confirm it opens Sellentum,
+- set a new password,
+- log in successfully.
 
-Owner: **Codex**
+Codex will:
 
-Public APIs should show shoppers only what they need to see, not private matching logic.
+- fix redirect/email issues if the flow fails.
 
-### Step 4 — Run one real production proof session
+---
 
-Owner: **You + Codex**
-
-We need:
-
-- real product catalog,
-- one published finder,
-- widget installed on a real/staging storefront page,
-- customer journey completed,
-- analytics events confirmed.
-
-### Step 5 — Simplify merchant onboarding/dashboard
+### Step 3 — Hide private recommendation data from public payloads
 
 Owner: **Codex**
 
-Make the dashboard easier for a real business owner.
+Codex needs to:
 
-## What files matter now
+- sanitize public finder config responses,
+- sanitize public recommendation responses,
+- keep private rules server-side only,
+- verify finder still works after sanitizing data.
 
-Keep these markdown files:
+---
 
-- `README.md` — developer/setup instructions.
-- `SELLENTUM_PROGRESS_REPORT.md` — plain-English project status and next steps.
+### Step 4 — Prove the widget on a real page
 
-The older audit/roadmap/research/verification markdown files have been consolidated into this report or moved into SQL verification files.
+Owner: **User + Codex**
 
-## Bottom line
+User needs to provide:
 
-Sellentum has a strong product foundation now.
+- a real/staging ecommerce page where the widget can be installed,
+- or permission to create a simple test page.
 
-The app can already demonstrate the core idea:
+Codex will:
 
-> A merchant can manage products, build a guided product finder, embed it, and give shoppers deterministic recommendations with AI-generated explanations.
+- verify the embed loads,
+- run a full shopper journey,
+- confirm analytics events.
 
-But it is not fully production-ready until we verify Supabase, test auth recovery in production, complete public payload privacy, prove a real storefront install, capture real analytics, and verify real OpenAI behavior.
+---
 
-The next immediate action is simple:
+### Step 5 — Simplify the dashboard
 
-> Finish the Supabase production verification.
+Owner: **Codex**
+
+Codex needs to:
+
+- make onboarding clearer,
+- reduce clutter,
+- move advanced tools away from the first-time user path,
+- make the dashboard feel more like a polished SaaS product.
+
+---
+
+### Step 6 — Production polish
+
+Owner: **Codex + User**
+
+Needed before serious launch:
+
+- final copy polish,
+- support/contact/legal pages,
+- pricing/early-access messaging,
+- better loading and empty states,
+- real product demo data,
+- final deployment check.
+
+---
+
+## 7. What I need from you right now
+
+The most useful things you can provide next are:
+
+1. Supabase verification result.
+2. Confirmation that production signup/email confirmation works.
+3. Confirmation that production password reset works.
+4. A real or staging storefront page for widget testing.
+5. A real sample product catalog.
+
+If you give me those, I can keep moving the project from “built MVP” to “production-proven SaaS.”
+
+---
+
+## 8. Markdown files we are keeping
+
+Only these markdown files are needed now:
+
+- `README.md`
+  - setup and developer instructions,
+  - useful for future deployment and handoff.
+
+- `SELLENTUM_PROGRESS_REPORT.md`
+  - the plain-English project status,
+  - the single source of truth for progress and next steps.
+
+Older roadmap, audit, research and verification markdown files are no longer needed as separate documents. Their useful content has been consolidated into this report or moved into proper SQL/code files.
+
+---
+
+## 9. Bottom line
+
+Sellentum is in a strong position for an early SaaS product.
+
+The core idea is already represented in the app:
+
+> A merchant can manage products, create a guided product finder, embed it, and help shoppers choose products with deterministic recommendations and AI explanations.
+
+But the next milestone is not “add more pages.”
+
+The next milestone is:
+
+> Prove the existing product works safely and reliably in production.
+
+Once Supabase, auth, widget, analytics and AI are proven with real data, Sellentum will feel much closer to a serious SaaS rather than a development prototype.
