@@ -8,6 +8,44 @@ import { LoadingState } from "@/components/loading-state";
 import { buildDashboardCommandCenter } from "@/lib/dashboard-command-center";
 import { buildConversionPlaybook } from "@/lib/conversion-playbook";
 
+const operationsMap = [
+  { group: "Shopper intelligence", label: "Persona Studio", href: "/dashboard/personas" },
+  { group: "Shopper intelligence", label: "Audience Capture", href: "/dashboard/audience" },
+  { group: "Shopper intelligence", label: "Feedback Center", href: "/dashboard/feedback" },
+  { group: "Shopper intelligence", label: "Content Studio", href: "/dashboard/content" },
+  { group: "Shopper intelligence", label: "Merchandising Studio", href: "/dashboard/merchandising" },
+  { group: "Shopper intelligence", label: "Returns & Fit", href: "/dashboard/returns" },
+  { group: "Experience design", label: "Templates", href: "/dashboard/templates" },
+  { group: "Experience design", label: "Decision Graph", href: "/dashboard/decision-graph" },
+  { group: "Experience design", label: "Vocabulary Studio", href: "/dashboard/vocabulary" },
+  { group: "Experience design", label: "Flow Studio", href: "/dashboard/flow-studio" },
+  { group: "Experience design", label: "Advisor Studio", href: "/dashboard/advisor" },
+  { group: "Experience design", label: "Search Lab", href: "/dashboard/search" },
+  { group: "Trust and AI", label: "AI Trust Center", href: "/dashboard/trust-center" },
+  { group: "Trust and AI", label: "Grounding Center", href: "/dashboard/grounding" },
+  { group: "Trust and AI", label: "Knowledge Graph", href: "/dashboard/knowledge-graph" },
+  { group: "Trust and AI", label: "Data Contract", href: "/dashboard/data-contract" },
+  { group: "Trust and AI", label: "AI Readiness", href: "/dashboard/ai-readiness" },
+  { group: "Catalog operations", label: "Attribute Studio", href: "/dashboard/attributes" },
+  { group: "Catalog operations", label: "Catalog Pipeline", href: "/dashboard/catalog-pipeline" },
+  { group: "Catalog operations", label: "Availability Guard", href: "/dashboard/availability" },
+  { group: "Catalog operations", label: "Bundle Studio", href: "/dashboard/bundles" },
+  { group: "Catalog operations", label: "Compatibility Matrix", href: "/dashboard/compatibility" },
+  { group: "Launch operations", label: "Launch Channels", href: "/dashboard/channels" },
+  { group: "Launch operations", label: "Experience Registry", href: "/dashboard/experiences" },
+  { group: "Launch operations", label: "Widget Studio", href: "/dashboard/widget-studio" },
+  { group: "Launch operations", label: "API Center", href: "/dashboard/api-center" },
+  { group: "Launch operations", label: "Runtime Operations", href: "/dashboard/operations" },
+  { group: "Launch operations", label: "Production Verification", href: "/dashboard/production" },
+  { group: "Launch operations", label: "Syndication", href: "/dashboard/syndication" },
+  { group: "Launch operations", label: "Storefront QA Sandbox", href: "/dashboard/storefront-sandbox" },
+  { group: "Launch operations", label: "Install Scanner", href: "/dashboard/install-scanner" },
+  { group: "Launch operations", label: "Release Center", href: "/dashboard/release-center" },
+  { group: "Launch operations", label: "Workspace Snapshot", href: "/dashboard/workspace-snapshot" },
+  { group: "Optimization", label: "Experiments", href: "/dashboard/experiments" },
+  { group: "Optimization", label: "Usage Center", href: "/dashboard/usage" },
+];
+
 export default function DashboardOverview() {
   const { ready, products, quizzes, configurators, events, settings } = useStore();
   const commandCenter = useMemo(() => buildDashboardCommandCenter({ products, quizzes, configurators, events, settings }), [products, quizzes, configurators, events, settings]);
@@ -79,8 +117,26 @@ export default function DashboardOverview() {
             {!commandCenter.actions.length && <div className="rounded-xl border border-lime/40 bg-lime/10 p-4"><p className="flex items-center gap-2 text-xs font-extrabold text-moss"><Check size={14} /> No urgent launch actions</p><p className="mt-1 text-xs leading-4 text-black/40">Keep collecting sessions and rerun preflight before the next campaign.</p></div>}
           </div>
         </section>
-        <section className="rounded-2xl border border-black/[0.07] bg-ink p-6 text-white"><div className="flex items-center justify-between"><div><h2 className="text-sm font-extrabold">Experience mix</h2><p className="mt-1 text-xs text-white/35">Actual event mix across every embedded surface.</p></div><Sparkles className="text-lime" size={18} /></div><div className="mt-6 grid grid-cols-4 gap-2 text-center"><div className="rounded-xl bg-white/[.06] p-4"><p className="text-2xl font-extrabold">{commandCenter.experienceMix.finder}</p><p className="mt-1 text-xs text-white/35">Finder</p></div><div className="rounded-xl bg-white/[.06] p-4"><p className="text-2xl font-extrabold">{commandCenter.experienceMix.assistant}</p><p className="mt-1 text-xs text-white/35">Advisor</p></div><Link href="/dashboard/search" className="rounded-xl bg-white/[.06] p-4 transition hover:bg-white/[.1]"><p className="text-2xl font-extrabold">{commandCenter.experienceMix.search}</p><p className="mt-1 text-xs text-white/35">Search</p></Link><div className="rounded-xl bg-white/[.06] p-4"><p className="text-2xl font-extrabold">{commandCenter.experienceMix.configurator}</p><p className="mt-1 text-xs text-white/35">Config</p></div></div><div className="mt-5 grid grid-cols-3 gap-2 text-center"><div className="rounded-xl bg-white/[.06] p-3"><p className="text-lg font-extrabold">{commandCenter.catalogScore}%</p><p className="mt-1 text-xs text-white/35">Catalog</p></div><div className="rounded-xl bg-white/[.06] p-3"><p className="text-lg font-extrabold">{commandCenter.discoveryScore}</p><p className="mt-1 text-xs text-white/35">Gap score</p></div><div className="rounded-xl bg-white/[.06] p-3"><p className="text-lg font-extrabold">{commandCenter.summary.recommendationQaScore}%</p><p className="mt-1 text-xs text-white/35">QA</p></div></div><Link href="/dashboard/settings" className="mt-5 inline-flex items-center gap-2 text-xs font-extrabold text-lime">Choose embed experience <ChevronRight size={13} /></Link></section>
+        <section className="rounded-2xl border border-black/[0.07] bg-ink p-6 text-white"><div className="flex items-center justify-between"><div><h2 className="text-sm font-extrabold">Experience mix</h2><p className="mt-1 text-xs text-white/35">Actual event mix across every embedded surface.</p></div><Sparkles className="text-lime" size={18} /></div><div className="mt-6 grid grid-cols-4 gap-2 text-center"><div className="rounded-xl bg-white/[.06] p-4"><p className="text-2xl font-extrabold">{commandCenter.experienceMix.finder}</p><p className="mt-1 text-xs text-white/35">Finder</p></div><div className="rounded-xl bg-white/[.06] p-4"><p className="text-2xl font-extrabold">{commandCenter.experienceMix.assistant}</p><p className="mt-1 text-xs text-white/35">Advisor</p></div><Link href="/dashboard/search" className="rounded-xl bg-white/[.06] p-4 transition hover:bg-white/[.1]"><p className="text-2xl font-extrabold">{commandCenter.experienceMix.search}</p><p className="mt-1 text-xs text-white/35">Search</p></Link><div className="rounded-xl bg-white/[.06] p-4"><p className="text-2xl font-extrabold">{commandCenter.experienceMix.configurator}</p><p className="mt-1 text-xs text-white/35">Config</p></div></div><div className="mt-5 grid grid-cols-3 gap-2 text-center"><div className="rounded-xl bg-white/[.06] p-3"><p className="text-lg font-extrabold">{commandCenter.catalogScore}%</p><p className="mt-1 text-xs text-white/35">Catalog</p></div><div className="rounded-xl bg-white/[.06] p-3"><p className="text-lg font-extrabold">{commandCenter.discoveryScore}</p><p className="mt-1 text-xs text-white/35">Gap score</p></div><div className="rounded-xl bg-white/[.06] p-3"><p className="text-lg font-extrabold">{commandCenter.summary.recommendationQaScore}%</p><p className="mt-1 text-xs text-white/35">QA</p></div></div><div className="mt-5 grid gap-3 xl:grid-cols-2"><div className="rounded-2xl bg-white/[.06] p-4"><p className="text-xs font-extrabold text-lime">Shopper Persona Studio</p><p className="mt-1 text-xs leading-4 text-white/40">Turn real answer, search and buy-click signals into merchant-ready shopper segments.</p><Link href="/dashboard/personas" className="mt-3 inline-flex items-center gap-2 text-xs font-extrabold text-lime">Open Persona Studio <ChevronRight size={13} /></Link></div><div className="rounded-2xl bg-white/[.06] p-4"><p className="text-xs font-extrabold text-lime">Audience Capture</p><p className="mt-1 text-xs leading-4 text-white/40">Plan privacy-safe capture prompts and exports from anonymous shopper intent.</p><Link href="/dashboard/audience" className="mt-3 inline-flex items-center gap-2 text-xs font-extrabold text-lime">Open Audience Capture <ChevronRight size={13} /></Link></div></div><Link href="/dashboard/settings" className="mt-5 inline-flex items-center gap-2 text-xs font-extrabold text-lime">Choose embed experience <ChevronRight size={13} /></Link></section>
       </div>
+
+      <section className="mt-5 rounded-2xl border border-black/[0.07] bg-white p-5 sm:p-6">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h2 className="text-sm font-extrabold">Operations map</h2>
+            <p className="mt-1 max-w-2xl text-xs leading-5 text-black/35">A compact route map for the deeper studios, QA centers and launch tools. Use this after the basic product, finder and widget setup is underway.</p>
+          </div>
+          <span className="rounded-full bg-black/[0.04] px-3 py-1.5 text-xs font-extrabold uppercase text-black/35">{operationsMap.length} centers</span>
+        </div>
+        <div className="mt-5 grid gap-2 md:grid-cols-2 xl:grid-cols-4">
+          {operationsMap.map((item) => (
+            <Link key={item.href} href={item.href} className="group rounded-2xl border border-black/[0.06] bg-[#f8f8f4] p-3.5 transition hover:-translate-y-0.5 hover:bg-white hover:shadow-sm">
+              <span className="block text-xs font-extrabold uppercase tracking-wider text-black/30">{item.group}</span>
+              <span className="mt-1 flex items-center justify-between gap-3 text-xs font-extrabold text-ink">{item.label}<ChevronRight size={12} className="text-black/20 group-hover:text-moss" /></span>
+            </Link>
+          ))}
+        </div>
+      </section>
 
       <section className="mt-5 rounded-2xl border border-black/[0.07] bg-white p-5 sm:p-6">
         <div className="flex items-start justify-between gap-4">

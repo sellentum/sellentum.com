@@ -74,7 +74,7 @@ export default function FinderPage({ params }: { params: Promise<{ id: string }>
     const currentPathIndex = visitedStepIndexes.lastIndexOf(step);
     const currentPath = currentPathIndex >= 0 ? visitedStepIndexes.slice(0, currentPathIndex + 1) : [...visitedStepIndexes, step];
     const activeQuestionIds = new Set(currentPath.map((index) => data.quiz.questions[index]?.id).filter(Boolean));
-    const selectedAnswer: FinderAnswer = { questionId: question.id, question: question.title, optionId: option.id, answer: option.label, matchType: option.match_type, matchValue: option.match_value, weight: option.weight };
+    const selectedAnswer: FinderAnswer = { questionId: question.id, question: question.title, optionId: option.id, answer: option.label, matchType: option.match_type || "none", matchValue: option.match_value || "", weight: option.weight || 0 };
     const nextAnswers = [...answers.filter((a) => activeQuestionIds.has(a.questionId) && a.questionId !== question.id), selectedAnswer];
     const nextStep = getNextFinderQuestionIndex(data.quiz, step, option, currentPath);
     const questionPath = currentPath.map((index) => data.quiz.questions[index]?.id).filter(Boolean);

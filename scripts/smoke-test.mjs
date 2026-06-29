@@ -104,6 +104,10 @@ function assertPublishedFinderRuntime() {
   const schema = readFileSync("supabase/schema.sql", "utf8");
   assert(route.includes("runFinderRecommendations"), "Published finder route should use the server-side finder engine");
   assert(route.includes("resolveFinderAnswerPath"), "Published finder route should reconstruct the valid branched answer path from stored option rules");
+  assert(route.includes("toPublicQuiz"), "Published finder GET should sanitize question options before they reach the shopper browser");
+  assert(route.includes("toPublicRecommendation"), "Published finder POST should sanitize recommendation payloads before returning them to the shopper browser");
+  assert(route.includes("toPublicRecovery"), "Published finder POST should sanitize no-result recovery metadata before returning it publicly");
+  assert(route.includes("getExplanationProduct"), "Published finder POST should generate shopper explanations from public-safe product facts");
   assert(route.includes("products: []"), "Published finder GET should avoid exposing the full product catalog");
   assert(route.includes("recommendation_overrides: []"), "Published finder GET should strip merchant override details from the shopper payload");
   assert(route.includes("overrides: quiz.recommendation_overrides"), "Published finder POST should apply stored merchandising overrides server-side");
@@ -111,6 +115,7 @@ function assertPublishedFinderRuntime() {
   assert(route.includes("buildFinderBuyerProfile"), "Published finder POST should build a semantic buyer profile from selected answers");
   assert(route.includes("semanticScoresByProductId"), "Published finder recommendations should receive semantic scores as deterministic ranking signals");
   assert(route.includes("question_path"), "Published finder recommendations should report the validated branched question path");
+  assert(!route.includes("buyer_profile: buyerProfile"), "Published finder POST should not return the internal semantic buyer profile to the browser");
   assert(route.includes("recovery"), "Published finder recommendations should return deterministic no-result recovery metadata");
   assert(page.includes("/api/public/finder/"), "Finder page should call the published finder runtime outside demo mode");
   assert(page.includes("setRecovery"), "Finder page should render deterministic no-result recovery guidance");
@@ -1568,6 +1573,9 @@ async function assertDeterministicLogic() {
     .replace('from "./decision-graph";', 'from "./decision-graph.js";')
     .replace('from "./launch-channels";', 'from "./launch-channels.js";')
     .replace('from "./release-center";', 'from "./release-center.js";'));
+  const compiledPublicExperience = `${compileDir}/lib/public-experience.js`;
+  writeFileSync(compiledPublicExperience, readFileSync(compiledPublicExperience, "utf8")
+    .replace('from "./domain-allowlist";', 'from "./domain-allowlist.js";'));
 
   const demo = await import(pathToFileURL(`${compileDir}/lib/demo-data.js`));
   const utils = await import(pathToFileURL(`${compileDir}/lib/utils.js`));

@@ -144,6 +144,7 @@ What was done:
 - Analytics area.
 - Launch/testing tools.
 - Production/developer verification tools.
+- Dashboard overview now includes an Operations map so deeper studios and QA centers are reachable from one organized place.
 
 What is left:
 
@@ -204,7 +205,7 @@ What is left:
 
 ### Stage 7 — Customer-facing product finder
 
-Status: **Built, needs privacy hardening**
+Status: **Built, privacy hardened in code**
 
 What was done:
 
@@ -215,11 +216,13 @@ What was done:
 - AI-generated recommendation explanation is shown.
 - Fallback explanations exist if AI fails.
 - Buy button clicks can be tracked.
+- Public finder config responses no longer expose answer matching rules, rule values, answer weights or merchant override data.
+- Public recommendation responses now redact internal scores, buyer-profile text, internal tags and private recovery details.
 
 What is left:
 
-- Hide private recommendation/rule metadata from public browser payloads.
 - Test one full production shopper journey.
+- Verify the sanitized public payload on the deployed production URL.
 - Improve final shopper experience polish.
 
 ---
@@ -234,10 +237,10 @@ What was done:
 - Matching uses tags, category, budget, features and product data.
 - AI is used for explanation, not for choosing products.
 - This means recommendation selection is more reliable than a fully AI-only system.
+- Public AI explanations now use shopper-safe reasons and public product facts, while private matching logic stays server-side.
 
 What is left:
 
-- Complete the public payload privacy pass.
 - Test recommendation quality with real products.
 - Tune matching weights after real examples.
 
@@ -353,12 +356,13 @@ This is one of the most important remaining steps.
 - Vercel deployment connection.
 - Brand rename to Sellentum.
 - Password reset flow.
+- Public recommendation payload privacy pass.
 
 ### Not fully completed yet
 
 - Production Supabase verification.
 - Production auth/email verification.
-- Public recommendation payload privacy.
+- Production verification of sanitized public finder/widget payloads.
 - Real storefront widget proof.
 - Real production analytics proof.
 - Real catalog recommendation testing.
@@ -381,9 +385,9 @@ These are the main things preventing us from honestly saying “Sellentum is pro
 
    The forgot/reset password flow exists, but we still need to confirm the real email link works on `sellentum.com`.
 
-3. **Public finder payload privacy still needs to be completed.**
+3. **Sanitized public finder payloads still need production verification.**
 
-   Shoppers should not be able to inspect private matching rules or internal scoring data in the browser.
+   The code now redacts private matching rules and internal scoring data. We still need to inspect the deployed production responses after Vercel deploys this change.
 
 4. **The widget has not been proven on a real storefront yet.**
 
@@ -446,12 +450,19 @@ Codex will:
 
 Owner: **Codex**
 
-Codex needs to:
+Code status: **Done**
+
+What changed:
 
 - sanitize public finder config responses,
 - sanitize public recommendation responses,
 - keep private rules server-side only,
-- verify finder still works after sanitizing data.
+- generate shopper explanations from public-safe product facts.
+- full local smoke test now passes after fixing dashboard overview route coverage and smoke harness module resolution.
+
+What is still needed:
+
+- verify the deployed production response after Vercel finishes deploying this commit.
 
 ---
 

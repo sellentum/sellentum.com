@@ -1,9 +1,11 @@
 import "server-only";
 
-import { explainRecommendation, fallbackRecommendationExplanation } from "@/lib/recommendation-explanations";
+import { explainRecommendation, fallbackRecommendationExplanation, type ExplanationProduct } from "@/lib/recommendation-explanations";
 import { buildRecommendationRecoveryReport } from "@/lib/recommendation-recovery";
 import type { FinderAnswer, Product, Recommendation, RecommendationOverride } from "@/lib/types";
 import { auditProductMatches } from "@/lib/utils";
+
+type FinderRecommendationMatch = Pick<Recommendation, "product" | "score" | "matchedReasons">;
 
 export async function runFinderRecommendations({
   products,
@@ -12,6 +14,8 @@ export async function runFinderRecommendations({
   overrides = [],
   semanticScoresByProductId,
   semanticSource,
+  getExplanationReasons,
+  getExplanationProduct,
 }: {
   products: Product[];
   answers: FinderAnswer[];
@@ -19,6 +23,8 @@ export async function runFinderRecommendations({
   overrides?: RecommendationOverride[];
   semanticScoresByProductId?: Record<string, number>;
   semanticSource?: "pgvector";
+  getExplanationReasons?: (match: FinderRecommendationMatch) => string[];
+  getExplanationProduct?: (product: Product) => ExplanationProduct;
 }) {
   const audits = auditProductMatches(products, answers, { overrides, semanticScoresByProductId, semanticSource });
   const recommendations = audits
@@ -27,15 +33,17 @@ export async function runFinderRecommendations({
     .map(({ product, score, matchedReasons }) => ({ product, score, matchedReasons }));
   const recovery = buildRecommendationRecoveryReport({ products, answers, audits, recommendedCount: recommendations.length });
   const explained = await Promise.all(recommendations.map(async (match): Promise<Recommendation> => {
+    const explanationReasons = getExplanationReasons ? getExplanationReasons(match) : match.matchedReasons;
+    const explanationProduct = getExplanationProduct ? getExplanationProduct(match.product) : match.product;
     try {
       const { explanation } = await explainRecommendation({
-        product: match.product,
+        product: explanationProduct,
         answers,
-        matchedReasons: match.matchedReasons,
+        matchedReasons: explanationReasons,
       });
       return { ...match, explanation };
     } catch {
-      return { ...match, explanation: fallbackRecommendationExplanation(match.product, match.matchedReasons) };
+      return { ...match, explanation: fallbackRecommendationExplanation(explanationProduct, explanationReasons) };
     }
   }));
 
