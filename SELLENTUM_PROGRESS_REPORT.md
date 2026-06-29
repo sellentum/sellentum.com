@@ -133,7 +133,7 @@ What is left:
 
 ### Stage 4 — Business dashboard
 
-Status: **Built, but needs simplification**
+Status: **Built, first-launch path added**
 
 What was done:
 
@@ -145,13 +145,13 @@ What was done:
 - Launch/testing tools.
 - Production/developer verification tools.
 - Dashboard overview now includes an Operations map so deeper studios and QA centers are reachable from one organized place.
+- Dashboard overview now starts with a plain-English **First launch path**: set up brand, add products, publish finder, install widget, prove one shopper journey.
 
 What is left:
 
-- Make dashboard easier for a normal business owner.
-- Hide or simplify advanced/internal tools.
-- Create a clearer “start here” onboarding path.
-- Reduce the feeling that the user is entering a developer control panel.
+- Test the simplified dashboard with a real merchant workflow.
+- Continue polishing labels and empty states.
+- Keep advanced/internal tools visually secondary to the first-launch path.
 
 ---
 
@@ -357,6 +357,7 @@ This is one of the most important remaining steps.
 - Brand rename to Sellentum.
 - Password reset flow.
 - Public recommendation payload privacy pass.
+- Merchant-first dashboard launch path.
 
 ### Not fully completed yet
 
@@ -366,7 +367,7 @@ This is one of the most important remaining steps.
 - Real storefront widget proof.
 - Real production analytics proof.
 - Real catalog recommendation testing.
-- Dashboard simplification.
+- Dashboard simplification user testing and polish.
 - Final SaaS polish.
 - Full billing.
 - Full legal/support pages.
@@ -401,9 +402,9 @@ These are the main things preventing us from honestly saying “Sellentum is pro
 
    The AI paths exist, but we need to check quality, speed and cost with real data.
 
-7. **Dashboard is too broad for a first-time merchant.**
+7. **Dashboard still needs real merchant usability testing.**
 
-   It works, but the experience needs to feel simpler and more guided.
+   The first-launch path and Operations map are now in place, but we still need to test whether a real merchant can use the dashboard without guidance.
 
 ---
 
@@ -487,12 +488,19 @@ Codex will:
 
 Owner: **Codex**
 
-Codex needs to:
+Code status: **In progress**
 
-- make onboarding clearer,
-- reduce clutter,
-- move advanced tools away from the first-time user path,
-- make the dashboard feel more like a polished SaaS product.
+What changed:
+
+- added a reusable merchant launch-plan helper,
+- added a top-of-dashboard First launch path,
+- kept advanced tools available through an organized Operations map,
+- added smoke coverage so this simpler path remains part of the dashboard contract.
+
+What is still needed:
+
+- test the dashboard with a real product catalog and real merchant workflow,
+- keep simplifying copy and empty states after that test.
 
 ---
 

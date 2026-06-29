@@ -7,6 +7,7 @@ import { useStore } from "@/lib/store";
 import { LoadingState } from "@/components/loading-state";
 import { buildDashboardCommandCenter } from "@/lib/dashboard-command-center";
 import { buildConversionPlaybook } from "@/lib/conversion-playbook";
+import { buildMerchantLaunchPlan } from "@/lib/merchant-launch-plan";
 
 const operationsMap = [
   { group: "Shopper intelligence", label: "Persona Studio", href: "/dashboard/personas" },
@@ -50,6 +51,7 @@ export default function DashboardOverview() {
   const { ready, products, quizzes, configurators, events, settings } = useStore();
   const commandCenter = useMemo(() => buildDashboardCommandCenter({ products, quizzes, configurators, events, settings }), [products, quizzes, configurators, events, settings]);
   const conversionPlaybook = useMemo(() => buildConversionPlaybook({ products, quizzes, configurators, events, settings }), [products, quizzes, configurators, events, settings]);
+  const launchPlan = useMemo(() => buildMerchantLaunchPlan({ products, quizzes, events, settings }), [products, quizzes, events, settings]);
   if (!ready) return <LoadingState />;
   const { snapshot, trends } = commandCenter;
   const views = snapshot.widget_view;
@@ -76,6 +78,37 @@ export default function DashboardOverview() {
           <Link href="/dashboard/launch" className="btn-primary self-start"><Rocket size={15} className="text-lime" /> Launch checklist</Link>
         </div>
       </div>
+
+      <section className="mt-8 overflow-hidden rounded-[28px] border border-black/[0.07] bg-ink text-white shadow-sm">
+        <div className="grid xl:grid-cols-[0.85fr_1.15fr]">
+          <div className="relative p-6 sm:p-7">
+            <div className="dot-grid absolute inset-0 opacity-10" />
+            <div className="relative">
+              <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-xs font-extrabold uppercase tracking-[.16em] text-lime">First launch path</span>
+              <h2 className="display mt-5 text-4xl leading-none">{launchPlan.headline}</h2>
+              <p className="mt-3 max-w-md text-sm leading-6 text-white/50">{launchPlan.summary}</p>
+              <div className="mt-6 rounded-2xl bg-white/[0.06] p-4">
+                <div className="flex items-center justify-between text-xs font-extrabold uppercase tracking-wider text-white/35"><span>Launch progress</span><span>{launchPlan.completedCount}/{launchPlan.totalCount}</span></div>
+                <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-lime" style={{ width: `${launchPlan.progressPercent}%` }} /></div>
+              </div>
+              <Link href={launchPlan.currentStep.href} className="mt-6 inline-flex items-center gap-2 rounded-full bg-lime px-5 py-3 text-xs font-extrabold text-ink transition hover:-translate-y-0.5">{launchPlan.currentStep.cta}<ArrowRight size={13} /></Link>
+            </div>
+          </div>
+          <div className="grid gap-3 bg-white p-4 text-ink sm:p-5 xl:grid-cols-5">
+            {launchPlan.steps.map((step, index) => (
+              <Link key={step.id} href={step.href} className={`rounded-2xl border p-4 transition hover:-translate-y-0.5 ${step.status === "done" ? "border-lime/50 bg-lime/15" : step.status === "current" ? "border-ink bg-canvas shadow-sm" : "border-black/[0.06] bg-white text-black/45"}`}>
+                <div className="flex items-center justify-between gap-3">
+                  <span className={`grid h-7 w-7 place-items-center rounded-full text-xs font-extrabold ${step.status === "done" ? "bg-lime text-ink" : step.status === "current" ? "bg-ink text-lime" : "bg-black/[0.05] text-black/35"}`}>{step.status === "done" ? <Check size={13} /> : index + 1}</span>
+                  <span className="rounded-full bg-white px-2 py-1 text-xs font-extrabold uppercase text-black/30">{step.status}</span>
+                </div>
+                <h3 className="mt-4 text-sm font-extrabold leading-5">{step.title}</h3>
+                <p className="mt-2 text-xs leading-4 text-black/45">{step.detail}</p>
+                <p className="mt-3 rounded-xl bg-white px-3 py-2 text-xs font-bold leading-4 text-black/35">{step.evidence}</p>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
 
       <div className="mt-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {metricCards.map((metric) => {
