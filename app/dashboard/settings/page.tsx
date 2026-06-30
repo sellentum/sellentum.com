@@ -12,6 +12,13 @@ import { buildWidgetInstallReport, buildWidgetSnippet, widgetPathForExperience, 
 const swatches = ["#22352a", "#2d4cbe", "#7c3aed", "#be3a2d", "#111827", "#d25f28"];
 type EditableWidgetSettingKey = Exclude<keyof WidgetSettings, "allowed_domains">;
 
+const widgetProofChecks = [
+  "Install the snippet on one public HTTPS staging or product page.",
+  "Run Storefront Install Scanner and resolve critical blockers.",
+  "Complete one shopper journey through the widget and click Buy Now once.",
+  "Confirm Analytics receives widget_view, quiz_start, quiz_complete, product_recommended and buy_click.",
+];
+
 export default function SettingsPage() {
   const { ready, settings, quizzes, configurators, events, saveSettings, resetDemo, mode } = useStore();
   const [draft, setDraft] = useState<WidgetSettings>(settings);
@@ -77,6 +84,18 @@ export default function SettingsPage() {
               <span className="mt-3 inline-flex items-center gap-1 text-xs font-extrabold text-moss">Open <ArrowRight size={10} /></span>
             </Link>
           ))}
+          <div className="rounded-2xl border border-black/[0.07] bg-[#f8f8f4] p-4 xl:col-span-5">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-sm font-extrabold text-ink">Widget proof checklist</p>
+                <p className="mt-1 text-xs font-bold leading-5 text-black/40">Use this before calling the embed production-proven.</p>
+              </div>
+              <Link href="/dashboard/install-scanner" className="shrink-0 rounded-full bg-white px-3 py-2 text-xs font-extrabold text-moss">Open scanner</Link>
+            </div>
+            <div className="mt-4 grid gap-2 xl:grid-cols-2">
+              {widgetProofChecks.map((item) => <p key={item} className="flex gap-2 text-xs font-bold leading-5 text-black/50"><Check size={13} className="mt-1 shrink-0 text-moss" />{item}</p>)}
+            </div>
+          </div>
         </div>
       </div>
     </section>

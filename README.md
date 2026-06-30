@@ -76,7 +76,7 @@ For the current human-readable project status, open [`SELLENTUM_PROGRESS_REPORT.
 - Published configurator runtime that revalidates final bundles server-side before review/buy
 - Configurator compatibility guidance that explains blocked options, conflicting choices and safe alternatives
 - Shared public branding layer so finder, advisor, semantic search and configurator embeds all inherit merchant brand name, primary colour, widget title, welcome message and CTA copy consistently
-- Copyable JavaScript widget that opens a finder, advisor, semantic search or configurator in a lazy-loaded modal iframe or direct inline iframe, with first-install guidance, published-experience safeguards, install QA checks and launch handoff packets for generated snippets
+- Copyable JavaScript widget that opens a finder, advisor, semantic search or configurator in a lazy-loaded modal iframe or direct inline iframe, with first-install guidance, published-experience safeguards, install QA checks, widget proof checklist and launch handoff packets for generated snippets
 - Public runtime guardrails with bounded JSON bodies, shared rate-limit responses and sanitized analytics metadata for embedded finder, advisor, search, configurator and event APIs
 - Analytics for sessions, journey replay, first-run proof guidance, real period-over-period trends, funnel diagnosis, views, starts, completions, recommendations, buy clicks, selected answers, search/advisor themes, matched intent signals, product demand and zero-party opportunity suggestions
 - Launch analytics proof that checks the five critical storefront events, scores session-level evidence and exports a copyable QA proof packet

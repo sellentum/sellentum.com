@@ -478,6 +478,7 @@ function assertLaunchStudioWorkflow() {
   assert(settings.includes("buildWidgetInstallReport"), "Settings should expose widget install readiness diagnostics");
   assert(settings.includes("Analytics labels"), "Settings should let merchants label widget source, campaign and placement analytics");
   assert(settings.includes("First widget install path") && settings.includes("Do not paste the widget until install QA is ready"), "Settings should guide merchants through a safe first widget install path");
+  assert(settings.includes("Widget proof checklist") && settings.includes("Storefront Install Scanner") && settings.includes("widget_view, quiz_start, quiz_complete, product_recommended and buy_click"), "Settings should bridge snippet copy to storefront proof and analytics evidence");
   assert(settings.includes("disabled={!installReport.canInstall}") && settings.includes("Locked"), "Settings should lock snippet copying until install QA is ready");
   assert(!settings.includes("|| quizzes[0]") && !settings.includes("|| configurators[0]"), "Settings should not generate storefront snippets from draft fallback experiences");
   assert(widgetSnippet.includes("data-mode=\"${config.mode}\""), "Widget snippet helper should include the selected embed mode");

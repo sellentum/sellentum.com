@@ -377,6 +377,7 @@ What was completed:
 - Storefront demo page.
 - Widget install scanner.
 - Storefront QA guidance.
+- Latest completed interval: Brand & Embed now includes a **Widget proof checklist** that connects snippet copy to staging install, scanner proof and the five required analytics events.
 
 What still needs to be proven:
 
