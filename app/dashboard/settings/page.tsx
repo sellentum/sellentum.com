@@ -1,7 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { AlertTriangle, Check, Clipboard, Code2, ExternalLink, LoaderCircle, RotateCcw, Save, Sparkles } from "lucide-react";
+import { AlertTriangle, ArrowRight, Check, Clipboard, Code2, ExternalLink, Globe2, LoaderCircle, RotateCcw, Save, ShieldCheck, Sparkles } from "lucide-react";
 import { LoadingState } from "@/components/loading-state";
 import { formatAllowedDomains, normalizeAllowedDomains } from "@/lib/domain-allowlist";
 import { useStore } from "@/lib/store";
@@ -12,7 +13,7 @@ const swatches = ["#22352a", "#2d4cbe", "#7c3aed", "#be3a2d", "#111827", "#d25f2
 type EditableWidgetSettingKey = Exclude<keyof WidgetSettings, "allowed_domains">;
 
 export default function SettingsPage() {
-  const { ready, settings, quizzes, configurators, saveSettings, resetDemo, mode } = useStore();
+  const { ready, settings, quizzes, configurators, events, saveSettings, resetDemo, mode } = useStore();
   const [draft, setDraft] = useState<WidgetSettings>(settings);
   const [embedType, setEmbedType] = useState<WidgetEmbedExperience>("finder");
   const [embedMode, setEmbedMode] = useState<WidgetEmbedMode>("modal");
@@ -25,8 +26,8 @@ export default function SettingsPage() {
   const [embedPlacement, setEmbedPlacement] = useState("site-wide");
   const [allowedDomainsText, setAllowedDomainsText] = useState("");
   useEffect(() => { setDraft(settings); setAllowedDomainsText(formatAllowedDomains(settings.allowed_domains)); setOrigin(window.location.origin); }, [settings]);
-  const publishedQuiz = quizzes.find((q) => q.published) || quizzes[0];
-  const publishedConfigurator = configurators.find((configurator) => configurator.published) || configurators[0];
+  const publishedQuiz = quizzes.find((q) => q.published);
+  const publishedConfigurator = configurators.find((configurator) => configurator.published);
   const embedId = embedType === "configurator" ? publishedConfigurator?.id : publishedQuiz?.id;
   const embedPath = widgetPathForExperience(embedType);
   const embedPlaceholder = widgetPlaceholderForExperience(embedType);
@@ -36,12 +37,49 @@ export default function SettingsPage() {
   const snippetConfig = useMemo(() => ({ origin, experience: embedType, mode: embedMode, id: embedId || embedPlaceholder, color: draft.primary_color, label: embedLabel, position: embedPosition, source: embedSource, campaign: embedCampaign, placement: embedPlacement }), [origin, embedType, embedMode, embedId, embedPlaceholder, draft.primary_color, embedLabel, embedPosition, embedSource, embedCampaign, embedPlacement]);
   const snippet = useMemo(() => buildWidgetSnippet(snippetConfig), [snippetConfig]);
   const installReport = useMemo(() => buildWidgetInstallReport({ ...snippetConfig, id: embedId }), [snippetConfig, embedId]);
+  const brandReady = Boolean(draft.brand_name.trim() && draft.button_text.trim() && draft.widget_title.trim() && /^#[0-9a-f]{6}$/i.test(draft.primary_color));
+  const attributionReady = Boolean(embedSource.trim() && embedCampaign.trim() && embedPlacement.trim());
+  const widgetViewCaptured = events.some((event) => event.event_type === "widget_view");
+  const firstInstallSteps = [
+    { title: "Brand the widget", detail: "Set the brand name, colour, title and button copy shoppers will see.", done: brandReady, href: "/dashboard/settings" },
+    { title: "Publish an experience", detail: "Only published finders or configurators should be installed on a storefront.", done: Boolean(embedId), href: embedType === "configurator" ? "/dashboard/configurators" : "/dashboard/quizzes" },
+    { title: "Label the placement", detail: "Source, campaign and placement labels make Analytics useful after launch.", done: attributionReady, href: "/dashboard/settings" },
+    { title: "Copy the safe snippet", detail: "The snippet is safe to paste only after install QA shows Ready.", done: installReport.canInstall, href: "/dashboard/settings" },
+    { title: "Prove one widget view", detail: "Open the installed page and confirm Analytics receives widget_view.", done: widgetViewCaptured, href: "/dashboard/analytics" },
+  ];
   const update = (key: EditableWidgetSettingKey, value: string) => setDraft((current) => ({ ...current, [key]: value }));
   async function save() { setSaving(true); await saveSettings({ ...draft, allowed_domains: normalizedAllowedDomains }); setSaving(false); setSaved(true); setTimeout(() => setSaved(false), 1800); }
-  async function copy() { await navigator.clipboard.writeText(snippet); setCopied(true); setTimeout(() => setCopied(false), 1800); }
+  async function copy() { if (!installReport.canInstall) return; await navigator.clipboard.writeText(snippet); setCopied(true); setTimeout(() => setCopied(false), 1800); }
   if (!ready) return <LoadingState label="Loading brand settings…" />;
   return <div className="animate-rise">
     <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><p className="eyebrow text-moss">Customise & launch</p><h1 className="display mt-2 text-4xl sm:text-5xl">Brand & embed</h1><p className="mt-2 text-sm text-black/45">Make the experience yours, then add it to any storefront.</p></div><button onClick={save} disabled={saving} className="btn-primary self-start">{saving ? <LoaderCircle size={15} className="animate-spin" /> : saved ? <Check size={15} /> : <Save size={15} />}{saved ? "Changes saved" : "Save changes"}</button></div>
+    <section className="mt-8 overflow-hidden rounded-[28px] border border-black/[0.07] bg-white shadow-sm">
+      <div className="grid xl:grid-cols-[0.82fr_1.18fr]">
+        <div className="bg-ink p-6 text-white">
+          <p className="eyebrow text-lime">First widget install path</p>
+          <h2 className="mt-4 text-3xl font-extrabold tracking-[-.05em]">{installReport.canInstall ? "Your widget snippet is ready to copy." : "Do not paste the widget until install QA is ready."}</h2>
+          <p className="mt-3 max-w-xl text-sm leading-6 text-white/50">Use this path before touching a live storefront theme. It keeps the embed tied to a published experience, labelled for Analytics, and ready for a controlled proof run.</p>
+          <div className="mt-5 flex flex-wrap gap-2">
+            <Link href={embedType === "configurator" ? "/dashboard/configurators" : "/dashboard/quizzes"} className="inline-flex items-center gap-2 rounded-full bg-lime px-5 py-3 text-xs font-extrabold text-ink"><Sparkles size={14} /> Publish experience</Link>
+            <Link href="/dashboard/storefront-sandbox" className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-5 py-3 text-xs font-extrabold text-white"><Globe2 size={14} /> Test snippet</Link>
+            <Link href="/dashboard/install-scanner" className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-5 py-3 text-xs font-extrabold text-white"><ShieldCheck size={14} /> Scan install</Link>
+          </div>
+        </div>
+        <div className="grid gap-3 p-5 xl:grid-cols-5">
+          {firstInstallSteps.map((step, index) => (
+            <Link key={step.title} href={step.href} className={`rounded-2xl border p-4 transition hover:-translate-y-0.5 ${step.done ? "border-lime/50 bg-lime/15" : "border-black/[0.07] bg-[#f8f8f4]"}`}>
+              <div className="flex items-center justify-between gap-3">
+                <span className={`grid h-8 w-8 place-items-center rounded-xl text-xs font-extrabold ${step.done ? "bg-lime text-ink" : "bg-white text-black/35"}`}>{step.done ? <Check size={14} /> : index + 1}</span>
+                <span className={`rounded-full px-2 py-1 text-xs font-extrabold uppercase ${step.done ? "bg-white text-moss" : "bg-white text-black/30"}`}>{step.done ? "Done" : "Next"}</span>
+              </div>
+              <h3 className="mt-4 text-sm font-extrabold leading-5 text-ink">{step.title}</h3>
+              <p className="mt-2 text-xs font-bold leading-5 text-black/45">{step.detail}</p>
+              <span className="mt-3 inline-flex items-center gap-1 text-xs font-extrabold text-moss">Open <ArrowRight size={10} /></span>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </section>
     <div className="mt-8 grid gap-5 xl:grid-cols-[1fr_.85fr]">
       <div className="space-y-5">
         <section className="rounded-2xl border border-black/[0.07] bg-white p-5 sm:p-7"><div><h2 className="text-sm font-extrabold">Brand identity</h2><p className="mt-1 text-xs text-black/35">Shown inside your product finder and widget launcher.</p></div><div className="mt-6 grid gap-5"><div><label className="label">Brand name</label><input className="field" value={draft.brand_name} onChange={(e) => update("brand_name", e.target.value)} /></div><div><label className="label">Primary colour</label><div className="flex flex-wrap items-center gap-2">{swatches.map((color) => <button key={color} onClick={() => update("primary_color", color)} style={{ background: color }} className={`grid h-9 w-9 place-items-center rounded-full border-2 border-white shadow-sm ring-offset-2 ${draft.primary_color === color ? "ring-2 ring-ink" : ""}`} aria-label={`Set colour ${color}`}>{draft.primary_color === color && <Check size={14} className="text-white" />}</button>)}<label className="flex items-center gap-2 rounded-full border border-black/10 bg-canvas p-1 pr-3 text-xs font-bold"><input type="color" value={draft.primary_color} onChange={(e) => update("primary_color", e.target.value)} className="h-7 w-7 cursor-pointer rounded-full border-0 bg-transparent" /> Custom</label></div></div></div></section>
@@ -49,7 +87,7 @@ export default function SettingsPage() {
       </div>
       <div className="space-y-5">
         <section className="rounded-2xl border border-black/[0.07] bg-white p-5 sm:p-7"><div className="flex items-center justify-between"><div><h2 className="text-sm font-extrabold">Live preview</h2><p className="mt-1 text-xs text-black/35">What shoppers will see on your storefront.</p></div><span className="rounded-full bg-lime/35 px-2 py-1 text-xs font-extrabold text-moss">Interactive look</span></div><div className="relative mt-5 h-[340px] overflow-hidden rounded-2xl border border-black/10 bg-[#eceee9]"><div className="absolute left-0 right-0 top-0 flex h-11 items-center gap-1.5 border-b border-black/[0.06] bg-white px-3"><i className="h-2 w-2 rounded-full bg-red-300" /><i className="h-2 w-2 rounded-full bg-yellow-300" /><i className="h-2 w-2 rounded-full bg-green-300" /><div className="mx-auto h-4 w-32 rounded-full bg-black/5" /></div><div className="dot-grid absolute inset-x-0 bottom-0 top-11 opacity-40" /><div className="absolute left-6 top-20 h-3 w-32 rounded bg-black/10" /><div className="absolute left-6 top-28 h-2 w-48 rounded bg-black/5" /><div className="absolute left-6 top-32 h-2 w-40 rounded bg-black/5" /><button className={`absolute bottom-4 ${draft.launcher_position === "bottom-right" ? "right-4" : "left-4"} flex items-center gap-2 rounded-full px-4 py-3 text-xs font-extrabold text-white shadow-xl`} style={{ background: draft.primary_color }}><Sparkles size={14} />{draft.button_text}</button><div className="absolute left-1/2 top-[58%] w-56 -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-white p-4 text-center shadow-xl"><span className="mx-auto grid h-8 w-8 place-items-center rounded-xl text-white" style={{ background: draft.primary_color }}><Sparkles size={13} /></span><p className="mt-3 text-xs font-extrabold">{draft.widget_title}</p><p className="mt-1 text-xs leading-3 text-black/40">{draft.welcome_message}</p></div></div></section>
-        <section className="overflow-hidden rounded-2xl border border-black/[0.07] bg-ink text-white"><div className="flex items-start justify-between p-5 sm:p-6"><div><h2 className="flex items-center gap-2 text-sm font-extrabold"><Code2 size={16} className="text-lime" /> Install your widget</h2><p className="mt-1 text-xs text-white/40">Paste this before your site’s closing &lt;/body&gt; tag.</p></div><button onClick={copy} className="flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-2 text-xs font-extrabold hover:bg-white/15">{copied ? <Check size={12} className="text-lime" /> : <Clipboard size={12} />}{copied ? "Copied" : "Copy"}</button></div><pre className="overflow-x-auto border-y border-white/10 bg-black/20 p-5 text-xs leading-5 text-lime/80"><code>{snippet}</code></pre><div className="flex items-center justify-between p-4 text-xs text-white/35"><span>Works on any HTML storefront</span>{embedId && <a href={`/${embedPath}/${embedId}`} target="_blank" className="flex items-center gap-1 font-bold text-lime">Open {embedType} <ExternalLink size={10} /></a>}</div></section>
+        <section className="overflow-hidden rounded-2xl border border-black/[0.07] bg-ink text-white"><div className="flex items-start justify-between p-5 sm:p-6"><div><h2 className="flex items-center gap-2 text-sm font-extrabold"><Code2 size={16} className="text-lime" /> Install your widget</h2><p className="mt-1 text-xs text-white/40">{installReport.canInstall ? "Paste this before your site’s closing </body> tag." : "Publish an experience first; this snippet is still using a placeholder ID."}</p></div><button onClick={copy} disabled={!installReport.canInstall} className="flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-2 text-xs font-extrabold hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-45">{copied ? <Check size={12} className="text-lime" /> : <Clipboard size={12} />}{copied ? "Copied" : installReport.canInstall ? "Copy" : "Locked"}</button></div><pre className="overflow-x-auto border-y border-white/10 bg-black/20 p-5 text-xs leading-5 text-lime/80"><code>{snippet}</code></pre><div className="flex items-center justify-between p-4 text-xs text-white/35"><span>{installReport.canInstall ? "Works on any HTML storefront" : "Not ready for storefront paste yet"}</span>{embedId && <a href={`/${embedPath}/${embedId}`} target="_blank" className="flex items-center gap-1 font-bold text-lime">Open {embedType} <ExternalLink size={10} /></a>}</div></section>
         <section className="rounded-2xl border border-black/[0.07] bg-white p-5">
           <div className="flex items-center justify-between gap-4">
             <div><h2 className="text-xs font-extrabold">Embed QA checklist</h2><p className="mt-1 text-xs text-black/35">Make sure the snippet is install-ready before it goes into a storefront theme.</p></div>

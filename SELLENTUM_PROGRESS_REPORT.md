@@ -384,6 +384,8 @@ What is done:
 - Snippet can be copied from the dashboard.
 - Storefront demo/testing pages exist.
 - Widget analytics are connected.
+- Brand & embed now shows a first-widget install path before storefront copy/paste.
+- Snippet copying is locked until install QA has a published experience ID instead of a placeholder or draft fallback.
 
 What still needs proof:
 
@@ -439,6 +441,7 @@ What is done:
 - Widget title setting.
 - Welcome message setting.
 - Shared branding for public finder/widget surfaces.
+- Safe first-install guidance for widget snippets.
 
 What still needs improvement:
 
@@ -602,6 +605,7 @@ Latest completed Codex intervals:
 - Separated the sidebar language into core launch workflow, after-launch tools and advanced tools.
 - Added plain-English production proof lanes so the Production Verification Center explains what is proven, what needs evidence and who owns the next step.
 - Added a first-run Analytics proof guide so empty analytics screens tell merchants how to produce the first widget/session/buy-click evidence.
+- Added a first-widget install path in Brand & embed, and prevented draft experiences from being copied as storefront-ready snippets.
 
 I should continue in this order:
 
