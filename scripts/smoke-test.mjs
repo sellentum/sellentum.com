@@ -806,7 +806,9 @@ function assertProductionVerificationWorkflow() {
   const readme = readFileSync("README.md", "utf8");
   const marketing = readFileSync("lib/marketing-pages.ts", "utf8");
   assert(helper.includes("buildProductionVerificationReport"), "Production Verification helper should expose a reusable report builder");
+  assert(helper.includes("ProductionProofLane") && helper.includes("buildPlainEnglishProof"), "Production Verification helper should expose reusable plain-English proof lanes");
   assert(helper.includes("Sellentum Production Verification packet"), "Production Verification should generate a copyable packet");
+  assert(helper.includes("Plain-English production proof"), "Production Verification packet should summarize human-readable proof lanes");
   assert(helper.includes("Production is not complete until the deployed Vercel URL passes typecheck, lint, build and smoke"), "Production Verification should document the deployed smoke boundary");
   assert(helper.includes("deterministic product selection remains"), "Production Verification should preserve deterministic AI boundaries");
   assert(helper.includes("productionSupabaseRepair") && helper.includes("production_repair_widget_rate_limits.sql"), "Production Verification helper should expose the focused Supabase repair path");
@@ -816,6 +818,8 @@ function assertProductionVerificationWorkflow() {
   assert(helper.includes("productionAuthProofSteps") && helper.includes("buildProductionAuthProofPacket"), "Production Verification helper should expose a reusable auth proof evidence packet");
   assert(page.includes("Production Verification Center"), "Production Verification page should expose the dashboard title");
   assert(page.includes("Copy verification packet"), "Production Verification page should let merchants copy the packet");
+  assert(page.includes("Plain-English production status") && page.includes("What is actually proven"), "Production Verification page should show a human-readable proof summary");
+  assert(page.includes("report.plainEnglishProof.map") && page.includes("Open launch queue"), "Production Verification page should render proof lanes with a route back to the launch queue");
   assert(page.includes("Backend proof reference") && page.includes("Fallback use only"), "Production Verification page should treat Supabase repair as a backend proof reference, not the current next task");
   assert(page.includes("Copy repair steps"), "Production Verification page should let founders copy the Supabase repair workflow");
   assert(page.includes("Copy repair SQL") && page.includes("copyRepairSql"), "Production Verification page should let founders copy paste-ready Supabase repair SQL");
@@ -2154,6 +2158,8 @@ async function assertDeterministicLogic() {
   assert(productionVerificationReport.packet.includes("Sellentum Production Verification packet") && productionVerificationReport.packet.includes("deployed Vercel URL passes typecheck, lint, build and smoke"), "Expected Production Verification to generate a deployed-smoke packet");
   assert(productionVerificationReport.packet.includes("production_repair_widget_rate_limits.sql") && productionVerificationReport.packet.includes("production_schema_check.sql"), "Expected Production Verification packet to include Supabase repair and schema/RLS SQL artifacts");
   assert(productionVerificationReport.packet.includes("Production auth proof") && productionVerificationReport.packet.includes("https://www.sellentum.com/auth/callback"), "Expected Production Verification packet to include auth redirect proof steps");
+  assert(productionVerificationReport.plainEnglishProof.some((proof) => proof.id === "auth-email-proof" && proof.status === "needs-proof"), "Expected Production Verification to keep production auth email proof visible as a manual proof lane");
+  assert(productionVerificationReport.packet.includes("Plain-English production proof") && productionVerificationReport.packet.includes("Signup and password emails"), "Expected Production Verification packet to include plain-English proof lanes");
   assert(productionVerificationReport.artifacts.some((artifact) => artifact.command === "npm run build") && productionVerificationReport.actions.length, "Expected Production Verification to include verification commands and action queue");
   assert(productionVerificationReport.artifacts.some((artifact) => artifact.id === "supabase-repair-pack" && artifact.path === "supabase/verification/production_repair_widget_rate_limits.sql"), "Expected Production Verification artifacts to include the focused Supabase repair pack");
   assert(productionVerification.productionSupabaseRepair.sql.includes("create table if not exists public.rate_limit_buckets") && productionVerification.productionSupabaseRepair.sql.includes("allowed_domains"), "Expected Production Verification to expose paste-ready Supabase repair SQL");

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { AlertTriangle, ArrowRight, CheckCircle2, Clipboard, Code2, ExternalLink, Gauge, Globe2, LockKeyhole, MonitorCheck, Rocket, ShieldCheck, TerminalSquare, Wrench } from "lucide-react";
 import { LoadingState } from "@/components/loading-state";
-import { buildProductionAuthProofPacket, buildProductionVerificationReport, productionAuthChecklist, productionAuthProofSteps, productionSupabaseRepair, type ProductionActionPriority, type ProductionCheckStatus, type ProductionVerificationStatus } from "@/lib/production-verification";
+import { buildProductionAuthProofPacket, buildProductionVerificationReport, productionAuthChecklist, productionAuthProofSteps, productionSupabaseRepair, type ProductionActionPriority, type ProductionCheckStatus, type ProductionProofStatus, type ProductionVerificationStatus } from "@/lib/production-verification";
 import { useStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
@@ -25,6 +25,18 @@ const priorityTone: Record<ProductionActionPriority, string> = {
   high: "bg-amber-50 text-amber-700",
   medium: "bg-lime/35 text-moss",
   low: "bg-black/[0.04] text-black/35",
+};
+
+const proofTone: Record<ProductionProofStatus, string> = {
+  proven: "border-lime/50 bg-lime/15 text-moss",
+  "needs-proof": "border-amber-200 bg-amber-50 text-amber-700",
+  blocked: "border-red-100 bg-red-50 text-red-700",
+};
+
+const proofBadge: Record<ProductionProofStatus, string> = {
+  proven: "Proven",
+  "needs-proof": "Needs proof",
+  blocked: "Blocked",
 };
 
 function CheckIcon({ status }: { status: ProductionCheckStatus }) {
@@ -149,6 +161,33 @@ export default function ProductionVerificationPage() {
             const MetricIcon = Icon as typeof Globe2;
             return <div key={String(label)} className="rounded-2xl bg-white/[0.06] p-4"><MetricIcon size={15} className="text-lime" /><p className="mt-5 text-2xl font-extrabold">{String(value)}</p><p className="mt-1 text-xs font-bold uppercase tracking-wider text-white/45">{String(label)}</p></div>;
           })}
+        </div>
+      </section>
+
+      <section className="mt-6 rounded-[28px] border border-black/[0.07] bg-white p-6">
+        <div className="flex items-start justify-between gap-8">
+          <div className="max-w-4xl">
+            <p className="text-xs font-extrabold uppercase tracking-[0.22em] text-moss">Plain-English production status</p>
+            <h2 className="mt-3 text-2xl font-extrabold tracking-[-.04em] text-ink">What is actually proven, and what still needs evidence?</h2>
+            <p className="mt-3 text-sm leading-6 text-black/55">This separates shipped code from real launch proof. Green means the evidence exists, amber means someone still needs to test or capture proof, and red means the launch path is blocked.</p>
+          </div>
+          <Link href="/dashboard" className="inline-flex shrink-0 items-center gap-2 rounded-full bg-ink px-5 py-3 text-xs font-extrabold text-white">Open launch queue <ArrowRight size={13} className="text-lime" /></Link>
+        </div>
+        <div className="mt-5 grid gap-3 xl:grid-cols-3">
+          {report.plainEnglishProof.map((proof) => (
+            <Link key={proof.id} href={proof.href} className={`rounded-2xl border p-4 transition hover:-translate-y-0.5 ${proofTone[proof.status]}`}>
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <span className="rounded-full bg-white px-2.5 py-1 text-xs font-extrabold uppercase text-black/35">{proof.owner}</span>
+                  <h3 className="mt-4 text-sm font-extrabold leading-5 text-ink">{proof.title}</h3>
+                </div>
+                <span className="rounded-full bg-white px-2.5 py-1 text-xs font-extrabold uppercase text-black/45">{proofBadge[proof.status]}</span>
+              </div>
+              <p className="mt-3 text-xs font-bold leading-5 text-black/50">{proof.meaning}</p>
+              <p className="mt-3 rounded-xl bg-white px-3 py-2 text-xs font-bold leading-5 text-black/40">{proof.evidence}</p>
+              <p className="mt-3 text-xs font-extrabold leading-5 text-moss">Next: {proof.nextStep}</p>
+            </Link>
+          ))}
         </div>
       </section>
 

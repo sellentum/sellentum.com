@@ -9,6 +9,8 @@ export type ProductionVerificationStatus = "verified" | "review" | "blocked";
 export type ProductionCheckStatus = "pass" | "warn" | "fail";
 export type ProductionActionPriority = "critical" | "high" | "medium" | "low";
 export type ProductionArea = "deployment" | "runtime" | "storefront" | "analytics" | "trust" | "handoff";
+export type ProductionProofStatus = "proven" | "needs-proof" | "blocked";
+export type ProductionProofOwner = "Founder" | "Sellentum" | "Founder + Sellentum";
 
 export type ProductionCheck = {
   id: string;
@@ -53,6 +55,17 @@ export type ProductionAction = {
   label: string;
 };
 
+export type ProductionProofLane = {
+  id: string;
+  title: string;
+  status: ProductionProofStatus;
+  owner: ProductionProofOwner;
+  meaning: string;
+  evidence: string;
+  nextStep: string;
+  href: string;
+};
+
 export type ProductionVerificationReport = {
   status: ProductionVerificationStatus;
   score: number;
@@ -74,6 +87,7 @@ export type ProductionVerificationReport = {
   artifacts: ProductionArtifact[];
   desktopQa: DesktopQaScenario[];
   requiredRoutes: Array<{ route: string; purpose: string; owner: "Marketing" | "Dashboard" | "Runtime" | "API" }>;
+  plainEnglishProof: ProductionProofLane[];
   actions: ProductionAction[];
   packet: string;
 };
@@ -545,6 +559,109 @@ function buildActions(checks: ProductionCheck[]): ProductionAction[] {
   return actions.sort((a, b) => rank[a.priority] - rank[b.priority] || a.title.localeCompare(b.title)).slice(0, 7);
 }
 
+function proofStatusFromChecks(checks: ProductionCheck[]): ProductionProofStatus {
+  if (checks.some((item) => item.status === "fail")) return "blocked";
+  if (checks.some((item) => item.status === "warn")) return "needs-proof";
+  return "proven";
+}
+
+function proofLabel(status: ProductionProofStatus) {
+  if (status === "proven") return "PROVEN";
+  if (status === "blocked") return "BLOCKED";
+  return "NEEDS PROOF";
+}
+
+function buildPlainEnglishProof({
+  checks,
+  mode,
+  products,
+  quizzes,
+  events,
+}: {
+  checks: ProductionCheck[];
+  mode: "demo" | "supabase";
+  products: Product[];
+  quizzes: Quiz[];
+  events: AnalyticsEvent[];
+}): ProductionProofLane[] {
+  const checkById = new Map(checks.map((item) => [item.id, item]));
+  const activeProducts = products.filter((product) => product.active);
+  const publishedFinders = quizzes.filter((quiz) => quiz.published);
+  const eventCoverage = requiredEventTypes.filter((eventType) => hasEvent(events, eventType));
+  const widgetViews = events.filter((event) => event.event_type === "widget_view").length;
+  const completions = events.filter((event) => event.event_type === "quiz_complete").length;
+  const recommendations = events.filter((event) => event.event_type === "product_recommended").length;
+  const buyClicks = events.filter((event) => event.event_type === "buy_click").length;
+  const deploymentStatus = proofStatusFromChecks(["deployment-origin", "runtime-ops", "route-contract"].map((id) => checkById.get(id)).filter(Boolean) as ProductionCheck[]);
+  const backendStatus: ProductionProofStatus = mode === "supabase" ? "proven" : "needs-proof";
+  const catalogStatus: ProductionProofStatus = activeProducts.length >= 2 && publishedFinders.length ? "proven" : activeProducts.length ? "needs-proof" : "blocked";
+  const storefrontStatus: ProductionProofStatus = widgetViews > 0 ? "proven" : publishedFinders.length ? "needs-proof" : "blocked";
+  const analyticsStatus: ProductionProofStatus = eventCoverage.length === requiredEventTypes.length && hasSession(events) ? "proven" : eventCoverage.length >= 3 ? "needs-proof" : "blocked";
+
+  return [
+    {
+      id: "deployment-runtime",
+      title: "Live app and runtime",
+      status: deploymentStatus,
+      owner: "Sellentum",
+      meaning: "The deployed website, widget script and public runtime APIs are reachable and protected by release checks.",
+      evidence: ["deployment-origin", "runtime-ops", "route-contract"].map((id) => checkById.get(id)?.evidence).filter(Boolean).join(" · "),
+      nextStep: deploymentStatus === "proven" ? "Keep running production verification after every deployment." : "Rerun production verification after Vercel finishes deploying.",
+      href: "/dashboard/operations",
+    },
+    {
+      id: "backend-database",
+      title: "Backend database and RLS",
+      status: backendStatus,
+      owner: "Sellentum",
+      meaning: "Production must use Supabase persistence, not local demo storage.",
+      evidence: mode === "supabase" ? "Supabase mode is active for this workspace." : "Demo mode is active in this browser session.",
+      nextStep: mode === "supabase" ? "Keep npm run verify:supabase-schema passing after every schema change." : "Connect Supabase and verify schema/RLS before inviting merchants.",
+      href: "/dashboard/data-contract",
+    },
+    {
+      id: "auth-email-proof",
+      title: "Signup and password emails",
+      status: "needs-proof",
+      owner: "Founder",
+      meaning: "The app routes exist, but email verification and password reset must be manually tested from a real inbox.",
+      evidence: `Expected callback is ${productionAuthChecklist.appUrl}${productionAuthChecklist.callbackPath}; no production auth proof has been captured inside the app yet.`,
+      nextStep: "Create a fresh production account, click the email links and confirm none open localhost.",
+      href: "/dashboard/production",
+    },
+    {
+      id: "catalog-finder-proof",
+      title: "Real catalog and first finder",
+      status: catalogStatus,
+      owner: "Founder + Sellentum",
+      meaning: "The core product promise needs real products and one published deterministic finder.",
+      evidence: `${activeProducts.length} active product${activeProducts.length === 1 ? "" : "s"} · ${publishedFinders.length} published finder${publishedFinders.length === 1 ? "" : "s"}.`,
+      nextStep: catalogStatus === "proven" ? "Test multiple shopper paths and keep the finder launch brief with the release evidence." : "Upload the real CSV, then build and publish the first finder.",
+      href: activeProducts.length >= 2 ? "/dashboard/quizzes" : "/dashboard/products",
+    },
+    {
+      id: "storefront-widget-proof",
+      title: "Storefront widget proof",
+      status: storefrontStatus,
+      owner: "Founder + Sellentum",
+      meaning: "Sellentum is only production-proven when the widget loads from an ecommerce page, not only inside the dashboard.",
+      evidence: widgetViews ? `${widgetViews} widget view${widgetViews === 1 ? "" : "s"} captured.` : "No widget_view event captured yet.",
+      nextStep: storefrontStatus === "proven" ? "Scan the installed page and keep the storefront proof packet." : "Install the widget on a staging/storefront page and complete one QA journey.",
+      href: "/dashboard/install-scanner",
+    },
+    {
+      id: "analytics-proof",
+      title: "Analytics proof",
+      status: analyticsStatus,
+      owner: "Sellentum",
+      meaning: "The launch is measurable only after views, starts, completions, recommendations and buy-clicks appear in one session.",
+      evidence: `${eventCoverage.length}/${requiredEventTypes.length} event types captured · ${completions} completion${completions === 1 ? "" : "s"} · ${recommendations} recommendation event${recommendations === 1 ? "" : "s"} · ${buyClicks} buy click${buyClicks === 1 ? "" : "s"}.`,
+      nextStep: analyticsStatus === "proven" ? "Use Analytics to tune conversion and discovery gaps." : "Complete one embedded shopper QA session and confirm all five events appear.",
+      href: "/dashboard/analytics",
+    },
+  ];
+}
+
 function buildPacket(report: Omit<ProductionVerificationReport, "packet">) {
   return [
     "Sellentum Production Verification packet",
@@ -569,6 +686,9 @@ function buildPacket(report: Omit<ProductionVerificationReport, "packet">) {
     "",
     "Production checks",
     ...report.checks.map((check) => `- [${check.status.toUpperCase()}] ${check.label} (${check.score}%): ${check.evidence}`),
+    "",
+    "Plain-English production proof",
+    ...report.plainEnglishProof.map((lane) => `- [${proofLabel(lane.status)}] ${lane.title} · Owner: ${lane.owner} · ${lane.evidence} · Next: ${lane.nextStep}`),
     "",
     "Required routes and APIs",
     ...report.requiredRoutes.map((route) => `- ${route.route}: ${route.purpose}`),
@@ -703,6 +823,7 @@ export function buildProductionVerificationReport({
 
   const status = overallStatus(checks);
   const score = Math.round(checks.reduce((sum, item) => sum + item.score, 0) / Math.max(1, checks.length));
+  const plainEnglishProof = buildPlainEnglishProof({ checks, mode, products, quizzes, events });
   const actions = buildActions(checks);
   const baseReport: Omit<ProductionVerificationReport, "packet"> = {
     status,
@@ -729,6 +850,7 @@ export function buildProductionVerificationReport({
     artifacts,
     desktopQa,
     requiredRoutes,
+    plainEnglishProof,
     actions,
   };
 
