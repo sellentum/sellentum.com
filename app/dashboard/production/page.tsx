@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { AlertTriangle, ArrowRight, CheckCircle2, Clipboard, Code2, ExternalLink, Gauge, Globe2, LockKeyhole, MonitorCheck, Rocket, ShieldCheck, TerminalSquare, Wrench } from "lucide-react";
 import { LoadingState } from "@/components/loading-state";
-import { buildProductionVerificationReport, productionAuthChecklist, productionSupabaseRepair, type ProductionActionPriority, type ProductionCheckStatus, type ProductionVerificationStatus } from "@/lib/production-verification";
+import { buildProductionAuthProofPacket, buildProductionVerificationReport, productionAuthChecklist, productionAuthProofSteps, productionSupabaseRepair, type ProductionActionPriority, type ProductionCheckStatus, type ProductionVerificationStatus } from "@/lib/production-verification";
 import { useStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
@@ -47,6 +47,7 @@ export default function ProductionVerificationPage() {
   const [copiedRepair, setCopiedRepair] = useState(false);
   const [copiedRepairSql, setCopiedRepairSql] = useState(false);
   const [copiedAuth, setCopiedAuth] = useState(false);
+  const [copiedAuthProof, setCopiedAuthProof] = useState(false);
   const report = useMemo(() => buildProductionVerificationReport({ origin, mode, products, quizzes, configurators, events, settings }), [origin, mode, products, quizzes, configurators, events, settings]);
 
   useEffect(() => {
@@ -100,6 +101,12 @@ export default function ProductionVerificationPage() {
     window.setTimeout(() => setCopiedAuth(false), 1600);
   }
 
+  async function copyAuthProofTemplate() {
+    await navigator.clipboard.writeText(buildProductionAuthProofPacket({ appUrl: origin, testedAt: new Date().toISOString() }));
+    setCopiedAuthProof(true);
+    window.setTimeout(() => setCopiedAuthProof(false), 1600);
+  }
+
   if (!ready) return <LoadingState label="Verifying production readiness…" />;
 
   return (
@@ -145,12 +152,12 @@ export default function ProductionVerificationPage() {
         </div>
       </section>
 
-      <section className="mt-6 rounded-[28px] border border-amber-200 bg-amber-50 p-6">
+      <section className="mt-6 rounded-[28px] border border-lime/40 bg-lime/10 p-6">
         <div className="flex items-start justify-between gap-8">
           <div className="max-w-4xl">
-            <p className="text-xs font-extrabold uppercase tracking-[0.22em] text-amber-700">Known production backend repair</p>
-            <h2 className="mt-3 text-2xl font-extrabold tracking-[-.04em] text-ink">Supabase needs this repair if the verifier reports widget domains or rate-limit buckets missing.</h2>
-            <p className="mt-3 text-sm leading-6 text-black/55">This is the current production backend handoff: run the focused SQL file in Supabase, rerun the live verifier, then run the full schema/RLS check. It fixes <span className="font-extrabold text-ink">{productionSupabaseRepair.fixes.join(" and ")}</span>.</p>
+            <p className="text-xs font-extrabold uppercase tracking-[0.22em] text-moss">Backend proof reference</p>
+            <h2 className="mt-3 text-2xl font-extrabold tracking-[-.04em] text-ink">The production backend repair pack is kept here as a fallback.</h2>
+            <p className="mt-3 text-sm leading-6 text-black/55">The current Sellentum production backend has already passed schema/RLS and live route verification. Keep this repair pack available only for future schema drift or if the verifier reports <span className="font-extrabold text-ink">{productionSupabaseRepair.fixes.join(" or ")}</span> missing again.</p>
           </div>
           <div className="flex shrink-0 flex-col gap-2">
             <button onClick={copyRepairSteps} className="inline-flex items-center justify-center gap-2 rounded-full bg-ink px-5 py-3 text-xs font-extrabold text-white"><Clipboard size={14} /> {copiedRepair ? "Steps copied" : "Copy repair steps"}</button>
@@ -171,8 +178,8 @@ export default function ProductionVerificationPage() {
             <code className="mt-3 block rounded-xl bg-canvas px-3 py-2 text-xs font-bold text-moss">{productionSupabaseRepair.schemaCheckPath}</code>
           </div>
           <div className="rounded-2xl bg-white p-4">
-            <p className="text-xs font-extrabold uppercase text-black/35">Paste-ready repair</p>
-            <p className="mt-3 text-xs font-bold leading-5 text-black/45">The SQL is embedded in this dashboard so you can copy it directly, paste it into Supabase, run it once, then rerun the verifier.</p>
+            <p className="text-xs font-extrabold uppercase text-black/35">Fallback use only</p>
+            <p className="mt-3 text-xs font-bold leading-5 text-black/45">Do not rerun this as the next launch task unless production verification reports the widget/rate-limit schema drift again.</p>
           </div>
         </div>
       </section>
@@ -184,7 +191,10 @@ export default function ProductionVerificationPage() {
             <h2 className="mt-3 text-2xl font-extrabold tracking-[-.04em] text-ink">Confirm Supabase emails return users to Sellentum, not localhost.</h2>
             <p className="mt-3 text-sm leading-6 text-black/55">The app already generates signup and reset links from <span className="font-extrabold text-ink">NEXT_PUBLIC_APP_URL</span>. This checklist proves Supabase email confirmation, login and password reset work on the live domain before merchant onboarding.</p>
           </div>
-          <button onClick={copyAuthSteps} className="inline-flex shrink-0 items-center gap-2 rounded-full bg-moss px-5 py-3 text-xs font-extrabold text-white"><Clipboard size={14} /> {copiedAuth ? "Checklist copied" : "Copy auth checklist"}</button>
+          <div className="flex shrink-0 flex-col gap-2">
+            <button onClick={copyAuthSteps} className="inline-flex items-center justify-center gap-2 rounded-full bg-moss px-5 py-3 text-xs font-extrabold text-white"><Clipboard size={14} /> {copiedAuth ? "Checklist copied" : "Copy auth checklist"}</button>
+            <button onClick={copyAuthProofTemplate} className="inline-flex items-center justify-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-xs font-extrabold text-ink"><Clipboard size={14} /> {copiedAuthProof ? "Template copied" : "Copy auth proof template"}</button>
+          </div>
         </div>
         <div className="mt-5 grid gap-3 xl:grid-cols-2">
           <div className="rounded-2xl bg-canvas p-4">
@@ -203,6 +213,24 @@ export default function ProductionVerificationPage() {
           {productionAuthChecklist.manualChecks.map((item, index) => (
             <p key={item} className="rounded-2xl border border-black/[0.06] bg-canvas p-4 text-sm font-bold leading-5 text-black/50"><span className="mr-2 text-moss">{index + 1}.</span>{item}</p>
           ))}
+        </div>
+        <div className="mt-5 rounded-2xl border border-black/[0.07] bg-canvas p-4">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-black/35">Proof to capture</p>
+              <h3 className="mt-2 text-lg font-extrabold tracking-[-.035em] text-ink">Send this evidence back after testing auth.</h3>
+            </div>
+            <span className="rounded-full bg-white px-3 py-1.5 text-xs font-extrabold uppercase text-black/35">{productionAuthProofSteps.length} proof points</span>
+          </div>
+          <div className="mt-4 grid gap-3 xl:grid-cols-3">
+            {productionAuthProofSteps.map((step) => (
+              <article key={step.id} className="rounded-2xl bg-white p-4">
+                <p className="text-sm font-extrabold">{step.label}</p>
+                <p className="mt-2 text-xs font-bold leading-5 text-black/45">{step.proofToCapture}</p>
+                <p className="mt-3 rounded-xl bg-red-50 px-3 py-2 text-xs font-bold leading-4 text-red-700/75">Risk if failed: {step.failureRisk}</p>
+              </article>
+            ))}
+          </div>
         </div>
       </section>
 

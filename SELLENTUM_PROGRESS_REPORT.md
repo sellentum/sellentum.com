@@ -136,6 +136,7 @@ What has been completed:
 - Forgot-password route.
 - Reset-password route.
 - Branded sender setup discussion for Sellentum emails.
+- Production auth proof checklist and copyable evidence template inside the Production Verification Center.
 
 What is still left:
 
@@ -144,6 +145,7 @@ What is still left:
 - Confirm login works after email verification.
 - Confirm forgot-password works.
 - Confirm reset-password works.
+- Send back the copied auth proof packet or screenshots/notes if any step fails.
 
 Owner:
 
@@ -390,6 +392,8 @@ What has been completed:
 - Supabase production project connected.
 - Supabase schema/RLS verified.
 - Production route/API verification passed with no failures.
+- Backend repair SQL is now kept as a fallback reference, not shown as the next required launch task.
+- Production auth proof now has copyable checklist and evidence template.
 
 What is still left:
 

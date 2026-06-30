@@ -182,6 +182,89 @@ export const productionAuthChecklist = {
   ],
 } as const;
 
+export type ProductionAuthProofStep = {
+  id: string;
+  label: string;
+  proofToCapture: string;
+  failureRisk: string;
+};
+
+export const productionAuthProofSteps: ProductionAuthProofStep[] = [
+  {
+    id: "signup",
+    label: "Fresh signup",
+    proofToCapture: "Screenshot or note showing a new account can submit the signup form and receives the verification-email state.",
+    failureRisk: "New merchants cannot enter the product.",
+  },
+  {
+    id: "verification-link",
+    label: "Email verification link",
+    proofToCapture: "The clicked email link opens https://www.sellentum.com/auth/callback and continues to the dashboard, not localhost.",
+    failureRisk: "Verified users get stranded outside the production app.",
+  },
+  {
+    id: "login",
+    label: "Login after verification",
+    proofToCapture: "The verified account can log in from /login and reach /dashboard.",
+    failureRisk: "Account creation appears successful but returning users cannot access the workspace.",
+  },
+  {
+    id: "password-reset-request",
+    label: "Password reset request",
+    proofToCapture: "The account can request a reset email from /forgot-password.",
+    failureRisk: "Users who forget credentials need manual support.",
+  },
+  {
+    id: "password-reset-link",
+    label: "Password reset link",
+    proofToCapture: "The reset email opens the production callback and lands on /reset-password.",
+    failureRisk: "Reset emails still point to the wrong app URL.",
+  },
+  {
+    id: "new-password-login",
+    label: "New password login",
+    proofToCapture: "After setting a new password, the same account can log in and open the dashboard.",
+    failureRisk: "The recovery loop is incomplete even if the email sends.",
+  },
+];
+
+export function buildProductionAuthProofPacket({
+  appUrl = productionAuthChecklist.appUrl,
+  testedAt = new Date().toISOString(),
+}: {
+  appUrl?: string;
+  testedAt?: string;
+} = {}) {
+  return [
+    "Sellentum production auth proof",
+    "===============================",
+    "",
+    `App URL: ${appUrl}`,
+    `Expected callback: ${appUrl}${productionAuthChecklist.callbackPath}`,
+    `Tested at: ${testedAt}`,
+    "Tester: [name]",
+    "",
+    "Result summary",
+    "- Overall result: [pass/fail]",
+    "- Browser used: [Chrome/Safari/etc.]",
+    "- Test email used: [email address]",
+    "",
+    "Proof checklist",
+    ...productionAuthProofSteps.map((step, index) => [
+      `${index + 1}. ${step.label}`,
+      `   Result: [pass/fail]`,
+      `   Proof to capture: ${step.proofToCapture}`,
+      `   Evidence/notes: [paste screenshot link or notes]`,
+      `   If failed, risk: ${step.failureRisk}`,
+    ].join("\n")),
+    "",
+    "Done when",
+    "- Signup, verification, login, forgot-password, reset-password and new-password login all pass on the production domain.",
+    "- No email link opens localhost.",
+    "- The dashboard is reachable after both verification and password reset.",
+  ].join("\n");
+}
+
 const requiredEventTypes: Array<AnalyticsEvent["event_type"]> = [
   "widget_view",
   "quiz_start",

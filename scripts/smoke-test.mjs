@@ -808,12 +808,14 @@ function assertProductionVerificationWorkflow() {
   assert(helper.includes("widget_settings.allowed_domains") && helper.includes("rate_limit_buckets"), "Production Verification helper should name the known widget/rate-limit schema repair targets");
   assert(helper.includes("from anon") && helper.includes("from authenticated"), "Production Verification repair SQL should harden rate-limit RPC grants for anon/authenticated roles");
   assert(helper.includes("productionAuthChecklist") && helper.includes("/forgot-password") && helper.includes("/reset-password"), "Production Verification helper should expose production auth proof steps");
+  assert(helper.includes("productionAuthProofSteps") && helper.includes("buildProductionAuthProofPacket"), "Production Verification helper should expose a reusable auth proof evidence packet");
   assert(page.includes("Production Verification Center"), "Production Verification page should expose the dashboard title");
   assert(page.includes("Copy verification packet"), "Production Verification page should let merchants copy the packet");
-  assert(page.includes("Known production backend repair"), "Production Verification page should expose the Supabase repair workflow in-app");
+  assert(page.includes("Backend proof reference") && page.includes("Fallback use only"), "Production Verification page should treat Supabase repair as a backend proof reference, not the current next task");
   assert(page.includes("Copy repair steps"), "Production Verification page should let founders copy the Supabase repair workflow");
   assert(page.includes("Copy repair SQL") && page.includes("copyRepairSql"), "Production Verification page should let founders copy paste-ready Supabase repair SQL");
-  assert(page.includes("Production auth proof") && page.includes("Copy auth checklist"), "Production Verification page should expose copyable production auth QA");
+  assert(page.includes("Production auth proof") && page.includes("Copy auth checklist") && page.includes("Copy auth proof template"), "Production Verification page should expose copyable production auth QA and evidence capture");
+  assert(page.includes("Proof to capture") && page.includes("Risk if failed"), "Production Verification page should show auth evidence and risk cards");
   assert(page.includes("Desktop QA scenarios"), "Production Verification page should show desktop QA scenarios");
   assert(page.includes("Required route and API contract"), "Production Verification page should show required routes and APIs");
   assert(!page.includes("text-[8px]") && !page.includes("text-[9px]") && !page.includes("text-[10px]"), "Production Verification page should avoid tiny arbitrary font sizes");

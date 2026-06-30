@@ -36,7 +36,7 @@ For the current human-readable project status, open [`SELLENTUM_PROGRESS_REPORT.
 - Storefront Install Scanner that fetches a staging/production page, verifies the Sellentum widget script and data attributes, checks attribution labels, exposes a storefront proof handoff checklist and exports copyable scan/proof packets
 - Runtime Operations Center that monitors public endpoint contracts, guardrails, analytics quality, release gates and telemetry proof
 - Release Center that rolls catalog, experience, channel, sandbox, analytics and optimization gates into a go/no-go release candidate with rollback notes
-- Production Verification Center that packages Vercel deployment gates, Supabase/demo mode evidence, required route/API contracts, desktop QA scenarios, final verification commands and copyable production handoff packets
+- Production Verification Center that packages Vercel deployment gates, Supabase/demo mode evidence, required route/API contracts, desktop QA scenarios, production auth proof templates, final verification commands and copyable production handoff packets
 - System typography guardrails using a simple Helvetica/Poppins/SF Pro stack, a 16px base, readable line/word spacing and a desktop source sweep that keeps app/component UI on standard `text-xs`/`text-sm` scales instead of tiny arbitrary font sizes
 - Workspace Snapshot exporter that packages products, finder rules, configurators, brand settings, install snippets, release state and redacted analytics into copyable JSON/CSV/handoff files
 - Usage & Plan Center that meters sessions, guided interactions, catalog scale, published experiences and AI-assist credits against Stripe-placeholder plan tiers
@@ -229,7 +229,7 @@ The HTTP production verifier cannot prove exact RLS policies or function grants 
 
 Then rerun `npm run verify:production -- --base-url=https://www.sellentum.com`.
 
-The dashboard **Production Verification Center** also surfaces this repair workflow with copyable steps, a paste-ready repair SQL button, the live verifier command, and the full schema/RLS SQL check so production handoff is not hidden in documentation only.
+The dashboard **Production Verification Center** also keeps this repair workflow as a fallback reference with copyable steps, a paste-ready repair SQL button, the live verifier command, and the full schema/RLS SQL check so production handoff is not hidden in documentation only. It also includes a copyable production auth proof template for signup, verification, login, forgot-password, reset-password, and new-password login evidence.
 
 The same center includes a copyable production auth checklist. Before merchant onboarding, prove signup confirmation and password-reset emails route through `https://www.sellentum.com/auth/callback` and never back to `localhost`.
 
