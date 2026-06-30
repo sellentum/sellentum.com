@@ -33,7 +33,7 @@ For the current human-readable project status, open [`SELLENTUM_PROGRESS_REPORT.
 - Partner Syndication board that packages retailer, marketplace, affiliate, support and sales-partner widget snippets with syndication attribution, QA checks and data-policy handoff notes
 - Storefront QA sandbox that previews each channel in a controlled desktop storefront, lists expected telemetry events and exports a copyable QA packet before theme installation
 - Public storefront widget demo page that loads the real `/api/widget.js` contract on a simulated ecommerce page before a live theme install
-- Storefront Install Scanner that fetches a staging/production page, verifies the Sellentum widget script and data attributes, checks attribution labels, exposes a storefront proof handoff checklist and exports copyable scan/proof packets
+- Storefront Install Scanner that fetches a staging/production page, verifies the Sellentum widget script and data attributes, checks attribution labels, guides the first storefront proof path, exposes a storefront proof handoff checklist and exports copyable scan/proof packets
 - Runtime Operations Center that monitors public endpoint contracts, guardrails, analytics quality, release gates and telemetry proof
 - Release Center that rolls catalog, experience, channel, sandbox, analytics and optimization gates into a go/no-go release candidate with rollback notes
 - Production Verification Center that packages plain-English proof lanes, Vercel deployment gates, Supabase/demo mode evidence, required route/API contracts, desktop QA scenarios, production auth proof templates, final verification commands and copyable production handoff packets

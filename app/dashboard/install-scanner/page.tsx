@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { AlertTriangle, CheckCircle2, Clipboard, Code2, ExternalLink, Globe2, LoaderCircle, LockKeyhole, MonitorCheck, MousePointerClick, Search, ShieldCheck, Wrench } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Clipboard, Code2, ExternalLink, Globe2, LoaderCircle, LockKeyhole, MonitorCheck, MousePointerClick, Search, ShieldCheck, Sparkles, Wrench } from "lucide-react";
 import { LoadingState } from "@/components/loading-state";
 import type { StorefrontInstallScanReport, StorefrontInstallScanStatus, StorefrontInstallCheckStatus } from "@/lib/storefront-install-scanner";
 import { buildStorefrontProofPacket, storefrontProofEvents, storefrontProofSteps } from "@/lib/storefront-proof";
@@ -29,7 +29,7 @@ function CheckIcon({ status }: { status: StorefrontInstallCheckStatus }) {
 }
 
 export default function InstallScannerPage() {
-  const { ready, quizzes, configurators } = useStore();
+  const { ready, quizzes, configurators, events } = useStore();
   const [appOrigin, setAppOrigin] = useState("https://your-sellentum-app.vercel.app");
   const [url, setUrl] = useState("");
   const [report, setReport] = useState<StorefrontInstallScanReport | null>(null);
@@ -37,8 +37,20 @@ export default function InstallScannerPage() {
   const [scanning, setScanning] = useState(false);
   const [copied, setCopied] = useState(false);
   const [proofCopied, setProofCopied] = useState(false);
-  const publishedFinder = useMemo(() => quizzes.find((quiz) => quiz.published) || quizzes[0], [quizzes]);
-  const publishedConfigurator = useMemo(() => configurators.find((configurator) => configurator.published) || configurators[0], [configurators]);
+  const publishedFinder = useMemo(() => quizzes.find((quiz) => quiz.published), [quizzes]);
+  const publishedConfigurator = useMemo(() => configurators.find((configurator) => configurator.published), [configurators]);
+  const publishedExperienceId = publishedFinder?.id || publishedConfigurator?.id;
+  const widgetViewCaptured = events.some((event) => event.event_type === "widget_view");
+  const completedJourneyCaptured = events.some((event) => event.event_type === "quiz_complete") && events.some((event) => event.event_type === "product_recommended");
+  const buyClickCaptured = events.some((event) => event.event_type === "buy_click");
+  const scanPassed = report?.status === "installed";
+  const firstProofSteps = [
+    { title: "Publish a real experience", detail: "Use a published finder or configurator ID, never a placeholder or draft.", done: Boolean(publishedExperienceId), href: publishedConfigurator && !publishedFinder ? "/dashboard/configurators" : "/dashboard/quizzes" },
+    { title: "Copy the safe widget snippet", detail: "Brand & embed locks copy until install QA has a published ID.", done: Boolean(publishedExperienceId), href: "/dashboard/settings" },
+    { title: "Install on a public staging page", detail: "Use an HTTPS page the scanner can fetch from the server.", done: Boolean(url.trim()), href: "/dashboard/install-scanner" },
+    { title: "Scan the installed page", detail: "Confirm script, ID, mode, attribution and app origin.", done: Boolean(scanPassed), href: "/dashboard/install-scanner" },
+    { title: "Prove the shopper journey", detail: "Capture widget view, completion, recommendation and Buy Now events.", done: widgetViewCaptured && completedJourneyCaptured && buyClickCaptured, href: "/dashboard/analytics" },
+  ];
 
   useEffect(() => {
     setAppOrigin(window.location.origin);
@@ -75,7 +87,7 @@ export default function InstallScannerPage() {
     await navigator.clipboard.writeText(buildStorefrontProofPacket({
       storefrontUrl: url,
       appOrigin,
-      experienceId: publishedFinder?.id || publishedConfigurator?.id,
+      experienceId: publishedExperienceId,
     }));
     setProofCopied(true);
     window.setTimeout(() => setProofCopied(false), 1600);
@@ -110,6 +122,29 @@ export default function InstallScannerPage() {
       </section>
 
       <div className="mt-6 grid gap-6 xl:grid-cols-[.9fr_1.1fr]">
+        <section className="rounded-[28px] border border-black/[0.07] bg-white p-6 xl:col-span-2">
+          <div className="flex items-start justify-between gap-6">
+            <div>
+              <p className="text-xs font-extrabold uppercase tracking-[0.22em] text-moss">First storefront proof path</p>
+              <h2 className="mt-3 text-2xl font-extrabold tracking-[-.04em] text-ink">What we need before calling the widget production-proven.</h2>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-black/50">Use this path when you send me a staging URL. It keeps the proof tied to a published experience, an installable snippet, a public storefront page and the five analytics events.</p>
+            </div>
+            <Link href="/dashboard/settings" className="inline-flex shrink-0 items-center gap-2 rounded-full bg-ink px-5 py-3 text-xs font-extrabold text-white"><Sparkles size={14} className="text-lime" /> Get safe snippet</Link>
+          </div>
+          <div className="mt-5 grid gap-3 xl:grid-cols-5">
+            {firstProofSteps.map((step, index) => (
+              <Link key={step.title} href={step.href} className={`rounded-2xl border p-4 transition hover:-translate-y-0.5 ${step.done ? "border-lime/50 bg-lime/15" : "border-black/[0.07] bg-[#f8f8f4]"}`}>
+                <div className="flex items-center justify-between gap-3">
+                  <span className={`grid h-8 w-8 place-items-center rounded-xl text-xs font-extrabold ${step.done ? "bg-lime text-ink" : "bg-white text-black/35"}`}>{step.done ? <CheckCircle2 size={14} /> : index + 1}</span>
+                  <span className={`rounded-full px-2 py-1 text-xs font-extrabold uppercase ${step.done ? "bg-white text-moss" : "bg-white text-black/30"}`}>{step.done ? "Done" : "Next"}</span>
+                </div>
+                <h3 className="mt-4 text-sm font-extrabold leading-5 text-ink">{step.title}</h3>
+                <p className="mt-2 text-xs font-bold leading-5 text-black/45">{step.detail}</p>
+              </Link>
+            ))}
+          </div>
+        </section>
+
         <section className="rounded-[28px] border border-black/[0.07] bg-white p-6">
           <div className="flex items-center justify-between"><div><h2 className="text-sm font-extrabold">Scan target</h2><p className="mt-1 text-sm text-black/45">Use a public staging or production page. Localhost/private network URLs are intentionally blocked.</p></div><Globe2 className="text-moss" size={18} /></div>
           <form onSubmit={scan} className="mt-5 space-y-4">
@@ -129,8 +164,9 @@ export default function InstallScannerPage() {
             <h3 className="text-sm font-extrabold">Suggested staging targets</h3>
             <p className="mt-2 text-sm leading-5 text-black/45">Publish a finder/configurator, paste the widget snippet into a public staging page, then scan that page here.</p>
             <div className="mt-4 grid gap-2">
-              {publishedFinder && <Link href={`/finder/${publishedFinder.id}`} target="_blank" className="flex items-center justify-between rounded-xl bg-white px-3 py-3 text-xs font-extrabold text-black/45">Finder preview <ExternalLink size={12} /></Link>}
-              {publishedConfigurator && <Link href={`/configurator/${publishedConfigurator.id}`} target="_blank" className="flex items-center justify-between rounded-xl bg-white px-3 py-3 text-xs font-extrabold text-black/45">Configurator preview <ExternalLink size={12} /></Link>}
+              {publishedFinder && <Link href={`/finder/${publishedFinder.id}`} target="_blank" className="flex items-center justify-between rounded-xl bg-white px-3 py-3 text-xs font-extrabold text-black/45">Published finder preview <ExternalLink size={12} /></Link>}
+              {publishedConfigurator && <Link href={`/configurator/${publishedConfigurator.id}`} target="_blank" className="flex items-center justify-between rounded-xl bg-white px-3 py-3 text-xs font-extrabold text-black/45">Published configurator preview <ExternalLink size={12} /></Link>}
+              {!publishedFinder && !publishedConfigurator && <Link href="/dashboard/quizzes" className="flex items-center justify-between rounded-xl bg-white px-3 py-3 text-xs font-extrabold text-moss">Publish a finder before scanning <ExternalLink size={12} /></Link>}
             </div>
           </div>
         </section>

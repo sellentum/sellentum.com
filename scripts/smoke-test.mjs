@@ -901,6 +901,8 @@ function assertStorefrontInstallScannerWorkflow() {
   assert(route.includes("MAX_HTML_BYTES") && route.includes("TIMEOUT_MS"), "Storefront scan API should bound HTML fetch size and timeout");
   assert(page.includes("Storefront Install Scanner"), "Install Scanner page should expose the dashboard title");
   assert(page.includes("Scan storefront install"), "Install Scanner page should scan storefront URLs");
+  assert(page.includes("First storefront proof path") && page.includes("What we need before calling the widget production-proven"), "Install Scanner page should explain the first storefront proof path before scanning");
+  assert(page.includes("publishedExperienceId") && !page.includes("|| quizzes[0]") && !page.includes("|| configurators[0]"), "Install Scanner page should not build proof context from draft fallback experiences");
   assert(page.includes("Detected snippets"), "Install Scanner page should show detected snippets");
   assert(page.includes("Recommended next tasks"), "Install Scanner page should show next tasks");
   assert(page.includes("Storefront proof handoff") && page.includes("Copy proof packet"), "Install Scanner page should expose a copyable storefront proof handoff");

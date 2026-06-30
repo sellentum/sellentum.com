@@ -386,6 +386,7 @@ What is done:
 - Widget analytics are connected.
 - Brand & embed now shows a first-widget install path before storefront copy/paste.
 - Snippet copying is locked until install QA has a published experience ID instead of a placeholder or draft fallback.
+- Storefront Install Scanner now shows a first storefront proof path and uses only published experience IDs for proof context.
 
 What still needs proof:
 
@@ -606,6 +607,7 @@ Latest completed Codex intervals:
 - Added plain-English production proof lanes so the Production Verification Center explains what is proven, what needs evidence and who owns the next step.
 - Added a first-run Analytics proof guide so empty analytics screens tell merchants how to produce the first widget/session/buy-click evidence.
 - Added a first-widget install path in Brand & embed, and prevented draft experiences from being copied as storefront-ready snippets.
+- Added a first storefront proof path to the Install Scanner so the staging URL handoff is clear before the real embed test.
 
 I should continue in this order:
 
