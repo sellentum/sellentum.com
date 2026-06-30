@@ -6,7 +6,7 @@ For the current human-readable project status, open [`SELLENTUM_PROGRESS_REPORT.
 
 ## What is included
 
-- Premium marketing site with product, workflow, use-case, pricing, resource and platform pages
+- Premium marketing site with product, workflow, use-case, pricing, resource, platform, contact, support, security, privacy and terms pages
 - Supabase email/password authentication, protected dashboard routes and logout
 - Product catalog CRUD plus CSV upload with flexible header aliases, row-level validation and import preview (`name`, `price`, and `category` are required; buyer needs/search text are optional discovery fields)
 - AI catalog enrichment with normalized attributes, buyer needs, semantic search text and optional OpenAI embeddings

@@ -67,6 +67,19 @@ function assertDesktopTypographyScale() {
   assert(!offenders.length, `Desktop app/component source should use standard text-xs/text-sm scale instead of tiny arbitrary font classes: ${offenders.join("; ")}`);
 }
 
+function assertPublicTrustPages() {
+  const footer = readFileSync("components/marketing-footer.tsx", "utf8");
+  const authShell = readFileSync("components/auth-shell.tsx", "utf8");
+  const dashboardShell = readFileSync("components/dashboard-shell.tsx", "utf8");
+  const nav = readFileSync("components/landing-nav.tsx", "utf8");
+  for (const route of ["/contact", "/support", "/security", "/privacy", "/terms"]) {
+    assert(footer.includes(route), `Marketing footer should link to ${route}`);
+  }
+  assert(authShell.includes('href="/terms"') && authShell.includes('href="/privacy"'), "Auth fine print should link to real Terms and Privacy pages");
+  assert(dashboardShell.includes('href="/support"'), "Dashboard help actions should open the Support page");
+  assert(nav.includes('href: "/support"'), "Landing navigation should expose support from the Resources menu");
+}
+
 function assertPublishedAdvisorRuntime() {
   const route = readFileSync("app/api/public/assistant/[id]/route.ts", "utf8");
   const engine = readFileSync("lib/assistant-engine.ts", "utf8");
@@ -2382,6 +2395,11 @@ async function main() {
   await assertPage("/platform/semantic-knowledge-graph", "Connect product facts");
   await assertPage("/industries", "Industries");
   await assertPage("/resources", "Demo the product discovery loop");
+  await assertPage("/contact", "Talk to Sellentum");
+  await assertPage("/support", "Get from catalog to launch");
+  await assertPage("/security", "Rules, data and AI boundaries");
+  await assertPage("/privacy", "How Sellentum handles product");
+  await assertPage("/terms", "A practical usage boundary");
   await assertPage("/finder/quiz_footwear", "Preparing your product guide");
   await assertPage("/assistant/quiz_footwear", "Preparing your product advisor");
   await assertPage("/search/quiz_footwear", "Preparing product search");
@@ -2396,6 +2414,7 @@ async function main() {
   await assertWidgetScript();
   assertSystemFontStack();
   assertDesktopTypographyScale();
+  assertPublicTrustPages();
   assertPublishedAdvisorRuntime();
   assertPublishedFinderRuntime();
   assertPublishedConfiguratorRuntime();

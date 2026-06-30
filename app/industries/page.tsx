@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, Check, Footprints, ShoppingBag, Sparkles, Store } from "lucide-react";
 import { LandingNav } from "@/components/landing-nav";
-import { Logo } from "@/components/logo";
+import { MarketingFooter } from "@/components/marketing-footer";
 
 const industries = [
   { title: "Fashion & footwear", icon: Footprints, copy: "Guide fit, feel, intended use and style without forcing shoppers through endless filters.", journeys: ["Shoe finder", "Trail kit configurator", "Fit and comfort advisor"] },
@@ -49,7 +49,7 @@ export default function IndustriesPage() {
         </div>
       </section>
 
-      <footer className="border-t border-black/10 px-6 py-10 lg:px-10"><div className="mx-auto flex max-w-[1280px] items-center justify-between text-xs font-bold text-black/35"><Logo /><span>© 2026 Sellentum</span></div></footer>
+      <MarketingFooter compact />
     </main>
   );
 }

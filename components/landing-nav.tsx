@@ -35,6 +35,7 @@ const menus = {
       { title: "Visual configurator", copy: "Build a compatible product bundle", icon: PackagePlus, href: "/configurator/config_trail_kit" },
       { title: "Merchant workspace", copy: "Explore catalog, builder and analytics", icon: Settings2, href: "/login" },
       { title: "Quick-start guide", copy: "Go from catalog to launch in minutes", icon: BookOpen, href: "/resources" },
+      { title: "Support", copy: "Get help with launch and production checks", icon: MessageCircle, href: "/support" },
     ],
   },
 } as const;
@@ -114,6 +115,8 @@ export function LandingNav() {
               ["Platform", "/platform"],
               ["Industries", "/industries"],
               ["Resources", "/resources"],
+              ["Support", "/support"],
+              ["Contact", "/contact"],
               ["Pricing", "/#pricing"],
             ].map(([label, href]) => <Link onClick={() => setMobileOpen(false)} key={label} href={href} className="rounded-xl px-3 py-3 font-semibold hover:bg-canvas">{label}</Link>)}
             <div className="mt-3 grid grid-cols-2 gap-2"><Link href="/login" className="btn-secondary">Log in</Link><Link href="/signup" className="btn-primary">Start free</Link></div>

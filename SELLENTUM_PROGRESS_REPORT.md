@@ -94,7 +94,7 @@ Still left:
 
 ### Stage 2 — Public website
 
-Status: **Mostly done**
+Status: **Mostly done, launch-support pages added**
 
 Completed:
 
@@ -103,12 +103,18 @@ Completed:
 - Hero, features, workflow, use cases, pricing placeholder and CTA sections.
 - Resources/platform-style pages.
 - Sellentum brand language across the app.
+- Contact page.
+- Support page.
+- Security page.
+- Privacy Policy page.
+- Terms of Service page.
+- Shared public footer with support/legal links.
 
 Still left:
 
 - Final marketing copy.
 - Better pricing/early-access message.
-- Contact/support/legal pages.
+- Legal review of Privacy and Terms before broad commercial launch.
 - Remove any wording that makes the app feel like a temporary MVP.
 
 ---
@@ -381,7 +387,7 @@ This is one of the biggest remaining blockers.
 - Production AI quality/cost proof.
 - Real catalog recommendation testing.
 - Final dashboard simplification.
-- Legal/support/contact pages.
+- Professional legal review for Privacy and Terms.
 - Real billing.
 - Final launch polish.
 
@@ -551,7 +557,7 @@ Owner: **Codex + User**
 
 Needed:
 
-- Better legal/contact/support pages.
+- Legal review of Privacy and Terms.
 - Final marketing copy.
 - Clear pricing/early-access message.
 - Better empty/loading/error states.
@@ -638,6 +644,17 @@ This is the simplified history of what we have done.
 - Hardened public finder responses so private matching rules are not exposed.
 - Hardened recommendation responses so shoppers do not see internal scores or private buyer-profile data.
 - Started shared public payload sanitization for finder, advisor, search and configurator runtimes.
+
+### Phase 7 — Public SaaS trust pages
+
+- Added Contact page.
+- Added Support page.
+- Added Security page.
+- Added Privacy Policy page.
+- Added Terms of Service page.
+- Added shared public footer with Contact, Support, Privacy, Terms and Security links.
+- Linked signup/login fine print to the real legal pages.
+- Linked dashboard help actions to the Support page.
 
 ---
 

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, BarChart3, Check, ExternalLink, Footprints, Layers3, PackagePlus, ShoppingBag, Sparkles, Store, UploadCloud } from "lucide-react";
 import { LandingNav } from "@/components/landing-nav";
-import { Logo } from "@/components/logo";
+import { MarketingFooter } from "@/components/marketing-footer";
 import { AudienceExperience, CapabilityExplorer, HeroDiscoveryDemo, StoryCarousel } from "@/components/marketing-showcases";
 
 const industryCards = [
@@ -98,12 +98,7 @@ export default function LandingPage() {
 
       <section className="px-5 pb-5 lg:px-8"><div className="relative mx-auto max-w-[1440px] overflow-hidden rounded-[34px] bg-ink px-6 py-24 text-center text-white sm:px-12"><div className="absolute -left-24 -top-24 h-80 w-80 rounded-full bg-lime/20 blur-3xl" /><div className="absolute -bottom-24 -right-24 h-80 w-80 rounded-full bg-peach/15 blur-3xl" /><div className="dot-grid absolute inset-0 opacity-10" /><div className="relative"><p className="eyebrow text-lime">The right product is already in your catalog</p><h2 className="mx-auto mt-6 max-w-5xl text-5xl font-extrabold leading-[.95] tracking-[-.07em] sm:text-7xl lg:text-[5.6rem]"><span className="block">Help every customer </span><span className="block">find it.</span></h2><p className="mx-auto mt-6 max-w-xl text-sm leading-6 text-white/45">Turn your product expertise into a guided buying experience that works around the clock.</p><div className="mt-9 flex flex-col justify-center gap-3 sm:flex-row"><Link href="/signup" className="inline-flex items-center justify-center gap-2 rounded-full bg-lime px-7 py-4 text-sm font-extrabold text-ink">Start building free <ArrowRight size={15} /></Link><Link href="/finder/quiz_footwear" className="inline-flex items-center justify-center gap-2 rounded-full border border-white/15 px-7 py-4 text-sm font-extrabold text-white">Try the live finder <ExternalLink size={14} /></Link></div></div></div></section>
 
-      <footer className="bg-white px-5 py-14 lg:px-8"><div className="mx-auto max-w-[1280px]"><div className="grid gap-12 border-b border-black/10 pb-12 lg:grid-cols-[1.3fr_repeat(4,1fr)]"><div><Logo /><p className="mt-5 max-w-xs text-xs leading-5 text-black/40">AI-guided product discovery for ecommerce teams that want useful recommendations without enterprise complexity.</p></div>{[
-        ["Platform", [["Overview", "/platform"], ["Products", "/dashboard/products"], ["Finder builder", "/dashboard/quizzes"], ["Configurators", "/dashboard/configurators"], ["Analytics", "/dashboard/analytics"], ["Embed", "/dashboard/settings"]]],
-        ["Experiences", [["Live finder", "/finder/quiz_footwear"], ["Advisor", "/assistant/quiz_footwear"], ["Configurator", "/configurator/config_trail_kit"], ["Merchant demo", "/login"], ["Industries", "/industries"]]],
-        ["Company", [["Why Sellentum", "#why"], ["Pricing", "#pricing"], ["Start free", "/signup"], ["Contact", "mailto:hello@sellentum.com"]]],
-        ["Product", [["Sign up", "/signup"], ["Log in", "/login"], ["Documentation", "/resources"], ["Setup guide", "/resources"]]],
-      ].map(([heading, links]) => <div key={String(heading)}><h3 className="text-xs font-extrabold uppercase tracking-[.14em] text-black/35">{String(heading)}</h3><div className="mt-5 space-y-3">{(links as string[][]).map(([label, href]) => <Link key={label} href={href} className="block text-xs font-bold text-black/55 hover:text-ink">{label}</Link>)}</div></div>)}</div><div className="flex flex-col gap-4 pt-7 text-xs font-bold text-black/35 sm:flex-row sm:items-center sm:justify-between"><span>© 2026 Sellentum. Product decisions, made lighter.</span><div className="flex gap-6"><span>Privacy</span><span>Terms</span><span>Built with Next.js, Supabase & OpenAI</span></div></div></div></footer>
+      <MarketingFooter />
     </main>
   );
 }

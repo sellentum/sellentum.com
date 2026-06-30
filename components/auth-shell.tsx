@@ -8,7 +8,9 @@ export function AuthShell({ children, title, copy }: { children: React.ReactNode
       <section className="flex min-h-screen flex-col px-5 py-6 sm:px-10 lg:px-16">
         <div className="flex items-center justify-between"><Logo /><Link href="/" className="flex items-center gap-2 text-xs font-bold text-black/45"><ArrowLeft size={14} /> Back to site</Link></div>
         <div className="mx-auto my-auto w-full max-w-[430px] py-16"><p className="eyebrow text-moss">Welcome to Sellentum</p><h1 className="display mt-3 text-5xl leading-none">{title}</h1><p className="mt-4 text-sm leading-6 text-black/50">{copy}</p>{children}</div>
-        <p className="text-center text-xs text-black/30">By continuing, you agree to our Terms and Privacy Policy.</p>
+        <p className="text-center text-xs text-black/30">
+          By continuing, you agree to our <Link href="/terms" className="font-bold text-black/45 hover:text-ink">Terms</Link> and <Link href="/privacy" className="font-bold text-black/45 hover:text-ink">Privacy Policy</Link>.
+        </p>
       </section>
       <aside className="noise relative m-3 hidden overflow-hidden rounded-[32px] bg-ink p-12 text-white lg:flex lg:flex-col lg:justify-between">
         <div className="absolute -right-24 -top-24 h-80 w-80 rounded-full bg-lime/20 blur-3xl" />
