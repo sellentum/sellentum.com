@@ -1,6 +1,6 @@
 -- Sellentum production repair: widget domain allowlist + shared rate limiting.
 --
--- Use when `npm run verify:production -- --base-url=https://sellentum.com`
+-- Use when `npm run verify:production -- --base-url=https://www.sellentum.com`
 -- reports either of these production Supabase failures:
 --
 -- 1. widget_settings.allowed_domains does not exist
@@ -92,7 +92,7 @@ notify pgrst, 'reload schema';
 commit;
 
 -- After running this file, rerun:
--- npm run verify:production -- --base-url=https://sellentum.com
+-- npm run verify:production -- --base-url=https://www.sellentum.com
 --
 -- Then run:
 -- supabase/verification/production_schema_check.sql

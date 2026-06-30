@@ -45,6 +45,7 @@ export default function ProductionVerificationPage() {
   const [origin, setOrigin] = useState("https://your-sellentum-app.vercel.app");
   const [copied, setCopied] = useState(false);
   const [copiedRepair, setCopiedRepair] = useState(false);
+  const [copiedRepairSql, setCopiedRepairSql] = useState(false);
   const [copiedAuth, setCopiedAuth] = useState(false);
   const report = useMemo(() => buildProductionVerificationReport({ origin, mode, products, quizzes, configurators, events, settings }), [origin, mode, products, quizzes, configurators, events, settings]);
 
@@ -63,6 +64,8 @@ export default function ProductionVerificationPage() {
       "Run this in the production Supabase SQL editor:",
       productionSupabaseRepair.path,
       "",
+      "Or paste the SQL directly from the Copy repair SQL button in /dashboard/production.",
+      "",
       "Then rerun the production verifier:",
       productionSupabaseRepair.verifyCommand,
       "",
@@ -71,6 +74,12 @@ export default function ProductionVerificationPage() {
     ].join("\n"));
     setCopiedRepair(true);
     window.setTimeout(() => setCopiedRepair(false), 1600);
+  }
+
+  async function copyRepairSql() {
+    await navigator.clipboard.writeText(productionSupabaseRepair.sql);
+    setCopiedRepairSql(true);
+    window.setTimeout(() => setCopiedRepairSql(false), 1600);
   }
 
   async function copyAuthSteps() {
@@ -143,9 +152,12 @@ export default function ProductionVerificationPage() {
             <h2 className="mt-3 text-2xl font-extrabold tracking-[-.04em] text-ink">Supabase needs this repair if the verifier reports widget domains or rate-limit buckets missing.</h2>
             <p className="mt-3 text-sm leading-6 text-black/55">This is the current production backend handoff: run the focused SQL file in Supabase, rerun the live verifier, then run the full schema/RLS check. It fixes <span className="font-extrabold text-ink">{productionSupabaseRepair.fixes.join(" and ")}</span>.</p>
           </div>
-          <button onClick={copyRepairSteps} className="inline-flex shrink-0 items-center gap-2 rounded-full bg-ink px-5 py-3 text-xs font-extrabold text-white"><Clipboard size={14} /> {copiedRepair ? "Steps copied" : "Copy repair steps"}</button>
+          <div className="flex shrink-0 flex-col gap-2">
+            <button onClick={copyRepairSteps} className="inline-flex items-center justify-center gap-2 rounded-full bg-ink px-5 py-3 text-xs font-extrabold text-white"><Clipboard size={14} /> {copiedRepair ? "Steps copied" : "Copy repair steps"}</button>
+            <button onClick={copyRepairSql} className="inline-flex items-center justify-center gap-2 rounded-full bg-moss px-5 py-3 text-xs font-extrabold text-white"><Clipboard size={14} /> {copiedRepairSql ? "SQL copied" : "Copy repair SQL"}</button>
+          </div>
         </div>
-        <div className="mt-5 grid gap-3 xl:grid-cols-3">
+        <div className="mt-5 grid gap-3 xl:grid-cols-4">
           <div className="rounded-2xl bg-white p-4">
             <p className="text-xs font-extrabold uppercase text-black/35">1. Supabase SQL editor</p>
             <code className="mt-3 block rounded-xl bg-canvas px-3 py-2 text-xs font-bold text-moss">{productionSupabaseRepair.path}</code>
@@ -157,6 +169,10 @@ export default function ProductionVerificationPage() {
           <div className="rounded-2xl bg-white p-4">
             <p className="text-xs font-extrabold uppercase text-black/35">3. Full schema/RLS proof</p>
             <code className="mt-3 block rounded-xl bg-canvas px-3 py-2 text-xs font-bold text-moss">{productionSupabaseRepair.schemaCheckPath}</code>
+          </div>
+          <div className="rounded-2xl bg-white p-4">
+            <p className="text-xs font-extrabold uppercase text-black/35">Paste-ready repair</p>
+            <p className="mt-3 text-xs font-bold leading-5 text-black/45">The SQL is embedded in this dashboard so you can copy it directly, paste it into Supabase, run it once, then rerun the verifier.</p>
           </div>
         </div>
       </section>

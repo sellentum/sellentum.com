@@ -207,7 +207,7 @@ Import the repository into Vercel, add the variables from `.env.example`, and de
 After Vercel deploys and Supabase migrations are applied, run:
 
 ```bash
-npm run verify:production -- --base-url=https://sellentum.com
+npm run verify:production -- --base-url=https://www.sellentum.com
 ```
 
 The command checks required environment variables, public production routes, the widget loader and Supabase table/column reachability through the service-role key without printing secrets. It does not replace the authoritative SQL/RLS verification in Supabase. Run [`supabase/verification/production_schema_check.sql`](./supabase/verification/production_schema_check.sql) in the Supabase SQL editor and confirm every row returns `pass`.
@@ -218,16 +218,16 @@ If production verification reports `widget_settings.allowed_domains` or `rate_li
 supabase/verification/production_repair_widget_rate_limits.sql
 ```
 
-Then rerun `npm run verify:production -- --base-url=https://sellentum.com`.
+Then rerun `npm run verify:production -- --base-url=https://www.sellentum.com`.
 
-The dashboard **Production Verification Center** also surfaces this repair workflow with copyable steps, the live verifier command, and the full schema/RLS SQL check so production handoff is not hidden in documentation only.
+The dashboard **Production Verification Center** also surfaces this repair workflow with copyable steps, a paste-ready repair SQL button, the live verifier command, and the full schema/RLS SQL check so production handoff is not hidden in documentation only.
 
-The same center includes a copyable production auth checklist. Before merchant onboarding, prove signup confirmation and password-reset emails route through `https://sellentum.com/auth/callback` and never back to `localhost`.
+The same center includes a copyable production auth checklist. Before merchant onboarding, prove signup confirmation and password-reset emails route through `https://www.sellentum.com/auth/callback` and never back to `localhost`.
 
 To perform the optional shared rate-limit RPC probe from the CLI, add:
 
 ```bash
-npm run verify:production -- --base-url=https://sellentum.com --probe-rate-limit
+npm run verify:production -- --base-url=https://www.sellentum.com --probe-rate-limit
 ```
 
 ## Architecture notes

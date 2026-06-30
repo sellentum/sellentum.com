@@ -2,7 +2,7 @@
 
 Last updated: **30 June 2026**
 
-Production website: **https://sellentum.com**
+Production website: **https://www.sellentum.com**
 
 GitHub repo: **https://github.com/sellentum/sellentum.com.git**
 
@@ -67,7 +67,7 @@ The correct goal is:
 | Product area | Status | What is done | What is still left |
 |---|---|---|---|
 | Brand | **Done** | Product renamed from Findly to Sellentum. | Keep checking for old brand references as we work. |
-| Domain | **Done** | `sellentum.com` is live on Vercel. | Confirm whether final canonical domain is `sellentum.com` or `www.sellentum.com`. |
+| Domain | **Done** | `sellentum.com` is live on Vercel. | Canonical app URL currently matches `https://www.sellentum.com`. |
 | GitHub | **Done** | Repo moved to Sellentum GitHub organization. | Continue pushing every completed work step. |
 | Landing page | **Mostly done** | Premium SaaS-style public website exists. | Final copy, pricing message and legal review. |
 | Auth | **Built, needs live proof** | Signup, login, logout, email verification and password reset routes exist. | Test full production signup and reset-password flow. |
@@ -180,13 +180,21 @@ What we completed:
 - Added row-level security policy files.
 - Added verification SQL files.
 - Added production verification tooling.
+- Added paste-ready Supabase repair SQL inside the Production Verification Center.
 
 Known issue right now:
 
-The production verifier found two missing backend pieces:
+The production verifier on **30 June 2026** still found two missing backend pieces:
 
 - `widget_settings.allowed_domains`
 - `rate_limit_buckets`
+
+Latest verifier result:
+
+```text
+npm run verify:production -- --base-url=https://www.sellentum.com
+32 pass, 2 warn, 2 fail
+```
 
 Repair file already exists:
 
@@ -400,7 +408,7 @@ Status: **Partly done**
 What we completed:
 
 - Vercel project is set up.
-- `sellentum.com` is live.
+- `https://www.sellentum.com` is live as the current canonical app URL.
 - Environment variables were added to Vercel.
 - Production verification command exists.
 - Public routes and auth routes have been checked before.
@@ -442,6 +450,10 @@ Open Supabase SQL editor and run:
 supabase/verification/production_repair_widget_rate_limits.sql
 ```
 
+Easier option:
+
+Open **Dashboard → Production Verification Center** and click **Copy repair SQL**, then paste it directly into Supabase SQL editor.
+
 Then tell Codex whether it succeeded or paste the error.
 
 ---
@@ -453,7 +465,7 @@ Owner: **Codex**
 After the Supabase repair succeeds, Codex should run:
 
 ```bash
-npm run verify:production -- --base-url=https://sellentum.com
+npm run verify:production -- --base-url=https://www.sellentum.com
 ```
 
 Goal:
@@ -596,6 +608,7 @@ This is the plain-English log of work completed so far:
 - Added real-catalog intake guidance.
 - Added storefront widget proof workflow.
 - Added Supabase repair guidance.
+- Added copyable Supabase repair SQL in the dashboard.
 - Added clear README reference to this progress report.
 
 ---
