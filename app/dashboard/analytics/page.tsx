@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { AlertTriangle, ArrowDownRight, ArrowUpRight, Check, ChevronDown, CircleDollarSign, Clipboard, Clock3, Eye, GitBranch, Globe2, ListChecks, MapPin, Megaphone, MessageCircle, MousePointerClick, PackagePlus, Radar, Search, ShieldAlert, Sparkles, Tags, Trophy, UsersRound, Wrench } from "lucide-react";
 import { LoadingState } from "@/components/loading-state";
@@ -156,6 +157,18 @@ export default function AnalyticsPage() {
 
   const max = Math.max(1, ...byDay.map((day) => day.views));
   const activeExperienceLabel = experienceLabels[experienceFilter];
+  const publishedFinder = quizzes.some((quiz) => quiz.published);
+  const widgetViewCaptured = events.some((event) => event.event_type === "widget_view");
+  const journeyCompleted = events.some((event) => event.event_type === "quiz_complete") && events.some((event) => event.event_type === "product_recommended");
+  const buyClickCaptured = events.some((event) => event.event_type === "buy_click");
+  const showFirstRunGuide = filteredEvents.length === 0;
+  const firstRunSteps = [
+    { title: "Publish a product finder", detail: "Analytics starts with one live guided experience shoppers can open.", done: publishedFinder, href: "/dashboard/quizzes", cta: "Open Product Finders" },
+    { title: "Copy the widget snippet", detail: "Use the generated embed code so Sellentum can track views and attribution.", done: false, href: "/dashboard/settings", cta: "Open Brand & embed" },
+    { title: "Test on a storefront page", detail: "Use the sandbox or install scanner before touching a live theme.", done: widgetViewCaptured, href: "/dashboard/storefront-sandbox", cta: "Open QA sandbox" },
+    { title: "Complete one shopper journey", detail: "Answer the questions until recommendations appear.", done: journeyCompleted, href: "/dashboard/launch", cta: "Open Launch Studio" },
+    { title: "Click Buy Now once", detail: "This proves the final conversion event is connected to the session.", done: buyClickCaptured, href: "/dashboard/analytics", cta: "Refresh Analytics" },
+  ];
   async function copyProofPacket() {
     await navigator.clipboard.writeText(analyticsProof.packet);
     setProofCopied(true);
@@ -198,6 +211,36 @@ export default function AnalyticsPage() {
           </div>
         </div>
       </div>
+
+      {showFirstRunGuide && (
+        <section className="mt-8 overflow-hidden rounded-[28px] border border-black/[0.07] bg-white shadow-sm">
+          <div className="grid xl:grid-cols-[0.82fr_1.18fr]">
+            <div className="bg-ink p-6 text-white">
+              <p className="eyebrow text-lime">First analytics proof run</p>
+              <h2 className="mt-4 text-3xl font-extrabold tracking-[-.05em]">{events.length ? `No ${activeExperienceLabel.toLowerCase()} events yet.` : "Analytics is waiting for the first storefront journey."}</h2>
+              <p className="mt-3 max-w-xl text-sm leading-6 text-white/50">Do one controlled desktop QA session before judging performance. The goal is to prove the five critical events, not to chase numbers too early.</p>
+              <div className="mt-5 flex flex-wrap gap-2">
+                <Link href="/dashboard/quizzes" className="inline-flex items-center gap-2 rounded-full bg-lime px-5 py-3 text-xs font-extrabold text-ink"><Sparkles size={14} /> Publish finder</Link>
+                <Link href="/dashboard/storefront-sandbox" className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-5 py-3 text-xs font-extrabold text-white"><Globe2 size={14} /> Test storefront journey</Link>
+                <button onClick={copyProofPacket} className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-5 py-3 text-xs font-extrabold text-white"><Clipboard size={14} /> {proofCopied ? "Proof copied" : "Copy proof packet"}</button>
+              </div>
+            </div>
+            <div className="grid gap-3 p-5 xl:grid-cols-5">
+              {firstRunSteps.map((step, index) => (
+                <Link key={step.title} href={step.href} className={`rounded-2xl border p-4 transition hover:-translate-y-0.5 ${step.done ? "border-lime/50 bg-lime/15" : "border-black/[0.07] bg-[#f8f8f4]"}`}>
+                  <div className="flex items-center justify-between gap-3">
+                    <span className={`grid h-8 w-8 place-items-center rounded-xl text-xs font-extrabold ${step.done ? "bg-lime text-ink" : "bg-white text-black/35"}`}>{step.done ? <Check size={14} /> : index + 1}</span>
+                    <span className={`rounded-full px-2 py-1 text-xs font-extrabold uppercase ${step.done ? "bg-white text-moss" : "bg-white text-black/30"}`}>{step.done ? "Done" : "Next"}</span>
+                  </div>
+                  <h3 className="mt-4 text-sm font-extrabold leading-5 text-ink">{step.title}</h3>
+                  <p className="mt-2 text-xs font-bold leading-5 text-black/45">{step.detail}</p>
+                  <p className="mt-3 text-xs font-extrabold text-moss">{step.cta}</p>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       <div className="mt-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-6">
         {[

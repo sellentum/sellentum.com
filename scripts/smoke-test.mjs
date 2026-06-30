@@ -256,6 +256,8 @@ function assertSessionAnalytics() {
   assert(analytics.includes("buildAnalyticsLaunchProofReport"), "Analytics dashboard should use shared launch analytics proof");
   assert(analytics.includes("Launch analytics proof"), "Analytics dashboard should expose a launch analytics proof card");
   assert(analytics.includes("Copy proof packet"), "Analytics dashboard should let merchants copy a launch analytics proof packet");
+  assert(analytics.includes("First analytics proof run") && analytics.includes("Analytics is waiting for the first storefront journey"), "Analytics dashboard should guide empty workspaces toward a first proof session");
+  assert(analytics.includes("firstRunSteps") && analytics.includes("Publish a product finder") && analytics.includes("Click Buy Now once"), "Analytics empty state should show the five-step proof journey");
   assert(analyticsProof.includes("buildAnalyticsLaunchProofReport"), "Analytics proof helper should expose a reusable report builder");
   assert(analyticsProof.includes("launchCriticalAnalyticsEvents"), "Analytics proof helper should define the launch-critical event contract");
   for (const eventName of ["widget_view", "quiz_start", "quiz_complete", "product_recommended", "buy_click"]) {

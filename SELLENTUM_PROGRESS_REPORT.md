@@ -209,6 +209,7 @@ What is done:
 - Analytics section.
 - Production verification section.
 - Plain-English production proof lanes for deployment/runtime, backend/RLS, auth emails, catalog/finder, storefront widget and analytics proof.
+- First-run Analytics proof guide that explains how to generate the first real storefront session.
 - Launch proof queue.
 - Next-best-action card.
 - Persistent core launch path in the dashboard shell:
@@ -600,10 +601,11 @@ Latest completed Codex intervals:
 - Added a persistent core launch path to the dashboard shell so merchants see the next setup step from every dashboard page.
 - Separated the sidebar language into core launch workflow, after-launch tools and advanced tools.
 - Added plain-English production proof lanes so the Production Verification Center explains what is proven, what needs evidence and who owns the next step.
+- Added a first-run Analytics proof guide so empty analytics screens tell merchants how to produce the first widget/session/buy-click evidence.
 
 I should continue in this order:
 
-1. Improve merchant empty states across dashboard pages.
+1. Keep improving merchant empty states across the remaining advanced dashboard pages.
 2. Keep reducing internal/founder-only language from merchant-facing screens.
 3. Improve live storefront/widget proof guidance after the first real catalog and finder exist.
 4. Keep validation running after each meaningful step.
