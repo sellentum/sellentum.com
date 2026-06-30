@@ -3,7 +3,7 @@ import type { LaunchContract } from "@/lib/launch-contract";
 export type StorefrontQaStep = {
   id: string;
   title: string;
-  owner: "merchant" | "developer" | "sellentum";
+  owner: "merchant" | "storefront" | "sellentum";
   expectedOutcome: string;
   checks: string[];
 };
@@ -30,6 +30,12 @@ function statusFromContract(contract: LaunchContract): StorefrontQaRunbook["stat
 
 function firstEndpoint(contract: LaunchContract, token: string) {
   return contract.apiEndpoints.find((endpoint) => endpoint.includes(token)) || token;
+}
+
+function ownerLabel(owner: StorefrontQaStep["owner"]) {
+  if (owner === "storefront") return "storefront install";
+  if (owner === "sellentum") return "Sellentum";
+  return "merchant";
 }
 
 export function buildStorefrontQaRunbook({
@@ -79,7 +85,7 @@ export function buildStorefrontQaRunbook({
       {
         id: "install-snippet",
         title: "Install the widget snippet on a staging storefront",
-        owner: "developer",
+        owner: "storefront",
         expectedOutcome: "The launcher or inline frame appears once and inherits the merchant brand settings.",
         checks: [
           "Paste the snippet before the closing </body> tag or into the test page section.",
@@ -153,7 +159,7 @@ export function formatStorefrontQaRunbook(runbook: StorefrontQaRunbook) {
     "",
     "## Manual QA steps",
     ...runbook.steps.flatMap((step, index) => [
-      `${index + 1}. ${step.title} (${step.owner})`,
+      `${index + 1}. ${step.title} (${ownerLabel(step.owner)})`,
       `   Expected: ${step.expectedOutcome}`,
       ...step.checks.map((check) => `   - ${check}`),
     ]),

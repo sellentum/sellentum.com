@@ -242,12 +242,13 @@ What was completed:
 
 What still needs improvement:
 
-- Make the dashboard less technical.
+- Keep making the dashboard less technical.
 - Improve empty states.
 - Improve loading states.
 - Improve error messages.
 - Make every page clearly answer: “What should I do next?”
 - Remove internal/developer/founder language from merchant-facing screens.
+- Latest completed interval: Launch Studio now says **Storefront launch handoff**, **Implementation contract** and **Storefront QA checklist** instead of developer-first wording.
 
 Current judgment:
 
@@ -547,7 +548,7 @@ Codex tasks:
 - Improve “what to do next” copy.
 - Keep technical details only where they are truly useful.
 
-Status: **Next**
+Status: **In progress**
 
 ---
 

@@ -41,8 +41,8 @@ export function buildLaunchPacket(input: LaunchPacketInput) {
   }).join("\n");
 
   return [
-    "Sellentum launch packet",
-    "====================",
+    "Sellentum storefront launch handoff",
+    "===================================",
     "",
     `Brand: ${input.settings.brand_name || "Your brand"}`,
     `Experience: ${input.widgetExperience}`,
@@ -83,8 +83,8 @@ export function buildLaunchPacket(input: LaunchPacketInput) {
     "- product_recommended — product appeared in the recommendation set",
     "- buy_click — shopper clicked a product CTA",
     "",
-    "Implementation notes",
-    "--------------------",
+    "Storefront install notes",
+    "------------------------",
     "1. Paste the script once before the storefront closing </body> tag.",
     "2. Keep the stable embed ID in the snippet and preview URL; slugs are workspace-local labels only.",
     "3. Run Sellentum Preflight after deployment and confirm widget_view, quiz_start and buy_click events appear in Analytics.",

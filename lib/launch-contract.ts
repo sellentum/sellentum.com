@@ -12,7 +12,7 @@ export type LaunchContractCheck = {
   id: string;
   label: string;
   detail: string;
-  owner: "merchant" | "developer" | "sellentum";
+  owner: "merchant" | "storefront" | "sellentum";
   status: "ready" | "review" | "blocked";
 };
 
@@ -37,6 +37,12 @@ function statusFromInstallSeverity(severity: WidgetInstallReport["checks"][numbe
   return "ready";
 }
 
+function ownerLabel(owner: LaunchContractCheck["owner"]) {
+  if (owner === "storefront") return "storefront install";
+  if (owner === "sellentum") return "Sellentum";
+  return "merchant";
+}
+
 export function buildLaunchContract({
   config,
   installReport,
@@ -58,7 +64,7 @@ export function buildLaunchContract({
       id: item.id,
       label: item.label,
       detail: item.detail,
-      owner: item.id === "origin" || item.id === "id" ? "developer" as const : "merchant" as const,
+      owner: item.id === "origin" || item.id === "id" ? "storefront" as const : "merchant" as const,
       status: statusFromInstallSeverity(item.severity),
     })),
     {
@@ -78,7 +84,7 @@ export function buildLaunchContract({
   ];
 
   return {
-    title: `${config.experience} launch contract`,
+    title: `${config.experience} storefront launch contract`,
     publicUrl,
     apiEndpoints: [
       `${origin}/api/widget.js`,
@@ -169,7 +175,7 @@ export function formatLaunchContract(contract: LaunchContract) {
     ...contract.events.map((item) => `- ${item.event}: ${item.purpose} Required: ${item.requiredMetadata.join(", ")}. Optional: ${item.optionalMetadata.join(", ")}.`),
     "",
     "## Launch checks",
-    ...contract.checks.map((item) => `- ${item.status.toUpperCase()} [${item.owner}] ${item.label}: ${item.detail}`),
+    ...contract.checks.map((item) => `- ${item.status.toUpperCase()} [${ownerLabel(item.owner)}] ${item.label}: ${item.detail}`),
     "",
     "## Troubleshooting",
     ...contract.troubleshooting.map((item) => `- ${item}`),

@@ -458,17 +458,18 @@ function assertLaunchStudioWorkflow() {
   assert(experienceLaunch.includes("buildLaunchExperienceCards"), "Launch experience helper should expose reusable multi-experience launch cards");
   assert(experienceLaunch.includes("\"assistant\"") && experienceLaunch.includes("\"search\"") && experienceLaunch.includes("\"configurator\""), "Launch experience helper should include advisor, search and configurator embeds");
   assert(page.includes("buildLaunchPacket"), "Launch Studio should use the shared launch packet helper");
-  assert(page.includes("Developer handoff"), "Launch Studio should expose a developer handoff packet");
-  assert(page.includes("Copy packet"), "Launch Studio should let merchants copy the developer launch packet");
+  assert(page.includes("Storefront launch handoff"), "Launch Studio should expose a merchant-friendly storefront launch handoff");
+  assert(!page.includes("Developer handoff"), "Launch Studio should not expose developer-first wording in the merchant handoff panel");
+  assert(page.includes("Copy handoff"), "Launch Studio should let merchants copy the storefront launch handoff");
   assert(page.includes("buildLaunchContract"), "Launch Studio should build a deterministic launch contract");
-  assert(page.includes("Launch contract"), "Launch Studio should expose a launch contract panel");
+  assert(page.includes("Implementation contract"), "Launch Studio should expose an implementation contract panel");
   assert(page.includes("Copy contract"), "Launch Studio should let merchants copy the launch contract");
   assert(launchContract.includes("buildLaunchContract"), "Launch contract helper should expose reusable contract generation");
   assert(launchContract.includes("formatLaunchContract"), "Launch contract helper should expose reusable contract formatting");
   assert(launchContract.includes("Analytics contract") && launchContract.includes("data-experience"), "Launch contract should document analytics events and widget attributes");
   assert(page.includes("buildStorefrontQaRunbook"), "Launch Studio should build a deterministic storefront QA runbook");
-  assert(page.includes("Storefront QA runbook"), "Launch Studio should expose a storefront QA runbook panel");
-  assert(page.includes("Copy runbook"), "Launch Studio should let merchants copy the storefront QA runbook");
+  assert(page.includes("Storefront QA checklist"), "Launch Studio should expose a storefront QA checklist panel");
+  assert(page.includes("Copy QA checklist"), "Launch Studio should let merchants copy the storefront QA checklist");
   assert(storefrontQaRunbook.includes("buildStorefrontQaRunbook"), "Storefront QA helper should expose reusable runbook generation");
   assert(storefrontQaRunbook.includes("formatStorefrontQaRunbook"), "Storefront QA helper should expose reusable runbook formatting");
   assert(storefrontQaRunbook.includes("Acceptance criteria") && storefrontQaRunbook.includes("Rollback plan"), "Storefront QA runbook should document acceptance criteria and rollback");
@@ -2221,7 +2222,7 @@ async function assertDeterministicLogic() {
     activeProducts: demo.demoProducts.length,
     enrichedPercent: 75,
   });
-  assert(packet.includes("Sellentum launch packet") && packet.includes("Stable embed ID: quiz_footwear"), "Expected launch packet to include a title and stable embed ID");
+  assert(packet.includes("Sellentum storefront launch handoff") && packet.includes("Stable embed ID: quiz_footwear"), "Expected launch handoff to include a title and stable embed ID");
   assert(packet.includes("Analytics events tracked") && packet.includes("buy_click"), "Expected launch packet to document analytics events");
   assert(packet.includes(generatedWidgetSnippet), "Expected launch packet to include the generated embed snippet");
   const contract = launchContract.buildLaunchContract({

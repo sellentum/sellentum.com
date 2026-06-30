@@ -23,7 +23,7 @@ For the current human-readable project status, open [`SELLENTUM_PROGRESS_REPORT.
 - Shopper language planner that compares catalog facts, generated quiz terms and real search/advisor queries to find covered, thin and missing shopper vocabulary before launch
 - AI quiz blueprint review in Launch Studio so merchants can inspect planned questions, catalog coverage and generation risks before publishing
 - Industry starter kits that install editable sample products, finder questions, deterministic answer rules and product-linked configurator drafts for faster merchant onboarding
-- Launch Studio workflow that enriches a catalog, generates a finder, publishes it, prepares finder/advisor/search/configurator embed snippets and copies a developer launch packet from one screen
+- Launch Studio workflow that enriches a catalog, generates a finder, publishes it, prepares finder/advisor/search/configurator embed snippets and copies a storefront launch handoff from one screen
 - Widget Studio that centralizes finder/advisor/search/configurator modal and inline snippets, install contracts, attribution labels, QA checks and copyable developer handoff packets
 - Headless API Center that packages finder, advisor, search, configurator, widget and analytics runtimes with request examples, response fields, guardrails and copyable developer packets
 - Data Contract Center that verifies Supabase persistence mode, schema table coverage, catalog records, published experiences, analytics event shape and widget settings through an authenticated health endpoint
@@ -307,7 +307,7 @@ npm run verify:production -- --base-url=https://www.sellentum.com --probe-rate-l
 - `supabase/verification/*` — production Supabase schema, RLS, grant and shared-rate-limit verification SQL
 - `lib/workspace-snapshot.ts` and `app/dashboard/workspace-snapshot` — safe workspace archive, product/analytics CSV exports and developer/support handoff packet
 - `lib/usage-metering.ts` and `app/dashboard/usage` — Stripe-placeholder usage and plan-fit center for sessions, interactions, catalog scale, experiences and AI-assist credits
-- `lib/launch-packet.ts` — copyable developer handoff text for preview URLs, embed snippets, QA checks and analytics contracts
+- `lib/launch-packet.ts` — copyable storefront launch handoff text for preview URLs, embed snippets, QA checks and analytics contracts
 - `lib/launch-contract.ts` — deterministic launch contract for runtime endpoints, widget attributes, analytics payloads and troubleshooting
 - `lib/storefront-qa-runbook.ts` and `lib/storefront-proof.ts` — deterministic manual QA scripts for storefront install, analytics proof, recovery testing, rollback and founder/developer proof handoff
 - `lib/rule-coverage.ts` — deterministic answer-rule coverage helper used by the finder builder and readiness checks

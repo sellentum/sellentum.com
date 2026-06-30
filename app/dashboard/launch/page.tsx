@@ -232,10 +232,10 @@ export default function LaunchStudioPage() {
     try {
       await navigator.clipboard.writeText(launchPacket);
       setPacketCopied(true);
-      setNotice(`${selectedLaunchExperience.label} launch packet copied. It includes the URL, snippet, readiness checks and analytics events.`);
+      setNotice(`${selectedLaunchExperience.label} launch handoff copied. It includes the URL, snippet, readiness checks and analytics events.`);
       setTimeout(() => setPacketCopied(false), 1800);
     } catch {
-      setError("Could not copy the launch packet automatically. Select the preview and copy it manually.");
+      setError("Could not copy the launch handoff automatically. Select the preview and copy it manually.");
     } finally {
       setBusy(null);
     }
@@ -247,10 +247,10 @@ export default function LaunchStudioPage() {
     try {
       await navigator.clipboard.writeText(launchContractText);
       setContractCopied(true);
-      setNotice(`${selectedLaunchExperience.label} launch contract copied. It includes endpoints, widget attributes, analytics payloads and troubleshooting.`);
+      setNotice(`${selectedLaunchExperience.label} implementation contract copied. It includes endpoints, widget attributes, analytics payloads and troubleshooting.`);
       setTimeout(() => setContractCopied(false), 1800);
     } catch {
-      setError("Could not copy the launch contract automatically. Select the preview and copy it manually.");
+      setError("Could not copy the implementation contract automatically. Select the preview and copy it manually.");
     } finally {
       setBusy(null);
     }
@@ -262,10 +262,10 @@ export default function LaunchStudioPage() {
     try {
       await navigator.clipboard.writeText(storefrontQaRunbookText);
       setRunbookCopied(true);
-      setNotice(`${selectedLaunchExperience.label} storefront QA runbook copied. Use it to verify staging install, shopper journey, analytics and rollback.`);
+      setNotice(`${selectedLaunchExperience.label} storefront QA checklist copied. Use it to verify staging install, shopper journey, analytics and rollback.`);
       setTimeout(() => setRunbookCopied(false), 1800);
     } catch {
-      setError("Could not copy the storefront QA runbook automatically. Select the preview and copy it manually.");
+      setError("Could not copy the storefront QA checklist automatically. Select the preview and copy it manually.");
     } finally {
       setBusy(null);
     }
@@ -414,10 +414,10 @@ export default function LaunchStudioPage() {
           <div className="border-t border-black/[0.06] bg-white p-5">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h2 className="flex items-center gap-2 text-sm font-extrabold"><FileText size={15} className="text-moss" /> Developer handoff</h2>
-                <p className="mt-1 text-xs leading-4 text-black/35">Copy a launch packet with the preview URL, embed snippet, install QA status and analytics contract.</p>
+                <h2 className="flex items-center gap-2 text-sm font-extrabold"><FileText size={15} className="text-moss" /> Storefront launch handoff</h2>
+                <p className="mt-1 text-xs leading-4 text-black/35">Copy one clean handoff with the preview URL, embed snippet, install readiness and analytics events to verify.</p>
               </div>
-              <button onClick={copyLaunchPacket} disabled={busy !== null} className="btn-secondary shrink-0 !px-3 !py-2 text-xs">{busy === "packet" ? <LoaderCircle size={13} className="animate-spin" /> : packetCopied ? <Check size={13} /> : <Clipboard size={13} />}{packetCopied ? "Copied" : "Copy packet"}</button>
+              <button onClick={copyLaunchPacket} disabled={busy !== null} className="btn-secondary shrink-0 !px-3 !py-2 text-xs">{busy === "packet" ? <LoaderCircle size={13} className="animate-spin" /> : packetCopied ? <Check size={13} /> : <Clipboard size={13} />}{packetCopied ? "Copied" : "Copy handoff"}</button>
             </div>
             <div className="mt-4 grid gap-3 sm:grid-cols-3">
               <div className="rounded-2xl bg-canvas p-3"><p className="text-xs font-extrabold uppercase tracking-wide text-black/30">Preview URL</p><p className="mt-1 truncate text-xs font-bold text-black/55">{publicUrl}</p></div>
@@ -429,8 +429,8 @@ export default function LaunchStudioPage() {
           <div className="border-t border-black/[0.06] bg-[#f8f8f4] p-5">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h2 className="flex items-center gap-2 text-sm font-extrabold"><ShieldCheck size={15} className="text-moss" /> Launch contract</h2>
-                <p className="mt-1 text-xs leading-4 text-black/35">A stricter implementation spec with endpoints, widget attributes, analytics payload requirements, QA checks and troubleshooting.</p>
+                <h2 className="flex items-center gap-2 text-sm font-extrabold"><ShieldCheck size={15} className="text-moss" /> Implementation contract</h2>
+                <p className="mt-1 text-xs leading-4 text-black/35">A stricter storefront install spec with endpoints, widget attributes, analytics payload requirements, QA checks and troubleshooting.</p>
               </div>
               <button onClick={copyLaunchContract} disabled={busy !== null} className="btn-secondary shrink-0 !px-3 !py-2 text-xs">{busy === "contract" ? <LoaderCircle size={13} className="animate-spin" /> : contractCopied ? <Check size={13} /> : <Clipboard size={13} />}{contractCopied ? "Copied" : "Copy contract"}</button>
             </div>
@@ -444,10 +444,10 @@ export default function LaunchStudioPage() {
           <div className="border-t border-black/[0.06] bg-white p-5">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h2 className="flex items-center gap-2 text-sm font-extrabold"><BookOpenCheck size={15} className="text-moss" /> Storefront QA runbook</h2>
-                <p className="mt-1 text-xs leading-4 text-black/35">A manual go-live script for staging install, shopper journey, telemetry proof, recovery paths and rollback.</p>
+                <h2 className="flex items-center gap-2 text-sm font-extrabold"><BookOpenCheck size={15} className="text-moss" /> Storefront QA checklist</h2>
+                <p className="mt-1 text-xs leading-4 text-black/35">A manual go-live checklist for staging install, shopper journey, telemetry proof, recovery paths and rollback.</p>
               </div>
-              <button onClick={copyStorefrontQaRunbook} disabled={busy !== null} className="btn-secondary shrink-0 !px-3 !py-2 text-xs">{busy === "runbook" ? <LoaderCircle size={13} className="animate-spin" /> : runbookCopied ? <Check size={13} /> : <Clipboard size={13} />}{runbookCopied ? "Copied" : "Copy runbook"}</button>
+              <button onClick={copyStorefrontQaRunbook} disabled={busy !== null} className="btn-secondary shrink-0 !px-3 !py-2 text-xs">{busy === "runbook" ? <LoaderCircle size={13} className="animate-spin" /> : runbookCopied ? <Check size={13} /> : <Clipboard size={13} />}{runbookCopied ? "Copied" : "Copy QA checklist"}</button>
             </div>
             <div className="mt-4 grid gap-3 sm:grid-cols-3">
               <div className="rounded-2xl bg-canvas p-3"><p className="text-lg font-extrabold">{storefrontQaRunbook.steps.length}</p><p className="text-xs font-bold text-black/30">Manual QA steps</p></div>
