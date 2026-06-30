@@ -69,6 +69,37 @@ const nextActionTone: Record<MerchantNextActionPriority, string> = {
   complete: "bg-lime text-moss",
 };
 
+const serviceSteps = [
+  {
+    title: "Upload products",
+    copy: "Add the product facts Sellentum needs: price, images, categories, tags, features and product URLs.",
+    href: "/dashboard/products",
+    cta: "Add products",
+    icon: Boxes,
+  },
+  {
+    title: "Build a finder",
+    copy: "Ask shoppers a few guided questions instead of making them browse every product alone.",
+    href: "/dashboard/quizzes",
+    cta: "Build finder",
+    icon: BookOpenCheck,
+  },
+  {
+    title: "Recommend clearly",
+    copy: "Rules choose the products. AI explains why each match fits the shopper’s answers.",
+    href: "/dashboard/analytics",
+    cta: "See proof",
+    icon: Sparkles,
+  },
+  {
+    title: "Embed and learn",
+    copy: "Copy the widget snippet, install it on your store and track views, completions and Buy Now clicks.",
+    href: "/dashboard/launch",
+    cta: "Get widget",
+    icon: Rocket,
+  },
+];
+
 export default function DashboardOverview() {
   const { ready, products, quizzes, configurators, events, settings } = useStore();
   const [founderQueueCopied, setFounderQueueCopied] = useState(false);
@@ -116,7 +147,7 @@ export default function DashboardOverview() {
   return (
     <div className="animate-rise">
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-        <div><p className="eyebrow text-moss">{today}</p><h1 className="display mt-2 text-4xl sm:text-5xl">Good evening.</h1><p className="mt-2 text-sm text-black/45">Here’s how {settings.brand_name} is helping shoppers choose.</p></div>
+        <div><p className="eyebrow text-moss">{today}</p><h1 className="display mt-2 text-4xl sm:text-5xl">Launch your product finder.</h1><p className="mt-2 max-w-2xl text-sm leading-6 text-black/45">Sellentum helps {settings.brand_name} guide shoppers from “I’m not sure what to buy” to 1–3 recommended products with clear reasons and a Buy Now path.</p></div>
         <div className="flex flex-wrap justify-end gap-3">
           <Link href="/dashboard/products" className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-xs font-extrabold text-ink shadow-sm transition hover:-translate-y-0.5"><Boxes size={15} className="text-moss" /> Add products</Link>
           <Link href="/dashboard/quizzes" className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-xs font-extrabold text-ink shadow-sm transition hover:-translate-y-0.5"><BookOpenCheck size={15} className="text-moss" /> Build finder</Link>
@@ -124,6 +155,26 @@ export default function DashboardOverview() {
           <Link href="/dashboard/launch" className="btn-primary self-start"><Rocket size={15} className="text-lime" /> Launch checklist</Link>
         </div>
       </div>
+
+      <section className="mt-8 overflow-hidden rounded-[28px] border border-black/[0.07] bg-ink text-white shadow-sm">
+        <div className="grid gap-4 p-6 xl:grid-cols-[0.7fr_1.3fr] xl:items-stretch">
+          <div className="rounded-2xl bg-white/[0.06] p-6">
+            <p className="eyebrow text-lime">What you are selling</p>
+            <h2 className="mt-4 text-3xl font-extrabold leading-tight tracking-[-.05em]">An AI-guided product finder widget for ecommerce stores.</h2>
+            <p className="mt-4 text-sm leading-6 text-white/45">The promise is simple: shoppers answer useful questions, Sellentum recommends the right products from your catalog, and your store learns which choices lead to buying intent.</p>
+          </div>
+          <div className="grid gap-3 xl:grid-cols-4">
+            {serviceSteps.map(({ title, copy, href, cta, icon: Icon }) => (
+              <Link key={title} href={href} className="rounded-2xl bg-white p-4 text-ink transition hover:-translate-y-0.5">
+                <span className="grid h-9 w-9 place-items-center rounded-xl bg-lime/45 text-moss"><Icon size={16} /></span>
+                <h3 className="mt-5 text-sm font-extrabold leading-5">{title}</h3>
+                <p className="mt-2 text-xs font-bold leading-4 text-black/45">{copy}</p>
+                <span className="mt-4 inline-flex items-center gap-1 text-xs font-extrabold text-moss">{cta}<ArrowRight size={11} /></span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
 
       <section className="mt-8 rounded-[28px] border border-black/[0.07] bg-white p-6 shadow-sm">
         <div className="grid gap-6 xl:grid-cols-[1fr_1.15fr] xl:items-center">
@@ -300,7 +351,7 @@ export default function DashboardOverview() {
 
       <div className="mt-5 grid gap-5 lg:grid-cols-2">
         <section className="rounded-2xl border border-black/[0.07] bg-white p-5 sm:p-6"><div className="flex items-center justify-between"><div><h2 className="text-sm font-extrabold">Your product finders</h2><p className="mt-1 text-xs text-black/35">{published} live · {quizzes.length} total</p></div><Link href="/dashboard/quizzes" className="text-xs font-extrabold text-moss">View all</Link></div><div className="mt-5 space-y-2">{quizzes.slice(0, 2).map((quiz) => <Link href="/dashboard/quizzes" key={quiz.id} className="flex items-center gap-3 rounded-xl border border-black/[0.07] p-3.5 hover:bg-canvas"><span className="grid h-10 w-10 place-items-center rounded-xl bg-lime/40 text-moss"><BookOpenCheck size={17} /></span><span className="min-w-0 flex-1"><span className="block truncate text-xs font-extrabold">{quiz.name}</span><span className="mt-1 block text-xs text-black/35">{quiz.questions.length} questions · {quiz.published ? "Published" : "Draft"}</span></span><CirclePlay size={16} className="text-black/25" /></Link>)}</div></section>
-        <section className="rounded-2xl border border-black/[0.07] bg-white p-5 sm:p-6"><div className="flex items-center justify-between"><div><h2 className="text-sm font-extrabold">Visual configurators</h2><p className="mt-1 text-xs text-black/35">{liveConfigurators} live · {configurators.length} total</p></div><Link href="/dashboard/configurators" className="text-xs font-extrabold text-moss">View all</Link></div><div className="mt-5 space-y-2">{configurators.slice(0, 2).map((configurator) => <Link href="/dashboard/configurators" key={configurator.id} className="flex items-center gap-3 rounded-xl border border-black/[0.07] p-3.5 hover:bg-canvas"><span className="grid h-10 w-10 place-items-center rounded-xl bg-peach/55 text-moss"><PackagePlus size={17} /></span><span className="min-w-0 flex-1"><span className="block truncate text-xs font-extrabold">{configurator.name}</span><span className="mt-1 block text-xs text-black/35">{configurator.steps.length} steps · {configurator.published ? "Published" : "Draft"}</span></span><CirclePlay size={16} className="text-black/25" /></Link>)}</div></section>
+        <section className="rounded-2xl border border-black/[0.07] bg-white p-5 sm:p-6"><div className="flex items-center justify-between"><div><h2 className="text-sm font-extrabold">After the first finder</h2><p className="mt-1 text-xs text-black/35">Optional tools for richer product discovery once the core widget is proven.</p></div><span className="rounded-full bg-black/[0.04] px-3 py-1.5 text-xs font-extrabold text-black/35">{liveConfigurators} configurator live</span></div><div className="mt-5 grid gap-2 sm:grid-cols-2">{[{ label: "Configurators", href: "/dashboard/configurators", icon: PackagePlus, detail: `${configurators.length} total` }, { label: "Advisor Studio", href: "/dashboard/advisor", icon: Sparkles, detail: "Natural-language product help" }, { label: "Search lab", href: "/dashboard/search", icon: Wrench, detail: "Semantic product discovery" }, { label: "Templates", href: "/dashboard/templates", icon: BookOpenCheck, detail: "Starter kits" }].map(({ label, href, icon: Icon, detail }) => <Link key={href} href={href} className="flex items-center gap-3 rounded-xl border border-black/[0.07] p-3.5 hover:bg-canvas"><span className="grid h-10 w-10 place-items-center rounded-xl bg-peach/55 text-moss"><Icon size={17} /></span><span className="min-w-0 flex-1"><span className="block truncate text-xs font-extrabold">{label}</span><span className="mt-1 block text-xs text-black/35">{detail}</span></span><CirclePlay size={16} className="text-black/25" /></Link>)}</div></section>
       </div>
 
       <div className="mt-5 grid gap-5 lg:grid-cols-2">
@@ -317,7 +368,7 @@ export default function DashboardOverview() {
       <section className="mt-5 rounded-2xl border border-black/[0.07] bg-white p-5 sm:p-6">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h2 className="text-sm font-extrabold">Operations map</h2>
+            <h2 className="text-sm font-extrabold">Advanced map</h2>
             <p className="mt-1 max-w-2xl text-xs leading-5 text-black/35">A compact route map for the deeper studios, QA centers and launch tools. Use this after the basic product, finder and widget setup is underway.</p>
           </div>
           <span className="rounded-full bg-black/[0.04] px-3 py-1.5 text-xs font-extrabold uppercase text-black/35">{operationsMap.length} centers</span>

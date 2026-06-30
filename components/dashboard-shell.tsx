@@ -26,12 +26,11 @@ type NavSection = {
 
 const primaryNavSections: NavSection[] = [
   {
-    label: "Core launch workflow",
+    label: "Launch your product finder",
     items: [
       { href: "/dashboard", label: "Overview", icon: LayoutDashboard, exact: true },
       { href: "/dashboard/products", label: "Products", icon: Boxes },
       { href: "/dashboard/quizzes", label: "Product finders", icon: BookOpenCheck },
-      { href: "/dashboard/configurators", label: "Configurators", icon: PackagePlus },
       { href: "/dashboard/settings", label: "Brand & embed", icon: Settings },
       { href: "/dashboard/launch", label: "Launch Studio", icon: Rocket },
       { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
@@ -40,6 +39,7 @@ const primaryNavSections: NavSection[] = [
   {
     label: "After launch",
     items: [
+      { href: "/dashboard/configurators", label: "Configurators", icon: PackagePlus },
       { href: "/dashboard/advisor", label: "Advisor Studio", icon: Bot },
       { href: "/dashboard/search", label: "Search lab", icon: Search },
       { href: "/dashboard/templates", label: "Templates", icon: LayoutTemplate },
@@ -114,14 +114,13 @@ function isNavItemActive(pathname: string, item: NavItem) {
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { ready, mode, settings, products, quizzes, configurators, events } = useStore();
+  const { ready, mode, settings, products, quizzes, events } = useStore();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const [accountEmail, setAccountEmail] = useState("");
   const [accountName, setAccountName] = useState("");
   const [advancedExpanded, setAdvancedExpanded] = useState(false);
   const previewQuiz = quizzes.find((quiz) => quiz.published) || quizzes[0];
-  const previewConfigurator = configurators.find((configurator) => configurator.published) || configurators[0];
   const launchPlan = useMemo(() => buildMerchantLaunchPlan({ settings, products, quizzes, events }), [settings, products, quizzes, events]);
   const onboardingComplete = mode === "demo" || isWorkspaceOnboarded(settings);
   const isOnboardingPath = pathname.startsWith("/dashboard/onboarding");
@@ -264,7 +263,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       <div className="md:col-start-2">
         <header className="sticky top-0 z-30 flex h-[68px] items-center justify-between border-b border-black/[0.06] bg-[#f3f4ef]/90 px-4 backdrop-blur-xl sm:px-7">
           <div className="flex items-center gap-3"><button aria-label="Open navigation" onClick={() => setMobileOpen(true)} className="grid h-9 w-9 place-items-center rounded-xl border border-black/10 md:hidden"><Menu size={17} /></button><p className="text-xs font-bold text-black/35">{mode === "demo" ? "Interactive demo workspace" : "Your workspace"}</p></div>
-          <div className="flex items-center gap-3">{previewQuiz && <Link href={`/finder/${previewQuiz.slug || previewQuiz.id}`} target="_blank" className="hidden items-center gap-1.5 text-xs font-extrabold text-black/50 sm:flex">Preview finder <ExternalLink size={13} /></Link>}{previewConfigurator && <Link href={`/configurator/${previewConfigurator.slug || previewConfigurator.id}`} target="_blank" className="hidden items-center gap-1.5 text-xs font-extrabold text-black/50 xl:flex">Preview configurator <ExternalLink size={13} /></Link>}<Link href="/support" className="grid h-9 w-9 place-items-center rounded-full border border-black/10 bg-white text-black/40" aria-label="Help"><HelpCircle size={16} /></Link><div className="relative"><button onClick={() => setAccountOpen((open) => !open)} className="grid h-9 w-9 place-items-center rounded-full bg-peach text-xs font-extrabold" aria-label="Open account menu" aria-expanded={accountOpen}>{accountInitials}</button>{accountOpen && <div className="absolute right-0 top-11 z-50 w-72 overflow-hidden rounded-2xl border border-black/10 bg-white shadow-2xl"><div className="border-b border-black/5 p-4"><p className="text-xs font-extrabold text-ink">{accountName || settings.brand_name}</p><p className="mt-1 truncate text-xs font-bold text-black/35">{accountEmail || (mode === "demo" ? "Demo workspace" : "Account")}</p></div><div className="p-2"><Link href="/dashboard/account" className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold text-black/55 hover:bg-canvas hover:text-ink"><Settings size={16} className="text-black/35" /> Account settings</Link><Link href="/dashboard/settings" className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold text-black/55 hover:bg-canvas hover:text-ink"><Sparkles size={16} className="text-black/35" /> Brand & widget</Link><Link href="/dashboard/usage" className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold text-black/55 hover:bg-canvas hover:text-ink"><CreditCard size={16} className="text-black/35" /> Billing & plan</Link><Link href="/support" className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold text-black/55 hover:bg-canvas hover:text-ink"><HelpCircle size={16} className="text-black/35" /> Contact support</Link><button onClick={logout} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-bold text-red-600 hover:bg-red-50"><LogOut size={16} /> Log out</button></div></div>}</div></div>
+          <div className="flex items-center gap-3">{previewQuiz && <Link href={`/finder/${previewQuiz.slug || previewQuiz.id}`} target="_blank" className="hidden items-center gap-1.5 text-xs font-extrabold text-black/50 sm:flex">Preview product finder <ExternalLink size={13} /></Link>}<Link href="/support" className="grid h-9 w-9 place-items-center rounded-full border border-black/10 bg-white text-black/40" aria-label="Help"><HelpCircle size={16} /></Link><div className="relative"><button onClick={() => setAccountOpen((open) => !open)} className="grid h-9 w-9 place-items-center rounded-full bg-peach text-xs font-extrabold" aria-label="Open account menu" aria-expanded={accountOpen}>{accountInitials}</button>{accountOpen && <div className="absolute right-0 top-11 z-50 w-72 overflow-hidden rounded-2xl border border-black/10 bg-white shadow-2xl"><div className="border-b border-black/5 p-4"><p className="text-xs font-extrabold text-ink">{accountName || settings.brand_name}</p><p className="mt-1 truncate text-xs font-bold text-black/35">{accountEmail || (mode === "demo" ? "Demo workspace" : "Account")}</p></div><div className="p-2"><Link href="/dashboard/account" className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold text-black/55 hover:bg-canvas hover:text-ink"><Settings size={16} className="text-black/35" /> Account settings</Link><Link href="/dashboard/settings" className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold text-black/55 hover:bg-canvas hover:text-ink"><Sparkles size={16} className="text-black/35" /> Brand & widget</Link><Link href="/dashboard/usage" className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold text-black/55 hover:bg-canvas hover:text-ink"><CreditCard size={16} className="text-black/35" /> Billing & plan</Link><Link href="/support" className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold text-black/55 hover:bg-canvas hover:text-ink"><HelpCircle size={16} className="text-black/35" /> Contact support</Link><button onClick={logout} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-bold text-red-600 hover:bg-red-50"><LogOut size={16} /> Log out</button></div></div>}</div></div>
         </header>
         <main className="mx-auto max-w-[1500px] p-4 sm:p-7 lg:p-9">{shouldForceOnboarding ? <LoadingState label="Taking you to store setup…" /> : children}</main>
       </div>

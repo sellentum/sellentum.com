@@ -1,21 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import { BarChart3, BookOpen, Boxes, BrainCircuit, ChevronDown, Code2, Footprints, Menu, MessageCircle, PackagePlus, Search, Settings2, ShoppingBag, Sparkles, Store, X } from "lucide-react";
+import { BarChart3, BookOpen, Boxes, BrainCircuit, ChevronDown, Code2, Footprints, Menu, MessageCircle, Settings2, ShoppingBag, Sparkles, Store, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Logo } from "@/components/logo";
 
 const menus = {
   Platform: {
-    intro: "One focused platform for every step of guided product discovery.",
+    intro: "The simple product finder service: upload products, ask questions, recommend the right item.",
     items: [
-      { title: "Product catalog", copy: "Structure the facts behind every match", icon: Boxes, href: "/platform/catalog" },
-      { title: "Guided selling", copy: "Build useful, human buying conversations", icon: Sparkles, href: "/platform/guided-selling" },
-      { title: "Recommendation engine", copy: "Rank products with reliable rules", icon: BrainCircuit, href: "/platform/recommendation-engine" },
-      { title: "AI explanations", copy: "Explain every recommendation clearly", icon: Search, href: "/platform/ai-advisor" },
-      { title: "Visual configurators", copy: "Let shoppers build compatible bundles", icon: PackagePlus, href: "/platform/configurators" },
-      { title: "Embeddable widget", copy: "Launch on any storefront with one snippet", icon: Code2, href: "/platform/widget" },
-      { title: "Journey analytics", copy: "See intent, completion and buying signals", icon: BarChart3, href: "/platform/analytics" },
+      { title: "Product finder widget", copy: "A guided quiz shoppers open on your store", icon: Sparkles, href: "/platform/guided-selling" },
+      { title: "Product catalog", copy: "Upload the products and facts behind each match", icon: Boxes, href: "/platform/catalog" },
+      { title: "Recommendation logic", copy: "Use rules to select products reliably", icon: BrainCircuit, href: "/platform/recommendation-engine" },
+      { title: "AI explanations", copy: "Explain why each product fits", icon: MessageCircle, href: "/platform/ai-advisor" },
+      { title: "Embeddable widget", copy: "Add it to any storefront with one snippet", icon: Code2, href: "/platform/widget" },
+      { title: "Journey analytics", copy: "Track views, completions and Buy Now clicks", icon: BarChart3, href: "/platform/analytics" },
     ],
   },
   Industries: {
@@ -28,14 +27,12 @@ const menus = {
     ],
   },
   Resources: {
-    intro: "See the product in action, then build a useful experience of your own.",
+    intro: "Try the shopper journey, then see how a merchant launches it.",
     items: [
-      { title: "Live product finder", copy: "Experience the customer journey", icon: Sparkles, href: "/finder/quiz_footwear" },
-      { title: "Conversational advisor", copy: "Search the catalog in natural language", icon: MessageCircle, href: "/assistant/quiz_footwear" },
-      { title: "Visual configurator", copy: "Build a compatible product bundle", icon: PackagePlus, href: "/configurator/config_trail_kit" },
-      { title: "Merchant workspace", copy: "Explore catalog, builder and analytics", icon: Settings2, href: "/login" },
-      { title: "Storefront widget demo", copy: "Test the embed on a simulated shop page", icon: Code2, href: "/storefront-demo" },
-      { title: "Quick-start guide", copy: "Go from catalog to launch in minutes", icon: BookOpen, href: "/resources" },
+      { title: "Try the finder", copy: "Answer questions and see product matches", icon: Sparkles, href: "/finder/quiz_footwear" },
+      { title: "Storefront widget demo", copy: "See how it opens on an ecommerce page", icon: Code2, href: "/storefront-demo" },
+      { title: "Merchant workspace", copy: "Manage products, questions and analytics", icon: Settings2, href: "/login" },
+      { title: "Quick-start guide", copy: "Go from catalog to live finder", icon: BookOpen, href: "/resources" },
       { title: "Support", copy: "Get help with launch and production checks", icon: MessageCircle, href: "/support" },
     ],
   },
@@ -58,7 +55,7 @@ export function LandingNav() {
       <div className="bg-ink px-5 py-2.5 text-center text-xs font-bold text-white">
         <span className="text-lime">✦ New</span>
         <span className="mx-2 text-white/35">·</span>
-        Turn product knowledge into a guided buying experience in one afternoon.
+        Product finder widget for ecommerce stores: upload products, ask questions, recommend the right item.
         <Link href="/signup" className="ml-2 border-b border-white/40">Start building →</Link>
       </div>
       <div className="border-b border-black/[0.07] bg-white shadow-[0_8px_30px_rgba(24,33,27,.04)]">

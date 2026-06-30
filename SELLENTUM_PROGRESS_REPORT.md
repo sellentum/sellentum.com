@@ -275,6 +275,9 @@ What still needs work:
 
 Latest completed interval:
 
+- Reframed the dashboard around the plain service promise: **an AI-guided product finder widget for ecommerce stores**.
+- Added a dashboard explainer showing the four core steps: upload products, build a finder, recommend clearly, embed and learn.
+- Moved configurators and richer discovery tools into an **after the first finder** position so they do not confuse the first-use workflow.
 - Added a **First live merchant proof** card to the dashboard.
 - Added a copyable first-proof packet.
 - Made the proof definition explicit: auth, real catalog, published finder, widget install, five analytics events and saved launch proof.
@@ -499,6 +502,7 @@ High-level log:
 - Defined Sellentum as an AI-guided product finder SaaS.
 - Built the Next.js application.
 - Built the public marketing website.
+- Rewrote the homepage/platform/resources messaging so a normal ecommerce owner can understand the offer before seeing advanced modules.
 - Added Sellentum branding.
 - Replaced the old Findly brand.
 - Renamed the local folder from `Site_MVP` to `sellentum`.
@@ -537,6 +541,7 @@ High-level log:
 - Added smoke tests.
 - Added lint/typecheck/build workflows.
 - Added product/finder/widget/analytics proof guidance inside the dashboard.
+- Added a website/dashboard clarity pass inspired by guided-selling platform positioning: product finder first, advanced modules second.
 - Removed the temporary MVP audit section from the dashboard.
 - Created this human progress report.
 

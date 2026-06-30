@@ -1,12 +1,13 @@
 # Sellentum
 
-Sellentum is a compact guided-selling SaaS product for ecommerce brands. A merchant can import products, build question flows, create configurable bundles, connect choices to deterministic matching signals, publish the experience, and embed it on any website. OpenAI turns the selected product facts into concise match explanations; it never chooses the products.
+Sellentum is an AI-guided product finder widget for ecommerce brands. A merchant can upload products, build a short question flow, recommend 1–3 best-fit products, explain why each product fits, embed the finder on any website and track the shopper journey. OpenAI turns selected product facts into concise match explanations; it never chooses the products.
 
 For the current human-readable project status, open [`SELLENTUM_PROGRESS_REPORT.md`](./SELLENTUM_PROGRESS_REPORT.md).
 
 ## What is included
 
 - Premium marketing site with product, workflow, use-case, pricing, resource, platform, contact, support, security, privacy and terms pages
+- Public website and dashboard messaging now lead with the simple service promise: upload products, ask guided questions, embed a product finder and track shopper choices
 - Supabase email/password authentication, protected dashboard routes and logout
 - Product catalog CRUD plus CSV upload with flexible header aliases, row-level validation, import preview, visible first-catalog launch kit, real-catalog intake checklist and reusable CSV template (`name`, `price`, and `category` are required; buyer needs/search text are optional discovery fields)
 - AI catalog enrichment with normalized attributes, buyer needs, semantic search text and optional OpenAI embeddings

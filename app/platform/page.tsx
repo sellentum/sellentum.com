@@ -4,6 +4,12 @@ import { LandingNav } from "@/components/landing-nav";
 import { MarketingFooter } from "@/components/marketing-footer";
 import { platformPages } from "@/lib/marketing-pages";
 
+const corePlatformSlugs = ["guided-selling", "catalog", "recommendation-engine", "ai-advisor", "widget", "analytics"];
+const corePlatformPages = corePlatformSlugs
+  .map((slug) => platformPages.find((page) => page.slug === slug))
+  .filter((page): page is (typeof platformPages)[number] => Boolean(page));
+const advancedPlatformPages = platformPages.filter((page) => !corePlatformSlugs.includes(page.slug));
+
 export default function PlatformOverviewPage() {
   return (
     <main className="min-h-screen bg-white text-ink">
@@ -12,15 +18,20 @@ export default function PlatformOverviewPage() {
         <div className="absolute inset-x-0 top-0 h-[520px] bg-[radial-gradient(circle_at_50%_10%,rgba(217,255,97,.35),transparent_45%)]" />
         <div className="relative mx-auto max-w-[1280px] text-center">
           <p className="eyebrow text-moss">Sellentum platform</p>
-          <h1 className="mx-auto mt-6 max-w-5xl text-6xl font-extrabold leading-[.95] tracking-[-.07em] lg:text-8xl">A practical product discovery suite for small ecommerce teams.</h1>
-          <p className="mx-auto mt-7 max-w-2xl text-sm leading-7 text-black/52">Catalog enrichment, guided selling, semantic discovery, configurators, embeds and analytics—built as one focused MVP instead of an enterprise maze.</p>
-          <div className="mt-9 flex justify-center gap-3"><Link href="/signup" className="btn-primary">Start building <ArrowRight size={15} /></Link><Link href="/configurator/config_trail_kit" className="btn-secondary">Try configurator</Link></div>
+          <h1 className="mx-auto mt-6 max-w-5xl text-6xl font-extrabold leading-[.95] tracking-[-.07em] lg:text-8xl">A product finder widget your ecommerce store can launch fast.</h1>
+          <p className="mx-auto mt-7 max-w-2xl text-sm leading-7 text-black/52">Start with the core job: upload products, build a guided finder, recommend the right products, explain the match and embed the widget on your storefront.</p>
+          <div className="mt-9 flex justify-center gap-3"><Link href="/signup" className="btn-primary">Start building <ArrowRight size={15} /></Link><Link href="/finder/quiz_footwear" className="btn-secondary">Try product finder</Link></div>
         </div>
       </section>
 
       <section className="bg-[#f8f6f1] px-6 py-24 lg:px-10">
-        <div className="mx-auto grid max-w-[1280px] gap-4 lg:grid-cols-3">
-          {platformPages.map((page, index) => (
+        <div className="mx-auto max-w-[1280px]">
+          <div className="max-w-3xl">
+            <p className="eyebrow text-moss">Start here</p>
+            <h2 className="mt-4 text-4xl font-extrabold tracking-[-.06em]">The six pieces a normal merchant needs to understand first.</h2>
+          </div>
+          <div className="mt-10 grid gap-4 lg:grid-cols-3">
+          {corePlatformPages.map((page, index) => (
             <Link key={page.slug} href={`/platform/${page.slug}`} className="group rounded-[28px] border border-black/10 bg-white p-7 transition hover:-translate-y-1 hover:shadow-xl">
               <div className="flex items-start justify-between"><span className="text-xs font-extrabold tracking-[.16em] text-moss">{String(index + 1).padStart(2, "0")}</span><span className="grid h-11 w-11 place-items-center rounded-2xl bg-lime/50 transition group-hover:bg-lime"><Sparkles size={18} /></span></div>
               <p className="eyebrow mt-12 text-moss">{page.eyebrow}</p>
@@ -30,6 +41,20 @@ export default function PlatformOverviewPage() {
               <span className="mt-7 inline-flex items-center gap-2 text-xs font-extrabold text-moss">Explore <ArrowRight size={13} /></span>
             </Link>
           ))}
+          </div>
+          <div className="mt-16 max-w-3xl">
+            <p className="eyebrow text-moss">Advanced after launch</p>
+            <h2 className="mt-4 text-3xl font-extrabold tracking-[-.05em]">More Zoovu-like depth is available, but it should come after the first finder is proven.</h2>
+          </div>
+          <div className="mt-8 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+            {advancedPlatformPages.map((page) => (
+              <Link key={page.slug} href={`/platform/${page.slug}`} className="rounded-2xl border border-black/10 bg-white p-5 transition hover:-translate-y-0.5 hover:shadow-lg">
+                <p className="text-xs font-extrabold uppercase tracking-[.14em] text-moss">{page.eyebrow}</p>
+                <h3 className="mt-3 text-sm font-extrabold leading-5">{page.title}</h3>
+                <p className="mt-2 text-xs leading-4 text-black/40">{page.description}</p>
+              </Link>
+            ))}
+          </div>
         </div>
       </section>
 

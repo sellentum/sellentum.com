@@ -511,9 +511,13 @@ function assertDashboardCommandCenterWorkflow() {
   assert(overview.includes("buildFounderLaunchQueue"), "Dashboard overview should use the shared founder launch queue helper");
   assert(overview.includes("buildMerchantNextAction"), "Dashboard overview should use the shared next-best-action helper");
   assert(overview.includes("Today&apos;s next best action") && overview.includes("Copy next-action brief"), "Dashboard overview should expose one plain-English next best action");
+  assert(overview.includes("Launch your product finder.") && overview.includes("What you are selling") && overview.includes("An AI-guided product finder widget for ecommerce stores."), "Dashboard overview should explain Sellentum's service before operational proof details");
+  assert(overview.includes("After the first finder") && overview.includes("Optional tools for richer product discovery"), "Dashboard overview should frame advanced experiences as secondary to the first product finder");
   assert(overview.includes("First launch path"), "Dashboard overview should give merchants a simple first-launch path");
   assert(overview.includes("First live merchant proof") && overview.includes("Copy first proof packet") && overview.includes("What counts as proven"), "Dashboard overview should expose a copyable first-live-proof contract");
   assert(shell.includes("buildMerchantLaunchPlan"), "Dashboard shell should reuse the shared merchant launch plan helper");
+  assert(shell.includes("Launch your product finder"), "Dashboard shell should label the primary navigation around the product finder launch job");
+  assert(!shell.includes("Preview configurator"), "Dashboard shell should not promote configurators ahead of the first product finder");
   assert(shell.includes("Core launch path") && shell.includes("Products → Finder → Publish → Embed → Analytics proof"), "Dashboard shell should keep the core launch path visible across dashboard pages");
   assert(shell.includes("Next: {launchPlan.currentStep.title}"), "Dashboard shell should route merchants to the current launch step");
   assert(shell.includes("Advanced tools") && shell.includes("After launch"), "Dashboard shell should separate post-launch and advanced tools from the core first-launch workflow");
@@ -2497,7 +2501,7 @@ async function assertDeterministicLogic() {
 }
 
 async function main() {
-  await assertPage("/", "Turn product choice");
+  await assertPage("/", "Help shoppers");
   await assertPage("/platform", "Sellentum platform");
   await assertPage("/platform/catalog-pipeline", "Govern imports");
   await assertPage("/platform/availability-guard", "Keep unavailable products");
@@ -2520,7 +2524,7 @@ async function main() {
   await assertPage("/platform/grounding-center", "Give AI a safe product-fact map");
   await assertPage("/platform/semantic-knowledge-graph", "Connect product facts");
   await assertPage("/industries", "Industries");
-  await assertPage("/resources", "Demo the product discovery loop");
+  await assertPage("/resources", "Understand the product finder first");
   await assertPage("/contact", "Talk to Sellentum");
   await assertPage("/support", "Get from catalog to launch");
   await assertPage("/security", "Rules, data and AI boundaries");

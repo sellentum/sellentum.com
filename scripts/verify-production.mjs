@@ -61,12 +61,13 @@ async function fetchText(pathname, expectedText, group = "public_route") {
     const response = await fetch(url, { redirect: "follow" });
     const text = await response.text();
     const ok = response.status >= 200 && response.status < 300;
-    const includes = expectedText ? text.includes(expectedText) : true;
+    const expectedTexts = Array.isArray(expectedText) ? expectedText : expectedText ? [expectedText] : [];
+    const includes = expectedTexts.length ? expectedTexts.some((item) => text.includes(item)) : true;
     record(
       group,
       pathname,
       ok && includes ? "pass" : "fail",
-      ok ? `HTTP ${response.status}${expectedText ? `, expected text ${includes ? "found" : "missing"}` : ""}` : `HTTP ${response.status}`,
+      ok ? `HTTP ${response.status}${expectedTexts.length ? `, expected text ${includes ? "found" : "missing"}` : ""}` : `HTTP ${response.status}`,
       includes ? "" : `Open ${url} and confirm it renders the expected production page.`,
     );
   } catch (error) {
@@ -201,7 +202,7 @@ async function verifyPublicRoutes() {
   }
 
   const checks = [
-    ["/", "Turn product choice"],
+    ["/", ["Help shoppers", "Turn product choice"]],
     ["/login", "Good to see you again"],
     ["/signup", "Make choosing feel easy"],
     ["/forgot-password", "Reset your password"],
