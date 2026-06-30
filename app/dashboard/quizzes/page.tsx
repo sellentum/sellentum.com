@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { AlertTriangle, ArrowLeft, Ban, Check, ChevronDown, ChevronRight, ExternalLink, GitBranch, GripVertical, HelpCircle, LayoutTemplate, LoaderCircle, MoreHorizontal, Pin, Plus, Save, SlidersHorizontal, Sparkles, Trash2, TrendingUp, X, type LucideIcon } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Ban, Boxes, Check, ChevronDown, ChevronRight, Clipboard, ExternalLink, GitBranch, GripVertical, HelpCircle, LayoutTemplate, LoaderCircle, MoreHorizontal, Pin, Plus, Save, SlidersHorizontal, Sparkles, Trash2, TrendingUp, X, type LucideIcon } from "lucide-react";
 import { LoadingState } from "@/components/loading-state";
 import { useStore } from "@/lib/store";
 import { analyzeQuizReadiness } from "@/lib/quiz-readiness";
+import { buildFinderLaunchKit } from "@/lib/finder-launch-kit";
 import { getAnswerOptionCoverage, type AnswerOptionRuleCoverage } from "@/lib/rule-coverage";
 import type { AnswerOption, GeneratedQuizSuggestion, MatchType, Question, Quiz, RecommendationOverride } from "@/lib/types";
 import { slugify, uid } from "@/lib/utils";
@@ -180,7 +181,9 @@ export default function QuizzesPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
   const [generationError, setGenerationError] = useState("");
+  const [finderPacketCopied, setFinderPacketCopied] = useState(false);
   const selected = quizzes.find((q) => q.id === selectedId);
+  const finderLaunchKit = useMemo(() => buildFinderLaunchKit({ products, quizzes }), [products, quizzes]);
   if (!ready) return <LoadingState label="Loading your product finders…" />;
   if (selected) return <QuizEditor selected={selected} onBack={() => setSelectedId(null)} />;
   async function create() { const quiz = createQuiz(); await saveQuiz(quiz); setSelectedId(quiz.id); }
@@ -205,9 +208,63 @@ export default function QuizzesPage() {
     } catch (error) { setGenerationError(error instanceof Error ? error.message : "Could not generate a finder."); }
     finally { setGenerating(false); }
   }
+  async function copyFinderBrief() {
+    await navigator.clipboard.writeText(finderLaunchKit.packet);
+    setFinderPacketCopied(true);
+    window.setTimeout(() => setFinderPacketCopied(false), 1600);
+  }
   return <div className="animate-rise">
     <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><p className="eyebrow text-moss">Guided selling</p><h1 className="display mt-2 text-4xl sm:text-5xl">Product finders</h1><p className="mt-2 text-sm text-black/45">Turn your team’s best product questions into a useful conversation.</p></div><div className="flex gap-2"><button onClick={generateWithAi} disabled={generating || products.length < 2} className="btn-secondary self-start !border-lime/70"><Sparkles size={15} className="text-moss" />{generating ? "Generating…" : "Generate with AI"}</button><button onClick={create} className="btn-primary self-start"><Plus size={16} /> Create a finder</button></div></div>
     {generationError && <p className="mt-5 rounded-xl bg-red-50 p-3 text-xs font-bold text-red-700">{generationError}</p>}
+    <section className="mt-8 overflow-hidden rounded-[28px] border border-black/[0.07] bg-white shadow-sm">
+      <div className="grid xl:grid-cols-[0.9fr_1.1fr]">
+        <div className="bg-ink p-6 text-white">
+          <p className="eyebrow text-lime">First finder launch kit</p>
+          <h2 className="mt-4 text-3xl font-extrabold tracking-[-.05em]">{finderLaunchKit.headline}</h2>
+          <p className="mt-3 max-w-xl text-sm leading-6 text-white/50">{finderLaunchKit.summary}</p>
+          <div className="mt-5 flex flex-wrap gap-2">
+            <button onClick={generateWithAi} disabled={generating || products.length < 2} className="inline-flex items-center gap-2 rounded-full bg-lime px-5 py-3 text-xs font-extrabold text-ink disabled:opacity-50"><Sparkles size={14} /> {generating ? "Generating…" : "Generate draft finder"}</button>
+            <button onClick={create} className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-5 py-3 text-xs font-extrabold text-white"><Plus size={14} /> Start blank finder</button>
+            <button onClick={copyFinderBrief} className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-5 py-3 text-xs font-extrabold text-white"><Clipboard size={14} /> {finderPacketCopied ? "Brief copied" : "Copy finder brief"}</button>
+          </div>
+        </div>
+        <div className="grid gap-3 p-5 xl:grid-cols-2">
+          {finderLaunchKit.cards.map((card) => (
+            <article key={card.title} className={`rounded-2xl border p-4 ${card.status === "ready" ? "border-lime/40 bg-lime/10" : "border-amber-100 bg-amber-50"}`}>
+              <div className="flex items-start gap-3">
+                <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl ${card.status === "ready" ? "bg-lime text-moss" : "bg-white text-amber-700"}`}>{card.status === "ready" ? <Check size={15} /> : <Boxes size={15} />}</span>
+                <div>
+                  <p className="text-sm font-extrabold text-ink">{card.title}</p>
+                  <p className="mt-1 text-xs font-bold leading-5 text-black/45">{card.detail}</p>
+                  <p className="mt-3 rounded-xl bg-white px-3 py-2 text-xs font-extrabold text-moss">{card.evidence}</p>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+      <div className="border-t border-black/[0.07] bg-[#f8f8f4] p-5">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <p className="text-xs font-extrabold uppercase tracking-[.18em] text-black/35">Suggested first-finder question plan</p>
+            <p className="mt-1 text-xs font-bold text-black/40">Keep the first flow short. Use catalog-backed options so every important answer can reach products.</p>
+          </div>
+          <Link href="/dashboard/lab" className="shrink-0 text-xs font-extrabold text-moss">Open recommendation lab <ChevronRight size={12} className="inline" /></Link>
+        </div>
+        <div className="mt-4 grid gap-3 xl:grid-cols-4">
+          {finderLaunchKit.suggestedQuestions.map((question, index) => (
+            <article key={question.title} className="rounded-2xl bg-white p-4">
+              <span className="rounded-full bg-lime/35 px-2.5 py-1 text-xs font-extrabold text-moss">Question {index + 1}</span>
+              <h3 className="mt-3 text-sm font-extrabold leading-5 text-ink">{question.title}</h3>
+              <p className="mt-2 text-xs font-bold leading-5 text-black/45">{question.purpose}</p>
+              <div className="mt-3 flex flex-wrap gap-1.5">
+                {question.exampleOptions.slice(0, 4).map((option) => <span key={`${question.title}-${option}`} className="rounded-full bg-canvas px-2 py-1 text-xs font-bold text-black/45">{option}</span>)}
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
     {quizzes.length ? <div className="mt-8 grid gap-4 lg:grid-cols-2 xl:grid-cols-3">{quizzes.map((quiz) => { const views = events.filter((e) => e.quiz_id === quiz.id && e.event_type === "widget_view").length; const completed = events.filter((e) => e.quiz_id === quiz.id && e.event_type === "quiz_complete").length; return <article key={quiz.id} className="group overflow-hidden rounded-2xl border border-black/[0.07] bg-white"><button onClick={() => setSelectedId(quiz.id)} className="relative block h-44 w-full overflow-hidden bg-[#e7eae2] p-5 text-left"><div className="dot-grid absolute inset-0 opacity-40" /><div className="relative mx-auto max-w-[230px] rounded-2xl bg-white p-4 shadow-lg transition group-hover:-translate-y-1"><div className="flex items-center justify-between"><span className="grid h-6 w-6 place-items-center rounded-lg bg-ink text-lime"><Sparkles size={11} /></span><span className="text-xs font-extrabold uppercase text-black/25">Question 1 of {quiz.questions.length || 1}</span></div><h3 className="display mt-4 text-xl leading-none">{quiz.questions[0]?.title || quiz.welcome_title}</h3><div className="mt-3 space-y-1.5">{(quiz.questions[0]?.options || []).slice(0, 2).map((o) => <div key={o.id} className="rounded-lg border border-black/10 px-2 py-1.5 text-xs font-bold">{o.label}</div>)}</div></div><span className={`absolute right-3 top-3 inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-extrabold ${quiz.published ? "bg-lime text-moss" : "bg-white/80 text-black/40"}`}><i className={`h-1.5 w-1.5 rounded-full ${quiz.published ? "bg-moss" : "bg-black/25"}`} /> {quiz.published ? "Live" : "Draft"}</span></button><div className="p-5"><div className="flex items-start justify-between"><div className="min-w-0"><h2 className="truncate text-sm font-extrabold">{quiz.name}</h2><p className="mt-1 text-xs text-black/35">{quiz.questions.length} questions · Edited recently</p></div><button className="grid h-8 w-8 place-items-center rounded-lg hover:bg-black/5"><MoreHorizontal size={15} /></button></div><div className="mt-5 grid grid-cols-3 divide-x divide-black/[0.07] rounded-xl bg-canvas py-3 text-center"><div><p className="text-sm font-extrabold">{views}</p><p className="mt-0.5 text-xs font-bold text-black/30">Views</p></div><div><p className="text-sm font-extrabold">{completed}</p><p className="mt-0.5 text-xs font-bold text-black/30">Complete</p></div><div><p className="text-sm font-extrabold">{views ? Math.round(completed / views * 100) : 0}%</p><p className="mt-0.5 text-xs font-bold text-black/30">Rate</p></div></div><div className="mt-4 flex gap-2"><button onClick={() => setSelectedId(quiz.id)} className="btn-secondary flex-1 !px-3 !py-2 text-xs">Edit finder</button>{quiz.published && <Link href={`/finder/${quiz.id}`} target="_blank" className="grid h-9 w-9 place-items-center rounded-full border border-black/10"><ExternalLink size={13} /></Link>}</div></div></article>; })}<button onClick={create} className="grid min-h-[360px] place-items-center rounded-2xl border-2 border-dashed border-black/10 text-center transition hover:border-moss/30 hover:bg-white"><span><span className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-white shadow-sm"><Plus size={20} /></span><span className="mt-4 block text-sm font-extrabold">Create another finder</span><span className="mt-1 block text-xs text-black/35">Start with a blank canvas</span></span></button></div> : <div className="mt-8 grid min-h-[450px] place-items-center rounded-2xl border-2 border-dashed border-black/10 bg-white/40 p-8 text-center"><div><span className="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-lime/45 text-moss"><LayoutTemplate size={25} /></span><h2 className="display mt-5 text-3xl">Build your first buying guide</h2><p className="mx-auto mt-2 max-w-md text-xs leading-5 text-black/40">Ask the questions your best salesperson would ask, then connect answers to product attributes.</p><button onClick={create} className="btn-primary mt-5"><Plus size={15} /> Create a finder</button></div></div>}
   </div>;
 }

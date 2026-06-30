@@ -286,10 +286,12 @@ What is done:
 - Publish-readiness checks exist.
 - Branching/conditional flow support exists in code.
 - Recommendation lab/testing tools exist.
+- Product Finders dashboard includes a first-finder launch kit with readiness cards, suggested question plan and copyable finder brief.
 
 What still needs proof:
 
 - Build one real finder from a real catalog.
+- Use the first-finder brief after real catalog upload to shape the first production flow.
 - Test multiple shopper paths.
 - Confirm there are no dead-end paths.
 - Confirm each important answer maps to useful product logic.
@@ -581,19 +583,26 @@ Why it matters:
 
 ## 5. What Codex should work on next
 
+Latest completed Codex interval:
+
+- Added the first-finder launch kit to the Product Finders dashboard.
+- Added readiness cards for catalog choice, question language, deterministic answer rules and published finder proof.
+- Added a suggested first-finder question plan.
+- Added a copyable first-finder brief.
+- Added smoke-test coverage for the launch kit.
+
 I should continue in this order:
 
-1. Finish the first-finder launch kit in the Product Finders dashboard.
-2. Make the dashboard setup flow clearer:
+1. Make the dashboard setup flow clearer:
    - Step 1: Upload products.
    - Step 2: Create finder.
    - Step 3: Publish finder.
    - Step 4: Embed widget.
    - Step 5: Check analytics.
-3. Improve production-proof screens so they show plain English pass/fail status.
-4. Improve merchant empty states across dashboard pages.
-5. Run validation after each meaningful step.
-6. Commit and push completed work to GitHub so Vercel can deploy it.
+2. Improve production-proof screens so they show plain English pass/fail status.
+3. Improve merchant empty states across dashboard pages.
+4. Keep validation running after each meaningful step.
+5. Commit and push completed work to GitHub so Vercel can deploy it.
 
 ---
 
