@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { AlertTriangle, ArrowRight, CheckCircle2, Clipboard, Code2, ExternalLink, Gauge, Globe2, LockKeyhole, MonitorCheck, Rocket, ShieldCheck, TerminalSquare, Wrench } from "lucide-react";
 import { LoadingState } from "@/components/loading-state";
-import { buildProductionVerificationReport, type ProductionActionPriority, type ProductionCheckStatus, type ProductionVerificationStatus } from "@/lib/production-verification";
+import { buildProductionVerificationReport, productionSupabaseRepair, type ProductionActionPriority, type ProductionCheckStatus, type ProductionVerificationStatus } from "@/lib/production-verification";
 import { useStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
@@ -44,6 +44,7 @@ export default function ProductionVerificationPage() {
   const { ready, mode, products, quizzes, configurators, events, settings } = useStore();
   const [origin, setOrigin] = useState("https://your-sellentum-app.vercel.app");
   const [copied, setCopied] = useState(false);
+  const [copiedRepair, setCopiedRepair] = useState(false);
   const report = useMemo(() => buildProductionVerificationReport({ origin, mode, products, quizzes, configurators, events, settings }), [origin, mode, products, quizzes, configurators, events, settings]);
 
   useEffect(() => {
@@ -54,6 +55,21 @@ export default function ProductionVerificationPage() {
     await navigator.clipboard.writeText(report.packet);
     setCopied(true);
     window.setTimeout(() => setCopied(false), 1600);
+  }
+
+  async function copyRepairSteps() {
+    await navigator.clipboard.writeText([
+      "Run this in the production Supabase SQL editor:",
+      productionSupabaseRepair.path,
+      "",
+      "Then rerun the production verifier:",
+      productionSupabaseRepair.verifyCommand,
+      "",
+      "Then run the full schema/RLS check:",
+      productionSupabaseRepair.schemaCheckPath,
+    ].join("\n"));
+    setCopiedRepair(true);
+    window.setTimeout(() => setCopiedRepair(false), 1600);
   }
 
   if (!ready) return <LoadingState label="Verifying production readiness…" />;
@@ -98,6 +114,31 @@ export default function ProductionVerificationPage() {
             const MetricIcon = Icon as typeof Globe2;
             return <div key={String(label)} className="rounded-2xl bg-white/[0.06] p-4"><MetricIcon size={15} className="text-lime" /><p className="mt-5 text-2xl font-extrabold">{String(value)}</p><p className="mt-1 text-xs font-bold uppercase tracking-wider text-white/45">{String(label)}</p></div>;
           })}
+        </div>
+      </section>
+
+      <section className="mt-6 rounded-[28px] border border-amber-200 bg-amber-50 p-6">
+        <div className="flex items-start justify-between gap-8">
+          <div className="max-w-4xl">
+            <p className="text-xs font-extrabold uppercase tracking-[0.22em] text-amber-700">Known production backend repair</p>
+            <h2 className="mt-3 text-2xl font-extrabold tracking-[-.04em] text-ink">Supabase needs this repair if the verifier reports widget domains or rate-limit buckets missing.</h2>
+            <p className="mt-3 text-sm leading-6 text-black/55">This is the current production backend handoff: run the focused SQL file in Supabase, rerun the live verifier, then run the full schema/RLS check. It fixes <span className="font-extrabold text-ink">{productionSupabaseRepair.fixes.join(" and ")}</span>.</p>
+          </div>
+          <button onClick={copyRepairSteps} className="inline-flex shrink-0 items-center gap-2 rounded-full bg-ink px-5 py-3 text-xs font-extrabold text-white"><Clipboard size={14} /> {copiedRepair ? "Steps copied" : "Copy repair steps"}</button>
+        </div>
+        <div className="mt-5 grid gap-3 xl:grid-cols-3">
+          <div className="rounded-2xl bg-white p-4">
+            <p className="text-xs font-extrabold uppercase text-black/35">1. Supabase SQL editor</p>
+            <code className="mt-3 block rounded-xl bg-canvas px-3 py-2 text-xs font-bold text-moss">{productionSupabaseRepair.path}</code>
+          </div>
+          <div className="rounded-2xl bg-white p-4">
+            <p className="text-xs font-extrabold uppercase text-black/35">2. CLI verification</p>
+            <code className="mt-3 block rounded-xl bg-canvas px-3 py-2 text-xs font-bold text-moss">{productionSupabaseRepair.verifyCommand}</code>
+          </div>
+          <div className="rounded-2xl bg-white p-4">
+            <p className="text-xs font-extrabold uppercase text-black/35">3. Full schema/RLS proof</p>
+            <code className="mt-3 block rounded-xl bg-canvas px-3 py-2 text-xs font-bold text-moss">{productionSupabaseRepair.schemaCheckPath}</code>
+          </div>
         </div>
       </section>
 

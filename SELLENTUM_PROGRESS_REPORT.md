@@ -8,7 +8,7 @@ GitHub repo: **https://github.com/sellentum/sellentum.com.git**
 
 Branch: **main**
 
-Latest product-code milestone before this documentation cleanup: **85f4119 — Add production Supabase repair pack**
+Latest product-code milestone before this interval: **85f4119 — Add production Supabase repair pack**
 
 ---
 
@@ -188,9 +188,11 @@ Still needed: generate real production events and confirm they appear correctly.
 
 ### Stage 13 — Supabase production verification
 
-**Status: Partly blocked**
+**Status: Partly blocked, in-app repair guidance added**
 
 Added schema files, migrations, RLS policies, verification SQL and the production verification command.
+
+The dashboard Production Verification Center now also shows a dedicated Supabase repair workflow so the backend fix is visible inside the product, not only in documentation.
 
 Known production issue:
 
@@ -206,6 +208,13 @@ supabase/verification/production_repair_widget_rate_limits.sql
 ```
 
 Still needed: run that SQL file in Supabase, then rerun production verification.
+
+Latest Codex-side progress:
+
+- Added a dashboard repair card for the known Supabase production backend issue.
+- Added copyable repair steps inside the Production Verification Center.
+- Added the repair and schema/RLS SQL files to the copyable production verification packet.
+- Added smoke-test coverage so this repair guidance stays visible in future changes.
 
 ---
 

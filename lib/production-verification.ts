@@ -78,6 +78,13 @@ export type ProductionVerificationReport = {
   packet: string;
 };
 
+export const productionSupabaseRepair = {
+  path: "supabase/verification/production_repair_widget_rate_limits.sql",
+  schemaCheckPath: "supabase/verification/production_schema_check.sql",
+  verifyCommand: "npm run verify:production -- --base-url=https://sellentum.com",
+  fixes: ["widget_settings.allowed_domains", "rate_limit_buckets"],
+} as const;
+
 const requiredEventTypes: Array<AnalyticsEvent["event_type"]> = [
   "widget_view",
   "quiz_start",
@@ -185,6 +192,24 @@ function buildArtifacts({ mode, origin }: { mode: "demo" | "supabase"; origin: s
       path: "supabase/schema.sql",
       detail: "Production should use Supabase auth, RLS, products, quizzes, configurators, analytics and widget settings.",
       proof: mode === "supabase" ? "The current workspace is using Supabase mode." : "Demo mode is safe for local QA but not a production tenant.",
+    },
+    {
+      id: "supabase-repair-pack",
+      label: "Supabase widget/rate-limit repair",
+      status: "warn",
+      owner: "Founder",
+      path: productionSupabaseRepair.path,
+      detail: "Run this focused SQL pack only when production verification reports missing widget domain allowlists or shared rate-limit buckets.",
+      proof: `Repairs ${productionSupabaseRepair.fixes.join(" and ")}; rerun ${productionSupabaseRepair.verifyCommand} afterward.`,
+    },
+    {
+      id: "supabase-schema-rls-check",
+      label: "Supabase schema and RLS verification",
+      status: "warn",
+      owner: "Founder",
+      path: productionSupabaseRepair.schemaCheckPath,
+      detail: "Run the authoritative Supabase SQL verification after migrations/repairs so table coverage, RLS, policies and functions are proven inside the production project.",
+      proof: "Production is not backend-complete until every row in the Supabase SQL verification returns pass.",
     },
     {
       id: "env",
@@ -347,6 +372,9 @@ function buildPacket(report: Omit<ProductionVerificationReport, "packet">) {
     "",
     "Required verification commands",
     ...report.artifacts.filter((artifact) => artifact.command).map((artifact) => `- ${artifact.command}`),
+    "",
+    "Supabase SQL artifacts",
+    ...report.artifacts.filter((artifact) => artifact.path).map((artifact) => `- [${artifact.status.toUpperCase()}] ${artifact.path}: ${artifact.proof}`),
     "",
     "Production checks",
     ...report.checks.map((check) => `- [${check.status.toUpperCase()}] ${check.label} (${check.score}%): ${check.evidence}`),

@@ -782,8 +782,12 @@ function assertProductionVerificationWorkflow() {
   assert(helper.includes("Sellentum Production Verification packet"), "Production Verification should generate a copyable packet");
   assert(helper.includes("Production is not complete until the deployed Vercel URL passes typecheck, lint, build and smoke"), "Production Verification should document the deployed smoke boundary");
   assert(helper.includes("deterministic product selection remains"), "Production Verification should preserve deterministic AI boundaries");
+  assert(helper.includes("productionSupabaseRepair") && helper.includes("production_repair_widget_rate_limits.sql"), "Production Verification helper should expose the focused Supabase repair path");
+  assert(helper.includes("widget_settings.allowed_domains") && helper.includes("rate_limit_buckets"), "Production Verification helper should name the known widget/rate-limit schema repair targets");
   assert(page.includes("Production Verification Center"), "Production Verification page should expose the dashboard title");
   assert(page.includes("Copy verification packet"), "Production Verification page should let merchants copy the packet");
+  assert(page.includes("Known production backend repair"), "Production Verification page should expose the Supabase repair workflow in-app");
+  assert(page.includes("Copy repair steps"), "Production Verification page should let founders copy the Supabase repair workflow");
   assert(page.includes("Desktop QA scenarios"), "Production Verification page should show desktop QA scenarios");
   assert(page.includes("Required route and API contract"), "Production Verification page should show required routes and APIs");
   assert(!page.includes("text-[8px]") && !page.includes("text-[9px]") && !page.includes("text-[10px]"), "Production Verification page should avoid tiny arbitrary font sizes");
@@ -2081,7 +2085,9 @@ async function assertDeterministicLogic() {
   const productionVerificationReport = productionVerification.buildProductionVerificationReport({ origin: "https://sellentum.example", mode: "supabase", settings: demo.demoSettings, products: demo.demoProducts, quizzes: [demo.demoQuiz], configurators: [demo.demoConfigurator], events: demo.demoEvents });
   assert(productionVerificationReport.requiredRoutes.some((route) => route.route.includes("/api/widget.js")) && productionVerificationReport.desktopQa.some((scenario) => scenario.id === "finder-runtime"), "Expected Production Verification to include required route contracts and desktop QA scenarios");
   assert(productionVerificationReport.packet.includes("Sellentum Production Verification packet") && productionVerificationReport.packet.includes("deployed Vercel URL passes typecheck, lint, build and smoke"), "Expected Production Verification to generate a deployed-smoke packet");
+  assert(productionVerificationReport.packet.includes("production_repair_widget_rate_limits.sql") && productionVerificationReport.packet.includes("production_schema_check.sql"), "Expected Production Verification packet to include Supabase repair and schema/RLS SQL artifacts");
   assert(productionVerificationReport.artifacts.some((artifact) => artifact.command === "npm run build") && productionVerificationReport.actions.length, "Expected Production Verification to include verification commands and action queue");
+  assert(productionVerificationReport.artifacts.some((artifact) => artifact.id === "supabase-repair-pack" && artifact.path === "supabase/verification/production_repair_widget_rate_limits.sql"), "Expected Production Verification artifacts to include the focused Supabase repair pack");
   const localProductionVerificationReport = productionVerification.buildProductionVerificationReport({ origin: "http://localhost:3000", mode: "demo", settings: demo.demoSettings, products: demo.demoProducts, quizzes: [demo.demoQuiz], configurators: [demo.demoConfigurator], events: [] });
   assert(localProductionVerificationReport.status !== "verified" && localProductionVerificationReport.checks.some((check) => check.id === "supabase-mode" && check.status === "warn"), "Expected Production Verification to keep local demo mode out of final production verified status");
   const apiCenterReport = apiCenter.buildApiCenterReport({ origin: "https://sellentum.example", settings: demo.demoSettings, products: demo.demoProducts, quizzes: [demo.demoQuiz], configurators: [demo.demoConfigurator], events: demo.demoEvents });

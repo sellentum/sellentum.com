@@ -216,6 +216,8 @@ supabase/verification/production_repair_widget_rate_limits.sql
 
 Then rerun `npm run verify:production -- --base-url=https://sellentum.com`.
 
+The dashboard **Production Verification Center** also surfaces this repair workflow with copyable steps, the live verifier command, and the full schema/RLS SQL check so production handoff is not hidden in documentation only.
+
 To perform the optional shared rate-limit RPC probe from the CLI, add:
 
 ```bash
