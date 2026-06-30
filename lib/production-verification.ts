@@ -85,6 +85,20 @@ export const productionSupabaseRepair = {
   fixes: ["widget_settings.allowed_domains", "rate_limit_buckets"],
 } as const;
 
+export const productionAuthChecklist = {
+  appUrl: "https://sellentum.com",
+  callbackPath: "/auth/callback",
+  routes: ["/signup", "/login", "/forgot-password", "/reset-password", "/auth/callback?next=/dashboard"],
+  manualChecks: [
+    "Create a fresh account from https://sellentum.com/signup.",
+    "Confirm the verification email opens https://sellentum.com/auth/callback and lands in the dashboard.",
+    "Log out, then log in again from https://sellentum.com/login.",
+    "Request a password reset from https://sellentum.com/forgot-password.",
+    "Confirm the reset email opens https://sellentum.com/auth/callback?next=/reset-password, not localhost.",
+    "Set a new password and confirm the dashboard opens.",
+  ],
+} as const;
+
 const requiredEventTypes: Array<AnalyticsEvent["event_type"]> = [
   "widget_view",
   "quiz_start",
@@ -210,6 +224,14 @@ function buildArtifacts({ mode, origin }: { mode: "demo" | "supabase"; origin: s
       path: productionSupabaseRepair.schemaCheckPath,
       detail: "Run the authoritative Supabase SQL verification after migrations/repairs so table coverage, RLS, policies and functions are proven inside the production project.",
       proof: "Production is not backend-complete until every row in the Supabase SQL verification returns pass.",
+    },
+    {
+      id: "auth-email-proof",
+      label: "Production auth email proof",
+      status: "warn",
+      owner: "Founder",
+      detail: "Supabase email confirmation and password reset must be manually proven on the live domain before inviting merchants.",
+      proof: `Expected callback path: ${productionAuthChecklist.appUrl}${productionAuthChecklist.callbackPath}; reset links should land on /reset-password through the callback.`,
     },
     {
       id: "env",
@@ -375,6 +397,9 @@ function buildPacket(report: Omit<ProductionVerificationReport, "packet">) {
     "",
     "Supabase SQL artifacts",
     ...report.artifacts.filter((artifact) => artifact.path).map((artifact) => `- [${artifact.status.toUpperCase()}] ${artifact.path}: ${artifact.proof}`),
+    "",
+    "Production auth proof",
+    ...productionAuthChecklist.manualChecks.map((item) => `- ${item}`),
     "",
     "Production checks",
     ...report.checks.map((check) => `- [${check.status.toUpperCase()}] ${check.label} (${check.score}%): ${check.evidence}`),

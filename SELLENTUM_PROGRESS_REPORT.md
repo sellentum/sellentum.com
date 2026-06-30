@@ -8,7 +8,7 @@ GitHub repo: **https://github.com/sellentum/sellentum.com.git**
 
 Branch: **main**
 
-Latest product-code interval: **fd91228 — Surface Supabase repair guidance**
+Latest product-code interval: **Production auth proof hardening**
 
 ---
 
@@ -106,11 +106,25 @@ Still needed: final copy polish, final pricing message and legal review.
 
 ### Stage 4 — Authentication
 
-**Status: Built, not fully proven in production**
+**Status: Built, production proof workflow added**
 
 Built signup, login, logout, protected dashboard routes, email verification, forgot password and reset password.
 
-Still needed: test signup, email confirmation and password reset on `https://sellentum.com`.
+Latest Codex-side progress:
+
+- Added a Production Verification Center auth checklist.
+- Added copyable production auth QA steps.
+- Added live verifier checks for `/forgot-password`, `/reset-password` and auth callback routes.
+- Added auth proof steps to the production verification packet.
+- Verified production auth pages and callback routes are reachable.
+
+Current domain note:
+
+- Your app URL configuration currently matches `https://www.sellentum.com`.
+- If you want the canonical domain to be non-www `https://sellentum.com`, update Vercel `NEXT_PUBLIC_APP_URL` and Supabase auth redirect settings to match.
+- Either choice is fine; the important thing is that Vercel, Supabase email redirects and your public canonical domain all match.
+
+Still needed: manually test signup, email confirmation and password reset on the canonical production domain.
 
 ### Stage 5 — Merchant dashboard
 

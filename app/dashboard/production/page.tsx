@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { AlertTriangle, ArrowRight, CheckCircle2, Clipboard, Code2, ExternalLink, Gauge, Globe2, LockKeyhole, MonitorCheck, Rocket, ShieldCheck, TerminalSquare, Wrench } from "lucide-react";
 import { LoadingState } from "@/components/loading-state";
-import { buildProductionVerificationReport, productionSupabaseRepair, type ProductionActionPriority, type ProductionCheckStatus, type ProductionVerificationStatus } from "@/lib/production-verification";
+import { buildProductionVerificationReport, productionAuthChecklist, productionSupabaseRepair, type ProductionActionPriority, type ProductionCheckStatus, type ProductionVerificationStatus } from "@/lib/production-verification";
 import { useStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
@@ -45,6 +45,7 @@ export default function ProductionVerificationPage() {
   const [origin, setOrigin] = useState("https://your-sellentum-app.vercel.app");
   const [copied, setCopied] = useState(false);
   const [copiedRepair, setCopiedRepair] = useState(false);
+  const [copiedAuth, setCopiedAuth] = useState(false);
   const report = useMemo(() => buildProductionVerificationReport({ origin, mode, products, quizzes, configurators, events, settings }), [origin, mode, products, quizzes, configurators, events, settings]);
 
   useEffect(() => {
@@ -70,6 +71,24 @@ export default function ProductionVerificationPage() {
     ].join("\n"));
     setCopiedRepair(true);
     window.setTimeout(() => setCopiedRepair(false), 1600);
+  }
+
+  async function copyAuthSteps() {
+    await navigator.clipboard.writeText([
+      "Production auth QA checklist",
+      "============================",
+      "",
+      `Expected app URL: ${productionAuthChecklist.appUrl}`,
+      `Expected callback path: ${productionAuthChecklist.appUrl}${productionAuthChecklist.callbackPath}`,
+      "",
+      "Routes to verify:",
+      ...productionAuthChecklist.routes.map((route) => `- ${productionAuthChecklist.appUrl}${route}`),
+      "",
+      "Manual checks:",
+      ...productionAuthChecklist.manualChecks.map((item) => `- ${item}`),
+    ].join("\n"));
+    setCopiedAuth(true);
+    window.setTimeout(() => setCopiedAuth(false), 1600);
   }
 
   if (!ready) return <LoadingState label="Verifying production readiness…" />;
@@ -139,6 +158,35 @@ export default function ProductionVerificationPage() {
             <p className="text-xs font-extrabold uppercase text-black/35">3. Full schema/RLS proof</p>
             <code className="mt-3 block rounded-xl bg-canvas px-3 py-2 text-xs font-bold text-moss">{productionSupabaseRepair.schemaCheckPath}</code>
           </div>
+        </div>
+      </section>
+
+      <section className="mt-6 rounded-[28px] border border-black/[0.07] bg-white p-6">
+        <div className="flex items-start justify-between gap-8">
+          <div className="max-w-4xl">
+            <p className="text-xs font-extrabold uppercase tracking-[0.22em] text-moss">Production auth proof</p>
+            <h2 className="mt-3 text-2xl font-extrabold tracking-[-.04em] text-ink">Confirm Supabase emails return users to Sellentum, not localhost.</h2>
+            <p className="mt-3 text-sm leading-6 text-black/55">The app already generates signup and reset links from <span className="font-extrabold text-ink">NEXT_PUBLIC_APP_URL</span>. This checklist proves Supabase email confirmation, login and password reset work on the live domain before merchant onboarding.</p>
+          </div>
+          <button onClick={copyAuthSteps} className="inline-flex shrink-0 items-center gap-2 rounded-full bg-moss px-5 py-3 text-xs font-extrabold text-white"><Clipboard size={14} /> {copiedAuth ? "Checklist copied" : "Copy auth checklist"}</button>
+        </div>
+        <div className="mt-5 grid gap-3 xl:grid-cols-2">
+          <div className="rounded-2xl bg-canvas p-4">
+            <p className="text-xs font-extrabold uppercase text-black/35">Expected callback</p>
+            <code className="mt-3 block rounded-xl bg-white px-3 py-2 text-xs font-bold text-moss">{productionAuthChecklist.appUrl}{productionAuthChecklist.callbackPath}</code>
+            <p className="mt-3 text-xs font-bold leading-5 text-black/40">Supabase confirmation and reset emails should route through this callback, then continue to dashboard or reset password.</p>
+          </div>
+          <div className="rounded-2xl bg-canvas p-4">
+            <p className="text-xs font-extrabold uppercase text-black/35">Routes covered by verifier</p>
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {productionAuthChecklist.routes.map((route) => <code key={route} className="rounded-full bg-white px-2.5 py-1 text-xs font-bold text-black/45">{route}</code>)}
+            </div>
+          </div>
+        </div>
+        <div className="mt-5 grid gap-2 xl:grid-cols-3">
+          {productionAuthChecklist.manualChecks.map((item, index) => (
+            <p key={item} className="rounded-2xl border border-black/[0.06] bg-canvas p-4 text-sm font-bold leading-5 text-black/50"><span className="mr-2 text-moss">{index + 1}.</span>{item}</p>
+          ))}
         </div>
       </section>
 

@@ -55,7 +55,7 @@ function safeUrl(value) {
   }
 }
 
-async function fetchText(pathname, expectedText) {
+async function fetchText(pathname, expectedText, group = "public_route") {
   const url = `${baseUrl}${pathname}`;
   try {
     const response = await fetch(url, { redirect: "follow" });
@@ -63,20 +63,30 @@ async function fetchText(pathname, expectedText) {
     const ok = response.status >= 200 && response.status < 300;
     const includes = expectedText ? text.includes(expectedText) : true;
     record(
-      "public_route",
+      group,
       pathname,
       ok && includes ? "pass" : "fail",
       ok ? `HTTP ${response.status}${expectedText ? `, expected text ${includes ? "found" : "missing"}` : ""}` : `HTTP ${response.status}`,
       includes ? "" : `Open ${url} and confirm it renders the expected production page.`,
     );
   } catch (error) {
-    record("public_route", pathname, "fail", error.message, `Check whether ${baseUrl} is deployed and reachable.`);
+    record(group, pathname, "fail", error.message, `Check whether ${baseUrl} is deployed and reachable.`);
   }
 }
 
 function verifyEnvironment() {
   const appUrl = safeUrl(baseUrl);
-  record("env", "NEXT_PUBLIC_APP_URL/base URL", appUrl ? "pass" : "fail", appUrl ? baseUrl : "invalid URL", "Set NEXT_PUBLIC_APP_URL to https://sellentum.com in production.");
+  record("env", "NEXT_PUBLIC_APP_URL/base URL", appUrl ? "pass" : "fail", appUrl ? baseUrl : "invalid URL", `Set NEXT_PUBLIC_APP_URL to ${baseUrl} in production.`);
+  if (hasEnv("NEXT_PUBLIC_APP_URL")) {
+    const configuredAppUrl = String(env.NEXT_PUBLIC_APP_URL).replace(/\/$/, "");
+    record(
+      "env",
+      "NEXT_PUBLIC_APP_URL exact match",
+      configuredAppUrl === baseUrl ? "pass" : "warn",
+      configuredAppUrl === baseUrl ? `${configuredAppUrl} matches verification target` : `${configuredAppUrl} does not match ${baseUrl}`,
+      "Set NEXT_PUBLIC_APP_URL to the exact production origin used for Supabase email redirects and widget snippets.",
+    );
+  }
 
   for (const name of ["NEXT_PUBLIC_SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_ANON_KEY", "SUPABASE_SERVICE_ROLE_KEY"]) {
     record("env", name, hasEnv(name) ? "pass" : "fail", redacted(env[name]), `Add ${name} to Vercel and .env.local.`);
@@ -194,6 +204,8 @@ async function verifyPublicRoutes() {
     ["/", "Turn product choice"],
     ["/login", "Good to see you again"],
     ["/signup", "Make choosing feel easy"],
+    ["/forgot-password", "Reset your password"],
+    ["/reset-password", "Choose a new password"],
     ["/contact", "Talk to Sellentum"],
     ["/support", "Get from catalog to launch"],
     ["/security", "Rules, data and AI boundaries"],
@@ -205,6 +217,15 @@ async function verifyPublicRoutes() {
 
   for (const [pathname, expectedText] of checks) {
     await fetchText(pathname, expectedText);
+  }
+
+  const authChecks = [
+    ["/auth/callback?next=/dashboard", "Good to see you again"],
+    ["/auth/callback?code=invalid-production-verification-code&next=/dashboard", "Good to see you again"],
+  ];
+
+  for (const [pathname, expectedText] of authChecks) {
+    await fetchText(pathname, expectedText, "auth_route");
   }
 }
 

@@ -218,6 +218,8 @@ Then rerun `npm run verify:production -- --base-url=https://sellentum.com`.
 
 The dashboard **Production Verification Center** also surfaces this repair workflow with copyable steps, the live verifier command, and the full schema/RLS SQL check so production handoff is not hidden in documentation only.
 
+The same center includes a copyable production auth checklist. Before merchant onboarding, prove signup confirmation and password-reset emails route through `https://sellentum.com/auth/callback` and never back to `localhost`.
+
 To perform the optional shared rate-limit RPC probe from the CLI, add:
 
 ```bash
