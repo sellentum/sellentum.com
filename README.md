@@ -208,6 +208,14 @@ npm run verify:production -- --base-url=https://sellentum.com
 
 The command checks required environment variables, public production routes, the widget loader and Supabase table/column reachability through the service-role key without printing secrets. It does not replace the authoritative SQL/RLS verification in Supabase. Run [`supabase/verification/production_schema_check.sql`](./supabase/verification/production_schema_check.sql) in the Supabase SQL editor and confirm every row returns `pass`.
 
+If production verification reports `widget_settings.allowed_domains` or `rate_limit_buckets` as missing, run the focused repair pack in the Supabase SQL editor:
+
+```sql
+supabase/verification/production_repair_widget_rate_limits.sql
+```
+
+Then rerun `npm run verify:production -- --base-url=https://sellentum.com`.
+
 To perform the optional shared rate-limit RPC probe from the CLI, add:
 
 ```bash

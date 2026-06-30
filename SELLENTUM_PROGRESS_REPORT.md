@@ -460,6 +460,12 @@ Owner: **User + Codex**
 
 User needs to:
 
+- Run this focused repair SQL first if the verifier reports missing `allowed_domains` or `rate_limit_buckets`:
+
+  ```sql
+  supabase/verification/production_repair_widget_rate_limits.sql
+  ```
+
 - Open Supabase production project.
 - Run the verification SQL.
 - Send me any failed rows or errors.
@@ -677,6 +683,12 @@ This is the simplified history of what we have done.
 - The page lets a merchant paste a published finder/advisor/search/configurator ID.
 - The page loads the real `/api/widget.js` script on a simulated ecommerce product page.
 - The page shows the exact snippet, acceptance checklist and next step into the Install Scanner.
+
+### Phase 10 — Production Supabase repair pack
+
+- Live production verification found two missing backend schema items: `widget_settings.allowed_domains` and `rate_limit_buckets`.
+- Added `supabase/verification/production_repair_widget_rate_limits.sql`.
+- Updated the production verifier to point directly to that repair file when those checks fail.
 
 ---
 

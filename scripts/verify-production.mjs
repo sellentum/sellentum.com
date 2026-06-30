@@ -107,6 +107,13 @@ const requiredSupabaseTables = {
   rate_limit_buckets: ["key_hash", "request_count", "reset_at", "updated_at"],
 };
 
+function repairHintForTable(table) {
+  if (table === "widget_settings" || table === "rate_limit_buckets") {
+    return "Run supabase/verification/production_repair_widget_rate_limits.sql in the Supabase SQL editor, then rerun this verifier.";
+  }
+  return `Apply the missing migration or rerun supabase/schema.sql for ${table}.`;
+}
+
 async function supabaseRequest(pathname, { key, method = "GET", body } = {}) {
   const supabaseUrl = String(env.NEXT_PUBLIC_SUPABASE_URL || "").replace(/\/$/, "");
   const response = await fetch(`${supabaseUrl}${pathname}`, {
@@ -142,7 +149,7 @@ async function verifySupabaseRest() {
         table,
         response.ok ? "pass" : "fail",
         response.ok ? `${columns.length} required columns reachable via service role` : `HTTP ${response.status}: ${text.slice(0, 220)}`,
-        response.ok ? "" : `Apply the missing migration or rerun supabase/schema.sql for ${table}.`,
+        response.ok ? "" : repairHintForTable(table),
       );
     } catch (error) {
       record("supabase_table", table, "fail", error.message, "Check the Supabase project URL and service-role key.");

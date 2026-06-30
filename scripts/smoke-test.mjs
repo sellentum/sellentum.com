@@ -74,6 +74,7 @@ function assertPublicTrustPages() {
   const nav = readFileSync("components/landing-nav.tsx", "utf8");
   const packageJson = readFileSync("package.json", "utf8");
   const productionVerifier = readFileSync("scripts/verify-production.mjs", "utf8");
+  const productionRepairSql = readFileSync("supabase/verification/production_repair_widget_rate_limits.sql", "utf8");
   for (const route of ["/contact", "/support", "/security", "/privacy", "/terms"]) {
     assert(footer.includes(route), `Marketing footer should link to ${route}`);
   }
@@ -84,6 +85,8 @@ function assertPublicTrustPages() {
   assert(nav.includes('href: "/storefront-demo"'), "Landing navigation should expose the storefront widget demo from the Resources menu");
   assert(packageJson.includes("\"verify:production\""), "package.json should expose the production verification command");
   assert(productionVerifier.includes("production_schema_check.sql") && productionVerifier.includes("requiredSupabaseTables"), "Production verifier should bridge live checks with the authoritative Supabase SQL verification");
+  assert(productionVerifier.includes("production_repair_widget_rate_limits.sql"), "Production verifier should point missing widget/rate-limit schema checks to the focused repair SQL");
+  assert(productionRepairSql.includes("allowed_domains") && productionRepairSql.includes("rate_limit_buckets") && productionRepairSql.includes("check_rate_limit"), "Production repair SQL should install widget domain allowlists and shared rate limiting");
 }
 
 function assertPublishedAdvisorRuntime() {
