@@ -482,10 +482,13 @@ function assertDashboardCommandCenterWorkflow() {
   const commandCenter = readFileSync("lib/dashboard-command-center.ts", "utf8");
   const conversionPlaybook = readFileSync("lib/conversion-playbook.ts", "utf8");
   const launchPlan = readFileSync("lib/merchant-launch-plan.ts", "utf8");
+  const founderQueue = readFileSync("lib/founder-launch-queue.ts", "utf8");
   assert(overview.includes("buildDashboardCommandCenter"), "Dashboard overview should use the shared command-center helper");
   assert(overview.includes("buildConversionPlaybook"), "Dashboard overview should use the shared conversion playbook helper");
   assert(overview.includes("buildMerchantLaunchPlan"), "Dashboard overview should use the shared merchant launch plan helper");
+  assert(overview.includes("buildFounderLaunchQueue"), "Dashboard overview should use the shared founder launch queue helper");
   assert(overview.includes("First launch path"), "Dashboard overview should give merchants a simple first-launch path");
+  assert(overview.includes("Founder launch queue") && overview.includes("Copy founder queue"), "Dashboard overview should expose a copyable founder launch queue");
   assert(overview.includes("Command queue"), "Dashboard overview should expose prioritized command-center actions");
   assert(overview.includes("Conversion playbook"), "Dashboard overview should expose a deterministic conversion playbook");
   assert(overview.includes("Real shopper activity"), "Dashboard overview should label the activity chart as real data");
@@ -496,6 +499,9 @@ function assertDashboardCommandCenterWorkflow() {
   assert(commandCenter.includes("analyzeCatalogIntelligence"), "Command-center helper should reuse catalog intelligence");
   assert(launchPlan.includes("buildMerchantLaunchPlan"), "Merchant launch plan helper should expose a reusable first-launch builder");
   assert(launchPlan.includes("Install widget") && launchPlan.includes("Prove one shopper journey"), "Merchant launch plan should guide setup through storefront proof");
+  assert(founderQueue.includes("buildFounderLaunchQueue"), "Founder launch queue helper should expose a reusable builder");
+  assert(founderQueue.includes("production_repair_widget_rate_limits.sql") && founderQueue.includes("auth-email-proof"), "Founder launch queue should track Supabase repair and auth email proof");
+  assert(founderQueue.includes("Founder + Codex") && founderQueue.includes("real-catalog"), "Founder launch queue should separate founder/Codex shared catalog work");
   assert(conversionPlaybook.includes("buildConversionPlaybook"), "Conversion playbook helper should expose a reusable report builder");
   assert(conversionPlaybook.includes("buildAnalyticsQualityReport"), "Conversion playbook should consider analytics quality before optimization");
   assert(conversionPlaybook.includes("buildZeroPartyInsights"), "Conversion playbook should consider zero-party product demand");

@@ -1,12 +1,13 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
-import { AlertTriangle, ArrowDownRight, ArrowRight, ArrowUpRight, BookOpenCheck, Boxes, Check, ChevronRight, CirclePlay, Eye, MousePointerClick, PackagePlus, Rocket, Settings, Sparkles, Wrench } from "lucide-react";
+import { AlertTriangle, ArrowDownRight, ArrowRight, ArrowUpRight, BookOpenCheck, Boxes, Check, ChevronRight, CirclePlay, Clipboard, Eye, MousePointerClick, PackagePlus, Rocket, Settings, Sparkles, Wrench } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { LoadingState } from "@/components/loading-state";
 import { buildDashboardCommandCenter } from "@/lib/dashboard-command-center";
 import { buildConversionPlaybook } from "@/lib/conversion-playbook";
+import { buildFounderLaunchQueue } from "@/lib/founder-launch-queue";
 import { buildMerchantLaunchPlan } from "@/lib/merchant-launch-plan";
 
 const operationsMap = [
@@ -47,11 +48,19 @@ const operationsMap = [
   { group: "Optimization", label: "Usage Center", href: "/dashboard/usage" },
 ];
 
+const founderTaskTone = {
+  done: "border-lime/50 bg-lime/15 text-moss",
+  "needs-proof": "border-amber-200 bg-amber-50 text-amber-700",
+  pending: "border-black/[0.07] bg-white text-black/45",
+};
+
 export default function DashboardOverview() {
   const { ready, products, quizzes, configurators, events, settings } = useStore();
+  const [founderQueueCopied, setFounderQueueCopied] = useState(false);
   const commandCenter = useMemo(() => buildDashboardCommandCenter({ products, quizzes, configurators, events, settings }), [products, quizzes, configurators, events, settings]);
   const conversionPlaybook = useMemo(() => buildConversionPlaybook({ products, quizzes, configurators, events, settings }), [products, quizzes, configurators, events, settings]);
   const launchPlan = useMemo(() => buildMerchantLaunchPlan({ products, quizzes, events, settings }), [products, quizzes, events, settings]);
+  const founderQueue = useMemo(() => buildFounderLaunchQueue({ products, quizzes, events, settings }), [products, quizzes, events, settings]);
   if (!ready) return <LoadingState />;
   const { snapshot, trends } = commandCenter;
   const views = snapshot.widget_view;
@@ -66,6 +75,12 @@ export default function DashboardOverview() {
     { label: "Buy clicks", value: clicks, icon: MousePointerClick, trend: trends.buy_click },
     { label: "Launch score", value: `${commandCenter.launchScore}%`, icon: Rocket, badge: commandCenter.launchLabel },
   ];
+
+  async function copyFounderQueue() {
+    await navigator.clipboard.writeText(founderQueue.packet);
+    setFounderQueueCopied(true);
+    window.setTimeout(() => setFounderQueueCopied(false), 1600);
+  }
 
   return (
     <div className="animate-rise">
@@ -107,6 +122,37 @@ export default function DashboardOverview() {
               </Link>
             ))}
           </div>
+        </div>
+      </section>
+
+      <section className="mt-6 rounded-[28px] border border-black/[0.07] bg-white p-6">
+        <div className="flex items-start justify-between gap-6">
+          <div>
+            <p className="eyebrow text-moss">Founder launch queue</p>
+            <h2 className="mt-3 text-3xl font-extrabold tracking-[-.05em]">{founderQueue.headline}</h2>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-black/45">{founderQueue.summary}</p>
+          </div>
+          <button onClick={copyFounderQueue} className="inline-flex shrink-0 items-center gap-2 rounded-full bg-ink px-5 py-3 text-xs font-extrabold text-white"><Clipboard size={14} /> {founderQueueCopied ? "Queue copied" : "Copy founder queue"}</button>
+        </div>
+        <div className="mt-5 grid grid-cols-4 gap-3 text-center">
+          <div className="rounded-2xl bg-canvas p-4"><p className="text-2xl font-extrabold">{founderQueue.counts.done}</p><p className="mt-1 text-xs font-bold text-black/35">Done</p></div>
+          <div className="rounded-2xl bg-amber-50 p-4"><p className="text-2xl font-extrabold text-amber-700">{founderQueue.counts.needsProof}</p><p className="mt-1 text-xs font-bold text-amber-700/60">Needs proof</p></div>
+          <div className="rounded-2xl bg-canvas p-4"><p className="text-2xl font-extrabold">{founderQueue.counts.pending}</p><p className="mt-1 text-xs font-bold text-black/35">Pending</p></div>
+          <div className="rounded-2xl bg-ink p-4 text-white"><p className="text-2xl font-extrabold">{founderQueue.counts.founderOpen}</p><p className="mt-1 text-xs font-bold text-white/40">Founder-side</p></div>
+        </div>
+        <div className="mt-5 grid gap-3 xl:grid-cols-4">
+          {founderQueue.tasks.map((task) => (
+            <Link key={task.id} href={task.href} className={`rounded-2xl border p-4 transition hover:-translate-y-0.5 ${founderTaskTone[task.status]}`}>
+              <div className="flex items-start justify-between gap-3">
+                <span className="rounded-full bg-white px-2.5 py-1 text-xs font-extrabold uppercase text-black/35">{task.owner}</span>
+                <span className="rounded-full bg-white px-2.5 py-1 text-xs font-extrabold uppercase text-black/35">{task.status.replace("-", " ")}</span>
+              </div>
+              <h3 className="mt-4 text-sm font-extrabold leading-5 text-ink">{task.title}</h3>
+              <p className="mt-2 text-xs leading-4 text-black/45">{task.detail}</p>
+              <p className="mt-3 rounded-xl bg-white px-3 py-2 text-xs font-bold leading-4 text-black/35">{task.evidence}</p>
+              <span className="mt-3 inline-flex items-center gap-1 text-xs font-extrabold text-moss">{task.cta}<ArrowRight size={10} /></span>
+            </Link>
+          ))}
         </div>
       </section>
 

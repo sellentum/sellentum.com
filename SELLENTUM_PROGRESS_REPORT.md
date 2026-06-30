@@ -8,7 +8,7 @@ GitHub repo: **https://github.com/sellentum/sellentum.com.git**
 
 Branch: **main**
 
-Latest product-code interval: **Production auth proof hardening**
+Latest product-code interval: **Founder launch queue**
 
 ---
 
@@ -133,6 +133,13 @@ Still needed: manually test signup, email confirmation and password reset on the
 Built the dashboard home, product area, finder area, widget/settings area, analytics area and operations/verification areas.
 
 Also removed the temporary MVP audit section.
+
+Latest Codex-side progress:
+
+- Added a Founder Launch Queue to the dashboard home.
+- The queue separates Codex-shipped work from founder-side production proof.
+- It tracks Supabase repair, auth email proof, brand settings, real catalog upload, real finder creation, storefront widget testing and analytics proof.
+- It includes a copyable founder handoff packet.
 
 Still needed: simplify merchant language, improve empty states and make the dashboard less technical.
 
