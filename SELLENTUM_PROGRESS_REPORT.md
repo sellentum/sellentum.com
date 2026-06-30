@@ -2,115 +2,147 @@
 
 Last updated: **30 June 2026**
 
-Live site: **https://www.sellentum.com**
+Live website: **https://www.sellentum.com**
 
 GitHub repo: **https://github.com/sellentum/sellentum.com.git**
 
-Main branch: **main**
+Main local folder: **/Users/abhishekdubey/Documents/sellentum**
 
 ---
 
-## 1. Plain-English summary
+## 1. Short answer: where Sellentum stands today
 
-Sellentum is now a real working SaaS MVP, not just a landing page.
+Sellentum is no longer just an idea or landing page. It is a working SaaS MVP with:
 
-But it is **not yet a fully proven production SaaS**.
+- a public marketing website,
+- signup/login/logout,
+- a protected merchant dashboard,
+- product catalog tools,
+- CSV product upload,
+- guided product finder creation,
+- deterministic product recommendations,
+- AI-generated recommendation explanations,
+- customer-facing product finder pages,
+- embeddable widget code,
+- analytics tracking,
+- Supabase database/auth,
+- Vercel production deployment,
+- production verification scripts.
 
-The simplest way to understand the current position:
+But Sellentum is **not yet a fully proven production SaaS**.
 
-| Area | Current status |
-|---|---|
-| Product idea | Clear |
-| Landing website | Built |
-| Authentication | Built, needs final live signup proof |
-| Supabase database | Built and verified from code side |
-| Merchant dashboard | Built, needs simplification/polish |
-| Product catalog | Built, needs real catalog test |
-| Quiz/finder builder | Built, needs real merchant workflow proof |
-| Recommendations | Built with deterministic matching plus AI explanations |
-| Customer-facing finder | Built, needs real storefront proof |
-| Embeddable widget | Built, needs live website install proof |
-| Analytics | Built, needs real event proof |
-| Production readiness | Partly ready, still needs real end-to-end testing |
+The biggest missing piece is not “more pages”. The biggest missing piece is **real production proof**:
 
-My honest current estimate:
+> A real merchant account uploads real products, creates a finder, embeds it on a real storefront, a shopper completes the flow, recommendations appear, Buy Now is clicked, and analytics prove the whole journey.
 
-| Category | Progress |
-|---|---:|
-| Core MVP feature build | **80–85%** |
-| Production infrastructure | **70–75%** |
-| Real-world merchant proof | **30–40%** |
-| Design and SaaS polish | **40–45%** |
-| Zoovu-level maturity | **10–15%** |
-
-Important:
-
-> The codebase has many pieces built, but the product is not “serious SaaS ready” until we prove the full journey on production with real data.
-
-The real MVP proof we still need:
-
-> A business owner signs up, uploads products, creates a product finder, embeds it on a website, customers complete the finder, recommendations appear, buy clicks are tracked, and analytics show the journey correctly.
+That full live proof has not been completed yet.
 
 ---
 
-## 2. Markdown cleanup status
+## 2. Current progress estimate
 
-Current Markdown files that should stay:
+These numbers are honest estimates, not marketing numbers.
 
-| File | Keep? | Why |
+| Area | Current progress | What it means |
+|---|---:|---|
+| Core MVP feature build | **80–85%** | Most major MVP features exist in the app. |
+| Production infrastructure | **70–75%** | Vercel, Supabase, env vars and verification scripts are in place, but live proof still matters. |
+| Real merchant workflow proof | **30–40%** | The flow exists, but needs real data and real storefront testing. |
+| Visual polish / SaaS maturity | **45–50%** | Good foundation, but not yet as calm and refined as a serious mature SaaS. |
+| Zoovu-level maturity | **10–15%** | Sellentum is an early focused product, not an enterprise platform yet. |
+
+Simple version:
+
+> We have built a strong MVP foundation. Now we need to prove it, simplify it, polish it, and make it trustworthy for real ecommerce brands.
+
+---
+
+## 3. Markdown file cleanup
+
+Current useful Markdown files:
+
+| File | Keep? | Purpose |
 |---|---|---|
-| `README.md` | Yes | Technical setup, local run, Supabase, Vercel, environment variables, widget and production verification instructions. |
-| `SELLENTUM_PROGRESS_REPORT.md` | Yes | Human-readable project status, roadmap, progress stages and next actions. |
+| `README.md` | Yes | Technical setup, environment variables, local development, Supabase, Vercel and verification instructions. |
+| `SELLENTUM_PROGRESS_REPORT.md` | Yes | Human-readable project status, progress, roadmap and next actions. |
 
-There are currently **no other project Markdown files at the repo root that need deletion**.
+I checked the repo and there are currently **no other root project Markdown files that need to be removed**.
 
-Note:
+Going forward:
 
-- Markdown files inside `node_modules` are third-party package files. We do not touch those.
-- Going forward, this file is the main human progress report.
-- The README stays as the technical setup document.
-
----
-
-## 3. What we have completed so far
-
-### Stage 1 — Project foundation
-
-Status: **Done**
-
-What was completed:
-
-- Next.js application created.
-- React app structure created.
-- Tailwind CSS styling system added.
-- Reusable UI components added.
-- App routes and dashboard routes created.
-- API routes created.
-- Vercel-ready project structure created.
-
-What this means:
-
-> Sellentum has a real web application foundation.
+- Keep `README.md` for technical instructions.
+- Keep this file for human progress tracking.
+- If we create temporary audit/roadmap/status markdown files later, we should merge them into this file and delete the temporary file.
 
 ---
 
-### Stage 2 — Brand, repo and domain setup
+## 4. Stage-by-stage progress
+
+### Stage 1 — Product idea and MVP direction
 
 Status: **Done**
 
-What was completed:
+What we decided:
+
+- Sellentum is an AI-powered guided-selling SaaS for ecommerce brands.
+- The product helps a merchant upload products, create a guided product finder, embed it on their store and recommend the right products to shoppers.
+- The MVP should be practical and focused, not overloaded with enterprise features.
+
+What is not included yet:
+
+- full Shopify app,
+- Magento integration,
+- WooCommerce integration,
+- Salesforce/SAP integrations,
+- advanced team permissions,
+- enterprise workflows.
+
+---
+
+### Stage 2 — App foundation
+
+Status: **Done**
+
+What is built:
+
+- Next.js app.
+- React frontend.
+- Tailwind styling.
+- App Router routes.
+- API routes.
+- Reusable components.
+- Dashboard shell.
+- Public marketing layout.
+- Vercel-ready project structure.
+
+Current judgment:
+
+> The technical foundation is good enough to keep building on.
+
+---
+
+### Stage 3 — Branding, domain and repository
+
+Status: **Done**
+
+What is completed:
 
 - Brand changed from **Findly** to **Sellentum**.
-- Local folder renamed from `Site_MVP` to `sellentum`.
-- GitHub repo moved to the Sellentum organization.
-- Main branch connected to the new GitHub repo.
-- Production domain connected at **sellentum.com**.
-- Vercel deployment connected.
+- Project folder renamed to `sellentum`.
+- GitHub remote moved to the Sellentum organization.
+- Main branch connected to the new repo.
+- Vercel connected.
+- `sellentum.com` is live.
 
-What still needs watching:
+Important note:
 
-- If old “Findly” wording appears anywhere, replace it immediately.
-- If Codex or local tools still point to the old folder path, use:
+If any tool still points to this old folder:
+
+```text
+/Users/abhishekdubey/Documents/Site_MVP
+```
+
+it should now use:
 
 ```text
 /Users/abhishekdubey/Documents/sellentum
@@ -118,562 +150,410 @@ What still needs watching:
 
 ---
 
-### Stage 3 — Public marketing website
+### Stage 4 — Public website
 
 Status: **Mostly done**
 
-What was completed:
+What is built:
 
-- Landing page.
-- Hero section.
-- Feature sections.
-- How-it-works sections.
-- Use-case sections.
-- Pricing placeholder.
-- Calls to action.
-- Resource/support/security/privacy/terms-style pages.
+- homepage,
+- platform pages,
+- industry pages,
+- resources page,
+- support page,
+- contact page,
+- security page,
+- privacy page,
+- terms page,
+- marketing navigation and footer,
+- calls to action.
 
-What still needs improvement:
+What still needs work:
 
-- Final pricing offer.
-- Stronger sales copy after we prove the demo workflow.
-- Founder/company story.
-- Final legal review for Privacy Policy and Terms.
-- Better real screenshots once the production workflow is proven.
+- stronger sales copy,
+- clearer pricing offer,
+- better real product screenshots,
+- founder/company story,
+- legal review for final terms and privacy policy.
 
 Current judgment:
 
-> Good enough for early credibility, not yet final sales-grade positioning.
+> The public site is good enough for early credibility, but not yet final sales-grade.
 
 ---
 
-### Stage 4 — Authentication
+### Stage 5 — Authentication
 
-Status: **Built, needs final production proof**
+Status: **Built, needs final live proof**
 
-What was completed:
+What is built:
 
-- Signup.
-- Login.
-- Logout.
-- Protected dashboard routes.
-- Email verification through Supabase.
-- Forgot password flow.
-- Reset password flow.
-- Branded Sellentum email/SMTP discussion and setup guidance.
-- Login demo-prefill problem was addressed in the app.
+- signup,
+- login,
+- logout,
+- protected dashboard routes,
+- Supabase email verification,
+- forgot password,
+- reset password,
+- branded login/signup screens.
 
-What still needs to be proven on production:
+What still needs production proof:
 
-- Signup works at `https://www.sellentum.com`.
-- Verification email comes from the Sellentum sender.
-- Verification link opens the production site, not localhost.
-- Login works after verification.
-- Forgot password email works.
-- Password reset works.
+- signup works on `https://www.sellentum.com`,
+- verification email uses the Sellentum sender,
+- verification links open production, not localhost,
+- login works after email verification,
+- forgot password works,
+- reset password works.
 
 Owner:
 
-- **You:** test with a real inbox.
-- **Codex:** fix any app-side issue if the production auth flow fails.
+- **You:** test with a real email inbox.
+- **Codex:** fix any app-side or redirect issue if it fails.
 
 ---
 
-### Stage 5 — Supabase database and security
+### Stage 6 — Supabase database and security
 
-Status: **Built and verified from Codex side**
+Status: **Built and locally verified**
 
-What was completed:
+What is built:
 
-- Supabase schema created.
-- Main database tables created:
-  - profiles
-  - products
-  - quizzes
-  - questions
-  - answer options
-  - recommendation rules
-  - analytics events
-  - widget settings
-- Row Level Security added.
-- Production repair scripts added.
-- Schema verification scripts added.
-- Supabase schema verification passed from the local project.
+- Supabase authentication setup.
+- PostgreSQL schema.
+- Row Level Security policies.
+- Production repair scripts.
+- Schema verification scripts.
+- Server-side Supabase helpers.
+- Client-side Supabase helpers.
 
-Latest known verification:
+Main tables covered:
 
-```text
-npm run verify:supabase-schema
-Result: passed
-```
-
-What still matters:
-
-- Live user testing still needs to confirm the full workflow.
-- Supabase RLS should be treated carefully whenever new tables are added.
+- profiles,
+- products,
+- quizzes,
+- questions,
+- answer options,
+- recommendation rules,
+- analytics events,
+- widget settings,
+- rate-limit/runtime tables,
+- additional product discovery/configurator/feedback tables.
 
 Current judgment:
 
-> The database foundation is strong enough for MVP testing.
+> The database foundation is solid for MVP testing. Every new table must continue to use RLS carefully.
 
 ---
 
-### Stage 6 — Merchant dashboard
+### Stage 7 — Merchant dashboard
 
-Status: **Built, needs product polish**
+Status: **Built, needs simplification and polish**
 
-What was completed:
+What is built:
 
-- Dashboard home.
-- Products area.
-- Finder/quiz area.
-- Widget/settings area.
-- Analytics area.
-- Production verification area.
-- Launch proof queue.
-- Next-best-action card.
-- Core launch path:
-  - Products
-  - Finder
-  - Publish
-  - Embed
-  - Analytics proof
-- Temporary MVP audit section removed.
+- dashboard home,
+- products page,
+- product finder/quiz area,
+- settings area,
+- widget and embed area,
+- analytics area,
+- launch area,
+- production verification area,
+- onboarding and workspace health tools,
+- additional studios for catalog, content, feedback, personas, merchandising, search, configurators and operations.
 
-What still needs improvement:
+What still needs work:
 
-- Keep making the dashboard less technical.
-- Improve empty states.
-- Improve loading states.
-- Improve error messages.
-- Make every page clearly answer: “What should I do next?”
-- Remove internal/developer/founder language from merchant-facing screens.
-- Latest completed interval: Launch Studio now says **Storefront launch handoff**, **Implementation contract** and **Storefront QA checklist** instead of developer-first wording.
+- reduce complexity for first-time users,
+- make the “next thing to do” obvious on every page,
+- remove developer-style language from merchant screens,
+- improve empty states,
+- improve error messages,
+- improve loading states,
+- visually polish dashboard pages.
 
 Current judgment:
 
-> The dashboard works, but it should feel calmer, simpler and more like a serious SaaS product.
+> Powerful, but currently busier than it should be. The next phase should make it feel simple and serious.
 
 ---
 
-### Stage 7 — Product catalog
+### Stage 8 — Product catalog
 
-Status: **Built, needs real catalog test**
+Status: **Built, needs real catalog proof**
 
-What was completed:
+What is built:
 
-- Add products manually.
-- Edit products.
-- Delete products.
-- Upload products through CSV.
-- Product fields support:
-  - name
-  - price
-  - image URL
-  - category
-  - description
-  - features
-  - tags
-  - product URL
-- CSV importer supports flexible column names.
-- CSV validation exists.
-- First-catalog launch kit exists.
-- Latest completed interval: the empty Products page now shows a **First catalog proof path** with import/template/manual-entry actions and proof-ready catalog acceptance criteria.
+- manually add products,
+- edit products,
+- delete products,
+- CSV upload/import support,
+- product fields such as name, price, image URL, category, description, features, tags and product URL,
+- catalog guidance and proof steps.
 
-What still needs to be proven:
+What still needs proof:
 
-- Upload a real product catalog.
-- Confirm product images display correctly.
-- Confirm product URLs open correctly.
-- Confirm tags/features/categories are useful enough for recommendations.
-- Confirm the CSV importer is understandable for a normal business owner.
+- upload a real product CSV,
+- confirm imported fields map correctly,
+- confirm product images load correctly,
+- confirm product URLs work,
+- confirm categories/tags/features are clean enough for recommendations.
 
 Owner:
 
 - **You:** provide or upload a real product CSV.
-- **Codex:** improve importer UX and fix issues found during upload.
+- **Codex:** fix import, mapping or UI issues found during the test.
 
 ---
 
-### Stage 8 — Guided-selling quiz / product finder builder
+### Stage 9 — Guided-selling finder builder
 
-Status: **Built, needs real merchant proof**
+Status: **Built, needs real merchant workflow proof**
 
-What was completed:
+What is built:
 
-- Create product finder quizzes.
-- Add questions.
-- Add answer options.
-- Connect answers to recommendation signals.
-- Use tags, categories, features and budget logic.
-- Save and edit finder flows.
-- Publish-ready checks were added.
-- Builder and launch tools were expanded.
-- Latest completed interval: the Product Finders page now shows a **First finder proof path** and **Proof-ready finder** criteria before merchants publish or embed their first guided-selling flow.
+- create product finders/quizzes,
+- add questions,
+- add answer options,
+- connect answers to tags/categories/features/recommendation logic,
+- save and edit finder data,
+- launch readiness guidance.
 
-What still needs improvement:
+What still needs proof:
 
-- Simpler builder language.
-- Better preview flow.
-- Clearer “publish” moment.
-- Easier question creation for non-technical merchants.
-- Better guidance when the catalog is too weak to build a good finder.
+- create one real finder from scratch,
+- publish it,
+- run through the customer journey,
+- confirm the recommended products make sense,
+- confirm editing a finder after creation is clear.
 
 Current judgment:
 
-> The builder exists, but the merchant experience still needs simplification.
+> The builder exists, but we still need to prove it feels easy for a normal business owner.
 
 ---
 
-### Stage 9 — Recommendation logic and AI explanations
+### Stage 10 — Recommendation engine
 
-Status: **Built**
+Status: **Built, needs real data tuning**
 
-What was completed:
+What is built:
 
-- Deterministic product matching.
-- Rule-based scoring using:
-  - tags
-  - categories
-  - features
-  - budget
-  - answer rules
-- Product selection does not rely fully on AI.
-- AI is used to explain why products match.
-- Fallback explanations exist when OpenAI is unavailable.
-- Guardrails were added around the idea:
+- deterministic matching using product data,
+- matching based on tags/categories/features/budget-style signals,
+- recommendation tracing,
+- fallback behavior,
+- AI-generated explanation support,
+- non-AI product selection.
 
-```text
-Rules select. AI explains.
-```
+Important:
 
-What still needs improvement:
+> Product selection is not fully left to AI. AI is used mainly to explain why a product was recommended.
 
-- More explanation quality testing with real product data.
-- Better handling of weak catalogs.
-- More merchant-friendly explanation preview.
-- More confidence indicators for why a product was recommended.
+What still needs work:
 
-Current judgment:
-
-> The recommendation foundation is correct for MVP: deterministic selection first, AI explanation second.
+- test with a real catalog,
+- confirm scoring is understandable,
+- improve weak recommendation cases,
+- make bad/no-match states more helpful,
+- add more merchant-facing explanation of how recommendations are decided.
 
 ---
 
-### Stage 10 — Customer-facing finder and widget
+### Stage 11 — Customer-facing finder
 
-Status: **Built, needs live storefront proof**
+Status: **Built, needs real storefront proof**
 
-What was completed:
+What is built:
 
-- Customer-facing question flow.
-- Product recommendation results.
-- Product image/title/price display.
-- AI/fallback explanation display.
-- Buy Now buttons.
-- Restart flow.
-- Embeddable JavaScript widget.
-- Modal/iframe-style embed support.
-- Storefront demo page.
-- Widget install scanner.
-- Storefront QA guidance.
-- Latest completed interval: Brand & Embed now includes a **Widget proof checklist** that connects snippet copy to staging install, scanner proof and the five required analytics events.
+- public finder pages,
+- question flow,
+- answer selection,
+- recommendation results,
+- product image/title/price/explanation,
+- Buy Now button,
+- analytics event tracking.
 
-What still needs to be proven:
+What still needs proof:
 
-- Embed the widget on a real website page.
-- Confirm the widget loads correctly.
-- Confirm customers can complete the finder.
-- Confirm recommendations display correctly.
-- Confirm Buy Now clicks open the right product URL.
-- Confirm widget analytics events are recorded.
+- test with a real catalog,
+- complete a real shopper journey,
+- confirm results feel trustworthy,
+- confirm Buy Now routes to the right product page,
+- confirm analytics captures the session.
+
+---
+
+### Stage 12 — Embeddable widget
+
+Status: **Built, needs live install proof**
+
+What is built:
+
+- embeddable JavaScript snippet,
+- widget route,
+- modal/iframe-style loading behavior,
+- widget settings,
+- widget proof checklist,
+- storefront install scanner,
+- launch handoff packet.
+
+What still needs proof:
+
+- copy snippet from the dashboard,
+- install it on a real or staging ecommerce page,
+- open the page as a shopper,
+- confirm the widget loads,
+- complete the finder,
+- click Buy Now,
+- confirm analytics events were recorded.
 
 Owner:
 
-- **You:** provide the storefront/staging page where the widget will be installed.
-- **Codex:** verify the widget install and fix issues.
+- **You:** provide/storefront page access or install the snippet.
+- **Codex:** verify the install and fix any widget/runtime issue.
 
 ---
 
-### Stage 11 — Analytics
+### Stage 13 — Analytics
 
 Status: **Built, needs real event proof**
 
-What was completed:
+What is built:
 
-Analytics support exists for:
+- widget view tracking,
+- quiz start tracking,
+- quiz completion tracking,
+- product recommendation tracking,
+- buy button click tracking,
+- analytics dashboard,
+- launch analytics proof card,
+- copyable proof packet,
+- proof-ready acceptance criteria.
 
-- Widget views.
-- Quiz starts.
-- Completed quizzes.
-- Recommended products.
-- Buy button clicks.
-- Session tracking.
-- Journey/event proof.
-- Analytics QA.
-- Basic launch proof guidance.
+The five critical launch events are:
 
-What still needs to be proven:
+1. `widget_view`
+2. `quiz_start`
+3. `quiz_complete`
+4. `product_recommended`
+5. `buy_click`
 
-- Real production widget view event.
-- Real quiz start event.
-- Real quiz completion event.
-- Real recommendation event.
-- Real Buy Now click event.
-- Analytics dashboard correctly showing those events.
+What still needs proof:
+
+- all five events appear from one real storefront test session,
+- session ID stays consistent,
+- storefront URL/source/campaign/placement data is captured,
+- proof packet is copied into the launch record.
 
 Current judgment:
 
-> Analytics exists, but it needs a real end-to-end proof session before we trust it as production-ready.
+> Analytics features exist. Now we need one clean production proof session.
 
 ---
 
-### Stage 12 — Settings and branding
-
-Status: **Built**
-
-What was completed:
-
-- Brand name setting.
-- Primary color setting.
-- Button text setting.
-- Widget title setting.
-- Welcome message setting.
-- Shared branding across embedded experiences.
-
-What still needs improvement:
-
-- Better preview while editing settings.
-- More polished settings page design.
-- Safer defaults for new merchants.
-
----
-
-### Stage 13 — Production deployment and verification
+### Stage 14 — Production deployment and verification
 
 Status: **Partly done**
 
-What was completed:
+What is done:
 
-- Vercel connected.
+- Vercel project connected.
+- Production domain live.
 - Environment variables added.
-- Supabase environment variables added.
-- OpenAI environment variables added.
-- Production verification script added.
-- Supabase schema verification script added.
-- Production route checks added.
+- Supabase connected.
+- OpenAI environment variable added.
+- Production verification script exists.
+- Supabase schema verification script exists.
 
-Latest known production checks:
+What still needs proof:
 
-```text
-npm run verify:production -- --base-url=https://www.sellentum.com --probe-rate-limit
-Result: mostly passing with one expected warning around REST-level RLS proof
-```
+- latest commit deployed to Vercel,
+- production signup/login tested,
+- production widget tested,
+- production analytics tested,
+- production AI explanation tested,
+- production rate limiting and runtime protection confirmed.
 
-Meaning:
+Current judgment:
 
-> The production deployment is connected and testable, but the final proof must come from real user journeys.
-
----
-
-## 4. What is still left before Sellentum feels like serious SaaS
-
-### Must-have before showing seriously to customers
-
-1. Prove production signup and email verification.
-2. Upload a real product catalog.
-3. Build one real product finder from that catalog.
-4. Publish the finder.
-5. Embed the widget on a real storefront or staging page.
-6. Complete one full shopper journey.
-7. Confirm recommendations are correct.
-8. Confirm Buy Now links work.
-9. Confirm analytics events appear.
-10. Polish the dashboard language and obvious rough edges.
-
-### Important after first proof
-
-1. Simplify onboarding.
-2. Improve dashboard empty states.
-3. Improve finder preview.
-4. Continue improving CSV import guidance.
-5. Improve analytics explanations.
-6. Add better production monitoring.
-7. Add proper support/contact flows.
-8. Improve pricing and plan messaging.
-9. Add better example/demo data.
-10. Prepare a strong demo video or walkthrough.
-
-### Not needed yet
-
-These should stay out of scope for now:
-
-- Full Shopify app.
-- Magento integration.
-- WooCommerce integration.
-- Salesforce integration.
-- SAP integration.
-- Complex team permissions.
-- Enterprise SSO.
-- Advanced personalization.
-- Full Stripe billing.
-- Large-scale partner marketplace features.
+> Infrastructure is in place. Production behavior still needs full end-to-end proof.
 
 ---
 
-## 5. Current biggest risks
+## 5. What has been done so far: complete project log
 
-| Risk | Why it matters | What to do |
-|---|---|---|
-| We have many features but not enough real proof | A SaaS product is only believable after the real workflow works | Run the first real end-to-end production test |
-| Dashboard language is too technical in places | Merchants may feel confused or overwhelmed | Simplify copy page by page |
-| No real catalog has been tested yet | Product matching quality depends on real data | Upload a real CSV |
-| Widget has not been proven on a real storefront yet | Embed reliability is central to the product | Install on staging/live test page |
-| Analytics needs real event proof | Business owners need to trust the numbers | Complete one real journey and check events |
-| Legal/pricing copy is still placeholder-level | Public trust needs stronger details | Finalize after product proof |
+High-level log:
 
----
-
-## 6. What Codex should do next
-
-This is the recommended order. We should not jump randomly.
-
-### Step 1 — Clean merchant-facing dashboard language
-
-Goal:
-
-> Make the dashboard feel less like an internal development tool and more like a polished SaaS product.
-
-Codex tasks:
-
-- Remove unnecessary technical wording from merchant-facing pages.
-- Replace “developer handoff” style language where merchants see it.
-- Improve “what to do next” copy.
-- Keep technical details only where they are truly useful.
-
-Status: **In progress**
-
----
-
-### Step 2 — Prove production auth
-
-Goal:
-
-> Confirm signup, email verification, login, forgot password and reset password work on `sellentum.com`.
-
-You need to:
-
-- Create a fresh account using a real email.
-- Confirm the verification email sender looks correct.
-- Confirm the email link opens `https://www.sellentum.com`, not localhost.
-- Try login after verification.
-- Try forgot password.
-
-Codex will:
-
-- Fix redirect or UI issues if anything fails.
-
-Status: **Waiting for live test**
+- Defined Sellentum as an AI-guided product finder SaaS.
+- Built the Next.js application.
+- Built the public marketing website.
+- Added Sellentum branding.
+- Replaced the old Findly brand.
+- Renamed the local folder from `Site_MVP` to `sellentum`.
+- Changed GitHub remote to the Sellentum organization repo.
+- Connected Vercel.
+- Connected `sellentum.com`.
+- Added Supabase packages.
+- Added Supabase client/server/admin helpers.
+- Added Supabase authentication.
+- Added email verification flow.
+- Added login, signup, logout, forgot password and reset password pages.
+- Protected dashboard routes.
+- Built merchant dashboard shell.
+- Built product management.
+- Built CSV catalog upload/import support.
+- Built guided finder/quiz creation.
+- Built question and answer option logic.
+- Built deterministic recommendation matching.
+- Added AI explanation generation.
+- Added fallback explanations when AI is unavailable.
+- Built customer-facing finder pages.
+- Built widget JavaScript route.
+- Built embeddable widget/snippet functionality.
+- Built widget settings.
+- Added analytics event capture.
+- Built analytics dashboard.
+- Added launch analytics proof guidance.
+- Added proof-ready analytics acceptance criteria.
+- Added storefront install scanner.
+- Added launch handoff/checklist language.
+- Added production verification scripts.
+- Added Supabase schema verification scripts.
+- Added Supabase repair scripts.
+- Added smoke tests.
+- Added lint/typecheck/build workflows.
+- Added product/finder/widget/analytics proof guidance inside the dashboard.
+- Removed the temporary MVP audit section from the dashboard.
+- Created this human progress report.
 
 ---
 
-### Step 3 — Upload the first real catalog
+## 6. What is left before calling the MVP truly proven
 
-Goal:
+The MVP should only be considered proven when this exact story works in production:
 
-> Replace demo confidence with real product confidence.
-
-You need to:
-
-- Prepare or provide a real CSV.
-
-Codex will:
-
-- Help clean the CSV format.
-- Improve importer issues.
-- Check recommendation fields.
-
-Status: **Waiting for real catalog**
-
----
-
-### Step 4 — Build the first real finder
-
-Goal:
-
-> Create a product finder that actually helps a shopper choose products.
-
-Codex tasks:
-
-- Review the finder questions.
-- Check answer-to-product logic.
-- Check recommendation quality.
-- Improve wording and flow.
-
-Status: **After catalog upload**
-
----
-
-### Step 5 — Embed the widget and prove analytics
-
-Goal:
-
-> Prove Sellentum works on an ecommerce page.
-
-You need to:
-
-- Provide the storefront or staging page.
-
-Codex will:
-
-- Check widget installation.
-- Run the install scanner.
-- Verify events.
-- Confirm recommendations and Buy Now clicks.
-
-Status: **After finder publish**
-
----
-
-## 7. What you need to do now
-
-Short version:
-
-1. Wait for Vercel to finish deploying the latest pushed code.
-2. Test signup/login on `https://www.sellentum.com`.
-3. Prepare one real product CSV.
-4. Create or share a storefront/staging page where the widget can be installed.
-
-Most important user-side task:
-
-> Test production signup and email verification first.
-
-Without this, the rest of the production proof is weaker.
-
----
-
-## 8. What “done” means for the MVP
-
-The MVP is done only when this exact story works:
-
-1. A business owner visits Sellentum.
+1. A business owner visits `https://www.sellentum.com`.
 2. They create an account.
 3. They verify email.
-4. They enter the dashboard.
-5. They upload products.
-6. They create a product finder.
-7. They publish it.
-8. They copy an embed snippet.
-9. The widget works on a storefront.
-10. A shopper answers questions.
-11. The shopper receives 1–3 recommendations.
-12. The shopper sees clear explanations.
-13. The shopper clicks Buy Now.
-14. The merchant sees analytics for the session.
+4. They log in.
+5. They upload a real product catalog.
+6. They create a real product finder.
+7. They publish the finder.
+8. They copy the widget snippet.
+9. The snippet is installed on a storefront page.
+10. A shopper opens the storefront page.
+11. The shopper opens the Sellentum widget.
+12. The shopper answers the questions.
+13. Sellentum recommends 1–3 products.
+14. Each recommendation has a clear explanation.
+15. The shopper clicks Buy Now.
+16. Analytics shows the full journey.
 
-Until all 14 are proven on production, we should call Sellentum:
+Until this is proven, we should call Sellentum:
 
-> A strong working MVP in production testing.
+> A strong MVP in production testing.
 
 Not:
 
@@ -681,50 +561,83 @@ Not:
 
 ---
 
-## 9. Project log so far
+## 7. What you need to do next
 
-High-level work completed:
+These are the next things needed from your side.
 
-- Built the Next.js app foundation.
-- Built the public marketing website.
-- Added Sellentum branding.
-- Renamed the local project folder.
-- Moved GitHub remote to the Sellentum organization.
-- Connected Vercel deployment.
-- Connected `sellentum.com`.
-- Added Supabase auth.
-- Added protected dashboard routes.
-- Added product CRUD.
-- Added CSV upload.
-- Added quiz/finder builder.
-- Added deterministic recommendation logic.
-- Added OpenAI explanation support.
-- Added fallback explanation support.
-- Added customer-facing finder.
-- Added embeddable widget.
-- Added widget settings.
-- Added analytics events.
-- Added Supabase schema and RLS.
-- Added production verification scripts.
-- Added Supabase verification scripts.
-- Added widget install/scanner tools.
-- Added production proof guidance.
-- Removed temporary MVP audit section from dashboard.
-- Improved launch path visibility inside dashboard.
-- Created this human-readable progress report.
+### First priority
+
+1. Wait for the latest GitHub push to deploy on Vercel.
+2. Test signup on `https://www.sellentum.com`.
+3. Confirm the verification email comes from the Sellentum sender.
+4. Confirm the verification link opens production, not localhost.
+5. Log in after verification.
+
+### Second priority
+
+6. Prepare one real product CSV.
+7. Upload it inside the dashboard.
+8. Check that product names, prices, images, categories, tags and URLs look correct.
+
+### Third priority
+
+9. Create one real product finder.
+10. Publish it.
+11. Copy the widget snippet.
+12. Install it on one test/staging/storefront page.
+13. Send me that storefront URL so I can verify the widget install path.
+
+### Fourth priority
+
+14. Complete one shopper journey.
+15. Click Buy Now.
+16. Check analytics for these events:
+    - `widget_view`
+    - `quiz_start`
+    - `quiz_complete`
+    - `product_recommended`
+    - `buy_click`
 
 ---
 
-## 10. File rule going forward
+## 8. What Codex should do next
 
-To keep the project clean:
+Codex should continue in this order:
 
-- `README.md` = technical setup and developer instructions.
-- `SELLENTUM_PROGRESS_REPORT.md` = human progress, roadmap and next steps.
+1. Keep the dashboard simpler and more merchant-friendly.
+2. Validate production after each meaningful change.
+3. Keep Supabase schema/RLS safe.
+4. Push code to GitHub after each completed interval.
+5. Help prove the first real product catalog.
+6. Help prove the first real product finder.
+7. Help prove the first widget install.
+8. Help prove the first complete analytics session.
+9. Polish the design after the workflow is proven.
+10. Only then expand toward more Zoovu-like advanced features.
 
-If a new planning/audit/status Markdown file is created later, it should either:
+---
 
-1. be merged into this progress report, or
-2. be deleted once its information is no longer needed.
+## 9. Next milestone
 
-This keeps the project from becoming a graveyard of confusing old notes.
+The next serious milestone is:
+
+> **First live merchant proof**
+
+That means:
+
+- one real account,
+- one real catalog,
+- one real finder,
+- one real widget install,
+- one real shopper session,
+- one complete analytics proof packet.
+
+Once that works, Sellentum moves from:
+
+> built MVP
+
+to:
+
+> proven MVP.
+
+That is the next meaningful step.

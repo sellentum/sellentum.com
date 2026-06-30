@@ -85,6 +85,13 @@ export const launchCriticalAnalyticsEvents: LaunchCriticalAnalyticsEvent[] = [
   },
 ];
 
+export const launchAnalyticsProofCriteria = [
+  "All five launch-critical events are present: widget_view, quiz_start, quiz_complete, product_recommended and buy_click.",
+  "At least one uninterrupted session contains every launch-critical event under the same session ID.",
+  "The session includes storefront attribution such as page URL, source, campaign or placement.",
+  "The proof packet is copied into the launch record before judging conversion performance.",
+];
+
 function readableDate(value?: string) {
   if (!value) return "Not captured yet";
   const date = new Date(value);
@@ -164,6 +171,9 @@ function buildPacket(report: Omit<AnalyticsLaunchProofReport, "packet">) {
     "",
     "Best session evidence:",
     ...(sessionLines.length ? sessionLines : ["- No session evidence captured yet."]),
+    "",
+    "Proof-ready analytics means:",
+    ...launchAnalyticsProofCriteria.map((item) => `- ${item}`),
     "",
     `Next action: ${report.nextAction}`,
   ].join("\n");

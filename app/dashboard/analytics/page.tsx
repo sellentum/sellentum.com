@@ -7,7 +7,7 @@ import { LoadingState } from "@/components/loading-state";
 import { useStore } from "@/lib/store";
 import type { ExperienceType } from "@/lib/types";
 import { buildAnalyticsQualityReport, type AnalyticsQualityCheckStatus, type AnalyticsQualityStatus } from "@/lib/analytics-quality";
-import { buildAnalyticsLaunchProofReport, type AnalyticsLaunchProofEventStatus, type AnalyticsLaunchProofStatus } from "@/lib/analytics-proof";
+import { buildAnalyticsLaunchProofReport, launchAnalyticsProofCriteria, type AnalyticsLaunchProofEventStatus, type AnalyticsLaunchProofStatus } from "@/lib/analytics-proof";
 import { buildAnalyticsSnapshot, buildAnalyticsTrends, buildFunnelDiagnosis, countAnalyticsEvents, getAnalyticsPeriods, stageRate } from "@/lib/analytics";
 import { buildAttributionReport, type AttributionActionSeverity } from "@/lib/attribution";
 import { buildCommercialImpactReport, type CommercialImpactPriority, type CommercialImpactStatus } from "@/lib/commercial-impact";
@@ -297,6 +297,12 @@ export default function AnalyticsPage() {
             {proofCopied ? "Proof packet copied" : "Copy proof packet"}
           </button>
           <p className="mt-3 rounded-2xl bg-white/[.06] p-3 text-xs leading-4 text-white/45">{analyticsProof.nextAction}</p>
+          <div className="mt-3 rounded-2xl bg-white/[.06] p-3">
+            <p className="text-xs font-extrabold text-white">Proof-ready analytics means</p>
+            <div className="mt-2 space-y-1.5">
+              {launchAnalyticsProofCriteria.map((item) => <p key={item} className="flex gap-2 text-xs font-bold leading-4 text-white/45"><Check size={12} className="mt-0.5 shrink-0 text-lime" />{item}</p>)}
+            </div>
+          </div>
         </div>
 
         <div className="rounded-2xl border border-black/[0.07] bg-white p-5 sm:p-7">
