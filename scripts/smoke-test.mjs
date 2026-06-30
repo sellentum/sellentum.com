@@ -230,6 +230,7 @@ function assertSessionAnalytics() {
   const analytics = readFileSync("app/dashboard/analytics/page.tsx", "utf8");
   const analyticsHelpers = readFileSync("lib/analytics.ts", "utf8");
   const analyticsQuality = readFileSync("lib/analytics-quality.ts", "utf8");
+  const analyticsProof = readFileSync("lib/analytics-proof.ts", "utf8");
   const attribution = readFileSync("lib/attribution.ts", "utf8");
   const insights = readFileSync("lib/insights.ts", "utf8");
   const journeys = readFileSync("lib/journey-insights.ts", "utf8");
@@ -252,6 +253,14 @@ function assertSessionAnalytics() {
   assert(analytics.includes("buildAnalyticsQualityReport"), "Analytics dashboard should use shared analytics quality QA");
   assert(analytics.includes("Analytics QA"), "Analytics dashboard should expose an analytics QA panel");
   assert(analytics.includes("Event-contract health"), "Analytics dashboard should expose event-contract health checks");
+  assert(analytics.includes("buildAnalyticsLaunchProofReport"), "Analytics dashboard should use shared launch analytics proof");
+  assert(analytics.includes("Launch analytics proof"), "Analytics dashboard should expose a launch analytics proof card");
+  assert(analytics.includes("Copy proof packet"), "Analytics dashboard should let merchants copy a launch analytics proof packet");
+  assert(analyticsProof.includes("buildAnalyticsLaunchProofReport"), "Analytics proof helper should expose a reusable report builder");
+  assert(analyticsProof.includes("launchCriticalAnalyticsEvents"), "Analytics proof helper should define the launch-critical event contract");
+  for (const eventName of ["widget_view", "quiz_start", "quiz_complete", "product_recommended", "buy_click"]) {
+    assert(analyticsProof.includes(eventName), `Analytics proof helper should include ${eventName}`);
+  }
   assert(analytics.includes("buildAttributionReport"), "Analytics dashboard should use shared attribution reporting");
   assert(analytics.includes("Attribution command board"), "Analytics dashboard should expose source/campaign attribution");
   assert(attribution.includes("buildAttributionReport"), "Attribution helper should expose a reusable report builder");
@@ -1393,6 +1402,10 @@ async function assertDeterministicLogic() {
   writeFileSync(compiledAnalyticsQuality, readFileSync(compiledAnalyticsQuality, "utf8")
     .replace('from "./analytics";', 'from "./analytics.js";')
     .replace('from "./utils";', 'from "./utils.js";'));
+  const compiledAnalyticsProof = `${compileDir}/lib/analytics-proof.js`;
+  writeFileSync(compiledAnalyticsProof, readFileSync(compiledAnalyticsProof, "utf8")
+    .replace('from "@/lib/analytics";', 'from "./analytics.js";')
+    .replace('from "@/lib/utils";', 'from "./utils.js";'));
   const compiledAttribution = `${compileDir}/lib/attribution.js`;
   writeFileSync(compiledAttribution, readFileSync(compiledAttribution, "utf8")
     .replace('from "./analytics";', 'from "./analytics.js";'));
@@ -1640,6 +1653,7 @@ async function assertDeterministicLogic() {
   const utils = await import(pathToFileURL(`${compileDir}/lib/utils.js`));
   const analytics = await import(pathToFileURL(`${compileDir}/lib/analytics.js`));
   const analyticsQuality = await import(pathToFileURL(`${compileDir}/lib/analytics-quality.js`));
+  const analyticsProof = await import(pathToFileURL(`${compileDir}/lib/analytics-proof.js`));
   const attribution = await import(pathToFileURL(`${compileDir}/lib/attribution.js`));
   const journeyInsights = await import(pathToFileURL(`${compileDir}/lib/journey-insights.js`));
   const finderFlow = await import(pathToFileURL(`${compileDir}/lib/finder-flow.js`));
@@ -1867,6 +1881,14 @@ async function assertDeterministicLogic() {
     { id: "qa5", user_id: "demo-user", quiz_id: "quiz_footwear", product_id: "prod_trail", event_type: "buy_click", metadata: { session_id: "qa", experience_type: "finder", experience_id: "quiz_footwear", product_name: "Terra Trail Runner" }, created_at: "2026-06-25T10:04:00Z" },
   ]);
   assert(qualityReport.status === "healthy" && qualityReport.summary.completeEventTypes === 5, "Expected complete analytics event contract to pass QA");
+  const launchProofReport = analyticsProof.buildAnalyticsLaunchProofReport([
+    { id: "lp1", user_id: "demo-user", quiz_id: "quiz_footwear", event_type: "widget_view", metadata: { session_id: "proof", experience_type: "finder", experience_id: "quiz_footwear", sellentum_source: "storefront", sellentum_page_url: "https://store.example/pdp" }, created_at: "2026-06-25T10:00:00Z" },
+    { id: "lp2", user_id: "demo-user", quiz_id: "quiz_footwear", event_type: "quiz_start", metadata: { session_id: "proof", experience_type: "finder", experience_id: "quiz_footwear", sellentum_source: "storefront", sellentum_page_url: "https://store.example/pdp" }, created_at: "2026-06-25T10:01:00Z" },
+    { id: "lp3", user_id: "demo-user", quiz_id: "quiz_footwear", event_type: "quiz_complete", metadata: { session_id: "proof", experience_type: "finder", experience_id: "quiz_footwear", result_count: 1, sellentum_source: "storefront", sellentum_page_url: "https://store.example/pdp" }, created_at: "2026-06-25T10:02:00Z" },
+    { id: "lp4", user_id: "demo-user", quiz_id: "quiz_footwear", product_id: "prod_trail", event_type: "product_recommended", metadata: { session_id: "proof", experience_type: "finder", experience_id: "quiz_footwear", rank: 1, product_name: "Terra Trail Runner", sellentum_source: "storefront", sellentum_page_url: "https://store.example/pdp" }, created_at: "2026-06-25T10:03:00Z" },
+    { id: "lp5", user_id: "demo-user", quiz_id: "quiz_footwear", product_id: "prod_trail", event_type: "buy_click", metadata: { session_id: "proof", experience_type: "finder", experience_id: "quiz_footwear", product_name: "Terra Trail Runner", sellentum_source: "storefront", sellentum_page_url: "https://store.example/pdp" }, created_at: "2026-06-25T10:04:00Z" },
+  ]);
+  assert(launchProofReport.status === "proven" && launchProofReport.summary.completeSessions === 1 && launchProofReport.packet.includes("Sellentum launch analytics proof"), "Expected launch analytics proof to pass with one complete storefront session");
   const brokenQualityReport = analyticsQuality.buildAnalyticsQualityReport([
     { id: "bad1", user_id: "demo-user", quiz_id: "quiz_footwear", event_type: "buy_click", metadata: { experience_type: "finder" }, created_at: "2026-06-25T10:00:00Z" },
   ]);

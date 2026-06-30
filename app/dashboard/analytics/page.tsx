@@ -1,11 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { AlertTriangle, ArrowDownRight, ArrowUpRight, Check, ChevronDown, CircleDollarSign, Clock3, Eye, GitBranch, Globe2, ListChecks, MapPin, Megaphone, MessageCircle, MousePointerClick, PackagePlus, Radar, Search, ShieldAlert, Sparkles, Tags, Trophy, UsersRound, Wrench } from "lucide-react";
+import { AlertTriangle, ArrowDownRight, ArrowUpRight, Check, ChevronDown, CircleDollarSign, Clipboard, Clock3, Eye, GitBranch, Globe2, ListChecks, MapPin, Megaphone, MessageCircle, MousePointerClick, PackagePlus, Radar, Search, ShieldAlert, Sparkles, Tags, Trophy, UsersRound, Wrench } from "lucide-react";
 import { LoadingState } from "@/components/loading-state";
 import { useStore } from "@/lib/store";
 import type { ExperienceType } from "@/lib/types";
 import { buildAnalyticsQualityReport, type AnalyticsQualityCheckStatus, type AnalyticsQualityStatus } from "@/lib/analytics-quality";
+import { buildAnalyticsLaunchProofReport, type AnalyticsLaunchProofEventStatus, type AnalyticsLaunchProofStatus } from "@/lib/analytics-proof";
 import { buildAnalyticsSnapshot, buildAnalyticsTrends, buildFunnelDiagnosis, countAnalyticsEvents, getAnalyticsPeriods, stageRate } from "@/lib/analytics";
 import { buildAttributionReport, type AttributionActionSeverity } from "@/lib/attribution";
 import { buildCommercialImpactReport, type CommercialImpactPriority, type CommercialImpactStatus } from "@/lib/commercial-impact";
@@ -51,6 +52,17 @@ const analyticsCheckTone: Record<AnalyticsQualityCheckStatus, string> = {
   fail: "bg-red-50 text-red-700",
 };
 
+const analyticsProofTone: Record<AnalyticsLaunchProofStatus, string> = {
+  proven: "bg-lime text-moss",
+  partial: "bg-amber-100 text-amber-800",
+  empty: "bg-black/5 text-black/35",
+};
+
+const analyticsProofEventTone: Record<AnalyticsLaunchProofEventStatus, string> = {
+  pass: "border-lime/50 bg-lime/20 text-moss",
+  missing: "border-amber-200 bg-amber-50 text-amber-800",
+};
+
 const commercialImpactTone: Record<CommercialImpactStatus, string> = {
   empty: "bg-black/5 text-black/40",
   building: "bg-blue-50 text-blue-700",
@@ -81,6 +93,7 @@ export default function AnalyticsPage() {
   const { ready, events, products, quizzes, configurators } = useStore();
   const [range, setRange] = useState("14 days");
   const [experienceFilter, setExperienceFilter] = useState<ExperienceFilter>("all");
+  const [proofCopied, setProofCopied] = useState(false);
   const rangeDays = Number.parseInt(range, 10) || 14;
 
   const periodEvents = useMemo(() => getAnalyticsPeriods(events, rangeDays), [events, rangeDays]);
@@ -119,6 +132,7 @@ export default function AnalyticsPage() {
   const zeroPartyInsights = useMemo(() => buildZeroPartyInsights(filteredEvents, products), [filteredEvents, products]);
   const journeyReport = useMemo(() => buildShopperJourneyReport(filteredEvents, products), [filteredEvents, products]);
   const analyticsQuality = useMemo(() => buildAnalyticsQualityReport(filteredEvents), [filteredEvents]);
+  const analyticsProof = useMemo(() => buildAnalyticsLaunchProofReport(filteredEvents), [filteredEvents]);
   const attributionReport = useMemo(() => buildAttributionReport(filteredEvents), [filteredEvents]);
   const commercialImpact = useMemo(() => buildCommercialImpactReport(filteredEvents, products), [filteredEvents, products]);
 
@@ -142,6 +156,12 @@ export default function AnalyticsPage() {
 
   const max = Math.max(1, ...byDay.map((day) => day.views));
   const activeExperienceLabel = experienceLabels[experienceFilter];
+  async function copyProofPacket() {
+    await navigator.clipboard.writeText(analyticsProof.packet);
+    setProofCopied(true);
+    window.setTimeout(() => setProofCopied(false), 1600);
+  }
+
   const funnelStages = [
     ["Viewed widget", sessionStats.viewed, sessionStats.sessions ? stageRate(sessionStats.viewed, sessionStats.sessions) : 0],
     ["Started journey", sessionStats.started, stageRate(sessionStats.started, sessionStats.viewed)],
@@ -203,6 +223,71 @@ export default function AnalyticsPage() {
           );
         })}
       </div>
+
+      <section className="mt-5 grid gap-5 xl:grid-cols-[.72fr_1.28fr]">
+        <div className="rounded-2xl border border-black/[0.07] bg-ink p-6 text-white">
+          <div className="flex items-center justify-between gap-4">
+            <span className={`grid h-11 w-11 place-items-center rounded-xl ${analyticsProof.status === "proven" ? "bg-lime text-ink" : analyticsProof.status === "partial" ? "bg-amber-300 text-ink" : "bg-white/10 text-lime"}`}><Radar size={20} /></span>
+            <span className={`rounded-full px-3 py-1.5 text-xs font-extrabold uppercase ${analyticsProofTone[analyticsProof.status]}`}>{analyticsProof.status}</span>
+          </div>
+          <h2 className="display mt-6 text-3xl">Launch analytics proof</h2>
+          <p className="mt-2 text-xs leading-5 text-white/45">{analyticsProof.headline}</p>
+          <div className="mt-6 grid grid-cols-[120px_1fr] gap-4">
+            <div className="rounded-2xl bg-white/[.07] p-4 text-center">
+              <p className="display text-5xl">{analyticsProof.score}</p>
+              <p className="mt-1 text-xs font-extrabold uppercase tracking-wider text-white/35">Proof score</p>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                ["Events proven", `${analyticsProof.summary.coveredEvents}/${analyticsProof.summary.requiredEvents}`],
+                ["QA sessions", analyticsProof.summary.completeSessions],
+                ["Storefront pages", analyticsProof.summary.storefrontPages],
+                ["Attributed events", analyticsProof.summary.attributedEvents],
+              ].map(([label, value]) => <div key={String(label)} className="rounded-2xl bg-white/[.07] p-3">
+                <p className="text-xl font-extrabold">{String(value)}</p>
+                <p className="mt-1 text-xs font-bold text-white/35">{String(label)}</p>
+              </div>)}
+            </div>
+          </div>
+          <button onClick={copyProofPacket} className="mt-5 flex w-full items-center justify-center gap-2 rounded-full bg-lime px-4 py-3 text-xs font-extrabold text-moss transition hover:-translate-y-0.5">
+            {proofCopied ? <Check size={14} /> : <Clipboard size={14} />}
+            {proofCopied ? "Proof packet copied" : "Copy proof packet"}
+          </button>
+          <p className="mt-3 rounded-2xl bg-white/[.06] p-3 text-xs leading-4 text-white/45">{analyticsProof.nextAction}</p>
+        </div>
+
+        <div className="rounded-2xl border border-black/[0.07] bg-white p-5 sm:p-7">
+          <div className="flex items-center justify-between">
+            <div><h2 className="text-sm font-extrabold">Five-event launch checklist</h2><p className="mt-1 text-xs text-black/35">The exact storefront journey events Sellentum must capture before launch sign-off.</p></div>
+            <span className="rounded-full bg-[#f0f2ec] px-3 py-1.5 text-xs font-extrabold text-moss">{analyticsProof.summary.sessions} sessions</span>
+          </div>
+          <div className="mt-5 grid gap-3 xl:grid-cols-5">
+            {analyticsProof.events.map((event) => (
+              <article key={event.event} className={`rounded-2xl border p-4 ${analyticsProofEventTone[event.status]}`}>
+                <div className="flex items-start justify-between gap-3">
+                  <h3 className="text-xs font-extrabold text-ink">{event.label}</h3>
+                  <span className="rounded-full bg-white/75 px-2 py-1 text-xs font-extrabold uppercase">{event.status}</span>
+                </div>
+                <p className="mt-2 text-xs leading-4 text-black/50">{event.description}</p>
+                <p className="mt-3 rounded-xl bg-white/75 px-3 py-2 text-xs font-bold leading-4 text-black/55">{event.evidence}</p>
+              </article>
+            ))}
+          </div>
+          <div className="mt-5 grid gap-3 xl:grid-cols-3">
+            {analyticsProof.sessions.slice(0, 3).map((session) => (
+              <div key={session.sessionId} className="rounded-2xl border border-black/[0.06] bg-[#f7f8f4] p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="truncate text-xs font-extrabold">{session.sessionId}</p>
+                  <span className="rounded-full bg-white px-2 py-1 text-xs font-extrabold text-moss">{session.coveredEvents}/{analyticsProof.summary.requiredEvents}</span>
+                </div>
+                <p className="mt-2 truncate text-xs font-bold text-black/35">{session.experience}</p>
+                <p className="mt-1 line-clamp-1 text-xs font-bold text-black/30">{session.pageUrl}</p>
+              </div>
+            ))}
+            {!analyticsProof.sessions.length && <div className="rounded-2xl border border-dashed border-black/10 p-8 text-center xl:col-span-3"><p className="text-xs font-extrabold">No session proof yet</p><p className="mt-1 text-xs leading-4 text-black/35">Complete one storefront QA journey to populate this proof board.</p></div>}
+          </div>
+        </div>
+      </section>
 
       <section className="mt-5 grid gap-5 xl:grid-cols-[.72fr_1.28fr]">
         <div className="rounded-2xl border border-black/[0.07] bg-white p-5 sm:p-7">

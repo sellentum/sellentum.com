@@ -358,12 +358,15 @@ What we completed:
 - Track recommended products.
 - Track Buy Now clicks.
 - Added analytics dashboard concepts and QA checks.
+- Added launch analytics proof for the five critical storefront events.
+- Added a copyable analytics proof packet for storefront QA handoff.
 
 Still left:
 
 - Generate real events from a production widget journey.
 - Confirm those events appear in Supabase.
 - Confirm dashboard numbers are correct.
+- Use the new launch analytics proof card after a real widget QA run.
 
 Important:
 
@@ -579,6 +582,7 @@ This is the plain-English log of work completed so far:
 - Added embeddable JavaScript widget.
 - Added widget settings and branding controls.
 - Added analytics tracking.
+- Added launch analytics proof and copyable storefront QA evidence.
 - Added production verification tooling.
 - Added Supabase schema and RLS files.
 - Added OpenAI environment support.
