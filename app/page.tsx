@@ -20,20 +20,20 @@ export default function LandingPage() {
     <main className="overflow-hidden bg-white text-ink">
       <LandingNav />
 
-      <section className="relative px-5 pb-28 pt-20 lg:px-8 lg:pb-36 lg:pt-28">
+      <section className="relative px-5 pb-24 pt-16 lg:px-8 lg:pb-32 lg:pt-20">
         <div className="absolute left-1/2 top-16 h-[480px] w-[1000px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(217,255,97,.24),transparent_67%)]" />
         <div className="relative mx-auto max-w-[1280px] text-center">
           <div className="inline-flex items-center gap-2 text-xs font-extrabold uppercase tracking-[.16em] text-moss"><span className="h-2 w-2 rounded-full bg-lime shadow-[0_0_0_5px_rgba(217,255,97,.25)]" />AI product finder widget for ecommerce stores</div>
-          <h1 className="mx-auto mt-8 max-w-[1120px] text-[4rem] font-extrabold leading-[.91] tracking-[-.075em] sm:text-[5.7rem] lg:text-[7.15rem]">
+          <h1 className="mx-auto mt-6 max-w-[1040px] text-[4rem] font-extrabold leading-[.91] tracking-[-.075em] sm:text-[5.25rem] lg:text-[6.35rem]">
             <span className="block">Help shoppers </span>
             <span className="block bg-[linear-gradient(90deg,#45624f_0%,#6b8c49_45%,#b3d930_100%)] bg-clip-text text-transparent">choose the right </span>
             <span className="block">product.</span>
           </h1>
-          <p className="mx-auto mt-8 max-w-[760px] text-base leading-7 text-black/55 sm:text-lg">Sellentum lets an ecommerce brand upload its products, ask shoppers a few guided questions, recommend 1–3 best-fit products, explain why they fit, and embed the experience on any storefront with one script.</p>
-          <div className="mt-9 flex flex-col justify-center gap-3 sm:flex-row"><Link href="/signup" className="inline-flex items-center justify-center gap-2 rounded-full bg-ink px-7 py-4 text-sm font-extrabold text-white transition hover:-translate-y-0.5 hover:bg-moss">Create your product finder <ArrowRight size={16} className="text-lime" /></Link><Link href="/finder/quiz_footwear" className="inline-flex items-center justify-center gap-2 rounded-full border border-black/15 bg-white px-7 py-4 text-sm font-extrabold transition hover:-translate-y-0.5 hover:border-black/35">Try the shopper demo</Link></div>
-          <div className="mt-7 flex flex-wrap justify-center gap-x-7 gap-y-2 text-xs font-bold text-black/40"><span className="flex items-center gap-1.5"><Check size={12} />Upload products</span><span className="flex items-center gap-1.5"><Check size={12} />Ask guided questions</span><span className="flex items-center gap-1.5"><Check size={12} />Embed with one snippet</span></div>
+          <p className="mx-auto mt-6 max-w-[760px] text-base leading-7 text-black/55 sm:text-lg">Sellentum lets an ecommerce brand upload its products, ask shoppers a few guided questions, recommend 1–3 best-fit products, explain why they fit, and embed the experience on any storefront with one script.</p>
+          <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row"><Link href="/signup" className="inline-flex items-center justify-center gap-2 rounded-full bg-ink px-7 py-4 text-sm font-extrabold text-white transition hover:-translate-y-0.5 hover:bg-moss">Create your product finder <ArrowRight size={16} className="text-lime" /></Link><Link href="/finder/quiz_footwear" className="inline-flex items-center justify-center gap-2 rounded-full border border-black/15 bg-white px-7 py-4 text-sm font-extrabold transition hover:-translate-y-0.5 hover:border-black/35">Try the shopper demo</Link></div>
+          <div className="mt-5 flex flex-wrap justify-center gap-x-7 gap-y-2 text-xs font-bold text-black/40"><span className="flex items-center gap-1.5"><Check size={12} />Upload products</span><span className="flex items-center gap-1.5"><Check size={12} />Ask guided questions</span><span className="flex items-center gap-1.5"><Check size={12} />Embed with one snippet</span></div>
         </div>
-        <div className="relative mx-auto mt-20 max-w-[1280px]"><HeroDiscoveryDemo /></div>
+        <div className="relative mx-auto mt-12 max-w-[1280px]"><HeroDiscoveryDemo /></div>
       </section>
 
       <section className="border-y border-black/[0.08] bg-white">

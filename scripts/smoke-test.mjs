@@ -89,6 +89,24 @@ function assertPublicTrustPages() {
   assert(productionRepairSql.includes("allowed_domains") && productionRepairSql.includes("rate_limit_buckets") && productionRepairSql.includes("check_rate_limit"), "Production repair SQL should install widget domain allowlists and shared rate limiting");
 }
 
+function assertHomepageProductStory() {
+  const page = readFileSync("app/page.tsx", "utf8");
+  const showcases = readFileSync("components/marketing-showcases.tsx", "utf8");
+  assert(page.includes("<HeroDiscoveryDemo />"), "Homepage should render the product-finder story demo in the hero");
+  for (const token of [
+    "Sellentum product finder story",
+    "From catalog to confident shopper",
+    "Your products become recommendation-ready",
+    "Sellentum asks like a helpful salesperson",
+    "Rules select the right 1–3 products",
+    "AI explains why each product fits",
+    "Copy one snippet, then track the full journey",
+    "widget_view, quiz_start, quiz_complete, product_recommended and buy_click",
+  ]) {
+    assert(showcases.includes(token), `Homepage product story should include "${token}"`);
+  }
+}
+
 function assertPublishedAdvisorRuntime() {
   const route = readFileSync("app/api/public/assistant/[id]/route.ts", "utf8");
   const engine = readFileSync("lib/assistant-engine.ts", "utf8");
@@ -2545,6 +2563,7 @@ async function main() {
   await assertWidgetScript();
   assertSystemFontStack();
   assertDesktopTypographyScale();
+  assertHomepageProductStory();
   assertPublicTrustPages();
   assertPublishedAdvisorRuntime();
   assertPublishedFinderRuntime();

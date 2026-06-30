@@ -8,6 +8,7 @@ For the current human-readable project status, open [`SELLENTUM_PROGRESS_REPORT.
 
 - Premium marketing site with product, workflow, use-case, pricing, resource, platform, contact, support, security, privacy and terms pages
 - Public website and dashboard messaging now lead with the simple service promise: upload products, ask guided questions, embed a product finder and track shopper choices
+- Desktop-first homepage product story animation that shows the full Sellentum journey: catalog import, guided questions, deterministic recommendations, AI explanations, widget embed and analytics proof
 - Supabase email/password authentication, protected dashboard routes and logout
 - Product catalog CRUD plus CSV upload with flexible header aliases, row-level validation, import preview, visible first-catalog launch kit, real-catalog intake checklist and reusable CSV template (`name`, `price`, and `category` are required; buyer needs/search text are optional discovery fields)
 - AI catalog enrichment with normalized attributes, buyer needs, semantic search text and optional OpenAI embeddings

@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { ArrowLeft, ArrowRight, BarChart3, Boxes, Check, ChevronRight, Code2, Database, Eye, Footprints, Layers3, MousePointerClick, Search, Settings2, Sparkles } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ArrowLeft, ArrowRight, BarChart3, Boxes, Check, Code2, Database, Eye, Layers3, MousePointerClick, Search, Sparkles } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 
 const demoMatches = [
@@ -31,53 +31,351 @@ const demoMatches = [
   },
 ];
 
+const heroStorySteps = [
+  {
+    id: "catalog",
+    eyebrow: "Step 1 · Catalog imported",
+    title: "Your products become recommendation-ready.",
+    copy: "Upload a CSV or add products manually with prices, images, tags, features and Buy Now links.",
+    icon: Database,
+  },
+  {
+    id: "questions",
+    eyebrow: "Step 2 · Guided questions",
+    title: "Sellentum asks like a helpful salesperson.",
+    copy: "Create a short buying flow and connect each answer to tags, categories, features or budget logic.",
+    icon: Layers3,
+  },
+  {
+    id: "recommend",
+    eyebrow: "Step 3 · Best-fit products",
+    title: "Rules select the right 1–3 products.",
+    copy: "Product selection is deterministic, stable and traceable before AI writes any shopper-facing copy.",
+    icon: Search,
+  },
+  {
+    id: "explain",
+    eyebrow: "Step 4 · AI explanation",
+    title: "AI explains why each product fits.",
+    copy: "The explanation uses only the shopper answers and selected product facts, so it feels useful without becoming random.",
+    icon: Sparkles,
+  },
+  {
+    id: "embed",
+    eyebrow: "Step 5 · Embed and prove",
+    title: "Copy one snippet, then track the full journey.",
+    copy: "The widget runs on your store and records views, starts, completions, recommendations and Buy Now clicks.",
+    icon: Code2,
+  },
+] as const;
+
 export function HeroDiscoveryDemo() {
-  const [view, setView] = useState<"shopper" | "merchant">("shopper");
-  const [selected, setSelected] = useState(0);
-  const match = demoMatches[selected];
+  const [active, setActive] = useState(0);
+  const scene = heroStorySteps[active];
+  const SceneIcon = scene.icon;
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setActive((current) => (current + 1) % heroStorySteps.length);
+    }, 3600);
+
+    return () => window.clearInterval(timer);
+  }, []);
 
   return (
     <div className="relative mx-auto max-w-[1180px]">
-      <div className="absolute -inset-8 rounded-[56px] bg-[radial-gradient(circle_at_20%_20%,rgba(217,255,97,.5),transparent_37%),radial-gradient(circle_at_80%_40%,rgba(255,189,138,.35),transparent_36%)] blur-2xl" />
-      <div className="relative overflow-hidden rounded-[32px] border border-black/10 bg-white shadow-[0_35px_100px_rgba(28,39,32,.16)]">
-        <div className="flex items-center justify-between border-b border-black/[0.07] px-6 py-4">
-          <div className="flex items-center gap-2 text-xs font-extrabold"><span className="grid h-8 w-8 place-items-center rounded-xl bg-ink text-lime"><Sparkles size={14} /></span>Sellentum product finder</div>
-          <div className="flex rounded-full bg-[#f0f2ec] p-1">
-            <button onClick={() => setView("shopper")} aria-pressed={view === "shopper"} className={`rounded-full px-4 py-2 text-xs font-extrabold transition ${view === "shopper" ? "bg-white shadow-sm" : "text-black/40"}`}>Shopper experience</button>
-            <button onClick={() => setView("merchant")} aria-pressed={view === "merchant"} className={`rounded-full px-4 py-2 text-xs font-extrabold transition ${view === "merchant" ? "bg-white shadow-sm" : "text-black/40"}`}>Merchant workspace</button>
+      <div className="absolute -inset-8 rounded-[56px] bg-[radial-gradient(circle_at_16%_20%,rgba(217,255,97,.55),transparent_36%),radial-gradient(circle_at_88%_42%,rgba(255,189,138,.34),transparent_35%)] blur-2xl" />
+      <div className="relative overflow-hidden rounded-[34px] border border-black/10 bg-[#101912] p-2 shadow-[0_40px_120px_rgba(28,39,32,.24)]">
+        <div className="overflow-hidden rounded-[26px] bg-[#f7f8f3]">
+          <div className="flex items-center justify-between border-b border-black/[0.07] bg-white/80 px-5 py-4 backdrop-blur">
+            <div className="flex items-center gap-2">
+              <span className="h-3 w-3 rounded-full bg-[#ff8d7a]" />
+              <span className="h-3 w-3 rounded-full bg-[#ffd25f]" />
+              <span className="h-3 w-3 rounded-full bg-lime" />
+              <span className="ml-3 rounded-full bg-[#eef1e8] px-4 py-2 text-xs font-extrabold text-black/45">sellentum.com/product-finder</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="rounded-full bg-lime px-3 py-1.5 text-xs font-extrabold text-ink">Sellentum product finder story</span>
+              <span className="rounded-full border border-black/10 bg-white px-3 py-1.5 text-xs font-extrabold text-black/40">Auto demo</span>
+            </div>
           </div>
-          <span className="hidden rounded-full bg-lime/35 px-3 py-1.5 text-xs font-extrabold text-moss sm:block">Live product demo</span>
-        </div>
 
-        {view === "shopper" ? (
-          <div className="grid min-h-[525px] lg:grid-cols-[.86fr_1.14fr]">
-            <div className="flex flex-col justify-center border-b border-black/[0.07] p-7 sm:p-11 lg:border-b-0 lg:border-r">
-              <p className="eyebrow text-moss">Question 1 of 3</p>
-              <h3 className="mt-4 text-[2.35rem] font-extrabold leading-[1.02] tracking-[-.055em]">Where will you wear them most?</h3>
-              <p className="mt-3 text-sm leading-6 text-black/45">Choose the setting that looks most like your week.</p>
-              <div className="mt-7 space-y-2.5">
-                {demoMatches.map((item, index) => (
-                  <button key={item.label} onClick={() => setSelected(index)} aria-label={`${item.label}${selected === index ? " selected" : ""}`} aria-pressed={selected === index} className={`flex w-full items-center justify-between rounded-2xl border px-4 py-4 text-left text-sm font-extrabold transition hover:-translate-y-0.5 ${selected === index ? "border-ink bg-ink text-white shadow-lg" : "border-black/10 bg-white hover:border-black/30"}`}>
-                    <span className="flex items-center gap-3"><span aria-hidden="true" className={`grid h-7 w-7 place-items-center rounded-full border ${selected === index ? "border-lime bg-lime text-ink" : "border-black/15"}`}>{selected === index ? <Check size={13} /> : String.fromCharCode(65 + index)}</span>{item.label}</span><ChevronRight size={15} className={selected === index ? "text-lime" : "text-black/20"} />
-                  </button>
-                ))}
+          <div className="grid min-h-[610px] lg:grid-cols-[360px_1fr]">
+            <aside className="border-r border-black/[0.07] bg-white p-7">
+              <div className="flex items-center gap-3">
+                <span className="grid h-12 w-12 place-items-center rounded-2xl bg-ink text-lime"><Sparkles size={18} /></span>
+                <div>
+                  <p className="text-xs font-extrabold uppercase tracking-[.14em] text-moss">How it works</p>
+                  <h3 className="text-2xl font-extrabold tracking-[-.055em]">From catalog to confident shopper.</h3>
+                </div>
               </div>
-              <div className="mt-7 h-1.5 overflow-hidden rounded-full bg-black/5"><div className="h-full w-1/3 rounded-full bg-lime" /></div>
-            </div>
-            <div className="bg-[linear-gradient(135deg,#f7f8f3_0%,#eff3e2_55%,#fff2e8_100%)] p-7 sm:p-10">
-              <div className="flex items-center justify-between"><p className="eyebrow text-moss">Your current best match</p><span className="rounded-full bg-white px-3 py-1.5 text-xs font-extrabold shadow-sm">94% match</span></div>
-              <div className="mt-5 grid overflow-hidden rounded-[24px] border border-black/10 bg-white shadow-xl sm:grid-cols-[1.05fr_.95fr]">
-                <div className="relative min-h-[315px] overflow-hidden bg-[#eceee9]"><img src={match.image} alt={match.name} className="absolute inset-0 h-full w-full object-cover transition duration-500" /><span className="absolute left-4 top-4 rounded-full bg-lime px-3 py-1.5 text-xs font-extrabold uppercase tracking-wider">Best match</span></div>
-                <div className="flex flex-col p-6"><p className="text-xs font-extrabold uppercase tracking-[.14em] text-moss">Running shoes</p><h4 className="mt-2 text-2xl font-extrabold leading-tight tracking-[-.04em]">{match.name}</h4><p className="mt-1 text-lg font-extrabold">{formatCurrency(match.price)}</p><div className="mt-5 rounded-xl bg-[#f3f5ef] p-4"><p className="flex items-center gap-1.5 text-xs font-extrabold text-moss"><Sparkles size={11} /> Why it fits</p><p className="mt-2 text-xs leading-5 text-black/55">{match.reason}</p></div><div className="mt-4 flex flex-wrap gap-1.5">{match.tags.map((tag) => <span key={tag} className="rounded-full border border-black/10 px-2.5 py-1 text-xs font-bold text-black/45">{tag}</span>)}</div><button className="mt-auto rounded-full bg-ink px-5 py-3 text-xs font-extrabold text-white">See my full results →</button></div>
+
+              <div className="mt-8 space-y-2">
+                {heroStorySteps.map((step, index) => {
+                  const StepIcon = step.icon;
+                  const isActive = active === index;
+                  return (
+                    <button
+                      key={step.id}
+                      onClick={() => setActive(index)}
+                      aria-pressed={isActive}
+                      className={`group w-full rounded-2xl border p-4 text-left transition hover:-translate-y-0.5 ${isActive ? "border-ink bg-ink text-white shadow-xl" : "border-black/[0.07] bg-[#f7f8f3] text-ink hover:border-black/20 hover:bg-white"}`}
+                    >
+                      <span className="flex items-start gap-3">
+                        <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl ${isActive ? "bg-lime text-ink" : "bg-white text-moss ring-1 ring-black/[0.06]"}`}>
+                          <StepIcon size={15} />
+                        </span>
+                        <span>
+                          <span className={`block text-xs font-extrabold uppercase tracking-[.12em] ${isActive ? "text-lime" : "text-moss"}`}>{step.eyebrow}</span>
+                          <span className="mt-1 block text-sm font-extrabold leading-snug tracking-[-.02em]">{step.title}</span>
+                        </span>
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
+
+              <div className="mt-7 rounded-2xl border border-black/[0.07] bg-[#f7f8f3] p-4">
+                <p className="text-xs font-extrabold text-moss">What visitors understand</p>
+                <p className="mt-2 text-sm leading-6 text-black/50">Sellentum is not just a chatbot. It is a controlled ecommerce product finder that recommends, explains, embeds and measures.</p>
+              </div>
+            </aside>
+
+            <section className="relative overflow-hidden bg-[radial-gradient(circle_at_78%_16%,rgba(217,255,97,.72),transparent_32%),linear-gradient(135deg,#eef2e7_0%,#fff5eb_100%)] p-8">
+              <div className="dot-grid absolute inset-0 opacity-20" />
+              <div className="relative grid h-full gap-6">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="eyebrow text-moss">{scene.eyebrow}</p>
+                    <h3 className="mt-3 max-w-2xl text-5xl font-extrabold leading-[.98] tracking-[-.065em]">{scene.title}</h3>
+                    <p className="mt-4 max-w-xl text-sm leading-6 text-black/52">{scene.copy}</p>
+                  </div>
+                  <span className="grid h-16 w-16 place-items-center rounded-[22px] border border-black/10 bg-white/70 text-moss shadow-lg backdrop-blur">
+                    <SceneIcon size={24} />
+                  </span>
+                </div>
+
+                <div key={scene.id} className="animate-rise">
+                  <HeroStoryScene sceneId={scene.id} />
+                </div>
+
+                <div className="mt-auto">
+                  <div className="flex items-center justify-between text-xs font-extrabold text-black/35">
+                    <span>Product finder launch flow</span>
+                    <span>{active + 1}/{heroStorySteps.length}</span>
+                  </div>
+                  <div className="mt-3 grid grid-cols-5 gap-2">
+                    {heroStorySteps.map((step, index) => (
+                      <button key={step.id} onClick={() => setActive(index)} aria-label={`Show ${step.eyebrow}`} className="h-2 overflow-hidden rounded-full bg-white/70 shadow-inner">
+                        <span className={`block h-full rounded-full transition-all duration-500 ${index <= active ? "w-full bg-ink" : "w-0 bg-ink"}`} />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function HeroStoryScene({ sceneId }: { sceneId: (typeof heroStorySteps)[number]["id"] }) {
+  if (sceneId === "catalog") {
+    return (
+      <div className="grid gap-4 xl:grid-cols-[1.05fr_.95fr]">
+        <div className="rounded-[24px] border border-black/10 bg-white p-5 shadow-xl">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-extrabold uppercase tracking-[.14em] text-moss">Catalog import</p>
+            <span className="rounded-full bg-lime px-3 py-1.5 text-xs font-extrabold text-ink">CSV ready</span>
+          </div>
+          <div className="mt-5 space-y-3">
+            {demoMatches.map((product, index) => (
+              <div key={product.name} className="grid grid-cols-[56px_1fr_auto] items-center gap-4 rounded-2xl border border-black/[0.07] bg-[#f8faf4] p-3">
+                <div className="relative h-14 overflow-hidden rounded-xl bg-[#e9ece5]"><img src={product.image} alt="" className="h-full w-full object-cover" /></div>
+                <div>
+                  <p className="text-sm font-extrabold tracking-[-.025em]">{product.name}</p>
+                  <p className="mt-1 text-xs font-bold text-black/35">{product.tags.join(" · ")}</p>
+                </div>
+                <span className="rounded-full bg-white px-3 py-1.5 text-xs font-extrabold shadow-sm">{index === 0 ? "active" : "mapped"}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="rounded-[24px] bg-ink p-5 text-white shadow-xl">
+          <p className="text-xs font-extrabold uppercase tracking-[.14em] text-lime">What Sellentum reads</p>
+          <div className="mt-5 grid grid-cols-2 gap-3">
+            {["Name", "Price", "Image URL", "Category", "Features", "Buy Now URL"].map((field) => (
+              <div key={field} className="rounded-2xl bg-white/[.06] p-4">
+                <Check size={14} className="text-lime" />
+                <p className="mt-3 text-sm font-extrabold">{field}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-5 rounded-2xl border border-lime/25 bg-lime/10 p-4 text-xs leading-5 text-white/58">Clean catalog data gives the recommendation engine enough facts to make repeatable product choices.</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (sceneId === "questions") {
+    return (
+      <div className="grid gap-4 xl:grid-cols-[.95fr_1.05fr]">
+        <div className="rounded-[24px] border border-black/10 bg-white p-6 shadow-xl">
+          <div className="flex items-center justify-between">
+            <p className="eyebrow text-moss">Question 1 of 3</p>
+            <span className="rounded-full bg-[#eef1e8] px-3 py-1.5 text-xs font-extrabold text-black/45">Finder preview</span>
+          </div>
+          <h4 className="mt-5 text-4xl font-extrabold leading-[1] tracking-[-.06em]">Where will you use them most?</h4>
+          <div className="mt-6 space-y-3">
+            {["Weekend trails", "City walking", "Fast road runs"].map((answer, index) => (
+              <div key={answer} className={`flex items-center justify-between rounded-2xl border p-4 ${index === 0 ? "border-ink bg-ink text-white shadow-lg" : "border-black/[0.08] bg-[#f8faf4]"}`}>
+                <span className="flex items-center gap-3 text-sm font-extrabold">
+                  <span className={`grid h-8 w-8 place-items-center rounded-full ${index === 0 ? "bg-lime text-ink" : "bg-white text-black/35 ring-1 ring-black/10"}`}>{index === 0 ? <Check size={13} /> : String.fromCharCode(65 + index)}</span>
+                  {answer}
+                </span>
+                <span className={`rounded-full px-3 py-1 text-xs font-extrabold ${index === 0 ? "bg-lime/15 text-lime" : "bg-white text-black/35"}`}>{index === 0 ? "tag: trail" : "rule ready"}</span>
+              </div>
+            ))}
+          </div>
+          <div className="mt-6 h-2 overflow-hidden rounded-full bg-black/5"><div className="h-full w-1/3 rounded-full bg-lime" /></div>
+        </div>
+        <div className="rounded-[24px] border border-black/10 bg-white/80 p-6 shadow-xl backdrop-blur">
+          <p className="text-xs font-extrabold uppercase tracking-[.14em] text-moss">Merchant rule mapping</p>
+          <div className="mt-5 space-y-3">
+            {[
+              ["Answer", "Weekend trails"],
+              ["Match signal", "tag contains trail"],
+              ["Feature boost", "cushioned + weather-ready"],
+              ["Budget rule", "exclude over shopper budget"],
+            ].map(([label, value], index) => (
+              <div key={label} className="flex items-center gap-4 rounded-2xl bg-white p-4 shadow-sm">
+                <span className="grid h-9 w-9 place-items-center rounded-xl bg-lime/45 text-xs font-extrabold">{index + 1}</span>
+                <span className="text-xs font-bold text-black/35">{label}</span>
+                <span className="ml-auto text-sm font-extrabold">{value}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (sceneId === "recommend") {
+    return (
+      <div className="rounded-[26px] border border-black/10 bg-white p-5 shadow-xl">
+        <div className="flex items-center justify-between">
+          <p className="eyebrow text-moss">Your best matches</p>
+          <span className="rounded-full bg-lime px-3 py-1.5 text-xs font-extrabold text-ink">3 recommendations</span>
+        </div>
+        <div className="mt-5 grid gap-4 xl:grid-cols-3">
+          {demoMatches.map((product, index) => (
+            <article key={product.name} className={`overflow-hidden rounded-[22px] border bg-white ${index === 0 ? "border-ink shadow-2xl" : "border-black/[0.08]"}`}>
+              <div className="relative h-48 overflow-hidden bg-[#e9ece5]">
+                <img src={product.image} alt={product.name} className="h-full w-full object-cover" />
+                <span className={`absolute left-3 top-3 rounded-full px-3 py-1.5 text-xs font-extrabold ${index === 0 ? "bg-lime text-ink" : "bg-white/85 text-black/45"}`}>{index === 0 ? "Best match" : `${88 - index * 6}% match`}</span>
+              </div>
+              <div className="p-5">
+                <p className="text-xs font-extrabold uppercase tracking-[.14em] text-moss">Running shoes</p>
+                <h4 className="mt-2 text-xl font-extrabold leading-tight tracking-[-.04em]">{product.name}</h4>
+                <p className="mt-1 text-sm font-extrabold">{formatCurrency(product.price)}</p>
+                <p className="mt-4 min-h-[64px] rounded-2xl bg-[#f3f5ef] p-3 text-xs leading-5 text-black/52">{product.reason}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (sceneId === "explain") {
+    return (
+      <div className="grid gap-4 xl:grid-cols-[.92fr_1.08fr]">
+        <div className="rounded-[24px] bg-ink p-6 text-white shadow-xl">
+          <p className="text-xs font-extrabold uppercase tracking-[.14em] text-lime">Recommendation trace</p>
+          <div className="mt-6 space-y-3">
+            {[
+              ["Shopper need", "Weekend trails"],
+              ["Tag matched", "trail · weight 5"],
+              ["Feature matched", "soft cushioning"],
+              ["Budget passed", "£128 under budget"],
+              ["Selected product", "Terra Trail Runner"],
+            ].map(([label, value], index) => (
+              <div key={label} className="flex items-center gap-3 rounded-2xl bg-white/[.06] p-4">
+                <span className={`grid h-8 w-8 place-items-center rounded-xl text-xs font-extrabold ${index === 4 ? "bg-lime text-ink" : "bg-white/10 text-white"}`}>{index + 1}</span>
+                <span className="text-xs text-white/38">{label}</span>
+                <span className="ml-auto text-sm font-extrabold">{value}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="rounded-[24px] border border-black/10 bg-white p-6 shadow-xl">
+          <div className="flex items-center gap-3">
+            <span className="grid h-11 w-11 place-items-center rounded-2xl bg-lime text-ink"><Sparkles size={18} /></span>
+            <div>
+              <p className="text-xs font-extrabold uppercase tracking-[.14em] text-moss">AI explanation</p>
+              <p className="text-sm font-bold text-black/40">Generated after rules select the product</p>
             </div>
           </div>
-        ) : (
-          <div className="grid min-h-[525px] bg-[#f4f5f1] lg:grid-cols-[220px_1fr]">
-            <aside className="hidden border-r border-black/[0.07] bg-[#eaede6] p-4 lg:block"><p className="px-3 py-3 text-xs font-extrabold uppercase tracking-wider text-black/30">Workspace</p>{[["Overview", BarChart3], ["Products", Boxes], ["Product finders", Footprints], ["Brand & embed", Code2], ["Analytics", Eye]].map(([label, Icon], index) => { const MenuIcon = Icon as typeof BarChart3; return <div key={String(label)} className={`mt-1 flex items-center gap-3 rounded-xl px-3 py-3 text-xs font-bold ${index === 2 ? "bg-ink text-white" : "text-black/45"}`}><MenuIcon size={15} className={index === 2 ? "text-lime" : ""} />{String(label)}</div>; })}</aside>
-            <div className="p-6 sm:p-9"><div className="flex items-center justify-between"><div><p className="eyebrow text-moss">Product finder</p><h3 className="mt-2 text-2xl font-extrabold tracking-[-.04em]">Find your perfect pair</h3></div><button className="rounded-full bg-ink px-4 py-2.5 text-xs font-extrabold text-white">Publish finder</button></div><div className="mt-7 grid gap-5 xl:grid-cols-[1fr_280px]"><div className="rounded-2xl border border-black/[0.07] bg-white p-5"><p className="text-xs font-extrabold">Conversation flow</p><div className="mt-5 space-y-3">{["Where will you wear them most?", "What matters most underfoot?", "What’s your comfortable budget?"].map((question, index) => <div key={question} className="flex items-center gap-4 rounded-xl border border-black/[0.07] p-4"><span className="grid h-8 w-8 place-items-center rounded-xl bg-lime/45 text-xs font-extrabold">{index + 1}</span><span className="flex-1 text-xs font-extrabold">{question}</span><span className="rounded-full bg-[#f1f3ed] px-2 py-1 text-xs font-bold text-black/35">{index === 2 ? "Budget" : index === 1 ? "Feature" : "Tag"}</span><Settings2 size={14} className="text-black/25" /></div>)}</div><button className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-black/15 py-3 text-xs font-extrabold text-moss">+ Add question</button></div><div className="rounded-2xl bg-ink p-5 text-white"><p className="text-xs font-extrabold uppercase tracking-wider text-lime">Live performance</p><p className="mt-7 text-xs text-white/40">Completion rate</p><p className="mt-1 text-4xl font-extrabold tracking-[-.06em]">52%</p><div className="mt-6 h-1.5 rounded-full bg-white/10"><div className="h-full w-[52%] rounded-full bg-lime" /></div><div className="mt-8 grid grid-cols-2 gap-2"><div className="rounded-xl bg-white/[.06] p-3"><Eye size={13} className="text-lime" /><p className="mt-3 text-lg font-extrabold">1.2k</p><p className="text-xs text-white/35">Views</p></div><div className="rounded-xl bg-white/[.06] p-3"><MousePointerClick size={13} className="text-lime" /><p className="mt-3 text-lg font-extrabold">184</p><p className="text-xs text-white/35">Buy clicks</p></div></div></div></div></div>
+          <div className="mt-7 space-y-3">
+            <div className="ml-auto max-w-[78%] rounded-3xl rounded-br-md bg-ink p-4 text-sm leading-6 text-white">I need something cushioned for wet weekend trails under £140.</div>
+            <div className="max-w-[88%] rounded-3xl rounded-bl-md bg-[#eef1e8] p-4 text-sm leading-6 text-black/58">
+              <b className="text-moss">Why Terra Trail Runner fits:</b> it matched your trail use, cushioning preference and budget. The grip and rain-ready signals make it the safest first recommendation.
+            </div>
           </div>
-        )}
+          <div className="mt-6 flex flex-wrap gap-2">
+            {["No black-box selection", "Catalog facts only", "Human-readable reason"].map((label) => <span key={label} className="rounded-full border border-black/10 px-3 py-1.5 text-xs font-extrabold text-black/45">{label}</span>)}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid gap-4 xl:grid-cols-[1.05fr_.95fr]">
+      <div className="rounded-[24px] bg-ink p-6 text-white shadow-xl">
+        <div className="flex items-center justify-between">
+          <p className="text-xs font-extrabold uppercase tracking-[.14em] text-lime">Embed snippet</p>
+          <span className="rounded-full bg-white/10 px-3 py-1.5 text-xs font-extrabold">Any storefront</span>
+        </div>
+        <div className="mt-5 rounded-2xl border border-white/10 bg-black/20 p-5 font-mono text-xs leading-6 text-lime">
+          &lt;script<br />
+          &nbsp;&nbsp;src=&quot;https://www.sellentum.com/api/widget.js&quot;<br />
+          &nbsp;&nbsp;data-experience=&quot;finder&quot;<br />
+          &nbsp;&nbsp;data-id=&quot;quiz_footwear&quot;<br />
+          &nbsp;&nbsp;async<br />
+          &gt;&lt;/script&gt;
+        </div>
+        <button className="mt-5 inline-flex items-center gap-2 rounded-full bg-lime px-5 py-3 text-xs font-extrabold text-ink">Copy widget code <ArrowRight size={13} /></button>
+      </div>
+      <div className="rounded-[24px] border border-black/10 bg-white p-6 shadow-xl">
+        <p className="text-xs font-extrabold uppercase tracking-[.14em] text-moss">First live proof</p>
+        <div className="mt-5 grid grid-cols-2 gap-3">
+          {[
+            ["1.2k", "widget views", Eye],
+            ["642", "quiz starts", Layers3],
+            ["511", "completed", Check],
+            ["184", "buy clicks", MousePointerClick],
+          ].map(([value, label, Icon]) => {
+            const MetricIcon = Icon as typeof Eye;
+            return (
+              <div key={String(label)} className="rounded-2xl bg-[#f3f5ef] p-4">
+                <MetricIcon size={15} className="text-moss" />
+                <p className="mt-4 text-3xl font-extrabold tracking-[-.06em]">{String(value)}</p>
+                <p className="text-xs font-bold text-black/35">{String(label)}</p>
+              </div>
+            );
+          })}
+        </div>
+        <div className="mt-5 rounded-2xl border border-black/[0.07] p-4">
+          <div className="flex items-center justify-between text-xs font-extrabold">
+            <span>Proof checklist</span>
+            <span className="text-moss">5/5 events</span>
+          </div>
+          <div className="mt-3 h-2 rounded-full bg-black/5"><div className="h-full w-full rounded-full bg-lime" /></div>
+          <p className="mt-3 text-xs leading-5 text-black/45">widget_view, quiz_start, quiz_complete, product_recommended and buy_click are captured from one shopper journey.</p>
+        </div>
       </div>
     </div>
   );

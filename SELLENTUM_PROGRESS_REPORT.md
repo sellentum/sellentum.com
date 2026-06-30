@@ -48,7 +48,7 @@ These numbers are honest estimates, not marketing numbers.
 | Core MVP feature build | **80–85%** | Most major MVP features exist in the app. |
 | Production infrastructure | **70–75%** | Vercel, Supabase, env vars and verification scripts are in place, but live proof still matters. |
 | Real merchant workflow proof | **30–40%** | The flow exists, but needs real data and real storefront testing. |
-| Visual polish / SaaS maturity | **45–50%** | Good foundation, but not yet as calm and refined as a serious mature SaaS. |
+| Visual polish / SaaS maturity | **50–55%** | The product story is clearer now, but the dashboard still needs simplification and real product screenshots. |
 | Zoovu-level maturity | **10–15%** | Sellentum is an early focused product, not an enterprise platform yet. |
 
 Simple version:
@@ -157,6 +157,7 @@ Status: **Mostly done**
 What is built:
 
 - homepage,
+- desktop-first homepage product story animation,
 - platform pages,
 - industry pages,
 - resources page,
@@ -176,9 +177,15 @@ What still needs work:
 - founder/company story,
 - legal review for final terms and privacy policy.
 
+Latest completed interval:
+
+- Reviewed the supplied Zoovu homepage screen recording and extracted the useful pattern: a large browser-style product demo that explains the product in motion.
+- Built an original Sellentum hero animation that cycles through catalog import, guided questions, deterministic recommendations, AI explanations, widget embed and analytics proof.
+- Added smoke-test coverage so the homepage must keep explaining the product-finder story clearly.
+
 Current judgment:
 
-> The public site is good enough for early credibility, but not yet final sales-grade.
+> The public site now explains the core Sellentum service much more clearly. It still needs real merchant proof, stronger pricing and sharper production screenshots before it feels like a mature SaaS.
 
 ---
 
@@ -503,6 +510,7 @@ High-level log:
 - Built the Next.js application.
 - Built the public marketing website.
 - Rewrote the homepage/platform/resources messaging so a normal ecommerce owner can understand the offer before seeing advanced modules.
+- Added a desktop-first homepage product story animation inspired by the observed guided-selling demo pattern: catalog import, questions, recommendations, AI explanation, widget embed and analytics proof.
 - Added Sellentum branding.
 - Replaced the old Findly brand.
 - Renamed the local folder from `Site_MVP` to `sellentum`.
