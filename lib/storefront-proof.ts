@@ -6,7 +6,7 @@ export type StorefrontProofEvent = {
 export type StorefrontProofStep = {
   id: string;
   label: string;
-  owner: "Founder" | "Codex" | "Founder + Codex";
+  owner: "Founder" | "Sellentum" | "Founder + Sellentum";
   detail: string;
   evidence: string;
 };
@@ -30,28 +30,28 @@ export const storefrontProofSteps: StorefrontProofStep[] = [
   {
     id: "install-snippet",
     label: "Install the Widget Studio snippet",
-    owner: "Founder + Codex",
+    owner: "Founder + Sellentum",
     detail: "Paste the modal or inline script from Widget Studio and preserve data-experience, data-mode, data-id and attribution labels.",
     evidence: "Storefront HTML contains /api/widget.js with a published experience ID.",
   },
   {
     id: "scan-page",
     label: "Run Storefront Install Scanner",
-    owner: "Codex",
+    owner: "Sellentum",
     detail: "Scan the page and confirm script, ID, mode, attribution, HTTPS and origin checks pass.",
     evidence: "Install scan packet shows installed or no critical blockers.",
   },
   {
     id: "complete-journey",
     label: "Complete one shopper journey",
-    owner: "Founder + Codex",
+    owner: "Founder + Sellentum",
     detail: "Open the widget as a shopper, answer the questions and reach recommendations.",
     evidence: "The result cards appear with product image, title, price, explanation and Buy Now.",
   },
   {
     id: "prove-analytics",
     label: "Verify analytics events",
-    owner: "Codex",
+    owner: "Sellentum",
     detail: "Confirm the five launch-critical events are visible with source, campaign, placement and page URL metadata.",
     evidence: storefrontProofEvents.map((event) => event.event).join(", "),
   },

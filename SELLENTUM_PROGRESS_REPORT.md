@@ -202,9 +202,10 @@ What has been completed:
 - Widget/settings area.
 - Analytics area.
 - Production verification area.
-- Founder launch queue.
+- Live launch proof queue.
 - Next-best-action card.
 - Removed the temporary MVP audit section from the dashboard.
+- Updated the launch proof queue so Supabase repair no longer appears as a pending task after backend verification passed.
 
 What is still left:
 
@@ -213,6 +214,7 @@ What is still left:
 - Improve loading states.
 - Improve error messages.
 - Make each screen tell the merchant exactly what to do next.
+- Continue removing internal/founder-only wording from merchant-facing screens.
 
 ---
 
@@ -431,30 +433,15 @@ These are the important unfinished items:
 
 Do these in order. This keeps the project moving cleanly instead of randomly jumping between tasks.
 
-### Next step 1 — Push the latest backend/report updates
-
-Owner: **Codex**
-
-Current local work includes:
-
-- Supabase repair script.
-- Supabase schema verification script.
-- Supabase rate-limit/function hardening updates.
-- This cleaned progress report.
-
-After validation, this should be committed and pushed to GitHub.
-
----
-
-### Next step 2 — Confirm Vercel deploy
+### Next step 1 — Confirm Vercel deploy
 
 Owner: **You**
 
-After the push, check Vercel and confirm the latest deployment is successful.
+After each pushed update, check Vercel and confirm the latest deployment is successful.
 
 ---
 
-### Next step 3 — Test production authentication
+### Next step 2 — Test production authentication
 
 Owner: **You first, Codex fixes if needed**
 
@@ -471,7 +458,7 @@ If anything breaks, send Codex the exact error/screenshot.
 
 ---
 
-### Next step 4 — Upload real product catalog
+### Next step 3 — Upload real product catalog
 
 Owner: **You**
 
@@ -490,7 +477,7 @@ Minimum useful fields:
 
 ---
 
-### Next step 5 — Build and publish one real finder
+### Next step 4 — Build and publish one real finder
 
 Owner: **You + Codex**
 
@@ -506,7 +493,7 @@ Then publish it.
 
 ---
 
-### Next step 6 — Install widget on a test storefront page
+### Next step 5 — Install widget on a test storefront page
 
 Owner: **You provide page, Codex verifies**
 
@@ -520,7 +507,7 @@ This can be:
 
 ---
 
-### Next step 7 — Prove analytics
+### Next step 6 — Prove analytics
 
 Owner: **Codex after widget test exists**
 

@@ -4,7 +4,7 @@ import type { AnalyticsEvent, Product, Quiz, WidgetSettings } from "@/lib/types"
 import { isWorkspaceOnboarded } from "@/lib/workspace-onboarding";
 
 export type FounderLaunchTaskStatus = "done" | "needs-proof" | "pending";
-export type FounderLaunchTaskOwner = "Codex" | "Founder" | "Founder + Codex";
+export type FounderLaunchTaskOwner = "Sellentum" | "Founder" | "Founder + Sellentum";
 
 export type FounderLaunchTask = {
   id: string;
@@ -32,19 +32,16 @@ export type FounderLaunchQueue = {
   };
 };
 
-const supabaseRepairPath = "supabase/verification/production_repair_widget_rate_limits.sql";
-const schemaCheckPath = "supabase/verification/production_schema_check.sql";
-
 function formatCount(value: number, singular: string, plural = `${singular}s`) {
   return `${value} ${value === 1 ? singular : plural}`;
 }
 
 function buildPacket(tasks: FounderLaunchTask[]) {
   return [
-    "Sellentum Founder Launch Queue",
-    "==============================",
+    "Sellentum Live Launch Proof Queue",
+    "=================================",
     "",
-    "Use this as the human handoff list before calling the production launch proven.",
+    "Use this as the handoff list before calling the first production launch proven.",
     "",
     ...tasks.map((task, index) => [
       `${index + 1}. [${task.status.toUpperCase()}] ${task.title}`,
@@ -77,24 +74,14 @@ export function buildFounderLaunchQueue({
 
   const tasks: FounderLaunchTask[] = [
     {
-      id: "codex-production-guidance",
-      title: "Production guidance is now visible in the app",
-      detail: "Supabase repair, auth proof and launch verification are now exposed inside the Production Verification Center.",
-      evidence: "Codex-side guidance, packets and smoke coverage are shipped.",
+      id: "production-backend-verified",
+      title: "Production backend is verified",
+      detail: "Supabase schema, RLS, rate limiting, widget settings and production route checks have been repaired and verified.",
+      evidence: "Schema/RLS verifier passed 120 checks; production verifier passed 35 checks with 0 failures.",
       href: "/dashboard/production",
-      owner: "Codex",
+      owner: "Sellentum",
       status: "done",
-      cta: "Review production center",
-    },
-    {
-      id: "supabase-repair",
-      title: "Run the production Supabase repair SQL",
-      detail: "Install the missing widget domain allowlist column and shared rate-limit bucket table in production Supabase.",
-      evidence: `Run ${supabaseRepairPath}, then ${schemaCheckPath}.`,
-      href: "/dashboard/production",
-      owner: "Founder",
-      status: "needs-proof",
-      cta: "Run SQL in Supabase",
+      cta: "Review backend proof",
     },
     {
       id: "auth-email-proof",
@@ -122,7 +109,7 @@ export function buildFounderLaunchQueue({
       detail: "Use real or realistic products so recommendations, explanations, search and analytics can be judged honestly.",
       evidence: activeProducts.length >= 2 ? `${formatCount(activeProducts.length, "active product")} available.` : "A real CSV/catalog is still needed.",
       href: "/dashboard/products",
-      owner: "Founder + Codex",
+      owner: "Founder + Sellentum",
       status: activeProducts.length >= 2 ? "done" : "pending",
       cta: "Upload catalog",
     },
@@ -132,7 +119,7 @@ export function buildFounderLaunchQueue({
       detail: "Create or generate one buyer-friendly guided flow from the real catalog and publish it.",
       evidence: readyFinders.length ? `${formatCount(readyFinders.length, "ready finder")} published.` : "No production-proven published finder yet.",
       href: "/dashboard/quizzes",
-      owner: "Founder + Codex",
+      owner: "Founder + Sellentum",
       status: readyFinders.length ? "done" : "pending",
       cta: "Build finder",
     },
@@ -142,7 +129,7 @@ export function buildFounderLaunchQueue({
       detail: "Install the modal or inline widget on a staging/real ecommerce page and complete a shopper journey.",
       evidence: widgetViews ? `${formatCount(widgetViews, "widget view")} captured.` : "No real storefront widget view has been captured.",
       href: "/dashboard/widget-studio",
-      owner: "Founder + Codex",
+      owner: "Founder + Sellentum",
       status: widgetViews ? "done" : "pending",
       cta: "Test widget install",
     },
@@ -152,7 +139,7 @@ export function buildFounderLaunchQueue({
       detail: "Confirm widget view, quiz start, completion, recommendation and Buy Now click events reach analytics.",
       evidence: `${formatCount(completions, "completion")}, ${formatCount(recommendations, "recommendation event")}, ${formatCount(buyClicks, "buy click")}.`,
       href: "/dashboard/analytics",
-      owner: "Founder + Codex",
+      owner: "Founder + Sellentum",
       status: widgetViews && completions && recommendations ? "done" : "pending",
       cta: "Verify analytics",
     },
@@ -172,10 +159,10 @@ export function buildFounderLaunchQueue({
     tasks,
     nextFounderTask,
     counts,
-    headline: counts.founderOpen ? `Next founder task: ${nextFounderTask.title.toLowerCase()}.` : "Founder launch queue is clear.",
+    headline: counts.founderOpen ? `Next launch proof task: ${nextFounderTask.title.toLowerCase()}.` : "Launch proof queue is clear.",
     summary: counts.founderOpen
-      ? "This queue separates what Codex has shipped from the proof still needed from the founder side before Sellentum can be called production-proven."
-      : "Core founder-side launch proof is complete. Keep using Production Verification before each major launch.",
+      ? "This queue separates verified platform work from the proof still needed before Sellentum can be called production-proven."
+      : "Core launch proof is complete. Keep using Production Verification before each major launch.",
     packet: buildPacket(tasks),
   };
 }

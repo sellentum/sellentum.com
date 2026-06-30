@@ -89,7 +89,7 @@ For the current human-readable project status, open [`SELLENTUM_PROGRESS_REPORT.
 - Discovery gap analytics that detect no-result paths, thin recommendation sets, missing shopper language, low-confidence matches and stalled surfaced products
 - Real dashboard command center with period trends, live performance bars, launch score, command queue, milestones and experience mix built from actual workspace data
 - Merchant next-best-action card that turns production blockers, first-launch setup and optimization into one plain-English owner task
-- Founder launch queue that separates Codex-shipped work from founder-side production proof tasks such as Supabase repair, auth email testing, real catalog upload, storefront widget proof and analytics verification
+- Live launch proof queue that separates verified platform work from remaining production proof tasks such as auth email testing, real catalog upload, storefront widget proof and analytics verification
 - Conversion playbook that turns analytics quality, funnel rates, discovery gaps, catalog health and product demand into prioritized merchant actions
 - Experiment planner that turns funnel, channel, attribution and discovery signals into controlled post-launch tests with metrics, guardrails, success criteria and rollback plans
 - Commercial impact reporting that estimates assisted product value, unclicked recommendation value, demand coverage and ROI opportunities from recommendation and buy-click events

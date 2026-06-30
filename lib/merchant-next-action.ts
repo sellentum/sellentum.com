@@ -27,7 +27,6 @@ export type MerchantNextAction = {
 };
 
 function priorityForFounderTask(task: FounderLaunchTask): MerchantNextActionPriority {
-  if (task.id === "supabase-repair") return "critical";
   if (task.status === "needs-proof") return "high";
   return "medium";
 }
@@ -41,7 +40,7 @@ function firstLaunchAction(step: MerchantLaunchStep): MerchantNextAction {
     proof: step.evidence,
     href: step.href,
     cta: step.cta,
-    owner: "Founder + Codex",
+    owner: "Founder + Sellentum",
     priority: "medium",
     stage: "first-launch",
     supportActions: [
@@ -57,9 +56,7 @@ function founderProofAction(task: FounderLaunchTask): MerchantNextAction {
     id: `founder-proof-${task.id}`,
     title: task.title,
     detail: task.detail,
-    why: task.id === "supabase-repair"
-      ? "The product code is ready to use the production backend, but launch cannot be trusted until the missing Supabase schema pieces are applied and verified."
-      : "This founder-side proof turns shipped code into real production evidence instead of a local/demo assumption.",
+    why: "This founder-side proof turns shipped code into real production evidence instead of a local/demo assumption.",
     proof: task.evidence,
     href: task.href,
     cta: task.cta,
@@ -67,8 +64,8 @@ function founderProofAction(task: FounderLaunchTask): MerchantNextAction {
     priority: priorityForFounderTask(task),
     stage: "production-proof",
     supportActions: [
-      { title: "Copy founder queue", detail: "Share the complete human handoff list for production proof.", href: "/dashboard", cta: "Use dashboard queue" },
-      { title: "Open production center", detail: "Copy Supabase repair SQL, auth checklist and verification commands.", href: "/dashboard/production", cta: "Open Production Center" },
+      { title: "Copy launch proof queue", detail: "Share the complete handoff list for production proof.", href: "/dashboard", cta: "Use dashboard queue" },
+      { title: "Open production center", detail: "Review backend proof, auth checklist and production verification commands.", href: "/dashboard/production", cta: "Open Production Center" },
     ],
   };
   return { ...action, packet: buildPacket(action) };

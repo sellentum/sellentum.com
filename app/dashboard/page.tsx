@@ -183,17 +183,17 @@ export default function DashboardOverview() {
       <section className="mt-6 rounded-[28px] border border-black/[0.07] bg-white p-6">
         <div className="flex items-start justify-between gap-6">
           <div>
-            <p className="eyebrow text-moss">Founder launch queue</p>
+            <p className="eyebrow text-moss">Live launch proof queue</p>
             <h2 className="mt-3 text-3xl font-extrabold tracking-[-.05em]">{founderQueue.headline}</h2>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-black/45">{founderQueue.summary}</p>
           </div>
-          <button onClick={copyFounderQueue} className="inline-flex shrink-0 items-center gap-2 rounded-full bg-ink px-5 py-3 text-xs font-extrabold text-white"><Clipboard size={14} /> {founderQueueCopied ? "Queue copied" : "Copy founder queue"}</button>
+          <button onClick={copyFounderQueue} className="inline-flex shrink-0 items-center gap-2 rounded-full bg-ink px-5 py-3 text-xs font-extrabold text-white"><Clipboard size={14} /> {founderQueueCopied ? "Queue copied" : "Copy proof queue"}</button>
         </div>
         <div className="mt-5 grid grid-cols-4 gap-3 text-center">
           <div className="rounded-2xl bg-canvas p-4"><p className="text-2xl font-extrabold">{founderQueue.counts.done}</p><p className="mt-1 text-xs font-bold text-black/35">Done</p></div>
           <div className="rounded-2xl bg-amber-50 p-4"><p className="text-2xl font-extrabold text-amber-700">{founderQueue.counts.needsProof}</p><p className="mt-1 text-xs font-bold text-amber-700/60">Needs proof</p></div>
           <div className="rounded-2xl bg-canvas p-4"><p className="text-2xl font-extrabold">{founderQueue.counts.pending}</p><p className="mt-1 text-xs font-bold text-black/35">Pending</p></div>
-          <div className="rounded-2xl bg-ink p-4 text-white"><p className="text-2xl font-extrabold">{founderQueue.counts.founderOpen}</p><p className="mt-1 text-xs font-bold text-white/40">Founder-side</p></div>
+          <div className="rounded-2xl bg-ink p-4 text-white"><p className="text-2xl font-extrabold">{founderQueue.counts.founderOpen}</p><p className="mt-1 text-xs font-bold text-white/40">Your side</p></div>
         </div>
         <div className="mt-5 grid gap-3 xl:grid-cols-4">
           {founderQueue.tasks.map((task) => (

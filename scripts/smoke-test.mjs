@@ -500,7 +500,7 @@ function assertDashboardCommandCenterWorkflow() {
   assert(overview.includes("buildMerchantNextAction"), "Dashboard overview should use the shared next-best-action helper");
   assert(overview.includes("Today&apos;s next best action") && overview.includes("Copy next-action brief"), "Dashboard overview should expose one plain-English next best action");
   assert(overview.includes("First launch path"), "Dashboard overview should give merchants a simple first-launch path");
-  assert(overview.includes("Founder launch queue") && overview.includes("Copy founder queue"), "Dashboard overview should expose a copyable founder launch queue");
+  assert(overview.includes("Live launch proof queue") && overview.includes("Copy proof queue"), "Dashboard overview should expose a copyable live launch proof queue");
   assert(overview.includes("Command queue"), "Dashboard overview should expose prioritized command-center actions");
   assert(overview.includes("Conversion playbook"), "Dashboard overview should expose a deterministic conversion playbook");
   assert(overview.includes("Real shopper activity"), "Dashboard overview should label the activity chart as real data");
@@ -511,12 +511,13 @@ function assertDashboardCommandCenterWorkflow() {
   assert(commandCenter.includes("analyzeCatalogIntelligence"), "Command-center helper should reuse catalog intelligence");
   assert(launchPlan.includes("buildMerchantLaunchPlan"), "Merchant launch plan helper should expose a reusable first-launch builder");
   assert(launchPlan.includes("Install widget") && launchPlan.includes("Prove one shopper journey"), "Merchant launch plan should guide setup through storefront proof");
-  assert(founderQueue.includes("buildFounderLaunchQueue"), "Founder launch queue helper should expose a reusable builder");
-  assert(founderQueue.includes("production_repair_widget_rate_limits.sql") && founderQueue.includes("auth-email-proof"), "Founder launch queue should track Supabase repair and auth email proof");
-  assert(founderQueue.includes("Founder + Codex") && founderQueue.includes("real-catalog"), "Founder launch queue should separate founder/Codex shared catalog work");
+  assert(founderQueue.includes("buildFounderLaunchQueue"), "Launch proof queue helper should expose a reusable builder");
+  assert(founderQueue.includes("production-backend-verified") && founderQueue.includes("auth-email-proof"), "Launch proof queue should mark backend verification done and keep auth email proof next");
+  assert(!founderQueue.includes("supabase-repair"), "Launch proof queue should not keep the completed Supabase repair as a pending task");
+  assert(founderQueue.includes("Founder + Sellentum") && founderQueue.includes("real-catalog"), "Launch proof queue should separate founder/Sellentum shared catalog work");
   assert(nextAction.includes("buildMerchantNextAction"), "Merchant next-action helper should expose a reusable decision builder");
   assert(nextAction.includes("Sellentum next best action brief"), "Merchant next-action helper should generate a copyable owner brief");
-  assert(nextAction.includes("supabase-repair") && nextAction.includes("first-launch") && nextAction.includes("optimization"), "Merchant next-action helper should prioritize production proof, first launch, then optimization");
+  assert(!nextAction.includes("supabase-repair") && nextAction.includes("production-proof") && nextAction.includes("first-launch") && nextAction.includes("optimization"), "Merchant next-action helper should prioritize remaining production proof, first launch, then optimization");
   assert(conversionPlaybook.includes("buildConversionPlaybook"), "Conversion playbook helper should expose a reusable report builder");
   assert(conversionPlaybook.includes("buildAnalyticsQualityReport"), "Conversion playbook should consider analytics quality before optimization");
   assert(conversionPlaybook.includes("buildZeroPartyInsights"), "Conversion playbook should consider zero-party product demand");
@@ -805,6 +806,7 @@ function assertProductionVerificationWorkflow() {
   assert(helper.includes("deterministic product selection remains"), "Production Verification should preserve deterministic AI boundaries");
   assert(helper.includes("productionSupabaseRepair") && helper.includes("production_repair_widget_rate_limits.sql"), "Production Verification helper should expose the focused Supabase repair path");
   assert(helper.includes("widget_settings.allowed_domains") && helper.includes("rate_limit_buckets"), "Production Verification helper should name the known widget/rate-limit schema repair targets");
+  assert(helper.includes("from anon") && helper.includes("from authenticated"), "Production Verification repair SQL should harden rate-limit RPC grants for anon/authenticated roles");
   assert(helper.includes("productionAuthChecklist") && helper.includes("/forgot-password") && helper.includes("/reset-password"), "Production Verification helper should expose production auth proof steps");
   assert(page.includes("Production Verification Center"), "Production Verification page should expose the dashboard title");
   assert(page.includes("Copy verification packet"), "Production Verification page should let merchants copy the packet");
@@ -878,6 +880,7 @@ function assertStorefrontInstallScannerWorkflow() {
   assert(helper.includes("Private, localhost and internal network URLs cannot be scanned"), "Storefront Install Scanner should block private/local scan targets");
   assert(proof.includes("buildStorefrontProofPacket"), "Storefront proof helper should generate a copyable proof packet");
   assert(proof.includes("widget_view") && proof.includes("quiz_complete") && proof.includes("buy_click"), "Storefront proof helper should track launch-critical analytics events");
+  assert(!proof.includes("Codex") && proof.includes("Founder + Sellentum"), "Storefront proof packets should use customer-facing Sellentum owner labels");
   assert(route.includes("getWorkspaceIdentity"), "Storefront scan API should require authentication");
   assert(route.includes("MAX_HTML_BYTES") && route.includes("TIMEOUT_MS"), "Storefront scan API should bound HTML fetch size and timeout");
   assert(page.includes("Storefront Install Scanner"), "Install Scanner page should expose the dashboard title");
