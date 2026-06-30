@@ -232,12 +232,14 @@ What has been completed:
 - Upload products through CSV.
 - Product fields include name, price, image URL, category, description, features, tags and product URL.
 - CSV importer supports flexible headers and validation.
+- Products dashboard now includes a visible first-catalog launch kit with template download, supplier brief and import shortcut.
 
 What is still left:
 
 - Upload a real or realistic product catalog.
 - Check whether product tags, features and categories are clean enough.
 - Fix importer or matching issues found with real data.
+- Use the first-catalog supplier brief if someone else is preparing the CSV.
 
 Owner:
 

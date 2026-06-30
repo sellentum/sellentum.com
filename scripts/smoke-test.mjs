@@ -1231,6 +1231,8 @@ function assertCatalogImportWorkflow() {
   assert(page.includes("Fix required"), "Product CSV import should expose invalid row feedback before import");
   assert(page.includes("Real catalog intake contract") && page.includes("Copy intake packet"), "Product CSV import should expose a real-catalog intake contract and copyable packet");
   assert(page.includes("buildCatalogCsvTemplate") && page.includes("sellentum-real-catalog-template.csv"), "Product CSV import should use the shared real-catalog template helper");
+  assert(page.includes("First catalog launch kit") && page.includes("Copy supplier brief"), "Products dashboard should expose a visible first-catalog launch handoff");
+  assert(page.includes("Minimum viable catalog") && page.includes("Required columns") && page.includes("Matching signals"), "Products dashboard should explain first catalog readiness before import");
   assert(page.includes("Buyer needs"), "Product form should expose buyer-needs editing");
   assert(page.includes("Semantic search text"), "Product form should expose semantic search text editing");
   assert(intake.includes("catalogCsvColumns") && intake.includes("catalogIntakeChecklist"), "Catalog intake helper should define the CSV columns and pre-import checklist");

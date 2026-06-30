@@ -8,7 +8,7 @@ For the current human-readable project status, open [`SELLENTUM_PROGRESS_REPORT.
 
 - Premium marketing site with product, workflow, use-case, pricing, resource, platform, contact, support, security, privacy and terms pages
 - Supabase email/password authentication, protected dashboard routes and logout
-- Product catalog CRUD plus CSV upload with flexible header aliases, row-level validation, import preview, real-catalog intake checklist and reusable CSV template (`name`, `price`, and `category` are required; buyer needs/search text are optional discovery fields)
+- Product catalog CRUD plus CSV upload with flexible header aliases, row-level validation, import preview, visible first-catalog launch kit, real-catalog intake checklist and reusable CSV template (`name`, `price`, and `category` are required; buyer needs/search text are optional discovery fields)
 - AI catalog enrichment with normalized attributes, buyer needs, semantic search text and optional OpenAI embeddings
 - Catalog Pipeline Center that governs import contracts, enrichment coverage, semantic readiness, downstream consumers, field coverage and copyable catalog handoff packets
 - Availability Guard Center that proves active products, Buy Now URLs, imagery and runtime references are safe before recommendations reach shoppers
@@ -166,7 +166,7 @@ Terra Trail Runner,128,https://example.com/terra.jpg,Running shoes,Cushioned tra
 
 Use pipes, commas or semicolons inside `features`, `tags`, and `buyer_needs`. `search_text` is optional extra discovery language for semantic search/advisor matching. The dashboard includes a downloadable template, accepts common aliases such as `title`, `sale price`, `collection`, `image`, `benefits`, `semantic text`, and `link`, and shows invalid rows or weak recommendation-data warnings before import.
 
-The Products CSV importer also includes a **Real catalog intake contract** with required/recommended columns, a pre-import checklist, a richer sample template and a copyable handoff packet for preparing the first production catalog.
+The Products dashboard includes a visible **First catalog launch kit** with a downloadable CSV template, a copyable supplier/developer brief and a shortcut into import. The CSV importer also includes a **Real catalog intake contract** with required/recommended columns, a pre-import checklist, a richer sample template and a copyable handoff packet for preparing the first production catalog.
 
 ## Embed a guided experience
 

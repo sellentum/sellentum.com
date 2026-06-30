@@ -158,14 +158,48 @@ export default function ProductsPage() {
   const [editing, setEditing] = useState<Product | null | undefined>(undefined);
   const [importOpen, setImportOpen] = useState(false);
   const [enrichOpen, setEnrichOpen] = useState(false);
+  const [catalogPacketCopied, setCatalogPacketCopied] = useState(false);
   const [menu, setMenu] = useState<string | null>(null);
   const categories = uniqueValues(products.map((p) => p.category));
   const intelligence = useMemo(() => analyzeCatalogIntelligence(products), [products]);
   const filtered = useMemo(() => products.filter((product) => (category === "All categories" || product.category === category) && `${product.name} ${product.category} ${product.tags.join(" ")} ${(product.buyer_needs || []).join(" ")} ${product.search_text || ""}`.toLowerCase().includes(query.toLowerCase())), [products, category, query]);
+  const catalogTemplate = useMemo(() => buildCatalogCsvTemplate(), []);
+  async function copyCatalogPacket() {
+    await navigator.clipboard.writeText(buildCatalogIntakePacket());
+    setCatalogPacketCopied(true);
+    window.setTimeout(() => setCatalogPacketCopied(false), 1600);
+  }
   if (!ready) return <LoadingState label="Loading your catalog…" />;
   return <div className="animate-rise">
     <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><p className="eyebrow text-moss">Catalog</p><h1 className="display mt-2 text-4xl sm:text-5xl">Products</h1><p className="mt-2 text-sm text-black/45">Give your finders a thoughtful, structured product catalog.</p></div><div className="flex gap-2"><button onClick={() => setEnrichOpen(true)} disabled={!products.length} className="btn-secondary !px-4 !py-2.5"><Sparkles size={15} className="text-moss" /> AI enrich</button><button onClick={() => setImportOpen(true)} className="btn-secondary !px-4 !py-2.5"><Upload size={15} /> Import CSV</button><button onClick={() => setEditing(null)} className="btn-primary !px-4 !py-2.5"><Plus size={16} /> Add product</button></div></div>
     {storeError && <p className="mt-5 rounded-xl bg-red-50 p-3 text-xs font-bold text-red-700">{storeError}</p>}
+    <section className="mt-8 overflow-hidden rounded-[28px] border border-black/[0.07] bg-white shadow-sm">
+      <div className="grid xl:grid-cols-[0.85fr_1.15fr]">
+        <div className="relative bg-[#f4f7eb] p-6">
+          <p className="eyebrow text-moss">First catalog launch kit</p>
+          <h2 className="mt-4 text-3xl font-extrabold tracking-[-.05em] text-ink">Prepare one clean product export before building the finder.</h2>
+          <p className="mt-3 max-w-xl text-sm leading-6 text-black/50">For the first serious launch, use live products with shopper-friendly descriptions, matching signals, image URLs and Buy Now URLs. This makes rule-based selection reliable and gives AI enough facts to explain recommendations.</p>
+          <div className="mt-5 flex flex-wrap gap-2">
+            <button onClick={() => setImportOpen(true)} className="inline-flex items-center gap-2 rounded-full bg-ink px-5 py-3 text-xs font-extrabold text-white"><Upload size={14} /> Import real catalog</button>
+            <a href={`data:text/csv;charset=utf-8,${encodeURIComponent(catalogTemplate)}`} download="sellentum-real-catalog-template.csv" className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-xs font-extrabold text-ink"><Download size={14} /> Download template</a>
+            <button onClick={copyCatalogPacket} className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-xs font-extrabold text-ink"><Clipboard size={14} /> {catalogPacketCopied ? "Brief copied" : "Copy supplier brief"}</button>
+          </div>
+        </div>
+        <div className="grid gap-3 p-5 xl:grid-cols-3">
+          {[
+            { title: "Minimum viable catalog", detail: "Start with at least 2 active products; 8–20 products gives recommendation paths enough choice.", evidence: `${products.filter((product) => product.active).length} active products now` },
+            { title: "Required columns", detail: "name, price and category are mandatory. Product URL and image URL are strongly recommended.", evidence: "CSV importer validates every row before import" },
+            { title: "Matching signals", detail: "Add tags, features and buyer_needs so answer options can map to deterministic product logic.", evidence: `${intelligence.coverage.matchingSignals}% matching-signal coverage` },
+          ].map((item) => (
+            <article key={item.title} className="rounded-2xl border border-black/[0.06] bg-canvas p-4">
+              <p className="text-sm font-extrabold text-ink">{item.title}</p>
+              <p className="mt-2 text-xs font-bold leading-5 text-black/45">{item.detail}</p>
+              <p className="mt-4 rounded-xl bg-white px-3 py-2 text-xs font-extrabold text-moss">{item.evidence}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
     <section className="mt-8 grid gap-5 xl:grid-cols-[380px_1fr]">
       <div className="rounded-[28px] border border-black/[0.07] bg-ink p-6 text-white">
         <div className="flex items-start justify-between gap-4"><span className="grid h-12 w-12 place-items-center rounded-2xl bg-lime text-ink"><ShieldCheck size={21} /></span><span className={`rounded-full px-3 py-1 text-xs font-extrabold ${intelligence.blockers.length ? "bg-red-400/15 text-red-100" : intelligence.warnings.length ? "bg-amber-300/20 text-amber-100" : "bg-lime text-ink"}`}>{intelligence.readinessLabel}</span></div>
