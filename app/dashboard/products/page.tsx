@@ -2,10 +2,11 @@
 
 import { useMemo, useRef, useState } from "react";
 import Papa from "papaparse";
-import { AlertTriangle, Boxes, Check, ChevronDown, Download, FileSpreadsheet, ImageIcon, LoaderCircle, MoreHorizontal, Pencil, Plus, Search, ShieldCheck, Sparkles, Tags, Trash2, Upload } from "lucide-react";
+import { AlertTriangle, Boxes, Check, ChevronDown, Clipboard, Download, FileSpreadsheet, ImageIcon, LoaderCircle, MoreHorizontal, Pencil, Plus, Search, ShieldCheck, Sparkles, Tags, Trash2, Upload } from "lucide-react";
 import { Modal } from "@/components/modal";
 import { LoadingState } from "@/components/loading-state";
 import { useStore } from "@/lib/store";
+import { buildCatalogCsvTemplate, buildCatalogIntakePacket, catalogCsvColumns, catalogIntakeChecklist } from "@/lib/catalog-intake";
 import { analyzeCatalogIntelligence } from "@/lib/catalog-intelligence";
 import { normalizeCatalogImportRows, type CatalogImportResult } from "@/lib/catalog-import";
 import type { Product, ProductInput } from "@/lib/types";
@@ -54,6 +55,7 @@ function CsvImport({ onClose }: { onClose: () => void }) {
   const [fileName, setFileName] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [copiedTemplate, setCopiedTemplate] = useState(false);
   function choose(file?: File) {
     if (!file) return;
     setError(""); setFileName(file.name); setResult(null);
@@ -70,9 +72,29 @@ function CsvImport({ onClose }: { onClose: () => void }) {
     });
   }
   async function upload() { if (!result?.products.length) return; setLoading(true); try { await importProducts(result.products); onClose(); } catch (err) { setError(err instanceof Error ? err.message : "Import failed."); } finally { setLoading(false); } }
-  const template = "name,price,image_url,category,description,features,tags,buyer_needs,search_text,product_url,active\nExample Product,99,https://example.com/image.jpg,Category,A short description,Feature one|Feature two,tag-one|tag-two,wet-weather protection|all-day comfort,Extra discovery language and shopper-use cases,https://example.com/product,true";
-  return <div className="p-5 sm:p-7"><div onClick={() => input.current?.click()} onDragOver={(e) => e.preventDefault()} onDrop={(e) => { e.preventDefault(); choose(e.dataTransfer.files[0]); }} className="cursor-pointer rounded-2xl border-2 border-dashed border-black/10 bg-canvas p-10 text-center transition hover:border-moss/40"><input ref={input} type="file" accept=".csv,text/csv" className="hidden" onChange={(e) => choose(e.target.files?.[0])} /><span className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-white text-moss shadow-sm"><FileSpreadsheet size={21} /></span><p className="mt-4 text-sm font-extrabold">Drop your CSV here, or click to browse</p><p className="mt-1 text-xs text-black/35">Required: name, price and category · Max 5 MB</p></div>
-    <a href={`data:text/csv;charset=utf-8,${encodeURIComponent(template)}`} download="sellentum-product-template.csv" className="mt-4 flex items-center justify-center gap-2 text-xs font-extrabold text-moss"><Download size={14} /> Download CSV template</a>
+  const template = buildCatalogCsvTemplate();
+  async function copyTemplate() { await navigator.clipboard.writeText(buildCatalogIntakePacket()); setCopiedTemplate(true); window.setTimeout(() => setCopiedTemplate(false), 1600); }
+  return <div className="p-5 sm:p-7">
+    <div className="mb-5 grid gap-3 xl:grid-cols-[1fr_.9fr]">
+      <div className="rounded-2xl border border-black/[0.07] bg-canvas p-4">
+        <p className="text-xs font-extrabold uppercase tracking-wider text-moss">Real catalog intake contract</p>
+        <p className="mt-2 text-sm font-bold leading-5 text-black/55">Start with one clean export of live products. Required fields let the import run; recommended fields make recommendations, search and AI explanations feel serious.</p>
+        <div className="mt-4 grid gap-2 sm:grid-cols-2">
+          {catalogCsvColumns.map((column) => <div key={column.key} className="rounded-xl bg-white px-3 py-2"><div className="flex items-center justify-between gap-3"><code className="text-xs font-extrabold text-ink">{column.key}</code><span className={`rounded-full px-2 py-0.5 text-xs font-extrabold uppercase ${column.required ? "bg-lime/35 text-moss" : "bg-black/[0.04] text-black/35"}`}>{column.required ? "Required" : "Useful"}</span></div><p className="mt-1 text-xs leading-4 text-black/35">{column.purpose}</p></div>)}
+        </div>
+      </div>
+      <div className="rounded-2xl border border-black/[0.07] bg-white p-4">
+        <p className="text-xs font-extrabold uppercase tracking-wider text-black/35">Before you import</p>
+        <div className="mt-3 space-y-2">
+          {catalogIntakeChecklist.map((item) => <p key={item} className="flex gap-2 text-xs font-bold leading-4 text-black/45"><Check size={13} className="mt-0.5 shrink-0 text-moss" />{item}</p>)}
+        </div>
+      </div>
+    </div>
+    <div onClick={() => input.current?.click()} onDragOver={(e) => e.preventDefault()} onDrop={(e) => { e.preventDefault(); choose(e.dataTransfer.files[0]); }} className="cursor-pointer rounded-2xl border-2 border-dashed border-black/10 bg-canvas p-10 text-center transition hover:border-moss/40"><input ref={input} type="file" accept=".csv,text/csv" className="hidden" onChange={(e) => choose(e.target.files?.[0])} /><span className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-white text-moss shadow-sm"><FileSpreadsheet size={21} /></span><p className="mt-4 text-sm font-extrabold">Drop your CSV here, or click to browse</p><p className="mt-1 text-xs text-black/35">Required: name, price and category · Max 5 MB</p></div>
+    <div className="mt-4 flex flex-wrap justify-center gap-3">
+      <a href={`data:text/csv;charset=utf-8,${encodeURIComponent(template)}`} download="sellentum-real-catalog-template.csv" className="inline-flex items-center justify-center gap-2 rounded-full bg-lime/35 px-4 py-2.5 text-xs font-extrabold text-moss"><Download size={14} /> Download real-catalog template</a>
+      <button onClick={copyTemplate} className="inline-flex items-center justify-center gap-2 rounded-full border border-black/10 bg-white px-4 py-2.5 text-xs font-extrabold text-ink"><Clipboard size={14} /> {copiedTemplate ? "Packet copied" : "Copy intake packet"}</button>
+    </div>
     {fileName && <div className="mt-5 rounded-xl border border-black/[0.07] p-3"><div className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-xl bg-lime/40"><FileSpreadsheet size={16} /></span><span className="min-w-0 flex-1"><span className="block truncate text-xs font-extrabold">{fileName}</span><span className="text-xs text-black/35">{result ? `${result.summary.valid} valid · ${result.summary.invalid} invalid · ${result.summary.warnings} with warnings` : "Parsing catalog…"}</span></span>{result?.summary.valid ? <Check size={16} className="text-moss" /> : null}</div></div>}
     {error && <p className="mt-4 rounded-xl bg-red-50 p-3 text-xs font-bold text-red-700">{error}</p>}
     {result && <div className="mt-5 max-h-[320px] overflow-y-auto rounded-2xl border border-black/[0.07]">

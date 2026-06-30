@@ -8,7 +8,7 @@ GitHub repo: **https://github.com/sellentum/sellentum.com.git**
 
 Branch: **main**
 
-Latest product-code interval: **Founder launch queue**
+Latest product-code interval: **Real catalog intake contract**
 
 ---
 
@@ -145,9 +145,17 @@ Still needed: simplify merchant language, improve empty states and make the dash
 
 ### Stage 6 — Product catalog
 
-**Status: Built, needs real catalog test**
+**Status: Built, real-catalog intake path improved**
 
 Built manual product creation, edit/delete, CSV import and core product fields such as name, price, image URL, category, description, features, tags and product URL.
+
+Latest Codex-side progress:
+
+- Added a reusable real-catalog CSV intake contract.
+- Added required/recommended field guidance directly inside the product CSV import modal.
+- Added a richer downloadable sample catalog template.
+- Added a copyable catalog intake packet for preparing the first real product CSV.
+- Added smoke-test coverage so the intake contract stays protected.
 
 Still needed: upload a real product CSV and check import quality.
 

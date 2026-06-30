@@ -1194,6 +1194,7 @@ function assertCatalogImportWorkflow() {
   const ontologyPage = readFileSync("app/dashboard/ontology/page.tsx", "utf8");
   const shell = readFileSync("components/dashboard-shell.tsx", "utf8");
   const importer = readFileSync("lib/catalog-import.ts", "utf8");
+  const intake = readFileSync("lib/catalog-intake.ts", "utf8");
   const intelligence = readFileSync("lib/catalog-intelligence.ts", "utf8");
   const ontology = readFileSync("lib/catalog-ontology.ts", "utf8");
   const benefits = readFileSync("lib/catalog-benefits.ts", "utf8");
@@ -1202,8 +1203,13 @@ function assertCatalogImportWorkflow() {
   const preflightPage = readFileSync("app/dashboard/preflight/page.tsx", "utf8");
   assert(page.includes("normalizeCatalogImportRows"), "Product CSV import should use the shared catalog import normalizer");
   assert(page.includes("Fix required"), "Product CSV import should expose invalid row feedback before import");
+  assert(page.includes("Real catalog intake contract") && page.includes("Copy intake packet"), "Product CSV import should expose a real-catalog intake contract and copyable packet");
+  assert(page.includes("buildCatalogCsvTemplate") && page.includes("sellentum-real-catalog-template.csv"), "Product CSV import should use the shared real-catalog template helper");
   assert(page.includes("Buyer needs"), "Product form should expose buyer-needs editing");
   assert(page.includes("Semantic search text"), "Product form should expose semantic search text editing");
+  assert(intake.includes("catalogCsvColumns") && intake.includes("catalogIntakeChecklist"), "Catalog intake helper should define the CSV columns and pre-import checklist");
+  assert(intake.includes("buildCatalogCsvTemplate") && intake.includes("buildCatalogIntakePacket"), "Catalog intake helper should generate reusable CSV templates and handoff packets");
+  assert(intake.includes("Terra Trail Runner") && intake.includes("buyer_needs"), "Catalog intake template should include realistic sample products and discovery fields");
   assert(importer.includes("headerAliases"), "Catalog import normalizer should support flexible CSV header aliases");
   assert(importer.includes("buyer_needs"), "Catalog import normalizer should support buyer-needs fields");
   assert(importer.includes("search_text"), "Catalog import normalizer should support semantic search text fields");
