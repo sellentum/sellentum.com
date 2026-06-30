@@ -190,6 +190,7 @@ async function verifyPublicRoutes() {
     ["/contact", "Talk to Sellentum"],
     ["/support", "Get from catalog to launch"],
     ["/security", "Rules, data and AI boundaries"],
+    ["/storefront-demo", "Test the embed before touching"],
     ["/privacy", "How Sellentum handles product"],
     ["/terms", "A practical usage boundary"],
     ["/api/widget.js", "data-experience"],

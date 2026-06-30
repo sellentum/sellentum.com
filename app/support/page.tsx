@@ -7,6 +7,7 @@ const supportTopics = [
   { title: "Import products", copy: "Prepare a CSV with product names, prices, categories, descriptions, features, tags and product URLs.", icon: UploadCloud, href: "/dashboard/products" },
   { title: "Build a finder", copy: "Create guided questions, connect answers to deterministic rules, publish the experience and test the result path.", icon: BookOpen, href: "/dashboard/quizzes" },
   { title: "Install the widget", copy: "Copy the modal or inline snippet and install it on a staging storefront before sending real traffic.", icon: Code2, href: "/dashboard/widget-studio" },
+  { title: "Try storefront demo", copy: "Paste a real experience ID into the simulated store page before touching a live ecommerce theme.", icon: Code2, href: "/storefront-demo" },
   { title: "Verify production", copy: "Use the production checks for Supabase, public routes, widget runtime, analytics and release readiness.", icon: CheckCircle2, href: "/dashboard/production" },
 ];
 

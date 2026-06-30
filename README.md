@@ -32,6 +32,7 @@ For the current human-readable project status, open [`SELLENTUM_PROGRESS_REPORT.
 - Launch Channels board that packages homepage, category, PDP and support placements with copy-ready snippets, attribution labels, QA checks and channel metrics
 - Partner Syndication board that packages retailer, marketplace, affiliate, support and sales-partner widget snippets with syndication attribution, QA checks and data-policy handoff notes
 - Storefront QA sandbox that previews each channel in a controlled desktop storefront, lists expected telemetry events and exports a copyable QA packet before theme installation
+- Public storefront widget demo page that loads the real `/api/widget.js` contract on a simulated ecommerce page before a live theme install
 - Storefront Install Scanner that fetches a staging/production page, verifies the Sellentum widget script and data attributes, checks attribution labels and exports a copyable install scan packet
 - Runtime Operations Center that monitors public endpoint contracts, guardrails, analytics quality, release gates and telemetry proof
 - Release Center that rolls catalog, experience, channel, sandbox, analytics and optimization gates into a go/no-go release candidate with rollback notes
@@ -190,6 +191,8 @@ The canonical production loader is `/api/widget.js`. `/widget.js` is kept as a c
 For attribution, the widget automatically passes the storefront page URL, page title, referrer, launcher position and inferred host source into the iframe. Add optional labels such as `data-source`, `data-medium`, `data-campaign`, `data-placement`, `data-content`, or `data-term` when you want Analytics to compare specific launches.
 
 The public runtime normalizes the saved widget settings before rendering, so brand name, primary colour, widget title, welcome message and button copy are shared across all embedded experiences with safe defaults if a setting is missing.
+
+To test a snippet before touching a real storefront theme, open `/storefront-demo`, paste a published experience ID, choose modal or inline mode, and complete the simulated shopper journey. The page loads the same `/api/widget.js` script contract used by production storefronts.
 
 ## Deploy to Vercel
 

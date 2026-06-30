@@ -77,9 +77,11 @@ function assertPublicTrustPages() {
   for (const route of ["/contact", "/support", "/security", "/privacy", "/terms"]) {
     assert(footer.includes(route), `Marketing footer should link to ${route}`);
   }
+  assert(footer.includes("/storefront-demo"), "Marketing footer should link to the storefront widget demo");
   assert(authShell.includes('href="/terms"') && authShell.includes('href="/privacy"'), "Auth fine print should link to real Terms and Privacy pages");
   assert(dashboardShell.includes('href="/support"'), "Dashboard help actions should open the Support page");
   assert(nav.includes('href: "/support"'), "Landing navigation should expose support from the Resources menu");
+  assert(nav.includes('href: "/storefront-demo"'), "Landing navigation should expose the storefront widget demo from the Resources menu");
   assert(packageJson.includes("\"verify:production\""), "package.json should expose the production verification command");
   assert(productionVerifier.includes("production_schema_check.sql") && productionVerifier.includes("requiredSupabaseTables"), "Production verifier should bridge live checks with the authoritative Supabase SQL verification");
 }
@@ -2402,6 +2404,7 @@ async function main() {
   await assertPage("/contact", "Talk to Sellentum");
   await assertPage("/support", "Get from catalog to launch");
   await assertPage("/security", "Rules, data and AI boundaries");
+  await assertPage("/storefront-demo", "Test the embed before touching");
   await assertPage("/privacy", "How Sellentum handles product");
   await assertPage("/terms", "A practical usage boundary");
   await assertPage("/finder/quiz_footwear", "Preparing your product guide");

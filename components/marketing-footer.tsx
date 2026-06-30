@@ -18,6 +18,7 @@ const footerGroups = [
       ["Live finder", "/finder/quiz_footwear"],
       ["Advisor", "/assistant/quiz_footwear"],
       ["Configurator", "/configurator/config_trail_kit"],
+      ["Storefront demo", "/storefront-demo"],
       ["Industries", "/industries"],
       ["Resources", "/resources"],
     ],
@@ -30,6 +31,7 @@ const footerGroups = [
       ["Contact", "/contact"],
       ["Support", "/support"],
       ["Security", "/security"],
+      ["Storefront demo", "/storefront-demo"],
     ],
   },
   {

@@ -285,7 +285,7 @@ Still left:
 
 ### Stage 10 — Embeddable widget
 
-Status: **Built, needs real storefront proof**
+Status: **Built, simulated storefront proof page added**
 
 Completed:
 
@@ -296,6 +296,7 @@ Completed:
 - Finder/advisor/search/configurator experience support.
 - Widget settings for brand name, color, title, welcome message and button copy.
 - Domain/metadata safety work has started.
+- Public `/storefront-demo` page for testing the real widget script on a simulated ecommerce product page.
 
 Still left:
 
@@ -669,6 +670,13 @@ This is the simplified history of what we have done.
 - The command checks live public routes and the widget loader.
 - The command checks Supabase table/column reachability through the service-role key.
 - The command points back to the authoritative Supabase SQL verification for RLS, extensions and exact function grants.
+
+### Phase 9 — Storefront widget demo
+
+- Added public `/storefront-demo` page.
+- The page lets a merchant paste a published finder/advisor/search/configurator ID.
+- The page loads the real `/api/widget.js` script on a simulated ecommerce product page.
+- The page shows the exact snippet, acceptance checklist and next step into the Install Scanner.
 
 ---
 

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, BarChart3, BookOpen, MessageCircle, PackagePlus, Rocket, Sparkles } from "lucide-react";
+import { ArrowRight, BarChart3, BookOpen, Code2, MessageCircle, PackagePlus, Rocket, Sparkles } from "lucide-react";
 import { LandingNav } from "@/components/landing-nav";
 import { MarketingFooter } from "@/components/marketing-footer";
 
@@ -7,6 +7,7 @@ const resources = [
   { label: "Live product finder", title: "Answer guided questions and get 1–3 reliable product recommendations.", href: "/finder/quiz_footwear", icon: Sparkles },
   { label: "Conversational advisor", title: "Describe a need in natural language and see semantic catalog matching.", href: "/assistant/quiz_footwear", icon: MessageCircle },
   { label: "Visual configurator", title: "Build a compatible trail bundle with live price updates.", href: "/configurator/config_trail_kit", icon: PackagePlus },
+  { label: "Storefront widget demo", title: "Load a real widget snippet on a simulated ecommerce product page.", href: "/storefront-demo", icon: Code2 },
   { label: "Merchant workspace", title: "Explore product import, builders, analytics and widget settings.", href: "/login", icon: BarChart3 },
   { label: "Launch Studio", title: "Enrich products, generate a finder, publish it and copy the widget snippet.", href: "/dashboard/launch", icon: Rocket },
   { label: "Platform overview", title: "See how the catalog, rules, AI and analytics fit together.", href: "/platform", icon: BookOpen },
