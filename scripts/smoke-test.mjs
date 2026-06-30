@@ -502,14 +502,17 @@ function assertDashboardCommandCenterWorkflow() {
   const conversionPlaybook = readFileSync("lib/conversion-playbook.ts", "utf8");
   const launchPlan = readFileSync("lib/merchant-launch-plan.ts", "utf8");
   const founderQueue = readFileSync("lib/founder-launch-queue.ts", "utf8");
+  const firstLiveProof = readFileSync("lib/first-live-proof.ts", "utf8");
   const nextAction = readFileSync("lib/merchant-next-action.ts", "utf8");
   assert(overview.includes("buildDashboardCommandCenter"), "Dashboard overview should use the shared command-center helper");
   assert(overview.includes("buildConversionPlaybook"), "Dashboard overview should use the shared conversion playbook helper");
   assert(overview.includes("buildMerchantLaunchPlan"), "Dashboard overview should use the shared merchant launch plan helper");
+  assert(overview.includes("buildFirstLiveMerchantProof"), "Dashboard overview should use the shared first live merchant proof helper");
   assert(overview.includes("buildFounderLaunchQueue"), "Dashboard overview should use the shared founder launch queue helper");
   assert(overview.includes("buildMerchantNextAction"), "Dashboard overview should use the shared next-best-action helper");
   assert(overview.includes("Today&apos;s next best action") && overview.includes("Copy next-action brief"), "Dashboard overview should expose one plain-English next best action");
   assert(overview.includes("First launch path"), "Dashboard overview should give merchants a simple first-launch path");
+  assert(overview.includes("First live merchant proof") && overview.includes("Copy first proof packet") && overview.includes("What counts as proven"), "Dashboard overview should expose a copyable first-live-proof contract");
   assert(shell.includes("buildMerchantLaunchPlan"), "Dashboard shell should reuse the shared merchant launch plan helper");
   assert(shell.includes("Core launch path") && shell.includes("Products → Finder → Publish → Embed → Analytics proof"), "Dashboard shell should keep the core launch path visible across dashboard pages");
   assert(shell.includes("Next: {launchPlan.currentStep.title}"), "Dashboard shell should route merchants to the current launch step");
@@ -525,10 +528,16 @@ function assertDashboardCommandCenterWorkflow() {
   assert(commandCenter.includes("analyzeCatalogIntelligence"), "Command-center helper should reuse catalog intelligence");
   assert(launchPlan.includes("buildMerchantLaunchPlan"), "Merchant launch plan helper should expose a reusable first-launch builder");
   assert(launchPlan.includes("Install widget") && launchPlan.includes("Prove one shopper journey"), "Merchant launch plan should guide setup through storefront proof");
+  assert(launchPlan.includes("recommendations > 0 && buyClicks > 0"), "Merchant launch plan must require Buy Now proof before the shopper journey is marked done");
   assert(founderQueue.includes("buildFounderLaunchQueue"), "Launch proof queue helper should expose a reusable builder");
   assert(founderQueue.includes("production-backend-verified") && founderQueue.includes("auth-email-proof"), "Launch proof queue should mark backend verification done and keep auth email proof next");
+  assert(founderQueue.includes("recommendations && buyClicks"), "Launch proof queue must require a buy-click before analytics proof is marked done");
   assert(!founderQueue.includes("supabase-repair"), "Launch proof queue should not keep the completed Supabase repair as a pending task");
   assert(founderQueue.includes("Founder + Sellentum") && founderQueue.includes("real-catalog"), "Launch proof queue should separate founder/Sellentum shared catalog work");
+  assert(firstLiveProof.includes("buildFirstLiveMerchantProof"), "First live proof helper should expose a reusable report builder");
+  assert(firstLiveProof.includes("Sellentum first live merchant proof") && firstLiveProof.includes("firstLiveProofDefinition"), "First live proof helper should generate a copyable proof packet and definition");
+  assert(firstLiveProof.includes("widget_view, quiz_start, quiz_complete, product_recommended and buy_click"), "First live proof definition should preserve the five-event production proof standard");
+  assert(firstLiveProof.includes("analyticsProof.status === \"proven\" && buyClicks"), "First live proof helper should not mark analytics done without buy-click evidence");
   assert(nextAction.includes("buildMerchantNextAction"), "Merchant next-action helper should expose a reusable decision builder");
   assert(nextAction.includes("Sellentum next best action brief"), "Merchant next-action helper should generate a copyable owner brief");
   assert(!nextAction.includes("supabase-repair") && nextAction.includes("production-proof") && nextAction.includes("first-launch") && nextAction.includes("optimization"), "Merchant next-action helper should prioritize remaining production proof, first launch, then optimization");
@@ -1450,6 +1459,12 @@ async function assertDeterministicLogic() {
   writeFileSync(compiledAnalyticsProof, readFileSync(compiledAnalyticsProof, "utf8")
     .replace('from "@/lib/analytics";', 'from "./analytics.js";')
     .replace('from "@/lib/utils";', 'from "./utils.js";'));
+  const compiledFirstLiveProof = `${compileDir}/lib/first-live-proof.js`;
+  writeFileSync(compiledFirstLiveProof, readFileSync(compiledFirstLiveProof, "utf8")
+    .replace('from "@/lib/analytics-proof";', 'from "./analytics-proof.js";')
+    .replace('from "@/lib/analytics";', 'from "./analytics.js";')
+    .replace('from "@/lib/quiz-readiness";', 'from "./quiz-readiness.js";')
+    .replace('from "@/lib/workspace-onboarding";', 'from "./workspace-onboarding.js";'));
   const compiledAttribution = `${compileDir}/lib/attribution.js`;
   writeFileSync(compiledAttribution, readFileSync(compiledAttribution, "utf8")
     .replace('from "./analytics";', 'from "./analytics.js";'));
@@ -1698,6 +1713,7 @@ async function assertDeterministicLogic() {
   const analytics = await import(pathToFileURL(`${compileDir}/lib/analytics.js`));
   const analyticsQuality = await import(pathToFileURL(`${compileDir}/lib/analytics-quality.js`));
   const analyticsProof = await import(pathToFileURL(`${compileDir}/lib/analytics-proof.js`));
+  const firstLiveProof = await import(pathToFileURL(`${compileDir}/lib/first-live-proof.js`));
   const attribution = await import(pathToFileURL(`${compileDir}/lib/attribution.js`));
   const journeyInsights = await import(pathToFileURL(`${compileDir}/lib/journey-insights.js`));
   const finderFlow = await import(pathToFileURL(`${compileDir}/lib/finder-flow.js`));
@@ -1925,14 +1941,19 @@ async function assertDeterministicLogic() {
     { id: "qa5", user_id: "demo-user", quiz_id: "quiz_footwear", product_id: "prod_trail", event_type: "buy_click", metadata: { session_id: "qa", experience_type: "finder", experience_id: "quiz_footwear", product_name: "Terra Trail Runner" }, created_at: "2026-06-25T10:04:00Z" },
   ]);
   assert(qualityReport.status === "healthy" && qualityReport.summary.completeEventTypes === 5, "Expected complete analytics event contract to pass QA");
-  const launchProofReport = analyticsProof.buildAnalyticsLaunchProofReport([
+  const launchProofEvents = [
     { id: "lp1", user_id: "demo-user", quiz_id: "quiz_footwear", event_type: "widget_view", metadata: { session_id: "proof", experience_type: "finder", experience_id: "quiz_footwear", sellentum_source: "storefront", sellentum_page_url: "https://store.example/pdp" }, created_at: "2026-06-25T10:00:00Z" },
     { id: "lp2", user_id: "demo-user", quiz_id: "quiz_footwear", event_type: "quiz_start", metadata: { session_id: "proof", experience_type: "finder", experience_id: "quiz_footwear", sellentum_source: "storefront", sellentum_page_url: "https://store.example/pdp" }, created_at: "2026-06-25T10:01:00Z" },
     { id: "lp3", user_id: "demo-user", quiz_id: "quiz_footwear", event_type: "quiz_complete", metadata: { session_id: "proof", experience_type: "finder", experience_id: "quiz_footwear", result_count: 1, sellentum_source: "storefront", sellentum_page_url: "https://store.example/pdp" }, created_at: "2026-06-25T10:02:00Z" },
     { id: "lp4", user_id: "demo-user", quiz_id: "quiz_footwear", product_id: "prod_trail", event_type: "product_recommended", metadata: { session_id: "proof", experience_type: "finder", experience_id: "quiz_footwear", rank: 1, product_name: "Terra Trail Runner", sellentum_source: "storefront", sellentum_page_url: "https://store.example/pdp" }, created_at: "2026-06-25T10:03:00Z" },
     { id: "lp5", user_id: "demo-user", quiz_id: "quiz_footwear", product_id: "prod_trail", event_type: "buy_click", metadata: { session_id: "proof", experience_type: "finder", experience_id: "quiz_footwear", product_name: "Terra Trail Runner", sellentum_source: "storefront", sellentum_page_url: "https://store.example/pdp" }, created_at: "2026-06-25T10:04:00Z" },
-  ]);
+  ];
+  const launchProofReport = analyticsProof.buildAnalyticsLaunchProofReport(launchProofEvents);
   assert(launchProofReport.status === "proven" && launchProofReport.summary.completeSessions === 1 && launchProofReport.packet.includes("Sellentum launch analytics proof"), "Expected launch analytics proof to pass with one complete storefront session");
+  const firstProofWithoutBuyClick = firstLiveProof.buildFirstLiveMerchantProof({ products: demo.demoProducts, quizzes: [demo.demoQuiz], events: launchProofEvents.filter((event) => event.event_type !== "buy_click"), settings: demo.demoSettings });
+  assert(firstProofWithoutBuyClick.lanes.find((lane) => lane.id === "analytics")?.status === "pending", "Expected first live proof to remain pending when the QA session has no buy_click event");
+  const firstProofWithBuyClick = firstLiveProof.buildFirstLiveMerchantProof({ products: demo.demoProducts, quizzes: [demo.demoQuiz], events: launchProofEvents, settings: demo.demoSettings });
+  assert(firstProofWithBuyClick.lanes.find((lane) => lane.id === "analytics")?.status === "done" && firstProofWithBuyClick.packet.includes("Sellentum first live merchant proof"), "Expected first live proof analytics lane to pass when all five events include buy_click");
   const brokenQualityReport = analyticsQuality.buildAnalyticsQualityReport([
     { id: "bad1", user_id: "demo-user", quiz_id: "quiz_footwear", event_type: "buy_click", metadata: { experience_type: "finder" }, created_at: "2026-06-25T10:00:00Z" },
   ]);

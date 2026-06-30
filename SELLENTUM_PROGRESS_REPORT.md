@@ -273,6 +273,12 @@ What still needs work:
 - improve loading states,
 - visually polish dashboard pages.
 
+Latest completed interval:
+
+- Added a **First live merchant proof** card to the dashboard.
+- Added a copyable first-proof packet.
+- Made the proof definition explicit: auth, real catalog, published finder, widget install, five analytics events and saved launch proof.
+
 Current judgment:
 
 > Powerful, but currently busier than it should be. The next phase should make it feel simple and serious.
@@ -447,6 +453,10 @@ What still needs proof:
 - storefront URL/source/campaign/placement data is captured,
 - proof packet is copied into the launch record.
 
+Latest completed interval:
+
+- Tightened launch proof logic so the first shopper journey is **not** treated as proven unless `buy_click` is captured.
+
 Current judgment:
 
 > Analytics features exist. Now we need one clean production proof session.
@@ -517,6 +527,8 @@ High-level log:
 - Built analytics dashboard.
 - Added launch analytics proof guidance.
 - Added proof-ready analytics acceptance criteria.
+- Added a dashboard-level First live merchant proof contract.
+- Tightened production proof logic so Buy Now click evidence is mandatory.
 - Added storefront install scanner.
 - Added launch handoff/checklist language.
 - Added production verification scripts.

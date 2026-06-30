@@ -2,11 +2,12 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { AlertTriangle, ArrowDownRight, ArrowRight, ArrowUpRight, BookOpenCheck, Boxes, Check, ChevronRight, CirclePlay, Clipboard, Eye, MousePointerClick, PackagePlus, Rocket, Settings, Sparkles, Wrench } from "lucide-react";
+import { AlertTriangle, ArrowDownRight, ArrowRight, ArrowUpRight, BookOpenCheck, Boxes, Check, ChevronRight, CirclePlay, Clipboard, Eye, MousePointerClick, PackagePlus, Rocket, Settings, ShieldCheck, Sparkles, Wrench } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { LoadingState } from "@/components/loading-state";
 import { buildDashboardCommandCenter } from "@/lib/dashboard-command-center";
 import { buildConversionPlaybook } from "@/lib/conversion-playbook";
+import { buildFirstLiveMerchantProof, firstLiveProofDefinition } from "@/lib/first-live-proof";
 import { buildFounderLaunchQueue } from "@/lib/founder-launch-queue";
 import { buildMerchantLaunchPlan } from "@/lib/merchant-launch-plan";
 import { buildMerchantNextAction, type MerchantNextActionPriority } from "@/lib/merchant-next-action";
@@ -55,6 +56,12 @@ const founderTaskTone = {
   pending: "border-black/[0.07] bg-white text-black/45",
 };
 
+const firstProofStatusTone = {
+  done: "border-lime/50 bg-lime/15 text-moss",
+  "needs-proof": "border-amber-200 bg-amber-50 text-amber-700",
+  pending: "border-black/[0.07] bg-white text-black/45",
+};
+
 const nextActionTone: Record<MerchantNextActionPriority, string> = {
   critical: "bg-red-50 text-red-700",
   high: "bg-amber-50 text-amber-700",
@@ -66,9 +73,11 @@ export default function DashboardOverview() {
   const { ready, products, quizzes, configurators, events, settings } = useStore();
   const [founderQueueCopied, setFounderQueueCopied] = useState(false);
   const [nextActionCopied, setNextActionCopied] = useState(false);
+  const [firstProofCopied, setFirstProofCopied] = useState(false);
   const commandCenter = useMemo(() => buildDashboardCommandCenter({ products, quizzes, configurators, events, settings }), [products, quizzes, configurators, events, settings]);
   const conversionPlaybook = useMemo(() => buildConversionPlaybook({ products, quizzes, configurators, events, settings }), [products, quizzes, configurators, events, settings]);
   const launchPlan = useMemo(() => buildMerchantLaunchPlan({ products, quizzes, events, settings }), [products, quizzes, events, settings]);
+  const firstLiveProof = useMemo(() => buildFirstLiveMerchantProof({ products, quizzes, events, settings }), [products, quizzes, events, settings]);
   const founderQueue = useMemo(() => buildFounderLaunchQueue({ products, quizzes, events, settings }), [products, quizzes, events, settings]);
   const nextAction = useMemo(() => buildMerchantNextAction({ products, quizzes, events, settings }), [products, quizzes, events, settings]);
   if (!ready) return <LoadingState />;
@@ -96,6 +105,12 @@ export default function DashboardOverview() {
     await navigator.clipboard.writeText(nextAction.packet);
     setNextActionCopied(true);
     window.setTimeout(() => setNextActionCopied(false), 1600);
+  }
+
+  async function copyFirstLiveProof() {
+    await navigator.clipboard.writeText(firstLiveProof.packet);
+    setFirstProofCopied(true);
+    window.setTimeout(() => setFirstProofCopied(false), 1600);
   }
 
   return (
@@ -177,6 +192,51 @@ export default function DashboardOverview() {
               </Link>
             ))}
           </div>
+        </div>
+      </section>
+
+      <section className="mt-6 rounded-[28px] border border-black/[0.07] bg-white p-6 shadow-sm">
+        <div className="flex items-start justify-between gap-6">
+          <div>
+            <p className="eyebrow text-moss">First live merchant proof</p>
+            <h2 className="mt-3 text-3xl font-extrabold tracking-[-.05em]">{firstLiveProof.headline}</h2>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-black/45">{firstLiveProof.summary}</p>
+          </div>
+          <button onClick={copyFirstLiveProof} className="inline-flex shrink-0 items-center gap-2 rounded-full bg-ink px-5 py-3 text-xs font-extrabold text-white"><Clipboard size={14} /> {firstProofCopied ? "Proof copied" : "Copy first proof packet"}</button>
+        </div>
+        <div className="mt-5 grid gap-3 xl:grid-cols-[0.9fr_1.1fr]">
+          <div className="rounded-2xl bg-ink p-5 text-white">
+            <div className="flex items-center justify-between gap-4">
+              <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-xs font-extrabold uppercase tracking-[.16em] text-lime"><ShieldCheck size={13} /> {firstLiveProof.status.replace("-", " ")}</span>
+              <span className="text-xs font-extrabold text-white/40">{firstLiveProof.completedCount}/{firstLiveProof.totalCount} lanes</span>
+            </div>
+            <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-lime" style={{ width: `${firstLiveProof.progressPercent}%` }} /></div>
+            <div className="mt-5 rounded-2xl bg-white/[0.06] p-4">
+              <p className="text-xs font-extrabold uppercase tracking-wider text-lime">Next proof owner</p>
+              <p className="mt-2 text-sm font-extrabold">{firstLiveProof.nextLane.owner}</p>
+              <p className="mt-1 text-xs leading-4 text-white/45">{firstLiveProof.nextLane.acceptance}</p>
+              <Link href={firstLiveProof.nextLane.href} className="mt-3 inline-flex items-center gap-2 text-xs font-extrabold text-lime">{firstLiveProof.nextLane.cta}<ArrowRight size={12} /></Link>
+            </div>
+          </div>
+          <div className="rounded-2xl bg-canvas p-5">
+            <p className="text-xs font-extrabold uppercase tracking-wider text-black/35">What counts as proven</p>
+            <div className="mt-3 grid gap-2 xl:grid-cols-2">
+              {firstLiveProofDefinition.map((item) => (
+                <p key={item} className="flex gap-2 rounded-xl bg-white px-3 py-2 text-xs font-bold leading-4 text-black/45"><Check size={12} className="mt-0.5 shrink-0 text-moss" />{item}</p>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="mt-4 grid gap-3 xl:grid-cols-7">
+          {firstLiveProof.lanes.map((lane) => (
+            <Link key={lane.id} href={lane.href} className={`rounded-2xl border p-4 transition hover:-translate-y-0.5 ${firstProofStatusTone[lane.status]}`}>
+              <div className="flex items-center justify-between gap-2">
+                <span className="rounded-full bg-white px-2 py-1 text-xs font-extrabold uppercase text-black/35">{lane.status.replace("-", " ")}</span>
+              </div>
+              <h3 className="mt-3 text-sm font-extrabold leading-5 text-ink">{lane.title}</h3>
+              <p className="mt-2 text-xs leading-4 text-black/45">{lane.evidence}</p>
+            </Link>
+          ))}
         </div>
       </section>
 

@@ -54,7 +54,7 @@ export function buildMerchantLaunchPlan({
   const recommendations = countAnalyticsEvents(events, "product_recommended");
   const buyClicks = countAnalyticsEvents(events, "buy_click");
   const widgetReady = widgetViews > 0;
-  const productionProofReady = widgetViews > 0 && completions > 0 && recommendations > 0;
+  const productionProofReady = widgetViews > 0 && completions > 0 && recommendations > 0 && buyClicks > 0;
 
   const steps = withStatuses([
     {

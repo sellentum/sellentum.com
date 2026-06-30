@@ -79,7 +79,7 @@ For the current human-readable project status, open [`SELLENTUM_PROGRESS_REPORT.
 - Copyable JavaScript widget that opens a finder, advisor, semantic search or configurator in a lazy-loaded modal iframe or direct inline iframe, with first-install guidance, published-experience safeguards, install QA checks, widget proof checklist and launch handoff packets for generated snippets
 - Public runtime guardrails with bounded JSON bodies, shared rate-limit responses and sanitized analytics metadata for embedded finder, advisor, search, configurator and event APIs
 - Analytics for sessions, journey replay, first-run proof guidance, real period-over-period trends, funnel diagnosis, views, starts, completions, recommendations, buy clicks, selected answers, search/advisor themes, matched intent signals, product demand and zero-party opportunity suggestions
-- Launch analytics proof that checks the five critical storefront events, scores session-level evidence, explains proof-ready acceptance criteria and exports a copyable QA proof packet
+- Launch analytics proof that checks the five critical storefront events, requires Buy Now click evidence for first-live proof, scores session-level evidence, explains proof-ready acceptance criteria and exports a copyable QA proof packet
 - Shopper-facing recommendation feedback on finder, advisor, search and configurator result cards, with a Feedback Center for product-quality lanes, negative themes, tuning actions and copyable feedback packets
 - Sales Content Studio that converts catalog proof, zero-party intent, product demand and recommendation feedback into grounded PDP, collection, email and support copy blocks with a copyable content packet
 - Shopper Persona Studio that turns zero-party answers, search/advisor terms, configurator choices, recommendations and buy clicks into deterministic buyer segments, product affinities and activation actions
@@ -89,7 +89,7 @@ For the current human-readable project status, open [`SELLENTUM_PROGRESS_REPORT.
 - Discovery gap analytics that detect no-result paths, thin recommendation sets, missing shopper language, low-confidence matches and stalled surfaced products
 - Real dashboard command center with period trends, live performance bars, launch score, command queue, milestones, experience mix and a persistent core launch path built from actual workspace data
 - Merchant next-best-action card that turns production blockers, first-launch setup and optimization into one plain-English owner task
-- Live launch proof queue that separates verified platform work from remaining production proof tasks such as auth email testing, real catalog upload, storefront widget proof and analytics verification
+- First live merchant proof card plus live launch proof queue that separates verified platform work from remaining production proof tasks such as auth email testing, real catalog upload, storefront widget proof, full five-event analytics verification and Buy Now click evidence
 - Conversion playbook that turns analytics quality, funnel rates, discovery gaps, catalog health and product demand into prioritized merchant actions
 - Experiment planner that turns funnel, channel, attribution and discovery signals into controlled post-launch tests with metrics, guardrails, success criteria and rollback plans
 - Commercial impact reporting that estimates assisted product value, unclicked recommendation value, demand coverage and ROI opportunities from recommendation and buy-click events

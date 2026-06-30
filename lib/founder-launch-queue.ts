@@ -140,7 +140,7 @@ export function buildFounderLaunchQueue({
       evidence: `${formatCount(completions, "completion")}, ${formatCount(recommendations, "recommendation event")}, ${formatCount(buyClicks, "buy click")}.`,
       href: "/dashboard/analytics",
       owner: "Founder + Sellentum",
-      status: widgetViews && completions && recommendations ? "done" : "pending",
+      status: widgetViews && completions && recommendations && buyClicks ? "done" : "pending",
       cta: "Verify analytics",
     },
   ];
