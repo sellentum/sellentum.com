@@ -88,6 +88,7 @@ For the current human-readable project status, open [`SELLENTUM_PROGRESS_REPORT.
 - Analytics QA that validates event-contract coverage, session linkage, required metadata, event sequence and product attribution before launch decisions
 - Discovery gap analytics that detect no-result paths, thin recommendation sets, missing shopper language, low-confidence matches and stalled surfaced products
 - Real dashboard command center with period trends, live performance bars, launch score, command queue, milestones and experience mix built from actual workspace data
+- Merchant next-best-action card that turns production blockers, first-launch setup and optimization into one plain-English owner task
 - Founder launch queue that separates Codex-shipped work from founder-side production proof tasks such as Supabase repair, auth email testing, real catalog upload, storefront widget proof and analytics verification
 - Conversion playbook that turns analytics quality, funnel rates, discovery gaps, catalog health and product demand into prioritized merchant actions
 - Experiment planner that turns funnel, channel, attribution and discovery signals into controlled post-launch tests with metrics, guardrails, success criteria and rollback plans
@@ -244,7 +245,7 @@ npm run verify:production -- --base-url=https://www.sellentum.com --probe-rate-l
 - `lib/returns-intelligence.ts` and `app/dashboard/returns` — return-prevention intelligence from fit-language gaps, product friction, compatibility rules, question guardrails and support-safe scripts
 - `lib/conversion-playbook.ts` — deterministic merchant optimization actions from funnel, catalog, QA and zero-party intent signals
 - `lib/experiments.ts` and `app/dashboard/experiments` — deterministic post-launch experiment planner for launcher copy, journey friction, result trust, semantic search, configurator and attribution tests
-- `lib/dashboard-command-center.ts` — overview-page command center combining analytics, catalog intelligence, readiness, recommendation QA and discovery gaps
+- `lib/dashboard-command-center.ts` and `lib/merchant-next-action.ts` — overview-page command center plus one plain-English next-best-action brief for the current launch owner
 - `lib/starter-kits.ts` and `app/dashboard/templates` — vertical launch templates that materialize starter catalog products, finder rules and configurator drafts into the workspace
 - `lib/insights.ts` — zero-party insight extraction for shopper answers, query themes, catalog signals, product demand and deterministic merchant opportunities
 - `lib/journey-insights.ts` — anonymous shopper journey reconstruction, drop-off detection and recent path summaries

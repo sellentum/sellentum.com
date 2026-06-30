@@ -9,6 +9,7 @@ import { buildDashboardCommandCenter } from "@/lib/dashboard-command-center";
 import { buildConversionPlaybook } from "@/lib/conversion-playbook";
 import { buildFounderLaunchQueue } from "@/lib/founder-launch-queue";
 import { buildMerchantLaunchPlan } from "@/lib/merchant-launch-plan";
+import { buildMerchantNextAction, type MerchantNextActionPriority } from "@/lib/merchant-next-action";
 
 const operationsMap = [
   { group: "Shopper intelligence", label: "Persona Studio", href: "/dashboard/personas" },
@@ -54,13 +55,22 @@ const founderTaskTone = {
   pending: "border-black/[0.07] bg-white text-black/45",
 };
 
+const nextActionTone: Record<MerchantNextActionPriority, string> = {
+  critical: "bg-red-50 text-red-700",
+  high: "bg-amber-50 text-amber-700",
+  medium: "bg-lime/35 text-moss",
+  complete: "bg-lime text-moss",
+};
+
 export default function DashboardOverview() {
   const { ready, products, quizzes, configurators, events, settings } = useStore();
   const [founderQueueCopied, setFounderQueueCopied] = useState(false);
+  const [nextActionCopied, setNextActionCopied] = useState(false);
   const commandCenter = useMemo(() => buildDashboardCommandCenter({ products, quizzes, configurators, events, settings }), [products, quizzes, configurators, events, settings]);
   const conversionPlaybook = useMemo(() => buildConversionPlaybook({ products, quizzes, configurators, events, settings }), [products, quizzes, configurators, events, settings]);
   const launchPlan = useMemo(() => buildMerchantLaunchPlan({ products, quizzes, events, settings }), [products, quizzes, events, settings]);
   const founderQueue = useMemo(() => buildFounderLaunchQueue({ products, quizzes, events, settings }), [products, quizzes, events, settings]);
+  const nextAction = useMemo(() => buildMerchantNextAction({ products, quizzes, events, settings }), [products, quizzes, events, settings]);
   if (!ready) return <LoadingState />;
   const { snapshot, trends } = commandCenter;
   const views = snapshot.widget_view;
@@ -82,6 +92,12 @@ export default function DashboardOverview() {
     window.setTimeout(() => setFounderQueueCopied(false), 1600);
   }
 
+  async function copyNextAction() {
+    await navigator.clipboard.writeText(nextAction.packet);
+    setNextActionCopied(true);
+    window.setTimeout(() => setNextActionCopied(false), 1600);
+  }
+
   return (
     <div className="animate-rise">
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
@@ -93,6 +109,45 @@ export default function DashboardOverview() {
           <Link href="/dashboard/launch" className="btn-primary self-start"><Rocket size={15} className="text-lime" /> Launch checklist</Link>
         </div>
       </div>
+
+      <section className="mt-8 rounded-[28px] border border-black/[0.07] bg-white p-6 shadow-sm">
+        <div className="grid gap-6 xl:grid-cols-[1fr_1.15fr] xl:items-center">
+          <div>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="eyebrow text-moss">Today&apos;s next best action</span>
+              <span className={`rounded-full px-3 py-1.5 text-xs font-extrabold uppercase ${nextActionTone[nextAction.priority]}`}>{nextAction.priority}</span>
+              <span className="rounded-full bg-black/[0.04] px-3 py-1.5 text-xs font-extrabold uppercase text-black/35">{nextAction.owner}</span>
+            </div>
+            <h2 className="mt-4 text-3xl font-extrabold tracking-[-.05em] text-ink">{nextAction.title}</h2>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-black/50">{nextAction.detail}</p>
+            <div className="mt-5 flex flex-wrap gap-2">
+              <Link href={nextAction.href} className="inline-flex items-center gap-2 rounded-full bg-ink px-5 py-3 text-xs font-extrabold text-white">{nextAction.cta}<ArrowRight size={13} /></Link>
+              <button onClick={copyNextAction} className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-canvas px-5 py-3 text-xs font-extrabold text-ink"><Clipboard size={14} /> {nextActionCopied ? "Brief copied" : "Copy next-action brief"}</button>
+            </div>
+          </div>
+          <div className="grid gap-3 xl:grid-cols-3">
+            <div className="rounded-2xl bg-canvas p-4">
+              <p className="text-xs font-extrabold uppercase tracking-wider text-black/30">Why now</p>
+              <p className="mt-3 text-xs font-bold leading-5 text-black/50">{nextAction.why}</p>
+            </div>
+            <div className="rounded-2xl bg-canvas p-4">
+              <p className="text-xs font-extrabold uppercase tracking-wider text-black/30">Proof needed</p>
+              <p className="mt-3 text-xs font-bold leading-5 text-black/50">{nextAction.proof}</p>
+            </div>
+            <div className="rounded-2xl bg-ink p-4 text-white">
+              <p className="text-xs font-extrabold uppercase tracking-wider text-lime">Support actions</p>
+              <div className="mt-3 space-y-2">
+                {nextAction.supportActions.map((item) => (
+                  <Link key={item.href} href={item.href} className="block rounded-xl bg-white/[0.07] px-3 py-2 text-xs font-bold leading-4 text-white/60 hover:bg-white/[0.1]">
+                    <span className="block text-white">{item.title}</span>
+                    <span className="mt-0.5 block text-white/35">{item.cta}</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <section className="mt-8 overflow-hidden rounded-[28px] border border-black/[0.07] bg-ink text-white shadow-sm">
         <div className="grid xl:grid-cols-[0.85fr_1.15fr]">

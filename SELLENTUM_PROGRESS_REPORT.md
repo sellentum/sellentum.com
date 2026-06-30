@@ -228,15 +228,17 @@ What we completed:
 - Analytics area.
 - Production verification area.
 - Founder launch queue.
+- Today's next best action card.
+- Copyable next-action owner brief.
 - Removed temporary MVP audit section.
 
 Still left:
 
-- Make the dashboard less technical.
+- Keep reducing technical language across deeper dashboard modules.
 - Improve empty states.
 - Improve loading states.
 - Improve error messages.
-- Make next steps clearer for a normal business owner.
+- Continue making next steps clearer for a normal business owner.
 
 ---
 
@@ -605,6 +607,7 @@ This is the plain-English log of work completed so far:
 - Helped configure branded Supabase email/SMTP direction.
 - Removed temporary MVP audit dashboard section.
 - Added founder-side launch queue.
+- Added a plain-English next best action card on the dashboard.
 - Added real-catalog intake guidance.
 - Added storefront widget proof workflow.
 - Added Supabase repair guidance.
