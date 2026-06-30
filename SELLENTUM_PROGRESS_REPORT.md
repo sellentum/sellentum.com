@@ -8,7 +8,7 @@ GitHub repo: **https://github.com/sellentum/sellentum.com.git**
 
 Branch: **main**
 
-Latest product-code interval: **Real catalog intake contract**
+Latest product-code interval: **Storefront proof handoff**
 
 ---
 
@@ -199,11 +199,19 @@ Still needed: check explanation quality, speed and cost with real products.
 
 ### Stage 11 — Embeddable widget
 
-**Status: Built, needs real storefront proof**
+**Status: Built, storefront proof handoff added**
 
 Built the JavaScript widget, modal mode, inline iframe mode and public loader at `/api/widget.js`.
 
 Also added `/storefront-demo` so we can test the real widget script on a simulated ecommerce page.
+
+Latest Codex-side progress:
+
+- Added a reusable storefront proof helper.
+- Added a Storefront Install Scanner proof handoff section.
+- Added a copyable proof packet for staging/real storefront testing.
+- Added the launch-critical analytics event checklist: widget view, quiz start, completion, recommendation and Buy Now click.
+- Added smoke-test coverage so the widget proof path remains visible.
 
 Still needed: install and test on a real or staging storefront page.
 

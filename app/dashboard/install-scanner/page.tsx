@@ -5,6 +5,7 @@ import Link from "next/link";
 import { AlertTriangle, CheckCircle2, Clipboard, Code2, ExternalLink, Globe2, LoaderCircle, LockKeyhole, MonitorCheck, MousePointerClick, Search, ShieldCheck, Wrench } from "lucide-react";
 import { LoadingState } from "@/components/loading-state";
 import type { StorefrontInstallScanReport, StorefrontInstallScanStatus, StorefrontInstallCheckStatus } from "@/lib/storefront-install-scanner";
+import { buildStorefrontProofPacket, storefrontProofEvents, storefrontProofSteps } from "@/lib/storefront-proof";
 import { useStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
@@ -35,6 +36,7 @@ export default function InstallScannerPage() {
   const [error, setError] = useState("");
   const [scanning, setScanning] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [proofCopied, setProofCopied] = useState(false);
   const publishedFinder = useMemo(() => quizzes.find((quiz) => quiz.published) || quizzes[0], [quizzes]);
   const publishedConfigurator = useMemo(() => configurators.find((configurator) => configurator.published) || configurators[0], [configurators]);
 
@@ -69,6 +71,16 @@ export default function InstallScannerPage() {
     window.setTimeout(() => setCopied(false), 1600);
   }
 
+  async function copyProofPacket() {
+    await navigator.clipboard.writeText(buildStorefrontProofPacket({
+      storefrontUrl: url,
+      appOrigin,
+      experienceId: publishedFinder?.id || publishedConfigurator?.id,
+    }));
+    setProofCopied(true);
+    window.setTimeout(() => setProofCopied(false), 1600);
+  }
+
   if (!ready) return <LoadingState label="Preparing storefront install scanner…" />;
 
   return (
@@ -82,6 +94,7 @@ export default function InstallScannerPage() {
             <div className="mt-6 flex flex-wrap gap-3">
               <Link href="/dashboard/widget-studio" className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-5 py-3 text-sm font-extrabold text-white hover:bg-white/15"><Code2 size={14} /> Widget Studio</Link>
               <Link href="/dashboard/storefront-sandbox" className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-5 py-3 text-sm font-extrabold text-white hover:bg-white/15"><MonitorCheck size={14} /> QA Sandbox</Link>
+              <button onClick={copyProofPacket} className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-5 py-3 text-sm font-extrabold text-white hover:bg-white/15"><Clipboard size={14} /> {proofCopied ? "Proof copied" : "Copy proof packet"}</button>
               {report && <button onClick={copyPacket} className="inline-flex items-center gap-2 rounded-full bg-lime px-5 py-3 text-sm font-extrabold text-ink"><Clipboard size={14} /> {copied ? "Scan copied" : "Copy scan packet"}</button>}
             </div>
           </div>
@@ -148,6 +161,40 @@ export default function InstallScannerPage() {
           )}
         </section>
       </div>
+
+      <section className="mt-6 rounded-[28px] border border-black/[0.07] bg-white p-6">
+        <div className="flex items-start justify-between gap-6">
+          <div>
+            <h2 className="text-sm font-extrabold">Storefront proof handoff</h2>
+            <p className="mt-1 max-w-3xl text-sm leading-6 text-black/45">Use this checklist to prove the widget on a real or staging storefront after the script scan passes. It captures the exact evidence needed before Sellentum can call the embed production-proven.</p>
+          </div>
+          <button onClick={copyProofPacket} className="inline-flex shrink-0 items-center gap-2 rounded-full bg-ink px-5 py-3 text-xs font-extrabold text-white"><Clipboard size={14} /> {proofCopied ? "Proof copied" : "Copy proof packet"}</button>
+        </div>
+        <div className="mt-5 grid gap-3 xl:grid-cols-5">
+          {storefrontProofSteps.map((step, index) => (
+            <article key={step.id} className="rounded-2xl border border-black/[0.07] bg-canvas p-4">
+              <div className="flex items-center justify-between gap-3">
+                <span className="grid h-8 w-8 place-items-center rounded-xl bg-lime text-xs font-extrabold text-ink">{index + 1}</span>
+                <span className="rounded-full bg-white px-2 py-1 text-xs font-extrabold uppercase text-black/35">{step.owner}</span>
+              </div>
+              <h3 className="mt-4 text-sm font-extrabold leading-5">{step.label}</h3>
+              <p className="mt-2 text-xs leading-4 text-black/45">{step.detail}</p>
+              <p className="mt-3 rounded-xl bg-white px-3 py-2 text-xs font-bold leading-4 text-black/35">{step.evidence}</p>
+            </article>
+          ))}
+        </div>
+        <div className="mt-5 rounded-2xl bg-ink p-5 text-white">
+          <h3 className="text-sm font-extrabold">Launch-critical analytics events</h3>
+          <div className="mt-4 grid gap-2 xl:grid-cols-5">
+            {storefrontProofEvents.map((event) => (
+              <div key={event.event} className="rounded-2xl bg-white/[0.06] p-3">
+                <code className="text-xs font-extrabold text-lime">{event.event}</code>
+                <p className="mt-2 text-xs leading-4 text-white/40">{event.proof}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {report && (
         <div className="mt-6 grid gap-6 xl:grid-cols-[.85fr_1.15fr]">

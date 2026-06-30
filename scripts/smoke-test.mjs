@@ -850,6 +850,7 @@ function assertStorefrontSandboxWorkflow() {
 function assertStorefrontInstallScannerWorkflow() {
   const page = readFileSync("app/dashboard/install-scanner/page.tsx", "utf8");
   const helper = readFileSync("lib/storefront-install-scanner.ts", "utf8");
+  const proof = readFileSync("lib/storefront-proof.ts", "utf8");
   const route = readFileSync("app/api/storefront/scan/route.ts", "utf8");
   const shell = readFileSync("components/dashboard-shell.tsx", "utf8");
   const overview = readFileSync("app/dashboard/page.tsx", "utf8");
@@ -859,12 +860,16 @@ function assertStorefrontInstallScannerWorkflow() {
   assert(helper.includes("validateStorefrontScanUrl"), "Storefront Install Scanner should validate scan URLs");
   assert(helper.includes("Sellentum storefront install scan"), "Storefront Install Scanner should generate a copyable scan packet");
   assert(helper.includes("Private, localhost and internal network URLs cannot be scanned"), "Storefront Install Scanner should block private/local scan targets");
+  assert(proof.includes("buildStorefrontProofPacket"), "Storefront proof helper should generate a copyable proof packet");
+  assert(proof.includes("widget_view") && proof.includes("quiz_complete") && proof.includes("buy_click"), "Storefront proof helper should track launch-critical analytics events");
   assert(route.includes("getWorkspaceIdentity"), "Storefront scan API should require authentication");
   assert(route.includes("MAX_HTML_BYTES") && route.includes("TIMEOUT_MS"), "Storefront scan API should bound HTML fetch size and timeout");
   assert(page.includes("Storefront Install Scanner"), "Install Scanner page should expose the dashboard title");
   assert(page.includes("Scan storefront install"), "Install Scanner page should scan storefront URLs");
   assert(page.includes("Detected snippets"), "Install Scanner page should show detected snippets");
   assert(page.includes("Recommended next tasks"), "Install Scanner page should show next tasks");
+  assert(page.includes("Storefront proof handoff") && page.includes("Copy proof packet"), "Install Scanner page should expose a copyable storefront proof handoff");
+  assert(page.includes("Launch-critical analytics events"), "Install Scanner page should show the required widget analytics proof events");
   assert(shell.includes("/dashboard/install-scanner"), "Dashboard navigation should expose Install Scanner");
   assert(overview.includes("/dashboard/install-scanner"), "Dashboard overview should expose Install Scanner");
   assert(readme.includes("Storefront Install Scanner"), "README should document Storefront Install Scanner");

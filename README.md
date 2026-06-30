@@ -33,7 +33,7 @@ For the current human-readable project status, open [`SELLENTUM_PROGRESS_REPORT.
 - Partner Syndication board that packages retailer, marketplace, affiliate, support and sales-partner widget snippets with syndication attribution, QA checks and data-policy handoff notes
 - Storefront QA sandbox that previews each channel in a controlled desktop storefront, lists expected telemetry events and exports a copyable QA packet before theme installation
 - Public storefront widget demo page that loads the real `/api/widget.js` contract on a simulated ecommerce page before a live theme install
-- Storefront Install Scanner that fetches a staging/production page, verifies the Sellentum widget script and data attributes, checks attribution labels and exports a copyable install scan packet
+- Storefront Install Scanner that fetches a staging/production page, verifies the Sellentum widget script and data attributes, checks attribution labels, exposes a storefront proof handoff checklist and exports copyable scan/proof packets
 - Runtime Operations Center that monitors public endpoint contracts, guardrails, analytics quality, release gates and telemetry proof
 - Release Center that rolls catalog, experience, channel, sandbox, analytics and optimization gates into a go/no-go release candidate with rollback notes
 - Production Verification Center that packages Vercel deployment gates, Supabase/demo mode evidence, required route/API contracts, desktop QA scenarios, final verification commands and copyable production handoff packets
@@ -299,7 +299,7 @@ npm run verify:production -- --base-url=https://sellentum.com --probe-rate-limit
 - `lib/usage-metering.ts` and `app/dashboard/usage` — Stripe-placeholder usage and plan-fit center for sessions, interactions, catalog scale, experiences and AI-assist credits
 - `lib/launch-packet.ts` — copyable developer handoff text for preview URLs, embed snippets, QA checks and analytics contracts
 - `lib/launch-contract.ts` — deterministic launch contract for runtime endpoints, widget attributes, analytics payloads and troubleshooting
-- `lib/storefront-qa-runbook.ts` — deterministic manual QA script for storefront install, analytics proof, recovery testing and rollback
+- `lib/storefront-qa-runbook.ts` and `lib/storefront-proof.ts` — deterministic manual QA scripts for storefront install, analytics proof, recovery testing, rollback and founder/developer proof handoff
 - `lib/rule-coverage.ts` — deterministic answer-rule coverage helper used by the finder builder and readiness checks
 - `lib/quiz-readiness.ts` — publish-readiness diagnostics for finder structure, catalog mapping and rule quality
 - `lib/configurator-blueprint.ts` — deterministic configurator blueprint generation from active products, shopper signals, benefits and compatibility inference
