@@ -278,6 +278,7 @@ What was completed:
 - CSV importer supports flexible column names.
 - CSV validation exists.
 - First-catalog launch kit exists.
+- Latest completed interval: the empty Products page now shows a **First catalog proof path** with import/template/manual-entry actions and proof-ready catalog acceptance criteria.
 
 What still needs to be proven:
 
@@ -493,7 +494,7 @@ Meaning:
 1. Simplify onboarding.
 2. Improve dashboard empty states.
 3. Improve finder preview.
-4. Improve CSV import guidance.
+4. Continue improving CSV import guidance.
 5. Improve analytics explanations.
 6. Add better production monitoring.
 7. Add proper support/contact flows.

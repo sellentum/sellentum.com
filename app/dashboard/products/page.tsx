@@ -14,6 +14,19 @@ import { formatCurrency, uniqueValues } from "@/lib/utils";
 
 const blankProduct: ProductInput = { name: "", price: 0, image_url: "", category: "", description: "", features: [], tags: [], buyer_needs: [], search_text: "", product_url: "", active: true };
 
+const firstCatalogProofSteps = [
+  { title: "Import your real catalog", detail: "Use the CSV template when you already have products in Shopify, WooCommerce, a supplier sheet or a spreadsheet export." },
+  { title: "Add missing product facts", detail: "Every launch-candidate product should have a clear description, image URL, product URL and at least one shopper-friendly matching signal." },
+  { title: "Prove readiness before the finder", detail: "Once products are imported, use the catalog intelligence score and AI enrichment before generating the first product finder." },
+];
+
+const proofReadyCatalogChecks = [
+  "At least 2 active products; 8–20 is better for the first serious finder.",
+  "Product URLs are present so Buy Now clicks can be proven.",
+  "Tags, features or buyer_needs describe why each product fits a shopper.",
+  "Images use public URLs so embedded recommendation cards render outside the dashboard.",
+];
+
 function ProductForm({ product, onClose }: { product?: Product; onClose: () => void }) {
   const { saveProduct } = useStore();
   const [form, setForm] = useState<ProductInput>(product ? {
@@ -182,7 +195,7 @@ export default function ProductsPage() {
           <div className="mt-5 flex flex-wrap gap-2">
             <button onClick={() => setImportOpen(true)} className="inline-flex items-center gap-2 rounded-full bg-ink px-5 py-3 text-xs font-extrabold text-white"><Upload size={14} /> Import real catalog</button>
             <a href={`data:text/csv;charset=utf-8,${encodeURIComponent(catalogTemplate)}`} download="sellentum-real-catalog-template.csv" className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-xs font-extrabold text-ink"><Download size={14} /> Download template</a>
-            <button onClick={copyCatalogPacket} className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-xs font-extrabold text-ink"><Clipboard size={14} /> {catalogPacketCopied ? "Brief copied" : "Copy supplier brief"}</button>
+            <button onClick={copyCatalogPacket} className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-xs font-extrabold text-ink"><Clipboard size={14} /> {catalogPacketCopied ? "Brief copied" : "Copy catalog prep brief"}</button>
           </div>
         </div>
         <div className="grid gap-3 p-5 xl:grid-cols-3">
@@ -222,7 +235,37 @@ export default function ProductsPage() {
         </div>
       </div>
     </section>
-    <div className="mt-8 rounded-2xl border border-black/[0.07] bg-white">
+    {!products.length && <section className="mt-8 overflow-hidden rounded-[28px] border border-black/[0.07] bg-white shadow-sm">
+      <div className="grid xl:grid-cols-[0.9fr_1.1fr]">
+        <div className="bg-canvas p-8">
+          <span className="grid h-14 w-14 place-items-center rounded-2xl bg-white text-moss shadow-sm"><Boxes size={22} /></span>
+          <p className="eyebrow mt-6 text-moss">First catalog proof path</p>
+          <h3 className="mt-3 max-w-lg text-4xl font-extrabold tracking-[-.06em] text-ink">Your catalog is the next real production proof.</h3>
+          <p className="mt-4 max-w-xl text-sm leading-6 text-black/50">Before a finder can recommend products seriously, Sellentum needs real live products with clean commerce links and shopper-friendly matching signals.</p>
+          <div className="mt-6 flex flex-wrap gap-2">
+            <button onClick={() => setImportOpen(true)} className="btn-primary !px-5 !py-3"><Upload size={15} /> Import CSV first</button>
+            <a href={`data:text/csv;charset=utf-8,${encodeURIComponent(catalogTemplate)}`} download="sellentum-real-catalog-template.csv" className="btn-secondary !px-5 !py-3"><Download size={15} /> Download template</a>
+            <button onClick={() => setEditing(null)} className="btn-secondary !px-5 !py-3"><Plus size={15} /> Add manually</button>
+          </div>
+        </div>
+        <div className="p-6">
+          <div className="grid gap-3 xl:grid-cols-3">
+            {firstCatalogProofSteps.map((step, index) => <article key={step.title} className="rounded-2xl border border-black/[0.06] bg-white p-4">
+              <span className="grid h-8 w-8 place-items-center rounded-xl bg-lime text-xs font-extrabold text-ink">{index + 1}</span>
+              <p className="mt-4 text-sm font-extrabold text-ink">{step.title}</p>
+              <p className="mt-2 text-xs font-bold leading-5 text-black/45">{step.detail}</p>
+            </article>)}
+          </div>
+          <div className="mt-5 rounded-2xl border border-black/[0.06] bg-[#f8f8f4] p-5">
+            <p className="text-sm font-extrabold text-ink">Proof-ready catalog means</p>
+            <div className="mt-4 grid gap-2 xl:grid-cols-2">
+              {proofReadyCatalogChecks.map((item) => <p key={item} className="flex gap-2 text-xs font-bold leading-5 text-black/50"><Check size={13} className="mt-1 shrink-0 text-moss" />{item}</p>)}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>}
+    <div className={`mt-8 rounded-2xl border border-black/[0.07] bg-white ${!products.length ? "hidden" : ""}`}>
       <div className="flex flex-col gap-3 border-b border-black/[0.07] p-4 sm:flex-row sm:items-center sm:justify-between"><div className="relative w-full sm:max-w-sm"><Search className="absolute left-3 top-1/2 -translate-y-1/2 text-black/30" size={15} /><input className="field !py-2.5 pl-9" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search products…" /></div><div className="relative"><select value={category} onChange={(e) => setCategory(e.target.value)} className="appearance-none rounded-xl border border-black/10 bg-white py-2.5 pl-3 pr-9 text-xs font-bold"><option>All categories</option>{categories.map((item) => <option key={item}>{item}</option>)}</select><ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-black/30" size={13} /></div></div>
       {filtered.length ? <div className="overflow-x-auto"><table className="w-full min-w-[760px] text-left"><thead><tr className="border-b border-black/[0.06] text-xs font-extrabold uppercase tracking-wider text-black/30"><th className="px-5 py-3">Product</th><th className="px-4 py-3">Category</th><th className="px-4 py-3">Price</th><th className="px-4 py-3">Match data</th><th className="px-4 py-3">Status</th><th className="px-5 py-3 text-right">Actions</th></tr></thead><tbody>{filtered.map((product) => <tr key={product.id} className="border-b border-black/[0.05] last:border-0 hover:bg-canvas/50"><td className="px-5 py-3.5"><div className="flex items-center gap-3"><div className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-xl bg-[#eef0eb]">{product.image_url ? <img src={product.image_url} alt="" className="h-full w-full object-cover" /> : <ImageIcon size={16} className="text-black/25" />}</div><div className="min-w-0"><p className="max-w-[220px] truncate text-xs font-extrabold">{product.name}</p><p className="mt-1 max-w-[220px] truncate text-xs text-black/35">{product.description || "No description"}</p></div></div></td><td className="px-4 py-3.5 text-xs font-semibold text-black/55">{product.category}</td><td className="px-4 py-3.5 text-xs font-extrabold">{formatCurrency(product.price)}</td><td className="px-4 py-3.5"><div className="flex max-w-[190px] flex-wrap gap-1">{[...(product.buyer_needs || []), ...product.tags, ...product.features].slice(0, 2).map((tag) => <span key={tag} className="rounded-md bg-black/[0.05] px-1.5 py-1 text-xs font-bold text-black/45">{tag}</span>)}{(product.buyer_needs || []).length + product.tags.length + product.features.length > 2 && <span className="rounded-md bg-black/[0.05] px-1.5 py-1 text-xs font-bold text-black/35">+{(product.buyer_needs || []).length + product.tags.length + product.features.length - 2}</span>}</div></td><td className="px-4 py-3.5"><div className="flex flex-col items-start gap-1"><span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-xs font-extrabold ${product.active ? "bg-lime/35 text-moss" : "bg-black/5 text-black/35"}`}><i className={`h-1.5 w-1.5 rounded-full ${product.active ? "bg-moss" : "bg-black/30"}`} />{product.active ? "Active" : "Inactive"}</span>{product.enrichment_status === "enriched" && <span className="inline-flex items-center gap-1 text-xs font-extrabold text-moss"><Sparkles size={9} /> AI-ready</span>}</div></td><td className="relative px-5 py-3.5 text-right"><button onClick={() => setMenu(menu === product.id ? null : product.id)} className="grid h-8 w-8 place-items-center rounded-lg hover:bg-black/5"><MoreHorizontal size={16} /></button>{menu === product.id && <div className="absolute right-6 top-11 z-20 w-36 rounded-xl border border-black/10 bg-white p-1.5 text-left shadow-xl"><button onClick={() => { setEditing(product); setMenu(null); }} className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-xs font-bold hover:bg-canvas"><Pencil size={13} /> Edit</button><button onClick={async () => { if (confirm(`Delete ${product.name}?`)) await deleteProduct(product.id); setMenu(null); }} className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-xs font-bold text-red-600 hover:bg-red-50"><Trash2 size={13} /> Delete</button></div>}</td></tr>)}</tbody></table></div> : <div className="px-5 py-20 text-center"><span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-canvas text-black/25"><Boxes size={22} /></span><h3 className="mt-4 text-sm font-extrabold">{products.length ? "No matching products" : "Your catalog is waiting"}</h3><p className="mx-auto mt-2 max-w-sm text-xs leading-5 text-black/35">{products.length ? "Try another search or category." : "Add a product manually or import your existing catalog from a CSV file."}</p>{!products.length && <button onClick={() => setEditing(null)} className="btn-primary mt-5 !px-4 !py-2.5"><Plus size={15} /> Add first product</button>}</div>}
       <div className="flex items-center justify-between border-t border-black/[0.06] px-5 py-3 text-xs font-bold text-black/35"><span>Showing {filtered.length} of {products.length} products</span><span>{products.filter((p) => p.active).length} recommendation-ready</span></div>
