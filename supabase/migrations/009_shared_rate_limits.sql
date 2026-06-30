@@ -69,4 +69,6 @@ end;
 $$;
 
 revoke all on function public.check_rate_limit(text, integer, integer) from public;
+revoke all on function public.check_rate_limit(text, integer, integer) from anon;
+revoke all on function public.check_rate_limit(text, integer, integer) from authenticated;
 grant execute on function public.check_rate_limit(text, integer, integer) to service_role;

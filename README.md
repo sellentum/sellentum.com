@@ -151,7 +151,7 @@ supabase/migrations/008_widget_allowed_domains.sql
 supabase/migrations/009_shared_rate_limits.sql
 ```
 
-For production verification, follow the next-step checklist in [`SELLENTUM_PROGRESS_REPORT.md`](./SELLENTUM_PROGRESS_REPORT.md). The SQL files are [`supabase/verification/production_schema_check.sql`](./supabase/verification/production_schema_check.sql) and [`supabase/verification/rate_limit_runtime_probe.sql`](./supabase/verification/rate_limit_runtime_probe.sql).
+For production verification, follow the next-step checklist in [`SELLENTUM_PROGRESS_REPORT.md`](./SELLENTUM_PROGRESS_REPORT.md). The main SQL files are [`supabase/verification/production_schema_check.sql`](./supabase/verification/production_schema_check.sql), [`supabase/verification/production_repair_widget_rate_limits.sql`](./supabase/verification/production_repair_widget_rate_limits.sql), and [`supabase/verification/rate_limit_runtime_probe.sql`](./supabase/verification/rate_limit_runtime_probe.sql).
 
 ## Enable OpenAI explanations
 
@@ -211,13 +211,21 @@ After Vercel deploys and Supabase migrations are applied, run:
 npm run verify:production -- --base-url=https://www.sellentum.com
 ```
 
-The command checks required environment variables, public production routes, the widget loader and Supabase table/column reachability through the service-role key without printing secrets. It does not replace the authoritative SQL/RLS verification in Supabase. Run [`supabase/verification/production_schema_check.sql`](./supabase/verification/production_schema_check.sql) in the Supabase SQL editor and confirm every row returns `pass`.
+The command checks required environment variables, public production routes, the widget loader and Supabase table/column reachability through the service-role key without printing secrets.
 
-If production verification reports `widget_settings.allowed_domains` or `rate_limit_buckets` as missing, run the focused repair pack in the Supabase SQL editor:
+To apply the focused production repair pack from a local machine with `SUPABASE_DB_URL` or `DATABASE_URL` in `.env.local`, run:
 
-```sql
-supabase/verification/production_repair_widget_rate_limits.sql
+```bash
+npm run repair:supabase -- --yes
 ```
+
+Then run the authoritative schema/RLS verification:
+
+```bash
+npm run verify:supabase-schema
+```
+
+The HTTP production verifier cannot prove exact RLS policies or function grants by itself. `npm run verify:supabase-schema` runs [`supabase/verification/production_schema_check.sql`](./supabase/verification/production_schema_check.sql) directly against the database and should return all checks as `pass`.
 
 Then rerun `npm run verify:production -- --base-url=https://www.sellentum.com`.
 
