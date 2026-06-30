@@ -8,7 +8,7 @@ GitHub repo: **https://github.com/sellentum/sellentum.com.git**
 
 Branch: **main**
 
-Latest product-code milestone before this interval: **85f4119 — Add production Supabase repair pack**
+Latest product-code interval: **fd91228 — Surface Supabase repair guidance**
 
 ---
 
@@ -215,6 +215,14 @@ Latest Codex-side progress:
 - Added copyable repair steps inside the Production Verification Center.
 - Added the repair and schema/RLS SQL files to the copyable production verification packet.
 - Added smoke-test coverage so this repair guidance stays visible in future changes.
+
+Latest live production verifier result:
+
+- Command run: `npm run verify:production -- --base-url=https://sellentum.com`
+- Result: **27 pass, 2 warn, 2 fail**
+- Passing: environment variables, public routes, widget loader and most Supabase tables.
+- Failing: `rate_limit_buckets` table is missing and `widget_settings.allowed_domains` column is missing.
+- Next required action: run `supabase/verification/production_repair_widget_rate_limits.sql` in Supabase.
 
 ---
 
