@@ -309,6 +309,7 @@ What was completed:
 - Save and edit finder flows.
 - Publish-ready checks were added.
 - Builder and launch tools were expanded.
+- Latest completed interval: the Product Finders page now shows a **First finder proof path** and **Proof-ready finder** criteria before merchants publish or embed their first guided-selling flow.
 
 What still needs improvement:
 

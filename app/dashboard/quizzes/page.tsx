@@ -15,6 +15,19 @@ const typeLabels: Record<MatchType, string> = { tag: "Product tag", category: "C
 const overrideLabels: Record<RecommendationOverride["action"], string> = { boost: "Boost", pin: "Pin to top", exclude: "Exclude" };
 const overrideIcons: Record<RecommendationOverride["action"], LucideIcon> = { boost: TrendingUp, pin: Pin, exclude: Ban };
 
+const firstFinderProofSteps = [
+  { title: "Draft from real catalog signals", detail: "Use Generate with AI after products have categories, tags, features or buyer_needs. The draft stays editable and rule-backed." },
+  { title: "Check answer coverage", detail: "Every important answer should reach at least one active product or be intentionally preference-only." },
+  { title: "Publish, preview, then embed", detail: "Only publish once readiness passes; preview the shopper flow, then use Launch Studio for the storefront snippet." },
+];
+
+const proofReadyFinderChecks = [
+  "2–4 questions with shopper-friendly wording.",
+  "Each answer has a deterministic tag, category, feature or budget rule.",
+  "Recommendation lab returns 1–3 sensible products for likely answer paths.",
+  "Published finder has a stable ID ready for the widget snippet.",
+];
+
 function RuleCoverageRow({ label, coverage }: { label: string; coverage?: AnswerOptionRuleCoverage }) {
   if (!coverage) return null;
   const tone = coverage.status === "matched" ? "bg-lime/25 text-moss" : coverage.status === "preference" ? "bg-blue-50 text-blue-700" : "bg-amber-50 text-amber-700";
@@ -241,6 +254,26 @@ export default function QuizzesPage() {
               </div>
             </article>
           ))}
+        </div>
+      </div>
+      <div className="border-t border-black/[0.07] bg-white p-5">
+        <div className="grid gap-5 xl:grid-cols-[1fr_.9fr]">
+          <div>
+            <p className="text-xs font-extrabold uppercase tracking-[.18em] text-black/35">First finder proof path</p>
+            <div className="mt-4 grid gap-3 xl:grid-cols-3">
+              {firstFinderProofSteps.map((step, index) => <article key={step.title} className="rounded-2xl border border-black/[0.06] bg-[#f8f8f4] p-4">
+                <span className="grid h-8 w-8 place-items-center rounded-xl bg-lime text-xs font-extrabold text-ink">{index + 1}</span>
+                <p className="mt-4 text-sm font-extrabold text-ink">{step.title}</p>
+                <p className="mt-2 text-xs font-bold leading-5 text-black/45">{step.detail}</p>
+              </article>)}
+            </div>
+          </div>
+          <div className="rounded-2xl border border-black/[0.06] bg-[#f8f8f4] p-5">
+            <p className="text-sm font-extrabold text-ink">Proof-ready finder means</p>
+            <div className="mt-4 space-y-2">
+              {proofReadyFinderChecks.map((item) => <p key={item} className="flex gap-2 text-xs font-bold leading-5 text-black/50"><Check size={13} className="mt-1 shrink-0 text-moss" />{item}</p>)}
+            </div>
+          </div>
         </div>
       </div>
       <div className="border-t border-black/[0.07] bg-[#f8f8f4] p-5">

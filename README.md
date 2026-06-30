@@ -43,7 +43,7 @@ For the current human-readable project status, open [`SELLENTUM_PROGRESS_REPORT.
 - Copyable launch contract with runtime endpoints, widget data attributes, analytics payload requirements, QA checks and troubleshooting guidance for storefront handoff
 - Storefront QA runbook for staging install, shopper-journey proof, telemetry verification, recovery-path testing and rollback planning
 - Ontology-guided finder generation that uses category clusters, repeated buyer needs and product features before falling back to OpenAI copy
-- Visual finder builder with questions, answer options, optional conditional branching, weights, tag/category/feature/budget rules, per-answer catalog coverage, a visible first-finder launch kit, a copyable first-finder brief and publish-readiness diagnostics
+- Visual finder builder with questions, answer options, optional conditional branching, weights, tag/category/feature/budget rules, per-answer catalog coverage, a visible first-finder launch kit, first-finder proof path, copyable first-finder brief and publish-readiness diagnostics
 - Flow Studio workbench that turns finder questions, answer routes, branch skips and deterministic route QA into a visual no-code canvas
 - Finder merchandising controls to pin, boost or exclude specific products without handing selection to AI
 - One-click product finder generation from the current catalog

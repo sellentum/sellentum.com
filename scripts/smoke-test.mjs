@@ -1333,13 +1333,14 @@ function assertQuizReadinessWorkflow() {
   const launchKit = readFileSync("lib/finder-launch-kit.ts", "utf8");
   assert(page.includes("buildFinderLaunchKit"), "Product Finders dashboard should use the first-finder launch kit helper");
   assert(page.includes("First finder launch kit") && page.includes("Copy finder brief"), "Product Finders dashboard should expose a visible first-finder launch handoff");
+  assert(page.includes("First finder proof path") && page.includes("Proof-ready finder means"), "Product Finders dashboard should explain the first finder proof path and acceptance criteria");
   assert(page.includes("Suggested first-finder question plan"), "Product Finders dashboard should show a catalog-backed question plan before editing");
   assert(page.includes("analyzeQuizReadiness"), "Quiz builder should run publish-readiness diagnostics");
   assert(page.includes("Publish readiness"), "Quiz builder should surface publish-readiness feedback");
   assert(page.includes("!readiness.canPublish"), "Quiz builder should block publishing when readiness has blockers");
   assert(page.includes("Rule coverage"), "Quiz builder should surface per-answer catalog coverage");
   assert(page.includes("getAnswerOptionCoverage"), "Quiz builder should calculate answer-rule catalog coverage");
-  assert(launchKit.includes("Sellentum first finder brief") && launchKit.includes("Suggested first-finder question plan"), "Finder launch kit should generate a reusable first-finder brief");
+  assert(launchKit.includes("Sellentum first finder brief") && launchKit.includes("Suggested first-finder question plan") && launchKit.includes("First finder proof path"), "Finder launch kit should generate a reusable first-finder brief");
   assert(launchKit.includes("Rules select") || launchKit.includes("deterministic matching"), "Finder launch kit should preserve deterministic product-selection guidance");
   assert(launchKit.includes("categorySignals") && launchKit.includes("buyerNeedSignals") && launchKit.includes("featureAndTagSignals"), "Finder launch kit readiness should count real catalog signals separately from fallback example options");
   assert(readiness.includes("getAnswerOptionCoverage"), "Quiz readiness helper should reuse shared rule coverage diagnostics");
