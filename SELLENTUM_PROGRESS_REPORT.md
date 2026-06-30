@@ -442,7 +442,7 @@ Goal:
 
 Status:
 
-- In progress in code.
+- Code completed and pushed.
 
 Done when:
 
@@ -462,6 +462,11 @@ User needs to:
 - Open Supabase production project.
 - Run the verification SQL.
 - Send me any failed rows or errors.
+- Run the production verification command after Vercel deploys:
+
+  ```bash
+  npm run verify:production -- --base-url=https://sellentum.com
+  ```
 
 Codex will:
 
@@ -475,6 +480,7 @@ Done when:
 - Policies are correct.
 - RPC/functions exist.
 - Rate-limit support is installed.
+- Production route/widget checks pass.
 
 ---
 
@@ -655,6 +661,14 @@ This is the simplified history of what we have done.
 - Added shared public footer with Contact, Support, Privacy, Terms and Security links.
 - Linked signup/login fine print to the real legal pages.
 - Linked dashboard help actions to the Support page.
+
+### Phase 8 — Production verification command
+
+- Added `npm run verify:production`.
+- The command checks required env variables without printing secrets.
+- The command checks live public routes and the widget loader.
+- The command checks Supabase table/column reachability through the service-role key.
+- The command points back to the authoritative Supabase SQL verification for RLS, extensions and exact function grants.
 
 ---
 

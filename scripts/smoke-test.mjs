@@ -72,12 +72,16 @@ function assertPublicTrustPages() {
   const authShell = readFileSync("components/auth-shell.tsx", "utf8");
   const dashboardShell = readFileSync("components/dashboard-shell.tsx", "utf8");
   const nav = readFileSync("components/landing-nav.tsx", "utf8");
+  const packageJson = readFileSync("package.json", "utf8");
+  const productionVerifier = readFileSync("scripts/verify-production.mjs", "utf8");
   for (const route of ["/contact", "/support", "/security", "/privacy", "/terms"]) {
     assert(footer.includes(route), `Marketing footer should link to ${route}`);
   }
   assert(authShell.includes('href="/terms"') && authShell.includes('href="/privacy"'), "Auth fine print should link to real Terms and Privacy pages");
   assert(dashboardShell.includes('href="/support"'), "Dashboard help actions should open the Support page");
   assert(nav.includes('href: "/support"'), "Landing navigation should expose support from the Resources menu");
+  assert(packageJson.includes("\"verify:production\""), "package.json should expose the production verification command");
+  assert(productionVerifier.includes("production_schema_check.sql") && productionVerifier.includes("requiredSupabaseTables"), "Production verifier should bridge live checks with the authoritative Supabase SQL verification");
 }
 
 function assertPublishedAdvisorRuntime() {

@@ -195,6 +195,22 @@ The public runtime normalizes the saved widget settings before rendering, so bra
 
 Import the repository into Vercel, add the variables from `.env.example`, and deploy. Set `NEXT_PUBLIC_APP_URL` to the production origin. No persistent filesystem is required.
 
+## Verify production
+
+After Vercel deploys and Supabase migrations are applied, run:
+
+```bash
+npm run verify:production -- --base-url=https://sellentum.com
+```
+
+The command checks required environment variables, public production routes, the widget loader and Supabase table/column reachability through the service-role key without printing secrets. It does not replace the authoritative SQL/RLS verification in Supabase. Run [`supabase/verification/production_schema_check.sql`](./supabase/verification/production_schema_check.sql) in the Supabase SQL editor and confirm every row returns `pass`.
+
+To perform the optional shared rate-limit RPC probe from the CLI, add:
+
+```bash
+npm run verify:production -- --base-url=https://sellentum.com --probe-rate-limit
+```
+
 ## Architecture notes
 
 - `app/` — App Router pages and server routes
