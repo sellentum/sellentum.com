@@ -8,7 +8,7 @@ GitHub repo: **https://github.com/sellentum/sellentum.com.git**
 
 Branch: **main**
 
-Latest pushed code before this report update: **85f4119 — Add production Supabase repair pack**
+Latest product-code milestone before this documentation cleanup: **85f4119 — Add production Supabase repair pack**
 
 ---
 
