@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Archive, BarChart3, BookOpenCheck, Bot, Boxes, Braces, BrainCircuit, ChevronDown, ClipboardCheck, Code2, CreditCard, Database, ExternalLink, FileText, FlaskConical, GalleryVerticalEnd, GitBranch, GitPullRequestArrow, Globe2, Handshake, HeartPulse, HelpCircle, Layers3, LayoutDashboard, LayoutTemplate, LogOut, Megaphone, Menu, MessageCircle, MonitorCheck, Network, PackagePlus, RadioTower, Rocket, Search, Settings, ShieldCheck, SlidersHorizontal, Sparkles, Target, ThumbsUp, UsersRound, X, type LucideIcon } from "lucide-react";
+import { Archive, ArrowRight, BarChart3, BookOpenCheck, Bot, Boxes, Braces, BrainCircuit, Check, ChevronDown, ClipboardCheck, Code2, CreditCard, Database, ExternalLink, FileText, FlaskConical, GalleryVerticalEnd, GitBranch, GitPullRequestArrow, Globe2, Handshake, HeartPulse, HelpCircle, Layers3, LayoutDashboard, LayoutTemplate, LogOut, Megaphone, Menu, MessageCircle, MonitorCheck, Network, PackagePlus, RadioTower, Rocket, Search, Settings, ShieldCheck, SlidersHorizontal, Sparkles, Target, ThumbsUp, UsersRound, X, type LucideIcon } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { LoadingState } from "@/components/loading-state";
 import { Logo } from "@/components/logo";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { useStore } from "@/lib/store";
+import { buildMerchantLaunchPlan } from "@/lib/merchant-launch-plan";
 import { isWorkspaceOnboarded } from "@/lib/workspace-onboarding";
 
 type NavItem = {
@@ -25,7 +26,7 @@ type NavSection = {
 
 const primaryNavSections: NavSection[] = [
   {
-    label: "Launch workflow",
+    label: "Core launch workflow",
     items: [
       { href: "/dashboard", label: "Overview", icon: LayoutDashboard, exact: true },
       { href: "/dashboard/products", label: "Products", icon: Boxes },
@@ -37,7 +38,7 @@ const primaryNavSections: NavSection[] = [
     ],
   },
   {
-    label: "Grow & improve",
+    label: "After launch",
     items: [
       { href: "/dashboard/advisor", label: "Advisor Studio", icon: Bot },
       { href: "/dashboard/search", label: "Search lab", icon: Search },
@@ -113,7 +114,7 @@ function isNavItemActive(pathname: string, item: NavItem) {
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { ready, mode, settings, quizzes, configurators } = useStore();
+  const { ready, mode, settings, products, quizzes, configurators, events } = useStore();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const [accountEmail, setAccountEmail] = useState("");
@@ -121,6 +122,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const [advancedExpanded, setAdvancedExpanded] = useState(false);
   const previewQuiz = quizzes.find((quiz) => quiz.published) || quizzes[0];
   const previewConfigurator = configurators.find((configurator) => configurator.published) || configurators[0];
+  const launchPlan = useMemo(() => buildMerchantLaunchPlan({ settings, products, quizzes, events }), [settings, products, quizzes, events]);
   const onboardingComplete = mode === "demo" || isWorkspaceOnboarded(settings);
   const isOnboardingPath = pathname.startsWith("/dashboard/onboarding");
   const shouldForceOnboarding = ready && mode === "supabase" && !onboardingComplete && !isOnboardingPath;
@@ -195,6 +197,33 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           <span className="grid h-8 w-8 shrink-0 place-items-center rounded-[10px] bg-ink text-xs font-extrabold text-lime">{workspaceInitial}</span>
           <span className="min-w-0 flex-1"><span className="block truncate text-xs font-extrabold">{settings.brand_name}</span><span className="block text-xs text-black/35">Starter workspace</span></span><ChevronDown size={14} className="text-black/30" />
         </Link>
+      </div>
+      <div className="mx-3 mb-5 rounded-2xl border border-lime/40 bg-white p-3 shadow-sm">
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-xs font-extrabold uppercase tracking-[.16em] text-moss">Core launch path</span>
+          <span className="rounded-full bg-lime/35 px-2 py-1 text-xs font-extrabold text-moss">{launchPlan.completedCount}/{launchPlan.totalCount}</span>
+        </div>
+        <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-black/[0.06]">
+          <div className="h-full rounded-full bg-lime" style={{ width: `${launchPlan.progressPercent}%` }} />
+        </div>
+        <Link href={launchPlan.currentStep.href} onClick={() => setMobileOpen(false)} className="mt-3 flex items-center justify-between gap-3 rounded-xl bg-ink px-3 py-2.5 text-xs font-extrabold text-white">
+          <span className="min-w-0 truncate">Next: {launchPlan.currentStep.title}</span>
+          <ArrowRight size={13} className="shrink-0 text-lime" />
+        </Link>
+        <div className="mt-3 grid grid-cols-5 gap-1" aria-label="Products to analytics launch path">
+          {launchPlan.steps.map((step, index) => (
+            <Link
+              key={step.id}
+              href={step.href}
+              onClick={() => setMobileOpen(false)}
+              title={`${step.title}: ${step.evidence}`}
+              className={`grid h-7 place-items-center rounded-lg text-xs font-extrabold ${step.status === "done" ? "bg-lime text-ink" : step.status === "current" ? "bg-ink text-lime" : "bg-black/[0.05] text-black/30"}`}
+            >
+              {step.status === "done" ? <Check size={12} /> : index + 1}
+            </Link>
+          ))}
+        </div>
+        <p className="mt-2 text-xs font-bold leading-4 text-black/35">Products → Finder → Publish → Embed → Analytics proof</p>
       </div>
       <nav className="flex-1 space-y-5 overflow-y-auto px-3 pb-4">
         {primaryNavSections.map((section) => (

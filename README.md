@@ -87,7 +87,7 @@ For the current human-readable project status, open [`SELLENTUM_PROGRESS_REPORT.
 - Widget attribution analytics for source, medium, campaign, placement, page URL, page title and referrer so merchants can compare storefront launches and campaigns
 - Analytics QA that validates event-contract coverage, session linkage, required metadata, event sequence and product attribution before launch decisions
 - Discovery gap analytics that detect no-result paths, thin recommendation sets, missing shopper language, low-confidence matches and stalled surfaced products
-- Real dashboard command center with period trends, live performance bars, launch score, command queue, milestones and experience mix built from actual workspace data
+- Real dashboard command center with period trends, live performance bars, launch score, command queue, milestones, experience mix and a persistent core launch path built from actual workspace data
 - Merchant next-best-action card that turns production blockers, first-launch setup and optimization into one plain-English owner task
 - Live launch proof queue that separates verified platform work from remaining production proof tasks such as auth email testing, real catalog upload, storefront widget proof and analytics verification
 - Conversion playbook that turns analytics quality, funnel rates, discovery gaps, catalog health and product demand into prioritized merchant actions

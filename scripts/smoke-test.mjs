@@ -488,6 +488,7 @@ function assertLaunchStudioWorkflow() {
 
 function assertDashboardCommandCenterWorkflow() {
   const overview = readFileSync("app/dashboard/page.tsx", "utf8");
+  const shell = readFileSync("components/dashboard-shell.tsx", "utf8");
   const commandCenter = readFileSync("lib/dashboard-command-center.ts", "utf8");
   const conversionPlaybook = readFileSync("lib/conversion-playbook.ts", "utf8");
   const launchPlan = readFileSync("lib/merchant-launch-plan.ts", "utf8");
@@ -500,6 +501,10 @@ function assertDashboardCommandCenterWorkflow() {
   assert(overview.includes("buildMerchantNextAction"), "Dashboard overview should use the shared next-best-action helper");
   assert(overview.includes("Today&apos;s next best action") && overview.includes("Copy next-action brief"), "Dashboard overview should expose one plain-English next best action");
   assert(overview.includes("First launch path"), "Dashboard overview should give merchants a simple first-launch path");
+  assert(shell.includes("buildMerchantLaunchPlan"), "Dashboard shell should reuse the shared merchant launch plan helper");
+  assert(shell.includes("Core launch path") && shell.includes("Products → Finder → Publish → Embed → Analytics proof"), "Dashboard shell should keep the core launch path visible across dashboard pages");
+  assert(shell.includes("Next: {launchPlan.currentStep.title}"), "Dashboard shell should route merchants to the current launch step");
+  assert(shell.includes("Advanced tools") && shell.includes("After launch"), "Dashboard shell should separate post-launch and advanced tools from the core first-launch workflow");
   assert(overview.includes("Live launch proof queue") && overview.includes("Copy proof queue"), "Dashboard overview should expose a copyable live launch proof queue");
   assert(overview.includes("Command queue"), "Dashboard overview should expose prioritized command-center actions");
   assert(overview.includes("Conversion playbook"), "Dashboard overview should expose a deterministic conversion playbook");

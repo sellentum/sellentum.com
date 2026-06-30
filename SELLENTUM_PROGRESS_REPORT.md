@@ -210,6 +210,12 @@ What is done:
 - Production verification section.
 - Launch proof queue.
 - Next-best-action card.
+- Persistent core launch path in the dashboard shell:
+  - Products.
+  - Finder.
+  - Publish.
+  - Embed.
+  - Analytics proof.
 - Temporary MVP audit section removed.
 
 What still needs improvement:
@@ -583,24 +589,21 @@ Why it matters:
 
 ## 5. What Codex should work on next
 
-Latest completed Codex interval:
+Latest completed Codex intervals:
 
 - Added the first-finder launch kit to the Product Finders dashboard.
 - Added readiness cards for catalog choice, question language, deterministic answer rules and published finder proof.
 - Added a suggested first-finder question plan.
 - Added a copyable first-finder brief.
 - Added smoke-test coverage for the launch kit.
+- Added a persistent core launch path to the dashboard shell so merchants see the next setup step from every dashboard page.
+- Separated the sidebar language into core launch workflow, after-launch tools and advanced tools.
 
 I should continue in this order:
 
-1. Make the dashboard setup flow clearer:
-   - Step 1: Upload products.
-   - Step 2: Create finder.
-   - Step 3: Publish finder.
-   - Step 4: Embed widget.
-   - Step 5: Check analytics.
-2. Improve production-proof screens so they show plain English pass/fail status.
-3. Improve merchant empty states across dashboard pages.
+1. Improve production-proof screens so they show plain English pass/fail status.
+2. Improve merchant empty states across dashboard pages.
+3. Keep reducing internal/founder-only language from merchant-facing screens.
 4. Keep validation running after each meaningful step.
 5. Commit and push completed work to GitHub so Vercel can deploy it.
 
